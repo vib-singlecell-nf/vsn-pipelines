@@ -25,6 +25,9 @@ process SC__FILE_CONCATENATOR() {
     file "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}"
   script:
     """
-    python ../../../src/scripts/utils/sc_file_concatenator.py --file-format $params.off --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
+    python ../../../src/scripts/utils/sc_file_concatenator.py \
+      --file-format $params.off \
+      ${(params.containsKey('join')) ? '--join ' + params.join : ''} \
+      --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
     """
 }

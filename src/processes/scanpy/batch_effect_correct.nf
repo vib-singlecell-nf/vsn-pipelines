@@ -14,11 +14,13 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
         --output-file "${params.project_name}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" \
         ${(params.containsKey('key')) ? '--key ' + params.key : ''} \
         ${(params.containsKey('batchKey')) ? '--batch-key ' + params.batchKey : ''} \
-        ${(params.containsKey('nPcs')) ? '--n_pcs ' + params.nPcs : ''} \
+        ${(params.containsKey('nPcs')) ? '--n-pcs ' + params.nPcs : ''} \
         ${(params.containsKey('k')) ? '--k' + params.k : ''} \
         ${(params.containsKey('varIndex')) ? '--var-index ' + params.varIndex : ''} \
         ${(params.containsKey('varSubset')) ? '--var-subset ' + params.varSubset : ''} \
         ${(params.containsKey('nJobs')) ? '--n-jobs ' + params.nJobs : ''} \
+        ${(params.containsKey('neighborsWithinBatch')) ? '--neighbors-within-batch ' + params.neighborsWithinBatch : ''} \
+        ${(params.containsKey('trim')) ? '--trim ' + params.trim : ''} \
         $f
     """
 }

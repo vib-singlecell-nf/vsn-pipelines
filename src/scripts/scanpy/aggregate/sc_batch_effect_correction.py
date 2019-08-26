@@ -68,6 +68,19 @@ parser.add_option("-j", "--n-jobs",
                     dest="n_jobs",
                     default=None,
                     help="[bbknn, mnn_correct], The number of jobs. When set to None, automatically uses the number of cores.")
+parser.add_option("-t", "--trim",
+                    type="int",
+                    action="store",
+                    dest="trim",
+                    default=None,
+                    help="[bbknn], Trim the neighbours of each cell to these many top connectivities. May help with population independence and improve the tidiness of clustering.")
+parser.add_option("-n", "--neighbors-within-batch",
+                    type="int",
+                    action="store",
+                    dest="neighbors_within_batch",
+                    default=3,
+                    help="[bbknn], How many top neighbours to report for each batch; total number of neighbours will be this number times the number of batches.")
+
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -103,9 +116,11 @@ elif options.method == 'bbknn':
     if 'X_pca' not in adata.obsm.keys():
         raise Exception("Expect the PCA to have been computed and stored in adata.obsm['X_pca']")
     # Run BBKNN
-    sc.external.pp.bbknn(adata,
+    sc.external.pp.bbknn(adatas[0],
         batch_key=options.batch_key, 
-        n_pcs=options.n_pcs)
+        n_pcs=options.n_pcs,
+        neighbors_within_batch=options.neighbors_within_batch,
+        trim=options.trim)
 elif options.method == 'mnn':
     # Run MNN_CORRECT (mnnpy)
     # GitHub: https://github.com/chriscainx/mnnpy/tree/master

@@ -40,10 +40,6 @@ parser.add_option("-D", "--max-dispersion",
 # Define the arguments properly
 FILE_PATH_IN = args[0]
 FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
-MEAN_DIS_POT__MIN_MEAN = options.min_mean if options.min_mean > 0 else None
-MEAN_DIS_POT__MAX_MEAN = options.max_mean if options.max_mean > 0 else None
-MEAN_DIS_POT__MIN_DISP = options.min_disp if options.min_disp > 0 else None
-MEAN_DIS_POT__MAX_DISP = options.max_disp if options.max_disp > 0 else None
 
 # I/O
 # Expects h5ad file
@@ -58,12 +54,13 @@ except:
 
 if options.method == "mean_disp_plot":
     # identify highly variable genes.
+    # Expects logarithmized data: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.api.pp.highly_variable_genes.html#scanpy.api.pp.highly_variable_genes
     sc.pp.highly_variable_genes(
         adata, 
-        min_mean=MEAN_DIS_POT__MIN_MEAN, 
-        max_mean=MEAN_DIS_POT__MAX_MEAN, 
-        min_disp=MEAN_DIS_POT__MIN_DISP, 
-        max_disp=MEAN_DIS_POT__MAX_DISP)
+        min_mean=options.min_mean, 
+        max_mean=options.max_mean, 
+        min_disp=options.min_disp, 
+        max_disp=options.max_disp)
     # sc.pl.highly_variable_genes(adata)
 
     # keep only highly variable genes:

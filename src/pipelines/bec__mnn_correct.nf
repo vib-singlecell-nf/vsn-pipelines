@@ -1,7 +1,7 @@
 //
 // Test: passed
 // Command: 
-//  nextflow src/processes/scanpy/dim_reduction.test.nf --tenx_folder data/01.count/**/filtered_feature_bc_matrix --project_name tiny -resume
+//  nextflow nextflow src/pipelines/bec__mnn_correct.test.nf --tenx_folder data/01.count/**/filtered_feature_bc_matrix --project_name tiny -resume
 //
 nextflow.preview.dsl=2
 

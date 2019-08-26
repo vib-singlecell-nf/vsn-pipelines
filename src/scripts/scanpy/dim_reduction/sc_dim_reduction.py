@@ -12,6 +12,12 @@ parser.add_option("-x", "--method",
                     dest="method",
                     default="PCA",
                     help="Reduce the dimensionality of the data. Choose one of : PCA, UMAP, t-SNE")
+parser.add_option("-c", "--n-comps",
+                    type="int",
+                    action="store",
+                    dest="n_comps",
+                    default=50,
+                    help="[PCA], Number of principal components to compute.")
 parser.add_option("-s", "--svd-solver",
                     type="string",
                     action="store",
@@ -55,7 +61,7 @@ except:
 
 if options.method == "PCA":
     # Run PCA
-    sc.tl.pca(adata, svd_solver=options.svd_solver)
+    sc.tl.pca(adata, n_comps=options.n_comps, svd_solver=options.svd_solver)
 elif options.method == "UMAP":
     # Run UMAP
     sc.pp.neighbors(adata, n_neighbors=options.n_neighbors, n_pcs=options.n_pcs)
