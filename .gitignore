@@ -1,0 +1,6 @@
+*checkpoint.ipynb
+.nextflow
+.nextflow*
+data
+refdata
+work
