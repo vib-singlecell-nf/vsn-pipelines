@@ -8,11 +8,7 @@ process SC__SCANPY__FEATURE_SELECTION {
   output:
     file "${getBaseName(f).get()}.SC__SCANPY__FEATURE_SELECTION.${params.off}"
   script:
-    println(">>>")
-    println(f)
-    println(params)
     """
-    echo $params
     python ../../../src/scripts/scanpy/feature_selection/sc_select_variable_genes.py \
         --method $params.featureSelectionMethod \
         ${(params.containsKey('featureSelectionMinMean')) ? '--min-mean ' + params.featureSelectionMinMean : ''} \

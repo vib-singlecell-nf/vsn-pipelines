@@ -2,9 +2,6 @@ nextflow.preview.dsl=2
 
 include getBaseName from '../../utils/files.nf'
 
-params.normalizationMethod = 'cpx'
-params.normalizationNumberReadsPerCellFactor = -1
-
 process SC__SCANPY__NORMALIZATION {
   input:
     file(f)
@@ -13,14 +10,12 @@ process SC__SCANPY__NORMALIZATION {
   script:
     """
     python ../../../src/scripts/scanpy/transform/sc_normalization.py \
-        --method $params.normalizationMethod \
-        --number-reads-per-cell-factor $params.normalizationNumberReadsPerCellFactor \
+        ${(params.containsKey('normalizationMethod')) ? '--method ' + params.normalizationMethod : ''} \
+        ${(params.containsKey('countsPerCellAfter')) ? '--counts-per-cell-after ' + params.countsPerCellAfter : ''} \
         $f \
         "${getBaseName(f).get()}.SC__SCANPY__NORMALIZATION.${params.off}"
     """
 }
-
-params.dataTransformationMethod = 'log1p'
 
 process SC__SCANPY__DATA_TRANSFORMATION {
   input:
@@ -30,14 +25,11 @@ process SC__SCANPY__DATA_TRANSFORMATION {
   script:
     """
     python ../../../src/scripts/scanpy/transform/sc_data_transformation.py \
-        --method $params.dataTransformationMethod \
+        ${(params.containsKey('dataTransformationMethod')) ? '--method ' + params.dataTransformationMethod : ''} \
         $f \
         "${getBaseName(f).get()}.SC__SCANPY__DATA_TRANSFORMATION.${params.off}"
     """
 }
-
-params.featureScalingMthod = 'zscore_scale'
-params.featureScalingMaxSD = -1
 
 process SC__SCANPY__FEATURE_SCALING {
   input:
@@ -47,8 +39,8 @@ process SC__SCANPY__FEATURE_SCALING {
   script:
     """
     python ../../../src/scripts/scanpy/transform/sc_feature_scaling.py \
-        --method $params.featureScalingMthod \
-        --max-sd $params.featureScalingMaxSD \
+        ${(params.containsKey('featureScalingMthod')) ? '--method ' + params.featureScalingMthod : ''} \
+        ${(params.containsKey('featureScalingMaxSD')) ? '--max-sd ' + params.featureScalingMaxSD : ''} \
        $f \
        "${getBaseName(f).get()}.SC__SCANPY__FEATURE_SCALING.${params.off}"
     """

@@ -11,10 +11,10 @@ parser.add_option("-x", "--method",
                     dest="method",
                     default="cpx",
                     help="Normalize the data. Choose one of : cpx, regress_out")
-parser.add_option("-f", "--number-reads-per-cell-factor",
+parser.add_option("-f", "--counts-per-cell-after",
                     type="int",
                     action="store",
-                    dest="number_reads_per_cell_factor",
+                    dest="counts_per_cell_after",
                     default=1e4,
                     help="Multiplying factor used when running 'cpx' method.")
 (options, args) = parser.parse_args()
@@ -36,7 +36,7 @@ except:
 
 if options.method == 'cpx':
     # Total-count normalize (library-size correct) to '-r' reads/cell
-    sc.pp.normalize_per_cell(adata, counts_per_cell_after=options.number_reads_per_cell_factor)
+    sc.pp.normalize_per_cell(adata, counts_per_cell_after=options.counts_per_cell_after)
 else:
     raise Exception("Method does not exist.")
 
