@@ -24,7 +24,6 @@ Let's say the file structure of your data looks like this,
 
 ```
 /home/data/
-.
 └── cellranger
     ├── Sample A
     │   └── outs
@@ -45,7 +44,7 @@ PROJECT_NAME="tiny"
 nextflow run \
    src/singlecelltxbenchmark/pipelines/bec__bbknn \
       -profile singularity \
-      --tenx_folder /home/data/**/filtered_feature_bc_matrix \
+      --tenx_folder /home/data/cellranger/**/filtered_feature_bc_matrix \
       --outdir ${OUTPUT_DIRECTORY} \
       --project_name ${PROJECT_NAME}
 ```
