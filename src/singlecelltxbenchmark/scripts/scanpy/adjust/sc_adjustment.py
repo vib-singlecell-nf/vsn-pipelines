@@ -4,17 +4,17 @@ from optparse import OptionParser
 import scanpy as sc
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                    version="%prog 1.0")
+                      version="%prog 1.0")
 parser.add_option("-x", "--method",
-                    action="store",
-                    dest="method",
-                    default="linear_regression",
-                    help="Normalize the data. Choose one of : regress_out")
+                  action="store",
+                  dest="method",
+                  default="linear_regression",
+                  help="Normalize the data. Choose one of : regress_out")
 parser.add_option("-r", "--variable-to-regress-out",
-                    action="append",
-                    dest="vars_to_regress_out",
-                    default=None,
-                    help="Variable to regress out. To regress multiple variables, add that many -v arguments. Used when running 'regress_out")
+                  action="append",
+                  dest="vars_to_regress_out",
+                  default=None,
+                  help="Variable to regress out. To regress multiple variables, add that many -v arguments. Used when running 'regress_out")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -24,7 +24,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
 # I/O
 # Expects h5ad file
 try:
-    adata=sc.read_h5ad(filename=FILE_PATH_IN)
+    adata = sc.read_h5ad(filename=FILE_PATH_IN)
 except:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 

@@ -1,38 +1,39 @@
 #!/usr/bin/env python
 import os
+import warnings
 from optparse import OptionParser
 import scanpy as sc
 import anndata as ad
 from singlecelltxbenchmark.scripts.scanpy.utils import sc_neighbors
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                    version="%prog 1.0")
+                      version="%prog 1.0")
 parser.add_option("-x", "--method",
-                    type="string",
-                    action="store",
-                    dest="method",
-                    default="PCA",
-                    help="Reduce the dimensionality of the data. Choose one of : PCA, UMAP, t-SNE")
+                  type="string",
+                  action="store",
+                  dest="method",
+                  default="PCA",
+                  help="Reduce the dimensionality of the data. Choose one of : PCA, UMAP, t-SNE")
 parser.add_option("-c", "--n-comps",
-                    type="int",
-                    action="store",
-                    dest="n_comps",
-                    default=50,
-                    help="[PCA], Number of principal components to compute.")
+                  type="int",
+                  action="store",
+                  dest="n_comps",
+                  default=50,
+                  help="[PCA], Number of principal components to compute.")
 parser.add_option("-s", "--svd-solver",
-                    type="string",
-                    action="store",
-                    dest="svd_solver",
-                    default="arpack",
-                    help="[PCA], SVD solver to use. Choose one of : arpack (Default), randomized, auto.")
+                  type="string",
+                  action="store",
+                  dest="svd_solver",
+                  default="arpack",
+                  help="[PCA], SVD solver to use. Choose one of : arpack (Default), randomized, auto.")
 # Add parser option for sc_neighbors
-parser = sc_neighbors.add_options(parser=parser, method = "UMAP")
+parser = sc_neighbors.add_options(parser=parser, method="UMAP")
 parser.add_option("-j", "--n-jobs",
-                    type="int",
-                    action="store",
-                    dest="n_jobs",
-                    default=1,
-                    help="[t-SNE], The number of jobs. When set to None, automatically uses the number of cores.")           
+                  type="int",
+                  action="store",
+                  dest="n_jobs",
+                  default=1,
+                  help="[t-SNE], The number of jobs. When set to None, automatically uses the number of cores.")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -52,16 +53,24 @@ except:
 
 if options.method == "PCA":
     # Run PCA
-    sc.tl.pca(adata, n_comps=options.n_comps, svd_solver=options.svd_solver)
+    sc.tl.pca(
+        data=adata,
+        n_comps=options.n_comps,
+        svd_solver=options.svd_solver)
 elif options.method == "UMAP":
     # Run UMAP
-    sc.pp.neighbors(adata, n_neighbors=options.n_neighbors, n_pcs=options.n_pcs)
+    # Notes:
+    # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
+    if "neighbors" not in adata.uns.keys():
+        warnings.warn("The neighborhood graph of observations has not been computed. Computing...")
+        sc.pp.neighbors(
+            adata=adata,
+            n_neighbors=options.n_neighbors,
+            n_pcs=options.n_pcs)
     sc.tl.umap(adata)
 elif options.method == "t-SNE":
     # Run t-SNE
-    from MulticoreTSNE import MulticoreTSNE as TSNE
-    tsne = TSNE(n_jobs=options.n_jobs)
-    adata.obsm['X_tsne'] = tsne.fit_transform(adata.X)
+    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=True)
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(options.method))
 

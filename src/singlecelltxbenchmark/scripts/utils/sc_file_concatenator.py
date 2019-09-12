@@ -4,23 +4,23 @@ from optparse import OptionParser
 import scanpy as sc
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_paths",
-                    version="%prog 1.0")
+                      version="%prog 1.0")
 parser.add_option("-f", "--file-format",
-                    action="store",
-                    dest="format",
-                    default="h5ad",
-                    help="Concatenate the data. Choose one of : h5ad")
+                  action="store",
+                  dest="format",
+                  default="h5ad",
+                  help="Concatenate the data. Choose one of : h5ad")
 parser.add_option("-j", "--join",
-                    type="string",
-                    action="store",
-                    dest="join",
-                    default="inner",
-                    help="How to concatenate the multiple datasets. Choose one of : inner (intersect), outer (union).")
+                  type="string",
+                  action="store",
+                  dest="join",
+                  default="inner",
+                  help="How to concatenate the multiple datasets. Choose one of : inner (intersect), outer (union).")
 parser.add_option("-o", "--output",
-                    action="store",
-                    dest="output",
-                    default=None,
-                    help="Output file name.")
+                  action="store",
+                  dest="output",
+                  default=None,
+                  help="Output file name.")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly

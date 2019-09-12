@@ -5,13 +5,13 @@ import scanpy as sc
 import anndata as ad
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                    version="%prog 1.0")
+                      version="%prog 1.0")
 parser.add_option("-c", "--min-number-cells",
-                    type=int,
-                    action="store",
-                    dest="min_number_cells",
-                    default=-1,
-                    help="Filter out genes that are detected in less than the minimum number of cells.")
+                  type=int,
+                  action="store",
+                  dest="min_number_cells",
+                  default=-1,
+                  help="Filter out genes that are detected in less than the minimum number of cells.")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly

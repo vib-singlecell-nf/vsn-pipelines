@@ -7,21 +7,22 @@ import anndata as ad
 from singlecelltxbenchmark.scripts.scanpy.utils import sc_neighbors
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                    version="%prog 1.0")
+                      version="%prog 1.0")
 parser.add_option("-x", "--method",
-                    type="string",
-                    action="store",
-                    dest="method",
-                    default="Louvain",
-                    help="Cluster cells using the Louvain algorithm [Blondel et al. (2008)] in the implementation of [Traag (2017)].")
+                  type="string",
+                  action="store",
+                  dest="method",
+                  default="Louvain",
+                  help="Cluster cells using the Louvain algorithm [Blondel et al. (2008)] in the implementation of [Traag (2017)].")
 parser.add_option("-r", "--resolution",
-                    type="float",
-                    action="store",
-                    dest="resolution",
-                    default=1.0,
-                    help="[louvain], For the default flavor ('vtraag'), you can provide a resolution (higher resolution means finding more and smaller clusters) (Default: 1.0).")
+                  type="float",
+                  action="store",
+                  dest="resolution",
+                  default=1.0,
+                  help="[louvain], For the default flavor ('vtraag'), you can provide a resolution (higher resolution means finding more and smaller clusters) (Default: 1.0).")
+
 # Add parser option for sc_neighbors
-parser = sc_neighbors.add_options(parser=parser, method = "Louvain")         
+parser = sc_neighbors.add_options(parser=parser, method="Louvain")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -42,7 +43,8 @@ except:
 if options.method == "Louvain":
     # Run Louvain clustering
     if "neighbors" not in adata.uns.keys():
-        sc.pp.neighbors(adata, n_pcs=options.n_pcs, n_neighbors=options.n_neighbors)
+        raise Exception("The neighborhood graph of observations has not been computed. Please do so before running {} clustering".format(options.method))
+        # sc.pp.neighbors(adata, n_pcs=options.n_pcs, n_neighbors=options.n_neighbors)
     sc.tl.louvain(adata, resolution=options.resolution)
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(options.method))

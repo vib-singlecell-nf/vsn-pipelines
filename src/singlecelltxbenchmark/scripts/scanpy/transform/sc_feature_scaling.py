@@ -5,19 +5,19 @@ import scanpy as sc
 import anndata as ad
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                    version="%prog 1.0")
+                      version="%prog 1.0")
 parser.add_option("-x", "--method",
-                    type="string",
-                    action="store",
-                    dest="method",
-                    default="zscore_scale",
-                    help="Scale the data. Choose one of : zscore_scale")
+                  type="string",
+                  action="store",
+                  dest="method",
+                  default="zscore_scale",
+                  help="Scale the data. Choose one of : zscore_scale")
 parser.add_option("-M", "--max-sd",
-                    type="float",
-                    action="store",
-                    dest="max_sd",
-                    default=-1,
-                    help="Clip values greater than maximum number of standard deviation")                    
+                  type="float",
+                  action="store",
+                  dest="max_sd",
+                  default=-1,
+                  help="Clip values greater than maximum number of standard deviation")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -28,7 +28,7 @@ SCALE__MAX_SD = options.max_sd if options.max_sd > 0 else None
 # I/O
 # Expects h5ad file
 try:
-    adata=sc.read_h5ad(filename=FILE_PATH_IN)
+    adata = sc.read_h5ad(filename=FILE_PATH_IN)
 except:
     raise Exception("Can only handle .h5ad files.")
 
