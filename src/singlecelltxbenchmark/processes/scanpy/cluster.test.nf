@@ -108,5 +108,5 @@ workflow test__from_raw__aggr_batch {
 // Uncomment to test
 workflow {
     main:
-        test__from_raw__aggr_batch( getTenXChannel( params.tenx_folder ) )   
+        test__from_raw__aggr_batch( getTenXChannel( params.tenx_folder ) )
 }

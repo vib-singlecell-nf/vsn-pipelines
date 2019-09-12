@@ -3,13 +3,16 @@ nextflow.preview.dsl=2
 include getBaseName from '../../utils/files.nf'
 
 process SC__SCANPY__BATCH_EFFECT_CORRECTION {
+
+  publishDir "${params.outdir}/data", mode: 'symlink'
+  
   input:
     file(f)
   output:
     file "${params.project_name}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" //#"${getBaseName(f).get()}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" 
   script:
     """
-    python ../../../src/singlecelltxbenchmark/scripts/scanpy/aggregate/sc_batch_effect_correction.py \
+    $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/aggregate/sc_batch_effect_correction.py \
         ${(params.containsKey('batchEffectCorrectionMethod')) ? '--method ' + params.batchEffectCorrectionMethod : ''} \
         --output-file "${params.project_name}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" \
         ${(params.containsKey('key')) ? '--key ' + params.key : ''} \
