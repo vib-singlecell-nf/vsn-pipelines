@@ -20,6 +20,11 @@ Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 
 **How to run on 10xGenomics datasets ?**
 
+```{bash}
+OUTPUT_DIRECTORY="out"
+PROJECT_NAME="tiny"
+```
+
 Let's say the file structure of your data looks like this,
 
 ```
@@ -37,14 +42,29 @@ Let's say the file structure of your data looks like this,
 
 Then the command to run the pipeline will be:
 
-```{bash}
-OUTPUT_DIRECTORY="out"
-PROJECT_NAME="tiny"
+Using conda,
+```
+nextflow run \
+   src/singlecelltxbenchmark/pipelines/bec__bbknn \
+   -profile conda \
+   --tenx_folder "/home/data/cellranger/**/filtered_feature_bc_matrix" \
+   --sample_metadata /home/data/cellranger/metadata.tsv \
+   --outdir ${OUTPUT_DIRECTORY} \
+   --project_name ${PROJECT_NAME}
+   --baseFilePath . \
+   -with-report report.html \
+   -with-trace
+```
 
+Using singularity,
+```{bash}
 nextflow run \
    src/singlecelltxbenchmark/pipelines/bec__bbknn \
       -profile singularity \
       --tenx_folder /home/data/cellranger/**/filtered_feature_bc_matrix \
+      --sample_metadata /home/data/cellranger/metadata.tsv \
       --outdir ${OUTPUT_DIRECTORY} \
-      --project_name ${PROJECT_NAME}
+      --project_name ${PROJECT_NAME} \
+      -with-report report.html \
+      -with-trace
 ```
