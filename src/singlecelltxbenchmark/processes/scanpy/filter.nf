@@ -45,12 +45,14 @@ process SC__SCANPY__FILTER_QC_REPORT {
   publishDir "${params.outdir}/notebooks", mode: 'symlink'
 
   input:
+    file(ipynb)
     file(f)
+
   output:
     file "${getBaseName(f)}.SC__SCANPY__FILTER_QC_REPORT.ipynb"
   script:
     """
-    papermill $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/filter/sc_filter_qc_report.ipynb \
+    papermill ${ipynb} \
         ${getBaseName(f)}.SC__SCANPY__FILTER_QC_REPORT.ipynb \
         -p FILE $f
     """
