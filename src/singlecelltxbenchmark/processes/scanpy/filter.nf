@@ -12,7 +12,7 @@ process SC__SCANPY__GENE_FILTER {
     file "${getBaseName(f)}.SC__SCANPY__GENE_FILTER.${params.off}"
   script:
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/filter/sc_gene_filter.py \
+    sc_gene_filter.py \
       ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''} \
       $f \
       "${getBaseName(f)}.SC__SCANPY__GENE_FILTER.${params.off}"
@@ -29,7 +29,7 @@ process SC__SCANPY__CELL_FILTER {
     file "${getBaseName(f)}.SC__SCANPY__CELL_FILTER.${params.off}"
   script:
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/filter/sc_cell_filter.py \
+    sc_cell_filter.py \
         ${(params.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + params.cellFilterMinNCounts : ''} \
         ${(params.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + params.cellFilterMaxNCounts : ''} \
         ${(params.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + params.cellFilterMinNGenes : ''} \

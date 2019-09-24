@@ -15,7 +15,7 @@ process SC__SCANPY__ADJUSTMENT {
     file "${getBaseName(f)}.SC__SCANPY__ADJUSTMENT.${params.off}" 
   script:
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/adjust/sc_adjustment.py \
+    sc_adjustment.py \
          ${(params.containsKey('adjustmentMethod')) ? '--method ' + params.adjustmentMethod : ''} \
          ${(params.containsKey('normalizationVariablesToRegressOut')) ? normalizationVariablesToRegressOutAsArguments : ''} \
          $f \

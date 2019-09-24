@@ -4,7 +4,6 @@ import warnings
 from optparse import OptionParser
 import scanpy as sc
 import anndata as ad
-from singlecelltxbenchmark.scripts.scanpy.utils import sc_neighbors
 
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
                       version="%prog 1.0")
@@ -26,8 +25,18 @@ parser.add_option("-s", "--svd-solver",
                   dest="svd_solver",
                   default="arpack",
                   help="[PCA], SVD solver to use. Choose one of : arpack (Default), randomized, auto.")
-# Add parser option for sc_neighbors
-parser = sc_neighbors.add_options(parser=parser, method="UMAP")
+parser.add_option("-n", "--n-neighbors",
+                  type="int",
+                  action="store",
+                  dest="n_neighbors",
+                  default=15,
+                  help="[Louvain], The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation.")
+parser.add_option("-p", "--n-pcs",
+                  type="int",
+                  action="store",
+                  dest="n_pcs",
+                  default=30,
+                  help="[Louvain], Use this many PCs.")
 parser.add_option("-j", "--n-jobs",
                   type="int",
                   action="store",

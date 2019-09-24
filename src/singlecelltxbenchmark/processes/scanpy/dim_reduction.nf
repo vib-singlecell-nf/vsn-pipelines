@@ -13,7 +13,7 @@ process SC__SCANPY__DIM_REDUCTION {
   script:
     method = params.dimReductionMethod.replaceAll('-','').toUpperCase()
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/dim_reduction/sc_dim_reduction.py \
+    sc_dim_reduction.py \
          ${(params.containsKey('dimReductionMethod')) ? '--method ' + params.dimReductionMethod : ''} \
          ${(params.containsKey('svdSolver')) ? '--svd-solver ' + params.svdSolver : ''} \
          ${(params.containsKey('nNeighbors')) ? '--n-neighbors ' + params.nNeighbors : ''} \

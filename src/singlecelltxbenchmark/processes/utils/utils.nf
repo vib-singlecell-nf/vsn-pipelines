@@ -17,7 +17,7 @@ process SC__FILE_CONVERTER {
     file "${id}.SC__FILE_CONVERTER.${params.off}"
   script:
     """
-    python $params.baseFilePath/src/singlecelltxbenchmark/scripts/utils/sc_file_converter.py \
+    sc_file_converter.py \
        --input-format $params.iff \
        --output-format $params.off $f "${id}.SC__FILE_CONVERTER.${params.off}"
     """
@@ -28,7 +28,7 @@ process SC__FILE_CONVERTER_HELP {
     stdout()
   script:
     """
-    python $params.baseFilePath/src/singlecelltxbenchmark/scripts/utils/sc_file_converter.py -h | awk '/-h/{y=1;next}y'
+    sc_file_converter.py -h | awk '/-h/{y=1;next}y'
     """
 }
 
@@ -42,7 +42,7 @@ process SC__FILE_CONCATENATOR() {
     file "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}"
   script:
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/utils/sc_file_concatenator.py \
+    sc_file_concatenator.py \
       --file-format $params.off \
       ${(params.containsKey('join')) ? '--join ' + params.join : ''} \
       --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
@@ -61,7 +61,7 @@ process SC__FILE_ANNOTATOR() {
     file "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
   script:
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/utils/sc_file_annotator.py \
+    sc_file_annotator.py \
       ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
       ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + params.metaDataFilePath : ''} \
       $f \

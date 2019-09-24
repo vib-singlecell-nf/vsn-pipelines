@@ -12,7 +12,7 @@ process SC__SCANPY__CLUSTERING {
     file "${getBaseName(f)}.SC__SCANPY__CLUSTERING.${params.off}"
   script:
     """
-    $params.baseFilePath/src/singlecelltxbenchmark/scripts/scanpy/cluster/sc_clustering.py \
+    sc_clustering.py \
          ${(params.containsKey('clusteringMethod')) ? '--method ' + params.clusteringMethod : ''} \
          ${(params.containsKey('resolution')) ? '--resolution ' + params.resolution : ''} \
          $f \

@@ -5,8 +5,6 @@ import scanpy as sc
 import anndata as ad
 import pandas as pd
 
-from singlecelltxbenchmark.scripts.scanpy.utils import sc_neighbors
-
 parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
                       version="%prog 1.0")
 parser.add_option("-t", "--type",
