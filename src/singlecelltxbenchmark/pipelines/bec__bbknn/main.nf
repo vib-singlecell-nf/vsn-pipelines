@@ -44,6 +44,7 @@ include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../../
 include '../../processes/scanpy/batch_effect_correct' params(PARAMS_GROUPED['SC__SCANPY__BATCH_EFFECT_CORRECT'])
 include SC__SCANPY__CLUSTERING from '../../processes/scanpy/cluster' params(PARAMS_GROUPED['SC__SCANPY__CLUSTERING'])
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../../processes/scanpy/dim_reduction' params(PARAMS_GROUPED['SC__SCANPY__DIM_REDUCTION__UMAP'])
+include SC__H5AD_TO_LOOM from '../../processes/utils/h5ad_to_loom'
 
 //////////////////////////////////////////////////////
 //  Get the data
@@ -75,9 +76,10 @@ workflow bbknn {
         SC__SCANPY__BATCH_EFFECT_CORRECTION( SC__SCANPY__DIM_REDUCTION__PCA.out )
         SC__SCANPY__CLUSTERING( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
         SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__CLUSTERING.out )
+        SC__H5AD_TO_LOOM(SC__SCANPY__DIM_REDUCTION__UMAP.out )
         // Not using t-SNE as it does not use the neighbour graph (which BBKNN alters) when constructing its dimensionality reduction
     emit:
-        SC__SCANPY__DIM_REDUCTION__UMAP.out
+        SC__H5AD_TO_LOOM.out
 }
 
 // Uncomment to test

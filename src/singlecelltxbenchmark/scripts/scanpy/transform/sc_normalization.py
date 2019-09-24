@@ -34,6 +34,8 @@ except:
 # Normalize the data
 #
 
+adata.raw = adata
+
 if options.method == 'cpx':
     # Total-count normalize (library-size correct) to '-r' reads/cell
     sc.pp.normalize_per_cell(adata, counts_per_cell_after=options.counts_per_cell_after)
