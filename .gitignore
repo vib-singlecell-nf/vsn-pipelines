@@ -1,0 +1,7 @@
+*checkpoint.ipynb
+*egg*
+.nextflow
+.nextflow*
+data
+refdata
+work
