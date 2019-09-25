@@ -3,21 +3,22 @@ nextflow.preview.dsl=2
 process SC__CELLRANGER__COUNT {
 
   publishDir "${params.outdir}/counts", mode: 'symlink'
-  container params.containers.cellranger
+  container params.container
 
   input:
     file(transcriptome)
     file(fastqs)
 
   output:
-    file "${sample}/outs"
+    tuple(_sampleName, file("${_sampleName}/outs") )
 
   script:
     sample = fastqs.getName() =~ /(.*)_fastqOut/
+    _sampleName = sample[0][1]
     """
     cellranger count \
-        --id=${sample[0][1]} \
-        --sample=${sample[0][1]} \
+        --id=${_sampleName} \
+        --sample=${_sampleName} \
         --fastqs=${fastqs} \
         --transcriptome=${transcriptome} \
         ${(params.containsKey('libraries')) ? '--libraries ' + params.libraries: ''} \

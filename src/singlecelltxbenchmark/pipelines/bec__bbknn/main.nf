@@ -26,8 +26,9 @@ include groupParams from '../../utils/utils.nf'
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__FILE_CONVERTER_HELP from '../../processes/utils/utils'
 
+include SC__CELLRANGER__MKFASTQ from '../../processes/cellranger/mkfastq' params(params.sc.cellranger.mkfastq + params.global + params)
+include SC__CELLRANGER__COUNT from '../../processes/cellranger/count' params(params.sc.cellranger.mkfastq + params.global)
 include SC__FILE_CONVERTER from '../../processes/utils/utils' params(params.sc.file_converter + params.global)
 include SC__FILE_ANNOTATOR from '../../processes/utils/utils' params(params.sc.file_annotator + params.global)
 include '../../processes/scanpy/filter' params(params.sc.scanpy.filter + params.global)
@@ -44,7 +45,7 @@ include SC__H5AD_TO_LOOM from '../../processes/utils/h5ad_to_loom' params(params
 
 //////////////////////////////////////////////////////
 //  Get the data
-include getChannel as getTenXChannel from '../../channels/tenx.nf'
+include getChannel as getTenXChannel from '../../channels/tenx.nf' params(params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -52,13 +53,11 @@ include getChannel as getTenXChannel from '../../channels/tenx.nf'
 /*
  * Run the workflow for each 10xGenomics CellRanger output folders specified.
  */ 
-workflow bbknn {
-    get:
-        data
+workflow {
     main:
-        // SC__FILE_CONVERTER_HELP()
-        // SC__FILE_CONVERTER_HELP.out.subscribe { println it }
-        SC__FILE_CONVERTER( data )
+        SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), file(params.sc.cellranger.mkfastq.runFolder))
+        SC__CELLRANGER__COUNT(file(params.sc.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
+        SC__FILE_CONVERTER( SC__CELLRANGER__COUNT.out )
         SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out )
         SC__SCANPY__GENE_FILTER( SC__FILE_ANNOTATOR.out )
         SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
@@ -79,7 +78,7 @@ workflow bbknn {
 }
 
 // Uncomment to test
-workflow {
-    main:
-        bbknn( getTenXChannel( params.global.tenx_folder ) )
-}
+// workflow {
+//     main:
+//         bbknn( getTenXChannel( params.tenx_folder ) )
+// }

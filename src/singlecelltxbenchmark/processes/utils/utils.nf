@@ -19,7 +19,7 @@ process SC__FILE_CONVERTER {
     """
     sc_file_converter.py \
        --input-format $params.iff \
-       --output-format $params.off $f "${id}.SC__FILE_CONVERTER.${params.off}"
+       --output-format $params.off ${f}/${params.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix "${id}.SC__FILE_CONVERTER.${params.off}"
     """
 }
 
