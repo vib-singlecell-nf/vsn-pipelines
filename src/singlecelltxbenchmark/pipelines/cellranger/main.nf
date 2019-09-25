@@ -6,7 +6,6 @@
 //
 /*
  */ 
-import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
@@ -14,12 +13,9 @@ include groupParams from '../../utils/utils.nf'
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
-PARAMS_GROUPED = groupParams( params )
 
-println(prettyPrint(toJson(PARAMS_GROUPED)))
-
-include SC__CELLRANGER__MKFASTQ from '../../processes/cellranger/mkfastq' params(PARAMS_GROUPED['SC__CELLRANGER__MKFASTQ'])
-include SC__CELLRANGER__COUNT from '../../processes/cellranger/count' params(PARAMS_GROUPED['SC__CELLRANGER__COUNT'])
+include SC__CELLRANGER__MKFASTQ from '../../processes/cellranger/mkfastq' params(params.sc.cellranger.mkfastq + params.global)
+include SC__CELLRANGER__COUNT from '../../processes/cellranger/count' params(params.sc.cellranger.mkfastq + params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

@@ -18,7 +18,6 @@
  * - dimensionality reduction (PCA)
  * - batch effect correction using python package bbknn (Park et al. (2018), Fast Batch Alignment of Single Cell Transcriptomes Unifies Multiple Mouse Cell Atlases into an Integrated Landscape)
  */ 
-import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
@@ -26,25 +25,22 @@ include groupParams from '../../utils/utils.nf'
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
-PARAMS_GROUPED = groupParams( params )
-
-println(prettyPrint(toJson(PARAMS_GROUPED)))
 
 include SC__FILE_CONVERTER_HELP from '../../processes/utils/utils'
 
-include SC__FILE_CONVERTER from '../../processes/utils/utils' params(PARAMS_GROUPED['SC__FILE_CONVERTER'])
-include SC__FILE_ANNOTATOR from '../../processes/utils/utils' params(PARAMS_GROUPED['SC__FILE_ANNOTATOR'])
-include '../../processes/scanpy/filter' params(PARAMS_GROUPED['SC__SCANPY_FILTER'])
-include SC__FILE_CONCATENATOR from '../../processes/utils/utils' params(PARAMS_GROUPED['SC__FILE_CONCATENATOR'])
-include SC__SCANPY__DATA_TRANSFORMATION from '../../processes/scanpy/transform' params(PARAMS_GROUPED['SC__SCANPY__DATA_TRANSFORMATION'])
-include SC__SCANPY__NORMALIZATION from '../../processes/scanpy/transform' params(PARAMS_GROUPED['SC__SCANPY__NORMALIZATION'])
-include '../../processes/scanpy/feature_selection' params(PARAMS_GROUPED['SC__SCANPY__FEATURE_SELECTION'])
-include SC__SCANPY__FEATURE_SCALING from '../../processes/scanpy/transform' params(PARAMS_GROUPED['SC__SCANPY__FEATURE_SCALING'])
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../../processes/scanpy/dim_reduction' params(PARAMS_GROUPED['SC__SCANPY__DIM_REDUCTION__PCA'])
-include '../../processes/scanpy/batch_effect_correct' params(PARAMS_GROUPED['SC__SCANPY__BATCH_EFFECT_CORRECT'])
-include SC__SCANPY__CLUSTERING from '../../processes/scanpy/cluster' params(PARAMS_GROUPED['SC__SCANPY__CLUSTERING'])
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../../processes/scanpy/dim_reduction' params(PARAMS_GROUPED['SC__SCANPY__DIM_REDUCTION__UMAP'])
-include SC__H5AD_TO_LOOM from '../../processes/utils/h5ad_to_loom'
+include SC__FILE_CONVERTER from '../../processes/utils/utils' params(params.sc.file_converter + params.global)
+include SC__FILE_ANNOTATOR from '../../processes/utils/utils' params(params.sc.file_annotator + params.global)
+include '../../processes/scanpy/filter' params(params.sc.scanpy.filter + params.global)
+include SC__FILE_CONCATENATOR from '../../processes/utils/utils' params(params.sc.file_concatenator + params.global)
+include SC__SCANPY__DATA_TRANSFORMATION from '../../processes/scanpy/transform' params(params.sc.scanpy.data_transformation + params.global)
+include SC__SCANPY__NORMALIZATION from '../../processes/scanpy/transform' params(params.sc.scanpy.normalization + params.global)
+include '../../processes/scanpy/feature_selection' params(params.sc.scanpy.feature_selection + params.global)
+include SC__SCANPY__FEATURE_SCALING from '../../processes/scanpy/transform' params(params.sc.scanpy.feature_scaling + params.global)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../../processes/scanpy/dim_reduction' params(params.sc.scanpy.dim_reduction.pca + params.global)
+include '../../processes/scanpy/batch_effect_correct' params(params.sc.scanpy.batch_effect_correct + params.global)
+include SC__SCANPY__CLUSTERING from '../../processes/scanpy/cluster' params(params.sc.scanpy.clustering + params.global)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../../processes/scanpy/dim_reduction' params(params.sc.scanpy.dim_reduction.umap + params.global)
+include SC__H5AD_TO_LOOM from '../../processes/utils/h5ad_to_loom' params(params.global)
 
 //////////////////////////////////////////////////////
 //  Get the data
@@ -66,7 +62,7 @@ workflow bbknn {
         SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out )
         SC__SCANPY__GENE_FILTER( SC__FILE_ANNOTATOR.out )
         SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
-        SC__SCANPY__FILTER_QC_REPORT(file(params.template_ipynb), SC__SCANPY__CELL_FILTER.out )
+        SC__SCANPY__FILTER_QC_REPORT(file(params.global.template_ipynb), SC__SCANPY__CELL_FILTER.out )
         SC__FILE_CONCATENATOR( SC__SCANPY__CELL_FILTER.out.collect() )
         SC__SCANPY__NORMALIZATION( SC__FILE_CONCATENATOR.out )
         SC__SCANPY__DATA_TRANSFORMATION( SC__SCANPY__NORMALIZATION.out )
@@ -85,5 +81,5 @@ workflow bbknn {
 // Uncomment to test
 workflow {
     main:
-        bbknn( getTenXChannel( params.tenx_folder ) )
+        bbknn( getTenXChannel( params.global.tenx_folder ) )
 }
