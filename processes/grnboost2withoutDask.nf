@@ -15,7 +15,7 @@ process SC__SCENIC__GRNBOOST2WITHOUTDASK {
     file 'adj.tsv'
 
     """
-    grnboost2_without_dask.py \
+    ${workflow.projectDir}/src/scenic/bin/grnboost2_without_dask.py \
         $filteredloom \
         $tfs \
         --output adj.tsv \

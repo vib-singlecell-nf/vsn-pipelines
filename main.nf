@@ -71,9 +71,9 @@ workflow SCENIC {
 
 }
 
-// Uncomment to test
-workflow {
-    main:
-        SCENIC( file( params.sc.scenic.filteredloom ) )
-}
+// // Uncomment to test
+// workflow {
+//     main:
+//         SCENIC( file( params.sc.scenic.filteredloom ) )
+// }
 
