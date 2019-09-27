@@ -13,7 +13,7 @@ process SC__SCENIC__MERGESCENICLOOMS {
     file params.sc.scenic.scenicoutputloom
 
     """
-    merge_SCENIC_motif_track_loom.py \
+    ${workflow.projectDir}/src/scenic/bin/merge_SCENIC_motif_track_loom.py \
         --loom_motif ${motifloom} \
         --loom_track ${trackloom} \
         --loom_output ${params.sc.scenic.scenicoutputloom} \
