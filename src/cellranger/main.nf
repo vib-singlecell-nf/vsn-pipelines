@@ -9,13 +9,13 @@
 
 nextflow.preview.dsl=2
 
-include groupParams from '../../utils/utils.nf'
+// include groupParams from '../../utils/utils.nf'
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__CELLRANGER__MKFASTQ from '../../processes/cellranger/mkfastq' params(params.sc.cellranger.mkfastq + params.global)
-include SC__CELLRANGER__COUNT from '../../processes/cellranger/count' params(params.sc.cellranger.mkfastq + params.global)
+include SC__CELLRANGER__MKFASTQ from './processes/mkfastq'  params(params)
+include SC__CELLRANGER__COUNT   from './processes/count'    params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -23,8 +23,11 @@ include SC__CELLRANGER__COUNT from '../../processes/cellranger/count' params(par
 /*
  * Run the workflow for each 10xGenomics CellRanger output folders specified.
  */ 
-workflow {
+workflow CELLRANGER {
     main:
-        SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.samplesheet), file(params.sc.cellranger.mkfastq.runFolder))
+        SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), file(params.sc.cellranger.mkfastq.runFolder))
         SC__CELLRANGER__COUNT(file(params.sc.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
+    emit:
+        SC__CELLRANGER__COUNT.out
 }
+

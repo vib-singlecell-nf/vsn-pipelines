@@ -22,11 +22,14 @@ println "${workflow.projectDir}"
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SCENIC from './src/scenic/main.nf' params(params) //params.sc.scenic + params.global)
+include SCENIC from './src/scenic/main.nf' params(params)
+
+include CELLRANGER from './src/cellranger/main.nf' params(params)
 
 
 workflow {
-    SCENIC( file( params.sc.scenic.filteredloom ) )
+    // SCENIC( file( params.sc.scenic.filteredloom ) )
+    CELLRANGER()
 }
 
 
