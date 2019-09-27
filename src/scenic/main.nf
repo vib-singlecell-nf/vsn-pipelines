@@ -18,12 +18,12 @@ nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
-include SC__SCENIC__GRNBOOST2WITHOUTDASK                        from '../../processes/scenic/grnboost2withoutDask'  params(params.sc.scenic + params.global)
-include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__MOTIF   from '../../processes/scenic/cistarget'             params(params.sc.scenic + params.global)
-include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__TRACK   from '../../processes/scenic/cistarget'             params(params.sc.scenic + params.global)
-include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from '../../processes/scenic/aucell'                params(params.sc.scenic + params.global)
-include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__TRACK         from '../../processes/scenic/aucell'                params(params.sc.scenic + params.global)
-include SC__SCENIC__MERGESCENICLOOMS                            from '../../processes/scenic/mergeScenicLooms'      params(params.sc.scenic + params.global)
+include SC__SCENIC__GRNBOOST2WITHOUTDASK                        from './processes/grnboost2withoutDask'  params(params)
+include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__MOTIF   from './processes/cistarget'             params(params)
+include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__TRACK   from './processes/cistarget'             params(params)
+include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from './processes/aucell'                params(params)
+include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__TRACK         from './processes/aucell'                params(params)
+include SC__SCENIC__MERGESCENICLOOMS                            from './processes/mergeScenicLooms'      params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

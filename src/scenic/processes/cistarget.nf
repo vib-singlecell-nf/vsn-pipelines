@@ -4,7 +4,7 @@ nextflow.preview.dsl=2
 
 process SC__SCENIC__CISTARGET {
     cache 'deep'
-    container params.container
+    container params.sc.scenic.container
 
     input:
     file filteredloom
@@ -22,11 +22,11 @@ process SC__SCENIC__CISTARGET {
         ${featherDB} \
         --annotations_fname ${annotation} \
         --expression_mtx_fname ${filteredloom} \
-        --cell_id_attribute ${params.cell_id_attribute} \
-        --gene_attribute ${params.gene_attribute} \
+        --cell_id_attribute ${params.sc.scenic.cell_id_attribute} \
+        --gene_attribute ${params.sc.scenic.gene_attribute} \
         --mode "dask_multiprocessing" \
         --output reg_${type}.csv \
-        --num_workers ${params.numWorkers} \
+        --num_workers ${params.sc.scenic.numWorkers} \
     """
 }
 

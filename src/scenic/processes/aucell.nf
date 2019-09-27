@@ -4,7 +4,7 @@ nextflow.preview.dsl=2
 
 process SC__SCENIC__AUCELL {
     cache 'deep'
-    container params.container
+    container params.sc.scenic.container
 
     input:
     file exprMat
@@ -20,8 +20,8 @@ process SC__SCENIC__AUCELL {
         $exprMat \
         $regulons \
         -o "auc_${type}.loom" \
-        --cell_id_attribute ${params.cell_id_attribute} \
-        --gene_attribute ${params.gene_attribute} \
-        --num_workers ${params.numWorkers}
+        --cell_id_attribute ${params.sc.scenic.cell_id_attribute} \
+        --gene_attribute ${params.sc.scenic.gene_attribute} \
+        --num_workers ${params.sc.scenic.numWorkers}
     """
 }
