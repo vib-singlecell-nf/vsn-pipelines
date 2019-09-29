@@ -10,6 +10,10 @@ workflow getChannel {
     get:
         glob
     main:
+        // Check whether multiple globs are provided
+        if(glob.contains(',')) {
+            glob = Arrays.asList(glob.split(',')); 
+        }
         channel = Channel
             .fromPath(glob, type: 'dir')
             .map { 
