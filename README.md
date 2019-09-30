@@ -21,8 +21,8 @@ The root `main.nf` imports and calls sub-workflows defined in the modules.
 
 ## Modules
 A "module" consists of a folder labeled with the tool name (Scanpy, SCENIC, utils, etc.), with subfolders for
-* `bin` (scripts passed into the container)
-* `processes` (where Nextflow processes are defined)
+* `bin/` (scripts passed into the container)
+* `processes/` (where Nextflow processes are defined)
 The root of the modules folder contains workflow files + associated configs (as many as there are workflows):
 * `main.nf` + `nextflow.config`
 * `workflow1.nf` + `workflow2.config`
@@ -36,8 +36,10 @@ src/
 │   └── processes
 │       ├── count.nf
 │       └── mkfastq.nf
+│
 ├── channels
 │   └── tenx.nf
+│
 ├── scenic
 │   ├── bin
 │   │   ├── grnboost2_without_dask.py
@@ -50,6 +52,7 @@ src/
 │   ├── main.nf
 │   ├── nextflow.config
 │   └── scenic.config
+│
 └── utils
     ├── bin
     │   ├── h5ad_to_loom.py
@@ -84,12 +87,12 @@ workflow CELLRANGER {
 ```
 
 ### Workflow imports
-Entire workflows can also be imported in other workflows with one command (inheriting all of the imports from the workflow definition):
+Entire workflows can also be imported in other workflows with one command (inheriting all of the process imports from the workflow definition):
 ```groovy
 include CELLRANGER from '../cellranger/main.nf' params(params)
 ```
 
-This leads to the ability to easily define high-level workflows from `aertslab/SingleCellTxBenchmark/main.nf`:
+This leads to the ability to easily define high-level workflows in the master nf file: `aertslab/SingleCellTxBenchmark/main.nf`:
 ```groovy
 include CELLRANGER from './src/cellranger/main.nf' params(params)
 include BEC_BBKNN from './src/scanpy/bec_bbknn.nf' params(params)
@@ -277,4 +280,8 @@ env {
 }
 ```
 but this using "user.dir" isn't a proper solution yet.
+
+### How to define multiple workflows in the master main.nf
+1. Create named master workflows in `main.nf` and use if/then statements to determine
+2. Create a github organization, and have separate repositories for each master workflow
 
