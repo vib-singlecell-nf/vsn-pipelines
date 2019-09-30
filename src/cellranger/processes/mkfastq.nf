@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 process SC__CELLRANGER__MKFASTQ {
 
-  publishDir "${params.outdir}/fastqs", saveAs: { filename -> dirname = filename =~ /(.*)_fastqOut/; "${dirname[0][1]}" }, mode: 'symlink'
+  publishDir "${params.global.outdir}/fastqs", saveAs: { filename -> dirname = filename =~ /(.*)_fastqOut/; "${dirname[0][1]}" }, mode: 'symlink'
   container params.sc.cellranger.container
 
   input:

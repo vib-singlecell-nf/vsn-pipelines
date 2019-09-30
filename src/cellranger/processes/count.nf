@@ -2,8 +2,8 @@ nextflow.preview.dsl=2
 
 process SC__CELLRANGER__COUNT {
 
-  publishDir "${params.outdir}/counts", mode: 'symlink'
-  container params.container
+  publishDir "${params.global.outdir}/counts", mode: 'symlink'
+  container params.sc.cellranger.container
 
   input:
     file(transcriptome)
