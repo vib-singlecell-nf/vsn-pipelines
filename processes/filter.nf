@@ -42,6 +42,16 @@ process SC__SCANPY__CELL_FILTER {
     """
 }
 
+process SC__SCANPY__PREPARE_FILTER_QC_REPORT {
+    output:
+        file "sc_filter_qc_report.ipynb"
+    script:
+    """
+    cp ${workflow.projectDir}/src/scanpy/bin/filter/sc_filter_qc_report.ipynb .
+    """
+}
+
+
 process SC__SCANPY__FILTER_QC_REPORT {
 
   container params.sc.scanpy.container
