@@ -1,9 +1,10 @@
 nextflow.preview.dsl=2
 
-include getBaseName from '../../utils/files.nf'
+include getBaseName from '../../utils/processes/files.nf'
 
 process SC__SCANPY__DIM_REDUCTION {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -13,7 +14,7 @@ process SC__SCANPY__DIM_REDUCTION {
   script:
     method = params.dimReductionMethod.replaceAll('-','').toUpperCase()
     """
-    sc_dim_reduction.py \
+    ${workflow.projectDir}/src/scanpy/bin/dim_reduction/sc_dim_reduction.py \
          ${(params.containsKey('dimReductionMethod')) ? '--method ' + params.dimReductionMethod : ''} \
          ${(params.containsKey('svdSolver')) ? '--svd-solver ' + params.svdSolver : ''} \
          ${(params.containsKey('nNeighbors')) ? '--n-neighbors ' + params.nNeighbors : ''} \

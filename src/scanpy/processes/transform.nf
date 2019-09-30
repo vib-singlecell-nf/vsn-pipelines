@@ -1,9 +1,10 @@
 nextflow.preview.dsl=2
 
-include getBaseName from '../../utils/files.nf'
+include getBaseName from '../../utils/processes/files.nf'
 
 process SC__SCANPY__NORMALIZATION {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -12,7 +13,7 @@ process SC__SCANPY__NORMALIZATION {
     file "${getBaseName(f)}.SC__SCANPY__NORMALIZATION.${params.off}"
   script:
     """
-    sc_normalization.py \
+    ${workflow.projectDir}/src/scanpy/bin/transform/sc_normalization.py \
         ${(params.containsKey('normalizationMethod')) ? '--method ' + params.normalizationMethod : ''} \
         ${(params.containsKey('countsPerCellAfter')) ? '--counts-per-cell-after ' + params.countsPerCellAfter : ''} \
         $f \
@@ -22,6 +23,7 @@ process SC__SCANPY__NORMALIZATION {
 
 process SC__SCANPY__DATA_TRANSFORMATION {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -30,7 +32,7 @@ process SC__SCANPY__DATA_TRANSFORMATION {
     file "${getBaseName(f)}.SC__SCANPY__DATA_TRANSFORMATION.${params.off}"
   script:
     """
-    sc_data_transformation.py \
+    ${workflow.projectDir}/src/scanpy/bin/transform/sc_data_transformation.py \
         ${(params.containsKey('dataTransformationMethod')) ? '--method ' + params.dataTransformationMethod : ''} \
         $f \
         "${getBaseName(f)}.SC__SCANPY__DATA_TRANSFORMATION.${params.off}"
@@ -39,6 +41,7 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 
 process SC__SCANPY__FEATURE_SCALING {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -47,7 +50,7 @@ process SC__SCANPY__FEATURE_SCALING {
     file "${getBaseName(f)}.SC__SCANPY__FEATURE_SCALING.${params.off}"
   script:
     """
-    sc_feature_scaling.py \
+    ${workflow.projectDir}/src/scanpy/bin/transform/sc_feature_scaling.py \
         ${(params.containsKey('featureScalingMthod')) ? '--method ' + params.featureScalingMthod : ''} \
         ${(params.containsKey('featureScalingMaxSD')) ? '--max-sd ' + params.featureScalingMaxSD : ''} \
        $f \

@@ -9,6 +9,8 @@ params.off = ''
 
 process SC__FILE_CONVERTER {
 
+  cache 'deep'
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -17,23 +19,25 @@ process SC__FILE_CONVERTER {
     file "${id}.SC__FILE_CONVERTER.${params.off}"
   script:
     """
-    sc_file_converter.py \
+    ${workflow.projectDir}/src/utils/bin/sc_file_converter.py \
        --input-format $params.iff \
        --output-format $params.off ${f}/${params.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix "${id}.SC__FILE_CONVERTER.${params.off}"
     """
 }
 
 process SC__FILE_CONVERTER_HELP {
+  container params.sc.scanpy.container
   output:
     stdout()
   script:
     """
-    sc_file_converter.py -h | awk '/-h/{y=1;next}y'
+    ${workflow.projectDir}/src/utils/bin/sc_file_converter.py -h | awk '/-h/{y=1;next}y'
     """
 }
 
 process SC__FILE_CONCATENATOR() {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -42,28 +46,30 @@ process SC__FILE_CONCATENATOR() {
     file "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}"
   script:
     """
-    sc_file_concatenator.py \
+    ${workflow.projectDir}/src/utils/bin/sc_file_concatenator.py \
       --file-format $params.off \
       ${(params.containsKey('join')) ? '--join ' + params.join : ''} \
       --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
     """
 }
 
-include getBaseName from '../../utils/files.nf'
+include getBaseName from './files.nf'
 
 process SC__FILE_ANNOTATOR() {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
     file(f)
+    file(metaDataFilePath)
   output:
     file "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
   script:
     """
-    sc_file_annotator.py \
+    ${workflow.projectDir}/src/utils/bin/sc_file_annotator.py \
       ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
-      ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + params.metaDataFilePath : ''} \
+      ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
       $f \
       "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
     """
