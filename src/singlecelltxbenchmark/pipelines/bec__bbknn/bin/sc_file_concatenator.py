@@ -1,1 +1,0 @@
-../../../scripts/utils/sc_file_concatenator.py
