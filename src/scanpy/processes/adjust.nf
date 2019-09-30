@@ -7,6 +7,7 @@ normalizationVariablesToRegressOutAsArguments = params.normalizationVariablesToR
 
 process SC__SCANPY__ADJUSTMENT {
 
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
@@ -15,7 +16,7 @@ process SC__SCANPY__ADJUSTMENT {
     file "${getBaseName(f)}.SC__SCANPY__ADJUSTMENT.${params.off}" 
   script:
     """
-    sc_adjustment.py \
+    ${workflow.projectDir}/src/scanpy/bin/adjust/sc_adjustment.py \
          ${(params.containsKey('adjustmentMethod')) ? '--method ' + params.adjustmentMethod : ''} \
          ${(params.containsKey('normalizationVariablesToRegressOut')) ? normalizationVariablesToRegressOutAsArguments : ''} \
          $f \
