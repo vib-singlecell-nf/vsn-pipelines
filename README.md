@@ -87,12 +87,12 @@ workflow CELLRANGER {
 ```
 
 ### Workflow imports
-Entire workflows can also be imported in other workflows with one command (inheriting all of the process imports from the workflow definition):
+Entire **sub-workflows** can also be imported in other workflows with one command (inheriting all of the process imports from the workflow definition):
 ```groovy
 include CELLRANGER from '../cellranger/main.nf' params(params)
 ```
 
-This leads to the ability to easily define high-level workflows in the master nf file: `aertslab/SingleCellTxBenchmark/main.nf`:
+This leads to the ability to easily define **high-level workflows** in the master nf file: `aertslab/SingleCellTxBenchmark/main.nf`:
 ```groovy
 include CELLRANGER from './src/cellranger/main.nf' params(params)
 include BEC_BBKNN from './src/scanpy/bec_bbknn.nf' params(params)
@@ -178,10 +178,19 @@ params {
 ## Running the pipeline directly from GitHub:
 
 ```bash
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,scenic -user <user> -r module_refactor
+nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn -user <GitHub-user>
 ```
-This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the worflow defined there.
+This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the worflow defined there, using the built-in configs, which are merged from each tool used.
 
+### Customizing config files
+In order to use a customized config file, the default file can be used as a template:
+```bash
+wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/nextflow.config
+wget https://github.com/aertslab/SingleCellTxBenchmark/blob/master/src/scanpy/bbknn.config
+
+# edit the config file parameters, then:
+nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn -c nextflow.config,bbknn.config -user <GitHub-user>
+```
 
 In most cases, sub-workflows could also be run directly (locally only at this point):
 ```bash
@@ -253,15 +262,15 @@ nextflow run \
 * **Modules** (organized by tool):
   * processes definitions + scripts
 * **Workflows:**
-  * sequences of processes (fine-grained, e.g. BBKNN)
-  * sequence of workflows (high-level, e.g. CellRanger + filtering + preprocessing + BBKNN + SCENIC)
+  * sequences of processes (fine-grained sub-workflows, e.g. BBKNN)
+  * sequence of workflows (high-level meta-workflows, e.g. CellRanger + filtering + preprocessing + BBKNN + SCENIC)
 * **Strategy to run the pipeline:**
   * Create a new working folder (to container nf `work/` & logs
   * Copy the template `nextflow.config` files for each sub-workflow to be run
   * Edit the config files (filering parameters, file paths, etc.)
   * Run the nextflow pipeline directly from GitHub, specifying the local config file:
 ```bash
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn,scenic -r module_refactor -c scenic.config
+nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn,scenic -c scenic.config
 ```
 
 
