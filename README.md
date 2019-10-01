@@ -270,7 +270,7 @@ nextflow run \
   * Edit the config files (filering parameters, file paths, etc.)
   * Run the nextflow pipeline directly from GitHub, specifying the local config file:
 ```bash
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn,scenic -r module_refactor -c scenic.config
+nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn,scenic -c scenic.config
 ```
 
 
