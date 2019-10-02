@@ -294,3 +294,10 @@ but this using "user.dir" isn't a proper solution yet.
 1. Create named master workflows in `main.nf` and use if/then statements to determine
 2. Create a github organization, and have separate repositories for each master workflow
 
+# Development
+
+## Module testing
+
+Modules and processes can be tested independently, you can find an example in `src/utils/main.test.nf`.
+
+The `SC__FILE_CONVERTER` process is tested against the `tiny` dataset available in `data/01.count`.
