@@ -12,6 +12,11 @@
 // Command:
 //  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__CISTARGET
 
+// Test 3: SC__SCENIC__AUCELL (from processes/)
+// Time: ~1min
+// Command:
+//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL
+
 nextflow.preview.dsl=2
 
 ///////////////////////////////////////////
@@ -20,6 +25,8 @@ nextflow.preview.dsl=2
 include SC__SCENIC__GRNBOOST2WITHOUTDASK from './processes/grnboost2withoutDask' params(params)
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__MOTIF   from './processes/cistarget'             params(params)
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__TRACK   from './processes/cistarget'             params(params)
+include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from './processes/aucell'                params(params)
+include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__TRACK         from './processes/aucell'                params(params)
 
 // Create channel for the different runs
 runs = Channel.from( 1..params.sc.scenic.numRuns )
@@ -61,6 +68,22 @@ workflow test_SC__SCENIC__CISTARGET {
         ctx_trk
 }
 
+// Make the test workflow 
+workflow test_SC__SCENIC__AUCELL {
+    get:
+        filteredloom
+        ctx_mtf
+        ctx_trk
+    main:
+        /* AUCell, motif regulons */
+        auc_mtf = SC__SCENIC__AUCELL__MOTIF( runs, filteredloom, ctx_mtf, 'mtf' )
+
+        /* AUCell, track regulons */
+        auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
+    emit:
+        auc_mtf
+        auc_trk
+}
 
 workflow {
     main:
@@ -71,6 +94,11 @@ workflow {
             case "SC__SCENIC__CISTARGET":
                 grn = Channel.fromPath(params.sc.scenic.scenicoutdir + "/grnboost2withoutDask/run_*/run_*__adj.tsv")
                 test_SC__SCENIC__CISTARGET( file( params.sc.scenic.filteredloom ), grn )
+            break;
+            case "SC__SCENIC__AUCELL":
+                ctx_mtf = Channel.fromPath(params.sc.scenic.scenicoutdir + "/cistarget/run_*/run_*__reg_mtf.csv")
+                ctx_trk = Channel.fromPath(params.sc.scenic.scenicoutdir + "/cistarget/run_*/run_*__reg_trk.csv")
+                test_SC__SCENIC__AUCELL( file( params.sc.scenic.filteredloom ), ctx_mtf, ctx_trk )
             break;
             default:
                 throw new Exception("The test parameters should be specified.")

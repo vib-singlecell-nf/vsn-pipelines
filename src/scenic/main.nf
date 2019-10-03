@@ -52,7 +52,7 @@ workflow SCENIC {
             .fromPath( params.sc.scenic.cistarget.mtfDB )
             .collect() // use all files together in the ctx command
         motifANN = file(params.sc.scenic.cistarget.mtfANN)
-        ctx_mtf = SC__SCENIC__CISTARGET__MOTIF( filteredloom, grn, motifDB, motifANN, 'mtf' )
+        ctx_mtf = SC__SCENIC__CISTARGET__MOTIF( runs, filteredloom, grn, motifDB, motifANN, 'mtf' )
 
         /* cisTarget 
             track analysis
@@ -61,13 +61,13 @@ workflow SCENIC {
             .fromPath( params.sc.scenic.cistarget.trkDB )
             .collect() // use all files together in the ctx command
         trackANN = file(params.sc.scenic.cistarget.trkANN)
-        ctx_trk = SC__SCENIC__CISTARGET__TRACK( filteredloom, grn, trackDB, trackANN, 'trk' )
+        ctx_trk = SC__SCENIC__CISTARGET__TRACK( runs, filteredloom, grn, trackDB, trackANN, 'trk' )
 
         /* AUCell, motif regulons */
-        auc_mtf = SC__SCENIC__AUCELL__MOTIF( filteredloom, ctx_mtf, 'mtf' )
+        auc_mtf = SC__SCENIC__AUCELL__MOTIF( runs, filteredloom, ctx_mtf, 'mtf' )
 
         /* AUCell, track regulons */
-        auc_trk = SC__SCENIC__AUCELL__TRACK( filteredloom, ctx_trk, 'trk' )
+        auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
 
         //visualize and merge
         SC__SCENIC__MERGESCENICLOOMS( auc_mtf, auc_trk )
