@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 import java.nio.file.Paths
 
 if(!params.containsKey("test")) {
-  binDir = "${workflow.projectDir}/src/utils/bin"
+  binDir = "${workflow.projectDir}/src/utils/bin/"
 } else {
   binDir = ""
 }
