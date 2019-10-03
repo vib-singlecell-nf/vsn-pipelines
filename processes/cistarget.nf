@@ -5,27 +5,30 @@ nextflow.preview.dsl=2
 process SC__SCENIC__CISTARGET {
     cache 'deep'
     container params.sc.scenic.container
+    publishDir "${params.sc.scenic.scenicoutdir}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
+    val runId
     file filteredloom
-    file 'adj.tsv'
+    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}"
     file featherDB
     file annotation
     val type
 
     output:
-    file "reg_${type}.csv"
+    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"}"
 
     """
     pyscenic ctx \
-        adj.tsv \
+        ${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"} \
         ${featherDB} \
         --annotations_fname ${annotation} \
         --expression_mtx_fname ${filteredloom} \
         --cell_id_attribute ${params.sc.scenic.cell_id_attribute} \
         --gene_attribute ${params.sc.scenic.gene_attribute} \
         --mode "dask_multiprocessing" \
-        --output reg_${type}.csv \
+        --output ${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"} \
         --num_workers ${params.sc.scenic.numWorkers} \
     """
 }
