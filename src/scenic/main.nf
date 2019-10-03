@@ -2,7 +2,6 @@
 // Version:
 // Test:
 // Command: 
-//  nextflow run src/singlecelltxbenchmark/pipelines/bec__bbknn -profile singularity --tenx_folder data/01.count/**/filtered_feature_bc_matrix --project_name tiny
 //
 /*
  * SCENIC workflow 
