@@ -32,6 +32,9 @@ include SC__SCENIC__MERGESCENICLOOMS                            from './processe
  * SCENIC workflow
  */ 
 
+// Create channel for the different runs
+runs = Channel.from( 1..params.sc.scenic.numRuns )
+
 workflow SCENIC {
     get:
         filteredloom
@@ -39,7 +42,7 @@ workflow SCENIC {
         // filteredloom = file(params.sc.scenic.filteredloom)
         /* GRN */
         tfs = file(params.sc.scenic.grn.TFs)
-        grn = SC__SCENIC__GRNBOOST2WITHOUTDASK( filteredloom, tfs )
+        grn = SC__SCENIC__GRNBOOST2WITHOUTDASK( runs, filteredloom, tfs )
 
         /* cisTarget 
             motif analysis
