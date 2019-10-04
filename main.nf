@@ -26,7 +26,7 @@ include CELLRANGER from './src/cellranger/main.nf' params(params)
 include QC_FILTER from './src/scanpy/qc_filter.nf' params(params)
 include BEC_BBKNN from './src/scanpy/bec_bbknn.nf' params(params)
 
-include SC__H5AD_TO_BARE_LOOM from './src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
+include SC__H5AD_TO_FILTERED_LOOM from './src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
 include SCENIC from './src/scenic/main.nf' params(params)
 
 // data channel to start from 10x data:
@@ -41,9 +41,9 @@ workflow {
     // to run starting from the 10x output:
     data = getTenXChannel( params.global.tenx_folder ).view()
     QC_FILTER( data )
-    BEC_BBKNN( QC_FILTER.out )
-    filteredloom = SC__H5AD_TO_BARE_LOOM( QC_FILTER.out )
-    SCENIC( filteredloom )
+    scopeloom = BEC_BBKNN( QC_FILTER.out )
+    filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out )
+    SCENIC( filteredloom, scopeloom )
 
 }
 
