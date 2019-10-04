@@ -28,10 +28,6 @@ args = parser.parse_args()
 ################################################################################
 ################################################################################
 
-# args.loom_motif = "/ddn1/vol1/staging/leuven/stg_00002/lcb/cflerin/testruns/SingleCellTxBenchmark/src/singlecelltxbenchmark/pipelines/scenic/work/6d/50e6af1508cb58f88d1800bee20720/auc_mtf.loom"
-# args.loom_track = "/ddn1/vol1/staging/leuven/stg_00002/lcb/cflerin/testruns/SingleCellTxBenchmark/src/singlecelltxbenchmark/pipelines/scenic/work/73/09b0e04f95b803b1a1393e19944df0/auc_trk.loom"
-# args.loom_output = "/ddn1/vol1/staging/leuven/stg_00002/lcb/cflerin/testruns/SingleCellTxBenchmark/src/singlecelltxbenchmark/pipelines/scenic/work/testout.loom"
-
 def dfToNamedMatrix(df):
     arr_ip = [tuple(i) for i in df.as_matrix()]
     dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
@@ -45,7 +41,6 @@ def integrateMotifTrack( args ):
     ################################################################################
 
     # scenic motif output
-    # scenic output
     lf = lp.connect( args.loom_motif, mode='r', validate=False )
     meta_mtf = json.loads(zlib.decompress(base64.b64decode( lf.attrs.MetaData )))
     auc_mtx_mtf = pd.DataFrame( lf.ca.RegulonsAUC, index=lf.ca.CellID)
@@ -67,9 +62,6 @@ def integrateMotifTrack( args ):
     ################################################################################
     # Fix track auc mtx names:
     ################################################################################
-
-    #auc_mtx_mtf.columns = auc_mtx_mtf.columns.str.replace('\(','_(')
-    #auc_mtx_trk.columns = auc_mtx_trk.columns.str.replace('\(','_(')
 
     # relabel columns with suffix indicating the regulon source
     auc_mtx_trk.columns = auc_mtx_trk.columns+'-track'
@@ -125,7 +117,7 @@ def integrateMotifTrack( args ):
     # UMAP
     runUmap = umap.UMAP(n_neighbors=10, min_dist=0.4, metric='correlation').fit_transform
     dr_umap = runUmap( auc_mtx.dropna() )
-    #pd.DataFrame(dr_umap, columns=['X', 'Y'], index=auc_mtx.dropna().index).to_csv( "scenic_motif-track_umap.txt", sep='\t')
+
     # tSNE
     tsne = TSNE( n_jobs=args.num_workers )
     dr_tsne = tsne.fit_transform( auc_mtx.dropna() )
@@ -136,8 +128,8 @@ def integrateMotifTrack( args ):
 
     defaultEmbedding = pd.DataFrame(dr_umap, columns=['_X', '_Y'], index=auc_mtx.dropna().index)
 
-    Embeddings_X = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index).iloc[:,0].astype('float32')
-    Embeddings_Y = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index).iloc[:,1].astype('float32')
+    Embeddings_X = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_X']].astype('float32')
+    Embeddings_Y = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_Y']].astype('float32')
 
     Embeddings_X.columns = ['1']
     Embeddings_Y.columns = ['1']
@@ -182,14 +174,12 @@ def integrateMotifTrack( args ):
 
     # re-open the connection to the loom file to copy the original expression data
     lf = lp.connect( args.loom_motif, mode='r', validate=False )
-    #exprMat = pd.DataFrame( lf[:,:], index=lf.ra.Gene, columns=lf.ca.CellID).T
-    #lf.close()
 
     col_attrs = {
         "CellID": lf.ca.CellID, #np.array(adata.obs.index),
         "Embedding": dfToNamedMatrix(defaultEmbedding),
-        #"Embeddings_X": dfToNamedMatrix(Embeddings_X),
-        #"Embeddings_Y": dfToNamedMatrix(Embeddings_Y),
+        "Embeddings_X": dfToNamedMatrix(Embeddings_X),
+        "Embeddings_Y": dfToNamedMatrix(Embeddings_Y),
         "RegulonsAUC": dfToNamedMatrix(auc_mtx),
     }
 
@@ -212,8 +202,6 @@ def integrateMotifTrack( args ):
         file_attrs=attrs
     )
     lf.close()
-
-
 
 
 if __name__ == "__main__":
