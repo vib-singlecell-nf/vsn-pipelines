@@ -22,7 +22,8 @@ include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__MOTIF   from './processe
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__TRACK   from './processes/cistarget'             params(params)
 include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from './processes/aucell'                params(params)
 include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__TRACK         from './processes/aucell'                params(params)
-include SC__SCENIC__MERGESCENICLOOMS                            from './processes/mergeScenicLooms'      params(params)
+include SC__SCENIC__MERGESCENICLOOMS                            from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__APPENDSCENICLOOM                            from './processes/scenicLoomHandler'     params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -34,6 +35,7 @@ include SC__SCENIC__MERGESCENICLOOMS                            from './processe
 workflow SCENIC {
     get:
         filteredloom
+        scopeloom
     main:
         // filteredloom = file(params.sc.scenic.filteredloom)
         /* GRN */
@@ -66,8 +68,12 @@ workflow SCENIC {
         auc_trk = SC__SCENIC__AUCELL__TRACK( filteredloom, ctx_trk, 'trk' )
 
         //visualize and merge
-        SC__SCENIC__MERGESCENICLOOMS( auc_mtf, auc_trk )
+        scenicloom = SC__SCENIC__MERGESCENICLOOMS( auc_mtf, auc_trk )
 
+        SC__SCENIC__APPENDSCENICLOOM( scopeloom, scenicloom )
+
+    emit:
+        SC__SCENIC__APPENDSCENICLOOM.out
 }
 
 // // Uncomment to test
