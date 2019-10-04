@@ -9,7 +9,6 @@
  * Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
  * 
  * Steps considered: 
- * - filter (cell, gene) + qc report
  * - normalize
  * - concatenate the batches
  * - feature selection
@@ -21,21 +20,10 @@
 
 nextflow.preview.dsl=2
 
-// include groupParams from '../utils/processes/utils.nf'
-
 //////////////////////////////////////////////////////
-//  Define the parameters for current testing proces
-
-
-include CELLRANGER from '../cellranger/main.nf' params(params)
-
-// utils:
-include SC__FILE_CONVERTER from '../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
-include SC__FILE_ANNOTATOR from '../utils/processes/utils.nf' params(params.sc.file_annotator + params.global + params)
-include SC__FILE_CONCATENATOR from '../utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
+//  process imports:
 
 // scanpy:
-include './processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
 include SC__SCANPY__DATA_TRANSFORMATION from './processes/transform.nf' params(params.sc.scanpy.data_transformation + params.global + params)
 include SC__SCANPY__NORMALIZATION from './processes/transform.nf' params(params.sc.scanpy.normalization + params.global + params)
 include './processes/feature_selection.nf' params(params.sc.scanpy.feature_selection + params.global + params)
@@ -50,27 +38,13 @@ include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from './pro
 include SC__H5AD_TO_LOOM from '../utils/processes/h5ad_to_loom.nf' params(params.global + params)
 
 //////////////////////////////////////////////////////
-//  Get the data
-// include getChannel as getTenXChannel from '../channels/tenx.nf' params(params.global)
-
-//////////////////////////////////////////////////////
 //  Define the workflow 
 
-/*
- * Run the workflow for each 10xGenomics CellRanger output folders specified.
- */ 
 workflow BEC_BBKNN {
     get:
-        cellrangercounts
+        filtered_concat
     main:
-        SC__FILE_CONVERTER( cellrangercounts )
-        SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
-        SC__SCANPY__GENE_FILTER( SC__FILE_ANNOTATOR.out )
-        SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
-        report = SC__SCANPY__PREPARE_FILTER_QC_REPORT()
-        SC__SCANPY__FILTER_QC_REPORT( report, SC__SCANPY__CELL_FILTER.out )
-        SC__FILE_CONCATENATOR( SC__SCANPY__CELL_FILTER.out.collect() )
-        SC__SCANPY__NORMALIZATION( SC__FILE_CONCATENATOR.out )
+        SC__SCANPY__NORMALIZATION( filtered_concat )
         SC__SCANPY__DATA_TRANSFORMATION( SC__SCANPY__NORMALIZATION.out )
         SC__SCANPY__FEATURE_SELECTION( SC__SCANPY__DATA_TRANSFORMATION.out )
         SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
