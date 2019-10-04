@@ -16,7 +16,7 @@ import static groovy.json.JsonOutput.*
 nextflow.preview.dsl=2
 
 // print all parameters:
-println(prettyPrint(toJson( params )))
+// println(prettyPrint(toJson( params )))
 
 
 //////////////////////////////////////////////////////
