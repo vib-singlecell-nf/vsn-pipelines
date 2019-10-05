@@ -35,7 +35,6 @@ parser_grn.add_argument('--num_workers',
                         help='The number of workers to use. (default: {}).'.format(cpu_count()))
 parser_grn.add_argument('--seed', type=int, required=False, default=None,
                         help='Seed value for regressor random state initialization (optional)')
-
 parser_grn.add_argument('--cell_id_attribute',
                         type=str, default='CellID',
                         help='The name of the column attribute that specifies the identifiers of the cells in the loom file.')
