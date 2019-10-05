@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__MULTI_RUNS_AGGR_REGULONS {
+process SC__SCENIC__AGGR_MULTI_RUNS_REGULONS {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'copy'
@@ -22,8 +22,7 @@ process SC__SCENIC__MULTI_RUNS_AGGR_REGULONS {
     """
     ${binDir}aggregate_SCENIC_multi_runs_regulons.py \
         ${f} \
-        --regulon-type ${type} \
-        --num-runs ${params.sc.scenic.numRuns} \
+        --output "multi_runs_regulons_${type}" \
     """
 }
 

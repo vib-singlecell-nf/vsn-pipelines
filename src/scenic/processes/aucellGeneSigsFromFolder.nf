@@ -16,7 +16,7 @@ process SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
 
     input:
     file exprMat
-    file regulonsFolder
+    file multiRunsAggrRegulonsFolder
     val type
 
     output:
@@ -26,9 +26,8 @@ process SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
     """
     ${binDir}aucell_genesigs_from_folder.py \
         $exprMat \
-        $regulonsFolder \
+        $multiRunsAggrRegulonsFolder \
         -o "multi_runs_regulons_auc_${type}.tsv" \
-        --regulon-type ${type} \
         --auc-threshold ${params.sc.scenic.aucell.auc_threshold} \
         ${params.sc.scenic.aucell.containsKey('percentile_threshold') ? "--percentile-threshold " + params.sc.scenic.aucell.percentile_threshold : ""} \
         --gene-occurence-threshold ${params.sc.scenic.aucell.gene_occurence_threshold} \

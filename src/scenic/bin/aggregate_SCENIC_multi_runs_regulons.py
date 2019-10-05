@@ -5,6 +5,7 @@ import loompy as lp
 import numpy as np
 import os
 import pandas as pd
+import sys
 
 ################################################################################
 ################################################################################
@@ -15,21 +16,11 @@ parser_grn = argparse.ArgumentParser(usage="usage: %prog [options] auc_looms",
 parser_grn.add_argument('auc_looms',
                         nargs='+',
                         help='The looms resulting from the SCENIC AUCell step.')
-parser_grn.add_argument('--regulon-type',
-                        type=str,
-                        dest="regulon_type",
-                        help='The type of the database ( mtf or trk) used for cisTarget pruning step.')
-parser_grn.add_argument('-n', '--num-runs',
-                        type=int,
-                        dest="num_runs",
-                        help='The number of SCENIC runs computed.')
+parser_grn.add_argument('-o', '--output',
+                        type=argparse.FileType('w'), default=sys.stdout,
+                        help='Output file/stream, i.e. a folder containing regulons (CSV).')
 
 args = parser_grn.parse_args()
-
-# Sanity checks:
-
-if args.regulon_type not in ["mtf", "trk"]:
-    raise ValueError(f"This type of database '{args.regulon_type}' is not recognized.")
 
 # Do stuff
 
@@ -45,7 +36,7 @@ def from_loom_connection_regulon_incidence_matrix_to_long_df(loom):
     return df_
 
 
-def stack_regulons(auc_looms, regulon_type, num_runs):
+def stack_regulons(auc_looms):
     all_runs_regulons_stacked = None
 
     for i in range(0, len(auc_looms)):
@@ -64,12 +55,12 @@ def aggregate_genes_by_regulons(all_runs_regulons_stacked):
     return all_runs_regulons_stacked_aggr.reset_index()
 
 
-def save_aggregated_regulons(all_runs_regulons_aggregated, regulon_type):
-    os.mkdir(f"multi_runs_regulons_{regulon_type}")
+def save_aggregated_regulons(all_runs_regulons_aggregated, output_dir):
+    os.mkdir(output_dir)
     for regulon_name in np.unique(all_runs_regulons_aggregated["regulon"]):
         regulon_target_gene_occurence_df = all_runs_regulons_aggregated[(all_runs_regulons_aggregated.regulon == regulon_name)].sort_values(by=['count'], ascending=False)[["gene", "count"]]
-        regulon_target_gene_occurence_df.to_csv(path_or_buf=os.path.join(f"multi_runs_regulons_{regulon_type}", regulon_name + ".tsv"), header=False, sep="\t", index=False)
+        regulon_target_gene_occurence_df.to_csv(path_or_buf=os.path.join(output_dir, regulon_name + ".tsv"), header=False, sep="\t", index=False)
 
-all_runs_regulons_stacked = stack_regulons(auc_looms=args.auc_looms, regulon_type=args.regulon_type, num_runs=args.num_runs)
+all_runs_regulons_stacked = stack_regulons(auc_looms=args.auc_looms)
 all_runs_regulons_aggregated = aggregate_genes_by_regulons(all_runs_regulons_stacked=all_runs_regulons_stacked)
-save_aggregated_regulons(all_runs_regulons_aggregated=all_runs_regulons_aggregated, regulon_type=args.regulon_type)
+save_aggregated_regulons(all_runs_regulons_aggregated=all_runs_regulons_aggregated, output_dir=args.output)
