@@ -98,7 +98,7 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
 
 
 def get_matrix(loom_file_path):
-    with lp.connect(loom_file_path, mode='r', validate=False) as loom:
+    with lp.connect(loom_file_path, mode='r', validate=False) as loom:  # Read in r mode otherwise concurrency problem
         ex_matrix = loom[:, :]
         ex_matrix_df = pd.DataFrame(data=ex_matrix[:, :], index=loom.ra[args.gene_attribute], columns=loom.ca[args.cell_id_attribute]).T  # Gene expression as (cell, gene) - matrix.
     return ex_matrix_df

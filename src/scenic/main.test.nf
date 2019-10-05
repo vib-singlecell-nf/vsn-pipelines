@@ -3,12 +3,12 @@
 //  
 
 // Test 1: SC__SCENIC__GRNBOOST2WITHOUTDASK (from processes/)
-// Time: ~3min
+// Time: ~2min
 // Command: 
 //  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__GRNBOOST2WITHOUTDASK
 
 // Test 2: SC__SCENIC__CISTARGET (from processes/)
-// Time: ~7min
+// Time: ~10min
 // Command:
 //  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__CISTARGET
 
@@ -21,6 +21,11 @@
 // Time: <1min
 // Command:
 //  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__MULTI_RUNS_AGGR_REGULONS
+
+// Test 5: SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER (from processes/)
+// Time: ~?min
+// Command:
+//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER
 
 
 nextflow.preview.dsl=2
@@ -35,6 +40,8 @@ include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from './processe
 include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__TRACK         from './processes/aucell'                params(params)
 include SC__SCENIC__MULTI_RUNS_AGGR_REGULONS as SC__SCENIC__MULTI_RUNS_AGGR_REGULONS__MOTIF from './processes/multiRunsAggrRegulons' params(params)
 include SC__SCENIC__MULTI_RUNS_AGGR_REGULONS as SC__SCENIC__MULTI_RUNS_AGGR_REGULONS__TRACK from './processes/multiRunsAggrRegulons' params(params)
+include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__MOTIF from './processes/aucellGeneSigsFromFolder' params(params)
+include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder.nf' params(params)
 
 // Create channel for the different runs
 runs = Channel.from( 1..params.sc.scenic.numRuns )
@@ -96,17 +103,34 @@ workflow test_SC__SCENIC__AUCELL {
 // Make the test workflow 
 workflow test_SC__SCENIC__MULTI_RUNS_AGGR_REGULONS {
     get:
-        mtf_auc_looms
-        trk_auc_looms
+        auc_mtf_looms
+        auc_trk_looms
     main:
         /* Aggregate motif regulons from multiple runs */
-        aggr_regulons_mtf = SC__SCENIC__MULTI_RUNS_AGGR_REGULONS__MOTIF( mtf_auc_looms, 'mtf' )
+        aggr_regulons_mtf = SC__SCENIC__MULTI_RUNS_AGGR_REGULONS__MOTIF( auc_mtf_looms, 'mtf' )
 
         /* Aggregate track regulons from multiple runs */
-        aggr_regulons_trk = SC__SCENIC__MULTI_RUNS_AGGR_REGULONS__TRACK( trk_auc_looms, 'trk' )
+        aggr_regulons_trk = SC__SCENIC__MULTI_RUNS_AGGR_REGULONS__TRACK( auc_trk_looms, 'trk' )
     emit:
         aggr_regulons_mtf
         aggr_regulons_trk
+}
+
+// Make the test workflow 
+workflow test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
+    get:
+        filteredloom
+        regulons_folder_mtf
+        regulons_folder_trk
+    main:
+        /* Aggregate motif regulons from multiple runs */
+        regulons_auc_mtf = SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__MOTIF( filteredloom, regulons_folder_mtf, 'mtf' )
+
+        /* Aggregate track regulons from multiple runs */
+        regulons_auc_trk = SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK( filteredloom, regulons_folder_trk, 'trk' )
+    emit:
+        regulons_auc_mtf
+        regulons_auc_trk
 }
 
 workflow {
@@ -125,9 +149,14 @@ workflow {
                 test_SC__SCENIC__AUCELL( file( params.sc.scenic.filteredloom ), ctx_mtf, ctx_trk )
             break;
             case "SC__SCENIC__MULTI_RUNS_AGGR_REGULONS":
-                aucell_mtf_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_mtf.loom")
-                aucell_trk_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_trk.loom")
-                test_SC__SCENIC__MULTI_RUNS_AGGR_REGULONS(aucell_mtf_looms.collect(), aucell_trk_looms.collect())
+                auc_mtf_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_mtf.loom")
+                auc_trk_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_trk.loom")
+                test_SC__SCENIC__MULTI_RUNS_AGGR_REGULONS(auc_mtf_looms.collect(), auc_trk_looms.collect())
+            break;
+            case "SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER":
+                mtf_regulons = file("out/multi_runs_regulons_mtf")
+                trk_regulons = file("out/multi_runs_regulons_trk")
+                test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER(file(params.sc.scenic.filteredloom), mtf_regulons, trk_regulons)
             break;
             default:
                 throw new Exception("The test parameters should be specified.")

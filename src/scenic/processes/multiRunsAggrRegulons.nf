@@ -17,7 +17,7 @@ process SC__SCENIC__MULTI_RUNS_AGGR_REGULONS {
     val type
 
     output:
-    file "regulons_${type}"
+    file "multi_runs_regulons_${type}"
 
     """
     ${binDir}aggregate_SCENIC_multi_runs_regulons.py \
