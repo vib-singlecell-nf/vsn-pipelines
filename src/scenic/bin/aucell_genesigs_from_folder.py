@@ -27,6 +27,10 @@ parser_grn.add_argument('signatures_fname',
 parser_grn.add_argument('-o', '--output',
                         type=argparse.FileType('w'), default=sys.stdout,
                         help='Output file/stream, i.e. a table of TF-target genes (CSV).')
+parser_grn.add_argument('--min-genes',
+                        type=int, default=5,
+                        dest="min_genes",
+                        help='The threshold used for filtering the regulons based on the number of targets (default: {}).'.format(5))
 parser_grn.add_argument('--auc-threshold',
                         type=float, default=0.05,
                         dest="auc_threshold",
@@ -59,7 +63,10 @@ args = parser_grn.parse_args()
 ex_matrix_df = utils.get_matrix(loom_file_path=args.expression_mtx_fname.name,
                                 gene_attribute=args.gene_attribute,
                                 cell_id_attribute=args.cell_id_attribute)
-signatures = utils.read_signatures_from_tsv_dir(dpath=args.signatures_fname, noweights=False, weight_threshold=args.gene_occurence_threshold)
+signatures = utils.read_signatures_from_tsv_dir(dpath=args.signatures_fname,
+                                                noweights=False,
+                                                weight_threshold=args.gene_occurence_threshold,
+                                                min_genes=args.min_genes)
 auc_threshold = args.auc_threshold
 
 if args.percentile_threshold is not None:

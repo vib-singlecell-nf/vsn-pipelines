@@ -10,7 +10,7 @@ from typing import List
 import warnings
 
 
-def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0, show_warnings=False) -> List['GeneSignature']:
+def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0, min_genes=0, show_warnings=False) -> List['GeneSignature']:
     """
     Load gene signatures from a list of TSV files in directory. Requires TSV with 1 or 2 columns. First column should be genes, second (optional) are weight for genes.
     :param dpath: The filepath to directory.
@@ -34,7 +34,6 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
                 gene2weight = gene_sig[0]
             if len(gene_sig.columns) == 2 and not noweights:
                 # Filter the genes based on the given weight_threshold
-                # print(weight_threshold)
                 gene_sig = gene_sig[gene_sig[1] > weight_threshold]
                 if len(gene_sig.index) == 0:
                     if show_warnings:
@@ -43,6 +42,8 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
                 gene2weight = [tuple(x) for x in gene_sig.values]
             yield GeneSignature(name=regulon, gene2weight=gene2weight)
     signatures = list(signatures())
+    # Filter regulons with less than min_genes (>= min_genes)
+    signatures = list(filter(lambda x: len(x.gene2weight) >= min_genes, signatures))
     print("Signatures passed filtering {0} out of {1}".format(len(signatures), len(gene_sig_file_paths)))
     return signatures
 
