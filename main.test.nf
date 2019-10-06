@@ -32,6 +32,11 @@
 // Command:
 //  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER
 
+// Test 7: SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM (from processes/)
+// Time: ~?min
+// Command:
+//  nextflow -C conf/test.config,scenic.config run main.test.nf --test SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM
+
 
 nextflow.preview.dsl=2
 
@@ -48,7 +53,9 @@ include SC__SCENIC__AGGR_MULTI_RUNS_FEATURES as SC__SCENIC__AGGR_MULTI_RUNS_FEAT
 include SC__SCENIC__AGGR_MULTI_RUNS_REGULONS as SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__MOTIF from './processes/aggregateMultiRunsRegulons' params(params)
 include SC__SCENIC__AGGR_MULTI_RUNS_REGULONS as SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK from './processes/aggregateMultiRunsRegulons' params(params)
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__MOTIF from './processes/aucellGeneSigsFromFolder' params(params)
-include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder.nf' params(params)
+include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder' params(params)
+include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
+include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
 
 // Create channel for the different runs
 runs = Channel.from( 1..params.sc.scenic.numRuns )
@@ -157,6 +164,38 @@ workflow test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
         regulons_auc_trk
 }
 
+workflow test_SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
+    get:
+        filteredloom
+        aggr_features_mtf
+        aggr_features_trk
+        regulons_folder_mtf
+        regulons_folder_trk
+        regulons_auc_mtf
+        regulons_auc_trk
+    main:
+        /* Save multiple motif SCENIC runs to loom*/
+        scenic_loom_mtf = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF( 
+            filteredloom,
+            aggr_features_mtf,
+            regulons_folder_mtf,
+            regulons_auc_mtf,
+            'mtf' 
+        )
+
+        /* Save multiple track SCENIC runs to loom*/
+        scenic_loom_trk = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
+            filteredloom,
+            aggr_features_trk,
+            regulons_folder_trk,
+            regulons_auc_trk,
+            'trk' 
+        )
+    emit:
+        scenic_loom_mtf
+        scenic_loom_trk
+}
+
 workflow {
     main:
         switch(params.test) {
@@ -186,6 +225,23 @@ workflow {
                 mtf_regulons = file("out/multi_runs_regulons_mtf")
                 trk_regulons = file("out/multi_runs_regulons_trk")
                 test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER(file(params.sc.scenic.filteredloom), mtf_regulons, trk_regulons)
+            break;
+            case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM":
+                aggr_features_mtf = file("out/multi_runs_cistarget/multi_runs_features_mtf.csv")
+                aggr_features_trk = file("out/multi_runs_cistarget/multi_runs_features_trk.csv")
+                regulons_folder_mtf = file("out/multi_runs_regulons_mtf")
+                regulons_folder_trk = file("out/multi_runs_regulons_trk")
+                regulons_auc_mtf = file("out/multi_runs_aucell/multi_runs_regulons_auc_mtf.tsv")
+                regulons_auc_trk = file("out/multi_runs_aucell/multi_runs_regulons_auc_trk.tsv")
+                test_SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM(
+                    file(params.sc.scenic.filteredloom),
+                    aggr_features_mtf,
+                    aggr_features_trk,
+                    regulons_folder_mtf,
+                    regulons_folder_trk,
+                    regulons_auc_mtf,
+                    regulons_auc_trk
+                )
             break;
             default:
                 throw new Exception("The test parameters should be specified.")
