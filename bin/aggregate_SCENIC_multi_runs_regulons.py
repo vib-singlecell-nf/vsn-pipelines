@@ -17,7 +17,6 @@ parser_grn.add_argument('auc_looms',
                         nargs='+',
                         help='The looms resulting from the SCENIC AUCell step.')
 parser_grn.add_argument('-o', '--output',
-                        type=argparse.FileType('w'), default=sys.stdout,
                         help='Output file/stream, i.e. a folder containing regulons (CSV).')
 
 args = parser_grn.parse_args()
