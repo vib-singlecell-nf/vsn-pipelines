@@ -8,7 +8,7 @@ import loompy as lp
 from multiprocessing import cpu_count
 from MulticoreTSNE import MulticoreTSNE as TSNE
 import umap
-import json 
+import json
 import zlib
 import base64
 import argparse
@@ -17,16 +17,17 @@ import argparse
 ################################################################################
 
 parser = argparse.ArgumentParser(description='Integrate output from pySCENIC motif- and track-based runs')
-parser.add_argument('--loom_motif', help='Loom file from pySCENIC motif run', required=True, default='pyscenic_motif.loom' )
-parser.add_argument('--loom_track', help='Loom file from pySCENIC track run', required=True, default='pyscenic_motif.loom' )
-parser.add_argument('--loom_output', help='Final loom file with pySCENIC motif and track results integrated', required=True, default='pyscenic.loom' )
+parser.add_argument('--loom_motif', help='Loom file from pySCENIC motif run', required=True, default='pyscenic_motif.loom')
+parser.add_argument('--loom_track', help='Loom file from pySCENIC track run', required=True, default='pyscenic_motif.loom')
+parser.add_argument('--loom_output', help='Final loom file with pySCENIC motif and track results integrated', required=True, default='pyscenic.loom')
 parser.add_argument('--num_workers',
-        type=int, default=cpu_count()-1,
-        help='The number of workers to use. (default: {}).'.format(cpu_count()-1))
+                    type=int, default=(cpu_count() - 1),
+                    help='The number of workers to use. (default: {}).'.format(cpu_count() - 1))
 args = parser.parse_args()
 
 ################################################################################
 ################################################################################
+
 
 def dfToNamedMatrix(df):
     arr_ip = [tuple(i) for i in df.as_matrix()]
@@ -35,28 +36,27 @@ def dfToNamedMatrix(df):
     return arr
 
 
-def integrateMotifTrack( args ):
+def integrateMotifTrack(args):
     ################################################################################
     # load data from loom
     ################################################################################
 
     # scenic motif output
-    lf = lp.connect( args.loom_motif, mode='r', validate=False )
-    meta_mtf = json.loads(zlib.decompress(base64.b64decode( lf.attrs.MetaData )))
-    auc_mtx_mtf = pd.DataFrame( lf.ca.RegulonsAUC, index=lf.ca.CellID)
-    regulons_mtf = pd.DataFrame( lf.ra.Regulons, index=lf.ra.Gene )
+    lf = lp.connect(args.loom_motif, mode='r', validate=False)
+    meta_mtf = json.loads(zlib.decompress(base64.b64decode(lf.attrs.MetaData)))
+    auc_mtx_mtf = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
+    regulons_mtf = pd.DataFrame(lf.ra.Regulons, index=lf.ra.Gene)
     lf.close()
 
-
     # scenic track output
-    lf = lp.connect( args.loom_track, mode='r', validate=False )
-    meta_trk = json.loads(zlib.decompress(base64.b64decode( lf.attrs.MetaData )))
-    auc_mtx_trk = pd.DataFrame( lf.ca.RegulonsAUC, index=lf.ca.CellID)
-    regulons_trk = pd.DataFrame( lf.ra.Regulons, index=lf.ra.Gene )
+    lf = lp.connect(args.loom_track, mode='r', validate=False)
+    meta_trk = json.loads(zlib.decompress(base64.b64decode(lf.attrs.MetaData)))
+    auc_mtx_trk = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
+    regulons_trk = pd.DataFrame(lf.ra.Regulons, index=lf.ra.Gene)
     lf.close()
 
     ################################################################################
-    # 
+    #
     ################################################################################
 
     ################################################################################
@@ -64,48 +64,48 @@ def integrateMotifTrack( args ):
     ################################################################################
 
     # relabel columns with suffix indicating the regulon source
-    auc_mtx_trk.columns = auc_mtx_trk.columns+'-track'
-    auc_mtx_mtf.columns = auc_mtx_mtf.columns+'-motif'
+    auc_mtx_trk.columns = auc_mtx_trk.columns + '-track'
+    auc_mtx_mtf.columns = auc_mtx_mtf.columns + '-motif'
 
     # merge the AUC matrices:
-    auc_mtx = pd.concat( [ auc_mtx_mtf, auc_mtx_trk ], sort=False, axis=1, join='outer' )
+    auc_mtx = pd.concat([auc_mtx_mtf, auc_mtx_trk], sort=False, axis=1, join='outer')
 
     # fill NAs (if any) with 0s:
     auc_mtx.fillna(0, inplace=True)
 
     # add underscore for SCope compatibility:
-    auc_mtx.columns = auc_mtx.columns.str.replace('\(','_(')
+    auc_mtx.columns = auc_mtx.columns.str.replace('\(', '_(')
 
     ################################################################################
     # Fix regulon objects to display properly in SCope:
     ################################################################################
 
-    ### combine regulon assignment matrices:
-    regulons_trk.columns = regulons_trk.columns+'-track'
-    regulons_mtf.columns = regulons_mtf.columns+'-motif'
+    # combine regulon assignment matrices:
+    regulons_trk.columns = regulons_trk.columns + '-track'
+    regulons_mtf.columns = regulons_mtf.columns + '-motif'
 
     # merge the regulon assignment matrices:
-    regulons = pd.concat( [ regulons_mtf, regulons_trk ], sort=False, axis=1, join='outer' )
+    regulons = pd.concat([regulons_mtf, regulons_trk], sort=False, axis=1, join='outer')
 
     # replace NAs with 0s:
     regulons.fillna(0, inplace=True)
 
     # add underscore for SCope compatibility:
-    regulons.columns = regulons.columns.str.replace('\(','_(')
+    regulons.columns = regulons.columns.str.replace('\(', '_(')
 
-    ### Rename regulons in the thresholds object, motif
+    # Rename regulons in the thresholds object, motif
     rt_mtf = meta_mtf['regulonThresholds']
-    for i,x in enumerate(rt_mtf):
-        tmp = x.get('regulon').replace("(","_(") +'-motif'
-        x.update( {'regulon': tmp} )
+    for i, x in enumerate(rt_mtf):
+        tmp = x.get('regulon').replace("(", "_(") + '-motif'
+        x.update({'regulon': tmp})
 
-    ### Rename regulons in the thresholds object, track
-    rt_trk= meta_trk['regulonThresholds']
-    for i,x in enumerate(rt_trk):
-        tmp = x.get('regulon').replace("(","_(") +'-track'
-        x.update( {'regulon': tmp} )
+    # Rename regulons in the thresholds object, track
+    rt_trk = meta_trk['regulonThresholds']
+    for i, x in enumerate(rt_trk):
+        tmp = x.get('regulon').replace("(", "_(") + '-track'
+        x.update({'regulon': tmp})
         # blank out the "motifData" field for track-based regulons:
-        x.update( {'mofitData': 'NA.png' }) 
+        x.update({'mofitData': 'NA.png'})
 
     # merge regulon threshold dictionaries:
     rt = rt_mtf + rt_trk
@@ -116,11 +116,11 @@ def integrateMotifTrack( args ):
 
     # UMAP
     runUmap = umap.UMAP(n_neighbors=10, min_dist=0.4, metric='correlation').fit_transform
-    dr_umap = runUmap( auc_mtx.dropna() )
-
+    dr_umap = runUmap(auc_mtx.dropna())
+    # pd.DataFrame(dr_umap, columns=['X', 'Y'], index=auc_mtx.dropna().index).to_csv("scenic_motif-track_umap.txt", sep='\t')
     # tSNE
-    tsne = TSNE( n_jobs=args.num_workers )
-    dr_tsne = tsne.fit_transform( auc_mtx.dropna() )
+    tsne = TSNE(n_jobs=args.num_workers)
+    dr_tsne = tsne.fit_transform(auc_mtx.dropna())
 
     ################################################################################
     # embeddings
@@ -133,7 +133,6 @@ def integrateMotifTrack( args ):
 
     Embeddings_X.columns = ['1']
     Embeddings_Y.columns = ['1']
-
 
     ################################################################################
     # metadata
@@ -153,13 +152,13 @@ def integrateMotifTrack( args ):
     ]
 
     metaJson["metrics"] = [
-            {
-                "name": "nUMI"
-            }, {
-                "name": "nGene"
-            }, {
-                "name": "Percent_mito"
-            }
+        {
+            "name": "nUMI"
+        }, {
+            "name": "nGene"
+        }, {
+            "name": "Percent_mito"
+        }
     ]
 
     metaJson["annotations"] = [
@@ -173,10 +172,12 @@ def integrateMotifTrack( args ):
     ################################################################################
 
     # re-open the connection to the loom file to copy the original expression data
-    lf = lp.connect( args.loom_motif, mode='r', validate=False )
+    lf = lp.connect(args.loom_motif, mode='r', validate=False)
+    # exprMat = pd.DataFrame(lf[:,:], index=lf.ra.Gene, columns=lf.ca.CellID).T
+    # lf.close()
 
     col_attrs = {
-        "CellID": lf.ca.CellID, #np.array(adata.obs.index),
+        "CellID": lf.ca.CellID,  # np.array(adata.obs.index),
         "Embedding": dfToNamedMatrix(defaultEmbedding),
         "Embeddings_X": dfToNamedMatrix(Embeddings_X),
         "Embeddings_Y": dfToNamedMatrix(Embeddings_Y),
@@ -195,15 +196,14 @@ def integrateMotifTrack( args ):
     attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
 
     lp.create(
-        filename = args.loom_output ,
-        layers=lf[:,:],
-        row_attrs=row_attrs, 
-        col_attrs=col_attrs, 
+        filename=args.loom_output,
+        layers=lf[:, :],
+        row_attrs=row_attrs,
+        col_attrs=col_attrs,
         file_attrs=attrs
     )
     lf.close()
 
 
 if __name__ == "__main__":
-    integrateMotifTrack( args )
-
+    integrateMotifTrack(args)
