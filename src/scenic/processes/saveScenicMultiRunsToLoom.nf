@@ -37,7 +37,7 @@ process SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
         --cell-id-attribute ${params.sc.scenic.cell_id_attribute} \
         --gene-attribute ${params.sc.scenic.gene_attribute} \
         --title "${params.global.project_name} - pySCENIC (${type})" \
-        --nomenclature "${params.global.genome}" \
+        --nomenclature "${params.sc.scope.genome}" \
         --scope-tree-level-1 "${params.sc.scope.tree.level_1}" \
         --scope-tree-level-2 "${params.sc.scope.tree.level_2}" \
         --scope-tree-level-3 "${params.sc.scope.tree.level_3}"

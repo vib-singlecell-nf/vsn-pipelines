@@ -41,7 +41,11 @@ include SC__SCENIC__MERGESCENICLOOMS                            from './processe
  */ 
 
 // Create channel for the different runs
-runs = Channel.from( 1..params.sc.scenic.numRuns )
+if(params.sc.scenic.containsKey("numRuns")) {
+    runs = Channel.from( 1..params.sc.scenic.numRuns )
+} else {
+    runs = Channel.from( 1..1 )
+}
 
 workflow SCENIC {
     get:
@@ -78,7 +82,7 @@ workflow SCENIC {
         auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
 
         // visualize and merge
-        if(params.sc.scenic.numRuns > 1) {
+        if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
             if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
                 throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
             // Aggregate features (motifs and tracks)
