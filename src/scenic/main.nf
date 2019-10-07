@@ -35,7 +35,6 @@ include SC__SCENIC__APPENDSCENICLOOM                            from './processe
 workflow SCENIC {
     get:
         filteredloom
-        scopeloom
     main:
         // filteredloom = file(params.sc.scenic.filteredloom)
         /* GRN */
@@ -67,18 +66,25 @@ workflow SCENIC {
         /* AUCell, track regulons */
         auc_trk = SC__SCENIC__AUCELL__TRACK( filteredloom, ctx_trk, 'trk' )
 
-        //visualize and merge
-        scenicloom = SC__SCENIC__MERGESCENICLOOMS( auc_mtf, auc_trk )
+        // visualize and merge
+        SC__SCENIC__MERGESCENICLOOMS( auc_mtf, auc_trk )
+    emit:
+        SC__SCENIC__MERGESCENICLOOMS.out
+}
 
+workflow SCENIC_append {
+    get:
+        filteredloom
+        scopeloom
+    main:
+        scenicloom = SCENIC( file( params.sc.scenic.filteredloom ) )
         SC__SCENIC__APPENDSCENICLOOM( scopeloom, scenicloom )
-
     emit:
         SC__SCENIC__APPENDSCENICLOOM.out
 }
 
-// // Uncomment to test
-// workflow {
-//     main:
-//         SCENIC( file( params.sc.scenic.filteredloom ) )
-// }
-
+// Uncomment to test
+workflow {
+    main:
+        SCENIC( file( params.sc.scenic.filteredloom ) )
+}
