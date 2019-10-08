@@ -24,18 +24,18 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__DATA_TRANSFORMATION from './processes/transform.nf' params(params.sc.scanpy.data_transformation + params.global + params)
-include SC__SCANPY__NORMALIZATION from './processes/transform.nf' params(params.sc.scanpy.normalization + params.global + params)
-include './processes/feature_selection.nf' params(params.sc.scanpy.feature_selection + params.global + params)
-include SC__SCANPY__FEATURE_SCALING from './processes/transform.nf' params(params.sc.scanpy.feature_scaling + params.global + params)
+include SC__SCANPY__DATA_TRANSFORMATION from '../processes/transform.nf' params(params.sc.scanpy.data_transformation + params.global + params)
+include SC__SCANPY__NORMALIZATION from '../processes/transform.nf' params(params.sc.scanpy.normalization + params.global + params)
+include '../processes/feature_selection.nf' params(params.sc.scanpy.feature_selection + params.global + params)
+include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params.sc.scanpy.feature_scaling + params.global + params)
 
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from './processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
 
-include './processes/batch_effect_correct.nf' params(params.sc.scanpy.batch_effect_correct + params.global + params)
+include '../processes/batch_effect_correct.nf' params(params.sc.scanpy.batch_effect_correct + params.global + params)
 
-include SC__SCANPY__CLUSTERING from './processes/cluster.nf' params(params.sc.scanpy.clustering + params.global + params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from './processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.umap + params.global + params)
-include SC__H5AD_TO_LOOM from '../utils/processes/h5ad_to_loom.nf' params(params.global + params)
+include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params.sc.scanpy.clustering + params.global + params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.umap + params.global + params)
+include SC__H5AD_TO_LOOM from '../../utils/processes/h5ad_to_loom.nf' params(params.global + params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

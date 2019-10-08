@@ -23,10 +23,10 @@ nextflow.preview.dsl=2
 //  Import sub-workflows from the modules:
 
 include CELLRANGER from './src/cellranger/main.nf' params(params)
-include QC_FILTER from './src/scanpy/qc_filter.nf' params(params)
+include QC_FILTER from './src/scanpy/workflows/qc_filter.nf' params(params)
 include SC__FILE_CONCATENATOR from './src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
 
-include BEC_BBKNN from './src/scanpy/bec_bbknn.nf' params(params)
+include BEC_BBKNN from './src/scanpy/workflows/bec_bbknn.nf' params(params)
 
 include SC__H5AD_TO_FILTERED_LOOM from './src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
 include SCENIC_append from './src/scenic/main.nf' params(params)
