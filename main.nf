@@ -26,6 +26,7 @@ include CELLRANGER from './src/cellranger/main.nf' params(params)
 include QC_FILTER from './src/scanpy/workflows/qc_filter.nf' params(params)
 include SC__FILE_CONCATENATOR from './src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
 include NORMALIZE_TRANSFORM from './normalize_transform.nf' params(params)
+include HVG_SELECTION from './hvg_selection.nf' params(params)
 
 include BEC_BBKNN from './src/scanpy/workflows/bec_bbknn.nf' params(params)
 
@@ -46,9 +47,9 @@ workflow bbknn_scenic {
     // to run starting from the 10x output:
     data = getTenXChannel( params.global.tenx_folder ).view()
     QC_FILTER( data ) // Remove concat
-    filtered_concat = SC__FILE_CONCATENATOR( QC_FILTER.out.collect() )
-    NORMALIZE_TRANSFORM( filtered_concat )
-    // HVG_SELECTION
+    SC__FILE_CONCATENATOR( QC_FILTER.out.collect() )
+    NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
+    HVG_SELECTION ( NORMALIZE_TRANSFORM.out )
     // DIM_REDUCTIONS
 
     scopeloom = BEC_BBKNN( NORMALIZE_TRANSFORM.out )
@@ -64,6 +65,7 @@ workflow single_sample {
     data = getTenXChannel( params.global.tenx_folder ).view()
     QC_FILTER( data ) // Remove concat
     NORMALIZE_TRANSFORM( QC_FILTER.out )
+    HVG_SELECTION ( NORMALIZE_TRANSFORM.out )
 
     // HVG_SELECTION
     // DIM_REDUCTIONS
@@ -71,6 +73,6 @@ workflow single_sample {
     // scopeloom = BEC_BBKNN( QC_FILTER.out )
     // CLUSTERING
     
-    filteredloom = SC__H5AD_TO_FILTERED_LOOM( NORMALIZE_TRANSFORM.out )
+    filteredloom = SC__H5AD_TO_FILTERED_LOOM( HVG_SELECTION.out )
     // SCENIC_append( filteredloom, scopeloom )
 }
