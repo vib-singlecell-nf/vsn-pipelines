@@ -25,8 +25,10 @@ nextflow.preview.dsl=2
 include CELLRANGER from './src/cellranger/main.nf' params(params)
 include QC_FILTER from './src/scanpy/workflows/qc_filter.nf' params(params)
 include SC__FILE_CONCATENATOR from './src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
-include NORMALIZE_TRANSFORM from './normalize_transform.nf' params(params)
-include HVG_SELECTION from './hvg_selection.nf' params(params)
+include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
+include HVG_SELECTION from './src/scanpy/workflows/hvg_selection.nf' params(params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
+include DIM_REDUCTION from './src/scanpy/workflows/dim_reduction.nf' params(params)
 
 include BEC_BBKNN from './src/scanpy/workflows/bec_bbknn.nf' params(params)
 
@@ -41,18 +43,15 @@ include getChannel as getTenXChannel from './src/channels/tenx.nf' params(params
 
 workflow bbknn_scenic {
     // CELLRANGER()
-    // QC_FILTER( CELLRANGER.out )
-    // BEC_BBKNN( QC_FILTER.out )
 
-    // to run starting from the 10x output:
     data = getTenXChannel( params.global.tenx_folder ).view()
     QC_FILTER( data ) // Remove concat
     SC__FILE_CONCATENATOR( QC_FILTER.out.collect() )
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
-    HVG_SELECTION ( NORMALIZE_TRANSFORM.out )
-    // DIM_REDUCTIONS
+    HVG_SELECTION( NORMALIZE_TRANSFORM.out )
+    SC__SCANPY__DIM_REDUCTION__PCA( HVG_SELECTION.out )
 
-    scopeloom = BEC_BBKNN( NORMALIZE_TRANSFORM.out )
+    scopeloom = BEC_BBKNN( SC__SCANPY__DIM_REDUCTION__PCA.out )
     // CLUSTERING
     
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out )
@@ -65,14 +64,10 @@ workflow single_sample {
     data = getTenXChannel( params.global.tenx_folder ).view()
     QC_FILTER( data ) // Remove concat
     NORMALIZE_TRANSFORM( QC_FILTER.out )
-    HVG_SELECTION ( NORMALIZE_TRANSFORM.out )
-
-    // HVG_SELECTION
-    // DIM_REDUCTIONS
-
-    // scopeloom = BEC_BBKNN( QC_FILTER.out )
+    HVG_SELECTION( NORMALIZE_TRANSFORM.out )
+    DIM_REDUCTION( HVG_SELECTION.out )
     // CLUSTERING
     
-    filteredloom = SC__H5AD_TO_FILTERED_LOOM( HVG_SELECTION.out )
+    filteredloom = SC__H5AD_TO_FILTERED_LOOM( DIM_REDUCTION.out )
     // SCENIC_append( filteredloom, scopeloom )
 }

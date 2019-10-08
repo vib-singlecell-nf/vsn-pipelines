@@ -24,10 +24,6 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-
-
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
-
 include '../processes/batch_effect_correct.nf' params(params.sc.scanpy.batch_effect_correct + params.global + params)
 
 include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params.sc.scanpy.clustering + params.global + params)
@@ -41,8 +37,7 @@ workflow BEC_BBKNN {
     get:
         data
     main:
-        SC__SCANPY__DIM_REDUCTION__PCA( data )
-        SC__SCANPY__BATCH_EFFECT_CORRECTION( SC__SCANPY__DIM_REDUCTION__PCA.out )
+        SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
         SC__SCANPY__CLUSTERING( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
         SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__CLUSTERING.out )
         SC__H5AD_TO_LOOM(SC__SCANPY__DIM_REDUCTION__UMAP.out )
