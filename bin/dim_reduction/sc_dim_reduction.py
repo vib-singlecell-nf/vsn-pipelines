@@ -79,7 +79,7 @@ elif options.method == "UMAP":
     sc.tl.umap(adata)
 elif options.method == "t-SNE":
     # Run t-SNE
-    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=True)
+    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=False)
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(options.method))
 
