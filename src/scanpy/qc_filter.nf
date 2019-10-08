@@ -19,7 +19,6 @@ nextflow.preview.dsl=2
 // utils:
 include SC__FILE_CONVERTER from '../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
 include SC__FILE_ANNOTATOR from '../utils/processes/utils.nf' params(params.sc.file_annotator + params.global + params)
-include SC__FILE_CONCATENATOR from '../utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
 
 // scanpy:
 include './processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
@@ -37,8 +36,7 @@ workflow QC_FILTER {
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
         report = SC__SCANPY__PREPARE_FILTER_QC_REPORT()
         SC__SCANPY__FILTER_QC_REPORT( report, filtered )
-        filtered_concat = SC__FILE_CONCATENATOR( filtered.collect() )
     emit:
-        filtered_concat
+        filtered
 }
 
