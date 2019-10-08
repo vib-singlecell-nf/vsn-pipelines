@@ -25,8 +25,6 @@ nextflow.preview.dsl=2
 
 // scanpy:
 
-include '../processes/feature_selection.nf' params(params.sc.scanpy.feature_selection + params.global + params)
-include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params.sc.scanpy.feature_scaling + params.global + params)
 
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
 
@@ -43,9 +41,7 @@ workflow BEC_BBKNN {
     get:
         data
     main:
-        SC__SCANPY__FEATURE_SELECTION( data )
-        SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
-        SC__SCANPY__DIM_REDUCTION__PCA( SC__SCANPY__FEATURE_SCALING.out )
+        SC__SCANPY__DIM_REDUCTION__PCA( data )
         SC__SCANPY__BATCH_EFFECT_CORRECTION( SC__SCANPY__DIM_REDUCTION__PCA.out )
         SC__SCANPY__CLUSTERING( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
         SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__CLUSTERING.out )
