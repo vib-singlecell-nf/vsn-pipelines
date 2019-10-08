@@ -24,8 +24,7 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__DATA_TRANSFORMATION from '../processes/transform.nf' params(params.sc.scanpy.data_transformation + params.global + params)
-include SC__SCANPY__NORMALIZATION from '../processes/transform.nf' params(params.sc.scanpy.normalization + params.global + params)
+
 include '../processes/feature_selection.nf' params(params.sc.scanpy.feature_selection + params.global + params)
 include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params.sc.scanpy.feature_scaling + params.global + params)
 
@@ -42,11 +41,9 @@ include SC__H5AD_TO_LOOM from '../../utils/processes/h5ad_to_loom.nf' params(par
 
 workflow BEC_BBKNN {
     get:
-        filtered_concat
+        data
     main:
-        SC__SCANPY__NORMALIZATION( filtered_concat )
-        SC__SCANPY__DATA_TRANSFORMATION( SC__SCANPY__NORMALIZATION.out )
-        SC__SCANPY__FEATURE_SELECTION( SC__SCANPY__DATA_TRANSFORMATION.out )
+        SC__SCANPY__FEATURE_SELECTION( data )
         SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
         SC__SCANPY__DIM_REDUCTION__PCA( SC__SCANPY__FEATURE_SCALING.out )
         SC__SCANPY__BATCH_EFFECT_CORRECTION( SC__SCANPY__DIM_REDUCTION__PCA.out )
