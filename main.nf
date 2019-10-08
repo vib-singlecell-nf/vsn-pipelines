@@ -25,9 +25,9 @@ nextflow.preview.dsl=2
 include CELLRANGER from './src/cellranger/main.nf' params(params)
 include QC_FILTER from './src/scanpy/workflows/qc_filter.nf' params(params)
 include SC__FILE_CONCATENATOR from './src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
-include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
+include NORMALIZE_TRANSFORM from './src/scanpy/workflows/normalize_transform.nf' params(params)
 include HVG_SELECTION from './src/scanpy/workflows/hvg_selection.nf' params(params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from './src/scanpy/processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
 include DIM_REDUCTION from './src/scanpy/workflows/dim_reduction.nf' params(params)
 include CLUSTER_IDENTIFICATION from './src/scanpy/workflows/cluster_identification.nf' params(params)
 
