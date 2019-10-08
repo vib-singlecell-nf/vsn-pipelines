@@ -80,13 +80,13 @@ embeddings_id = 1
 if 'X_tsne' in adata.obsm.keys():
     Embeddings_X[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_tsne'])[0]
     Embeddings_Y[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_tsne'])[1]
-    embeddings_id += 1
     metaJson['embeddings'].append(
         {
             "id": embeddings_id,
             "name": f"HVG t-SNE"
         }
     )
+    embeddings_id += 1
 
 Embeddings_X[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_pca'])[0]
 Embeddings_Y[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_pca'])[1]
@@ -149,10 +149,13 @@ for col in adata.obs.keys():
     col_attrs[col] = np.array(adata.obs[col].values)
 
 
-row_attrs = {"Gene": np.array(adata.raw.var.index)}
+row_attrs = {"Gene": np.array(adata.raw.var.index),
+             "ClusterMarkers_0": dfToNamedMatrix(ClusterMarkers_0),
+             "ClusterMarkers_0_avg_logFC": dfToNamedMatrix(ClusterMarkers_0_avg_logFC),
+             "ClusterMarkers_0_pval": dfToNamedMatrix(ClusterMarkers_0_pval)}
 
 attrs = {"MetaData": json.dumps(metaJson)}
 
 attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
 
-lp.create(filename=f"{FILE_PATH_OUT_BASENAME}.loom", layers=(adata.raw.X).T.toarray(), row_attrs=row_attrs, col_attrs=col_attrs, file_attrs=attrs)
+lp.create(filename=f"{FILE_PATH_OUT_BASENAME}.loom", layers=(adata.raw.X).T, row_attrs=row_attrs, col_attrs=col_attrs, file_attrs=attrs)
