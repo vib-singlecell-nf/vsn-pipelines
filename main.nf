@@ -29,6 +29,7 @@ include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf
 include HVG_SELECTION from './src/scanpy/workflows/hvg_selection.nf' params(params)
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
 include DIM_REDUCTION from './src/scanpy/workflows/dim_reduction.nf' params(params)
+include CLUSTER_IDENTIFICATION from './src/scanpy/workflows/cluster_identification.nf' params(params)
 
 include BEC_BBKNN from './src/scanpy/workflows/bec_bbknn.nf' params(params)
 
@@ -50,9 +51,8 @@ workflow bbknn_scenic {
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     SC__SCANPY__DIM_REDUCTION__PCA( HVG_SELECTION.out )
-
-    scopeloom = BEC_BBKNN( SC__SCANPY__DIM_REDUCTION__PCA.out )
-    // CLUSTERING
+    CLUSTER_IDENTIFICATION( SC__SCANPY__DIM_REDUCTION__PCA.out )
+    scopeloom = BEC_BBKNN( CLUSTER_IDENTIFICATION.out )
     
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out )
     SCENIC_append( filteredloom, scopeloom )
@@ -66,8 +66,7 @@ workflow single_sample {
     NORMALIZE_TRANSFORM( QC_FILTER.out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     DIM_REDUCTION( HVG_SELECTION.out )
-    // CLUSTERING
+    CLUSTER_IDENTIFICATION( DIM_REDUCTION.out )
+    filteredloom = SC__H5AD_TO_FILTERED_LOOM( CLUSTER_IDENTIFICATION.out )
     
-    filteredloom = SC__H5AD_TO_FILTERED_LOOM( DIM_REDUCTION.out )
-    // SCENIC_append( filteredloom, scopeloom )
 }

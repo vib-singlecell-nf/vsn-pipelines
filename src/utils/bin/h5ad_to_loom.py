@@ -39,29 +39,26 @@ try:
 except:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
+ClusterMarkers_0 = pd.DataFrame(index=adata.raw.var.index, columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)])
 
-# ClusterMarkers_0 = pd.DataFrame(index=adata.raw.var.index, columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)])
+ClusterMarkers_0_avg_logFC = pd.DataFrame(index=adata.raw.var.index, columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)])
 
-# ClusterMarkers_0_avg_logFC = pd.DataFrame(index=adata.raw.var.index, columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)])
+ClusterMarkers_0_pval = pd.DataFrame(index=adata.raw.var.index, columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)])
 
-# ClusterMarkers_0_pval = pd.DataFrame(index=adata.raw.var.index, columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)])
+ClusterMarkers_0.fillna(0, inplace=True)
+ClusterMarkers_0_avg_logFC.fillna(0, inplace=True)
+ClusterMarkers_0_pval.fillna(0, inplace=True)
 
-# ClusterMarkers_0.fillna(0, inplace=True)
-# ClusterMarkers_0_avg_logFC.fillna(0, inplace=True)
-# ClusterMarkers_0_pval.fillna(0, inplace=True)
-
-# for i in range(max(set([int(x) for x in adata.obs['louvain']])) + 1):
-#     i = str(i)
-#     tot_genes = len(adata.uns['rank_genes_groups']['pvals_adj'][i])
-#     sigGenes = adata.uns['rank_genes_groups']['pvals_adj'][i] < 0.05
-#     deGenes = np.logical_and(np.logical_or(adata.uns['rank_genes_groups']['logfoldchanges'][i] >= 1.5, adata.uns['rank_genes_groups']['logfoldchanges'][i] <= -1.5), np.isfinite(adata.uns['rank_genes_groups']['logfoldchanges'][i]))
-#     sigAndDE = np.logical_and(sigGenes, deGenes)
-#     print(f'Filtering {sum(sigAndDE)} sig and de genes of {tot_genes}')
-
-#     names = adata.uns['rank_genes_groups']['names'][i][sigAndDE]
-#     ClusterMarkers_0.loc[names, i] = 1
-#     ClusterMarkers_0_avg_logFC.loc[names, i] = np.around(adata.uns['rank_genes_groups']['logfoldchanges'][i][sigAndDE], decimals=6)
-#     ClusterMarkers_0_pval.loc[names, i] = np.around(adata.uns['rank_genes_groups']['pvals_adj'][i][sigAndDE], decimals=6)
+for i in range(max(set([int(x) for x in adata.obs['louvain']])) + 1):
+    i = str(i)
+    tot_genes = len(adata.uns['rank_genes_groups']['pvals_adj'][i])
+    sigGenes = adata.uns['rank_genes_groups']['pvals_adj'][i] < 0.05
+    deGenes = np.logical_and(np.logical_or(adata.uns['rank_genes_groups']['logfoldchanges'][i] >= 1.5, adata.uns['rank_genes_groups']['logfoldchanges'][i] <= -1.5), np.isfinite(adata.uns['rank_genes_groups']['logfoldchanges'][i]))
+    sigAndDE = np.logical_and(sigGenes, deGenes)
+    names = adata.uns['rank_genes_groups']['names'][i][sigAndDE]
+    ClusterMarkers_0.loc[names, i] = 1
+    ClusterMarkers_0_avg_logFC.loc[names, i] = np.around(adata.uns['rank_genes_groups']['logfoldchanges'][i][sigAndDE], decimals=6)
+    ClusterMarkers_0_pval.loc[names, i] = np.around(adata.uns['rank_genes_groups']['pvals_adj'][i][sigAndDE], decimals=6)
 
 metaJson = {}
 metaJson["metrics"] = []
@@ -104,7 +101,17 @@ metaJson["clusterings"] = [{
             "id": 0,
             "group": "Louvain",
             "name": "Louvain default resolution",
-            "clusters": [],                
+            "clusters": [],
+            "clusterMarkerMetrics": [{
+                "accessor": "avg_logFC", 
+                "name": "Avg. logFC",
+                "description": "Average log fold change from Wilcox test"
+            }, {
+                "accessor": "pval", 
+                "name": "Adjusted P-Value",
+                "description": "Adjusted P-Value from Wilcox test"
+            }
+            ]                
         }]
 
 for i in range(max(set([int(x) for x in adata.obs['louvain']])) + 1):
