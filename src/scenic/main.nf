@@ -14,6 +14,9 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
+// print all parameters:
+// println(prettyPrint(toJson( params )))
+// println(prettyPrint(toJson( "$workflow" )))
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
@@ -170,3 +173,4 @@ workflow {
     main:
         SCENIC( file( params.sc.scenic.filteredloom ) )
 }
+
