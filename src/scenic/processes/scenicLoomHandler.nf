@@ -9,7 +9,8 @@ if(!params.containsKey("test")) {
 process SC__SCENIC__MERGESCENICLOOMS {
     cache 'deep'
     container params.sc.scenic.container
-    // publishDir "${params.sc.scenic.scenicoutdir}", mode: 'copy'
+    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'copy'
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
     file motifloom
