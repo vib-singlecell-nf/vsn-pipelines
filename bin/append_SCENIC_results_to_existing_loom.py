@@ -10,6 +10,7 @@ import zlib
 import base64
 import argparse
 from shutil import copyfile
+from copy import deepcopy
 
 ################################################################################
 ################################################################################
@@ -93,25 +94,26 @@ def integrateSCENICloom( args ):
     # append regulon thresholds:
     meta['regulonThresholds'] = meta_scenic['regulonThresholds']
 
+    embeddings_start_index = 1
+    if len(meta['embeddings']) > 1:
+        embeddings_start_index = int(meta['embeddings'][-1]['id'])
+
     # append embedding labels:
-    if( len(meta['embeddings'])==1 ):
-        cnt = 1
-    else:
-        cnt = meta['embeddings'][-1]['id']
-    for i,x in enumerate(dr_names):
-        cnt += 1
-        meta['embeddings'].append( { 'id': cnt, 'name': x })
+    id = deepcopy(embeddings_start_index)
+    for i, x in enumerate(dr_names):
+        id += 1
+        meta['embeddings'].append({ 'id': id, 'name': x})
 
     # get existing embeddings:
     Embeddings_X = pd.DataFrame( lf.ca.Embeddings_X, index=lf.ca.CellID )
     Embeddings_Y = pd.DataFrame( lf.ca.Embeddings_Y, index=lf.ca.CellID )
 
     # append scenic embeddings:
-    cnt = Embeddings_X.shape[1]+1
+    id = deepcopy(embeddings_start_index)
     for i,x in enumerate(dr):
-        Embeddings_X[str(cnt)] = dr[i].iloc[:,0]
-        Embeddings_Y[str(cnt)] = dr[i].iloc[:,1]
-        cnt += 1
+        id += 1
+        Embeddings_X[str(id)] = dr[i].iloc[:, 0]
+        Embeddings_Y[str(id)] = dr[i].iloc[:, 1]
 
     lf.ca.Embeddings_X = dfToNamedMatrix(Embeddings_X)
     lf.ca.Embeddings_Y = dfToNamedMatrix(Embeddings_Y)
@@ -122,5 +124,4 @@ def integrateSCENICloom( args ):
 
 
 if __name__ == "__main__":
-    integrateMotifTrack( args )
-
+    integrateSCENICloom( args )

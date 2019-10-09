@@ -195,6 +195,13 @@ def integrateMotifTrack(args):
 
     attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
 
+    if "SCopeTreeL1" in attrs.keys():
+        attrs['SCopeTreeL1'] = lf.attrs.SCopeTreeL1
+    if "SCopeTreeL2" in attrs.keys():
+        attrs['SCopeTreeL2'] = lf.attrs.SCopeTreeL2
+    if "SCopeTreeL3" in attrs.keys():
+        attrs['SCopeTreeL3'] = lf.attrs.SCopeTreeL3
+
     lp.create(
         filename=args.loom_output,
         layers=lf[:, :],
