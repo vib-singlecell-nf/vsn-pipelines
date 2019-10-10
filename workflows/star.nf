@@ -16,8 +16,8 @@ include SC__STAR__UNLOAD_GENOME from '../src/star/processes/unload_genome'  para
 workflow star {
     main:
         SC__STAR__LOAD_GENOME( file(params.sc.star.map_count.transcriptome) )
-        SC__STAR__MAP_COUNT( file(params.sc.star.map_count.transcriptome), SC__STAR__LOAD_GENOME.out, file(params.sc.star.map_count.fastqs) )
-        SC__STAR__UNLOAD_GENOME( file(params.sc.star.map_count.transcriptome), SC__STAR__MAP_COUNT.out[0] )
+        counts_done = SC__STAR__MAP_COUNT( file(params.sc.star.map_count.transcriptome), SC__STAR__LOAD_GENOME.out, Channel.fromPath(params.sc.star.map_count.fastqs) )
+        SC__STAR__UNLOAD_GENOME( file(params.sc.star.map_count.transcriptome), counts_done.collect().unique() )
             
     emit:
         SC__STAR__MAP_COUNT.out
