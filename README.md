@@ -14,6 +14,8 @@ Make sure you have the following softwares installed,
 
 # Quick start
 
+Data needs to be downloaded. More info can be found [here](https://github.com/aertslab/SingleCellTxBenchmark/tree/master/data).
+
 You can have a quick test of the single sample analysis pipeline on the 1k pbmc
 datasets provided by 10x Genomics. This will take only **~3min** to run.
 ```
