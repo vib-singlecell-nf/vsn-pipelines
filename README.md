@@ -22,11 +22,11 @@ nextflow run aertslab/SingleCellTxBenchmark \
    -entry single_sample
 ```
 The pipelines will generate 3 types of results in the output directory (`params.global.outdir`) 
-- data: contain all the intermediate files.
-- loom: contain final loom files which can be imported inside SCope visualization tool for further insight of the results.
-- notebooks: contain all the notebooks generated along the pipeline (e.g.: Quality control report)
+- `data`: contains all the intermediate files.
+- `loom`: contains final loom files which can be imported inside SCope visualization tool for further insight of the results.
+- `notebooks`: contains all the notebooks generated along the pipeline (e.g.: Quality control report)
 
-If you would like to use the pipelines on a custom dataset, please go to the `Pipelines` section.
+If you would like to use the pipelines on a custom dataset, please go to the `Pipelines` section (see below).
 
 # Pipelines
 

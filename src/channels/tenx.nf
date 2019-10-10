@@ -15,8 +15,8 @@ workflow getChannel {
             glob = Arrays.asList(glob.split(',')); 
         }
         channel = Channel
-            .fromPath(glob, type: 'dir')
-            .map { 
+            .fromPath(glob, type: 'dir', checkIfExists: true)
+            .map {
                 path -> tuple(extractSample( "${path}" ), file("${path}"))
             }
     emit:
