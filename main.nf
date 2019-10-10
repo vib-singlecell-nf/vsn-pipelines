@@ -12,3 +12,8 @@ workflow single_sample {
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     SINGLE_SAMPLE()  
 }
+
+workflow star {
+    include star as STAR from './workflows/star' params(params)
+    STAR()
+}
