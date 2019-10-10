@@ -12,6 +12,91 @@ Make sure you have the following softwares installed,
     * [Docker](https://docs.docker.com/)
     * [Singularity](https://www.sylabs.io/singularity/)
 
+# Quick start
+
+You can have a quick test of the single sample analysis pipeline on the 1k pbmc
+datasets provided by 10x Genomics. This will take only **~3min** to run.
+```
+nextflow run aertslab/SingleCellTxBenchmark \
+   -profile singularity,bbknn \
+   -entry single_sample
+```
+The pipelines will generate 3 types of results in the output directory (`params.global.outdir`) 
+- data: contain all the intermediate files.
+- loom: contain final loom files which can be imported inside SCope visualization tool for further insight of the results.
+- notebooks: contain all the notebooks generated along the pipeline (e.g.: Quality control report)
+
+If you would like to use the pipelines on a custom dataset, please go to the `Pipelines` section.
+
+# Pipelines
+
+## Running the pipeline directly from GitHub:
+
+```bash
+nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn -user <GitHub-user>
+```
+This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the worflow defined there, using the built-in configs, which are merged from each tool used.
+
+### Customizing config files
+In order to use a customized config file, the default file can be used as a template:
+```bash
+wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/nextflow.config
+wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/src/scanpy/scanpy.config
+# edit the config file parameters, then:
+nextflow -c nextflow.config,scanpy.config \
+   run aertslab/SingleCellTxBenchmark \
+      -profile singularity,bbknn \
+      -user <GitHub-user>
+```
+
+In most cases, sub-workflows could also be run directly (locally only at this point):
+```bash
+nextflow run src/scenic/main.nf -profile singularity,scenic
+```
+
+## Multiple Datasets
+
+Pipelines to aggregate multiple datasets together.
+
+### BBKNN 
+Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
+
+**How to run on 10xGenomics datasets ?**
+
+```{bash}
+OUTPUT_DIRECTORY="out"
+PROJECT_NAME="tiny"
+```
+
+Let's say the file structure of your data looks like this,
+
+```
+/home/data/
+└── cellranger
+    ├── Sample A
+    │   └── outs
+    │       ├── filtered_feature_bc_matrix
+    │       └── ...
+    └── Sample_B
+        └── outs
+            ├── filtered_feature_bc_matrix
+            └── ...
+```
+
+Then the command to run the pipeline will be:
+
+Using singularity,
+```{bash}
+nextflow run \
+   src/scanpy/bec_bbknn.nf \
+      -profile singularity \
+      --tenx_folder /home/data/cellranger/**/filtered_feature_bc_matrix \
+      --sample_metadata /home/data/cellranger/metadata.tsv \
+      --outdir ${OUTPUT_DIRECTORY} \
+      --project_name ${PROJECT_NAME} \
+      -with-report report.html \
+      -with-trace
+```
 
 # Repository structure
 
@@ -169,75 +254,6 @@ params {
     }
 }
 
-```
-
-
-# Pipelines
-
-## Running the pipeline directly from GitHub:
-
-```bash
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn -user <GitHub-user>
-```
-This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the worflow defined there, using the built-in configs, which are merged from each tool used.
-
-### Customizing config files
-In order to use a customized config file, the default file can be used as a template:
-```bash
-wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/nextflow.config
-wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/src/scanpy/scanpy.config
-# edit the config file parameters, then:
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn -c nextflow.config,scanpy.config -user <GitHub-user>
-```
-
-In most cases, sub-workflows could also be run directly (locally only at this point):
-```bash
-nextflow run src/scenic/main.nf -profile singularity,scenic
-```
-
-
-## Multiple Datasets
-
-Pipelines to aggregate multiple datasets together.
-
-### bbknn 
-Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
-
-**How to run on 10xGenomics datasets ?**
-
-```{bash}
-OUTPUT_DIRECTORY="out"
-PROJECT_NAME="tiny"
-```
-
-Let's say the file structure of your data looks like this,
-
-```
-/home/data/
-└── cellranger
-    ├── Sample A
-    │   └── outs
-    │       ├── filtered_feature_bc_matrix
-    │       └── ...
-    └── Sample_B
-        └── outs
-            ├── filtered_feature_bc_matrix
-            └── ...
-```
-
-Then the command to run the pipeline will be:
-
-Using singularity,
-```{bash}
-nextflow run \
-   src/scanpy/bec_bbknn.nf \
-      -profile singularity \
-      --tenx_folder /home/data/cellranger/**/filtered_feature_bc_matrix \
-      --sample_metadata /home/data/cellranger/metadata.tsv \
-      --outdir ${OUTPUT_DIRECTORY} \
-      --project_name ${PROJECT_NAME} \
-      -with-report report.html \
-      -with-trace
 ```
 
 # Limitations
