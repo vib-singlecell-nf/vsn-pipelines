@@ -1,4 +1,4 @@
-FROM python:3.6.8-slim-stretch AS compile-image
+FROM python:3.7.4-slim-stretch AS compile-image
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends build-essential gcc apt-utils cmake openssh-client git && \
@@ -24,11 +24,13 @@ RUN pip install --upgrade pip && \
     python3 -m pip install ipykernel && \
     pip install --no-cache-dir papermill
 
-FROM python:3.6.8-slim-stretch AS build-image
+FROM python:3.7.4-slim-stretch AS build-image
 RUN apt-get -y update && \
     # Need to run ps
     apt-get -y install procps && \
     apt-get -y install libxml2 && \
+    # Need to run MulticoreTSNE
+    apt-get -y install libgomp1 && \
     rm -rf /var/cache/apt/* && \
     rm -rf /var/lib/apt/lists/*
 
