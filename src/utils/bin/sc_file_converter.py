@@ -60,7 +60,7 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
         FILE_PATH_IN,
         delimiter=delim,
         first_column_names=True
-    )
+    ).T
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
 
