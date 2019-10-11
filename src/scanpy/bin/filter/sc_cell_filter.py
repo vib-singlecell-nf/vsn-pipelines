@@ -63,7 +63,7 @@ except:
 
 
 def compute_n_counts(adata):
-    adata.obs['n_counts'] = adata.X.sum(axis=1).A1
+    adata.obs['n_counts'] = np.ravel(adata.X.sum(axis=1))
 
 compute_n_counts(adata=adata)
 
@@ -105,8 +105,7 @@ def compute_percent_mito(adata):
     # mito and genes/counts cuts
     mito_genes = adata.var_names.str.startswith('MT-')
     # for each cell compute fraction of counts in mito genes vs. all genes
-    adata.obs['percent_mito'] = np.sum(
-        adata[:, mito_genes].X, axis=1).A1 / np.sum(adata.X, axis=1).A1
+    adata.obs['percent_mito'] = np.ravel(np.sum(adata[:, mito_genes].X, axis=1)) / np.ravel(np.sum(adata.X, axis=1))
     return adata
 
 print(adata.obs.keys())
