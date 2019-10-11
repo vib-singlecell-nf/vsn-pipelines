@@ -7,7 +7,7 @@ process SC__STAR__MAP_COUNT {
 
   input:
     file(transcriptome)
-    val genome_loaded
+    val genomeLoaded
     file(fastqs)
 
   output:
