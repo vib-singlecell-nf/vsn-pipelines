@@ -1,25 +1,32 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
+
 import loompy as lp
 import numpy as np
-import os
 import pandas as pd
-import sys
 
 ################################################################################
 ################################################################################
 
-parser_grn = argparse.ArgumentParser(usage="usage: %prog [options] auc_looms",
-                                     description='Aggregate genes by regulon from multiple SCENIC runs.')
+parser_grn = argparse.ArgumentParser(
+    usage="usage: %prog [options] auc_looms",
+    description='Aggregate genes by regulon from multiple SCENIC runs.'
+)
 
-parser_grn.add_argument('auc_looms',
-                        nargs='+',
-                        help='The looms resulting from the SCENIC AUCell step.')
-parser_grn.add_argument('-o', '--output',
-                        help='Output file/stream, i.e. a folder containing regulons (CSV).')
+parser_grn.add_argument(
+    'auc_looms',
+    nargs='+',
+    help='The looms resulting from the SCENIC AUCell step.'
+)
+parser_grn.add_argument(
+    '-o', '--output',
+    help='Output file/stream, i.e. a folder containing regulons (CSV).'
+)
 
 args = parser_grn.parse_args()
+
 
 # Do stuff
 
@@ -49,7 +56,10 @@ def stack_regulons(auc_looms):
 
 
 def aggregate_genes_by_regulons(all_runs_regulons_stacked):
-    all_runs_regulons_stacked_aggr = all_runs_regulons_stacked.groupby(['gene', 'regulon']).agg(['count']).sort_values(by=['regulon'], ascending=False)
+    all_runs_regulons_stacked_aggr = all_runs_regulons_stacked.groupby(['gene', 'regulon']).agg(['count']).sort_values(
+        by=['regulon'],
+        ascending=False
+    )
     all_runs_regulons_stacked_aggr.columns = all_runs_regulons_stacked_aggr.columns.droplevel()
     return all_runs_regulons_stacked_aggr.reset_index()
 
@@ -57,8 +67,19 @@ def aggregate_genes_by_regulons(all_runs_regulons_stacked):
 def save_aggregated_regulons(all_runs_regulons_aggregated, output_dir):
     os.mkdir(output_dir)
     for regulon_name in np.unique(all_runs_regulons_aggregated["regulon"]):
-        regulon_target_gene_occurence_df = all_runs_regulons_aggregated[(all_runs_regulons_aggregated.regulon == regulon_name)].sort_values(by=['count'], ascending=False)[["gene", "count"]]
-        regulon_target_gene_occurence_df.to_csv(path_or_buf=os.path.join(output_dir, regulon_name + ".tsv"), header=False, sep="\t", index=False)
+        regulon_target_gene_occurence_df = all_runs_regulons_aggregated[
+            (all_runs_regulons_aggregated.regulon == regulon_name)
+        ].sort_values(
+            by=['count'],
+            ascending=False
+        )[["gene", "count"]]
+        regulon_target_gene_occurence_df.to_csv(
+            path_or_buf=os.path.join(output_dir, regulon_name + ".tsv"),
+            header=False,
+            sep="\t",
+            index=False
+        )
+
 
 all_runs_regulons_stacked = stack_regulons(auc_looms=args.auc_looms)
 all_runs_regulons_aggregated = aggregate_genes_by_regulons(all_runs_regulons_stacked=all_runs_regulons_stacked)
