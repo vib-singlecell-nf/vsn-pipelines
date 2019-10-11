@@ -75,6 +75,24 @@ process SC__FILE_CONCATENATOR() {
     """
 }
 
+process SC__STAR_CONCATENATOR() {
+
+  container params.sc.scanpy.container
+  publishDir "${params.outdir}/data", mode: 'symlink'
+
+  input:
+    file(f)
+  output:
+    tuple id, file("${params.project_name}.SC__STAR_CONCATENATOR.${params.off}")
+  script:
+    id = params.project_name
+    """
+    ${workflow.projectDir}/src/utils/bin/sc_star_concatenator.py \
+      --stranded $params.stranded \
+      --output "${params.project_name}.SC__STAR_CONCATENATOR.${params.off}" $f
+    """
+}
+
 include getBaseName from './files.nf'
 
 process SC__FILE_ANNOTATOR() {
