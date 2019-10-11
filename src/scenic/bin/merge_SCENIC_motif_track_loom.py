@@ -1,29 +1,47 @@
 #!/usr/bin/env python3
 
-import os
-import numpy as np
-import pandas as pd
-import scanpy as sc
-import loompy as lp
-from multiprocessing import cpu_count
-from MulticoreTSNE import MulticoreTSNE as TSNE
-import umap
+import argparse
+import base64
 import json
 import zlib
-import base64
-import argparse
+from multiprocessing import cpu_count
+
+import loompy as lp
+import numpy as np
+import pandas as pd
+import umap
+from MulticoreTSNE import MulticoreTSNE as TSNE
 
 ################################################################################
 ################################################################################
 
 parser = argparse.ArgumentParser(description='Integrate output from pySCENIC motif- and track-based runs')
-parser.add_argument('--loom_motif', help='Loom file from pySCENIC motif run', required=True, default='pyscenic_motif.loom')
-parser.add_argument('--loom_track', help='Loom file from pySCENIC track run', required=True, default='pyscenic_motif.loom')
-parser.add_argument('--loom_output', help='Final loom file with pySCENIC motif and track results integrated', required=True, default='pyscenic.loom')
-parser.add_argument('--num_workers',
-                    type=int, default=(cpu_count() - 1),
-                    help='The number of workers to use. (default: {}).'.format(cpu_count() - 1))
+parser.add_argument(
+    '--loom_motif',
+    help='Loom file from pySCENIC motif run',
+    required=True,
+    default='pyscenic_motif.loom'
+)
+parser.add_argument(
+    '--loom_track',
+    help='Loom file from pySCENIC track run',
+    required=True,
+    default='pyscenic_motif.loom'
+)
+parser.add_argument(
+    '--loom_output',
+    help='Final loom file with pySCENIC motif and track results integrated',
+    required=True,
+    default='pyscenic.loom'
+)
+parser.add_argument(
+    '--num_workers',
+    type=int,
+    default=(cpu_count() - 1),
+    help='The number of workers to use. (default: {}).'.format(cpu_count() - 1)
+)
 args = parser.parse_args()
+
 
 ################################################################################
 ################################################################################
@@ -74,7 +92,7 @@ def integrateMotifTrack(args):
     auc_mtx.fillna(0, inplace=True)
 
     # add underscore for SCope compatibility:
-    auc_mtx.columns = auc_mtx.columns.str.replace('\(', '_(')
+    auc_mtx.columns = auc_mtx.columns.str.replace('\\(', '_(')
 
     ################################################################################
     # Fix regulon objects to display properly in SCope:
@@ -91,7 +109,7 @@ def integrateMotifTrack(args):
     regulons.fillna(0, inplace=True)
 
     # add underscore for SCope compatibility:
-    regulons.columns = regulons.columns.str.replace('\(', '_(')
+    regulons.columns = regulons.columns.str.replace('\\(', '_(')
 
     # Rename regulons in the thresholds object, motif
     rt_mtf = meta_mtf['regulonThresholds']
