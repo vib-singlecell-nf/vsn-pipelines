@@ -6,7 +6,7 @@ process SC__STAR__UNLOAD_GENOME {
 
   input:
     file(transcriptome)
-    val all_done
+    val allDone
 
   script:
     """
