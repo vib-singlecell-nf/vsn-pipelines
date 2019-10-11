@@ -3,6 +3,7 @@ nextflow.preview.dsl=2
 process SC__STAR__MAP_COUNT {
 
   container params.sc.star.container
+  maxForks 2
 
   input:
     file(transcriptome)
@@ -11,11 +12,11 @@ process SC__STAR__MAP_COUNT {
 
   output:
     val success
-    // file '*ReadsPerGene.out.tab'
+    file '*ReadsPerGene.out.tab'
 
   script:
     sample = fastqs.getName()
-    _sampleName = sample
+    _sampleName = sample.take(sample.lastIndexOf('.'))
     success = true
 
     """
