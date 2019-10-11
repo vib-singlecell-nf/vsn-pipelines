@@ -42,7 +42,12 @@ parser.add_option("-j", "--n-jobs",
                   action="store",
                   dest="n_jobs",
                   default=1,
-                  help="[t-SNE], The number of jobs. When set to None, automatically uses the number of cores.")
+                  help="The number of jobs. When set to None, automatically uses the number of cores.")
+parser.add_option("-f", "--use-fast-tsne",
+                  action="store_true",
+                  dest="use_fast_tsne",
+                  default=False,
+                  help="Use the MulticoreTSNE package by D. Ulyanov if it is installed.")
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -79,7 +84,7 @@ elif options.method == "UMAP":
     sc.tl.umap(adata)
 elif options.method == "t-SNE":
     # Run t-SNE
-    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=False)
+    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=args.use_fast_tsne)
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(options.method))
 
