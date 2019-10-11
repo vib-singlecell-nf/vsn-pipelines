@@ -3,7 +3,14 @@ import os
 from optparse import OptionParser
 import scanpy as sc
 
-formats = ['10x_mtx', 'h5ad']
+in_formats = [
+    '10x_mtx', 
+    'tsv',
+    'csv']
+
+out_formats = [
+    'h5ad'
+]
 
 parser = OptionParser(usage="usage: %prog [options] datapath",
                       version="%prog 1.0")
@@ -11,12 +18,12 @@ parser.add_option("-i", "--input-format",
                   action="store",
                   dest="input_format",
                   default="",
-                  help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(formats)))
+                  help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(in_formats)))
 parser.add_option("-o", "--output-format",
                   action="store",  # optional because action defaults to "store"
                   dest="output_format",
                   default="",
-                  help="Output format which the file should be converted to. Choose one of: {}.".format(', '.join(formats)))
+                  help="Output format which the file should be converted to. Choose one of: {}.".format(', '.join(out_formats)))
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
@@ -41,6 +48,22 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
         cache=False)
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+
+elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
+    
+    if INPUT_FORMAT == 'tsv':
+        delim='\t'
+    elif INPUT_FORMAT == 'csv':
+        delim=','
+
+    adata = sc.read_csv(
+        FILE_PATH_IN,
+        delimiter=delim,
+        first_column_names=True
+    )
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+
+
 else:
     raise Exception("File format conversion {0} --> {1} hasn't been implemented yet.".format(INPUT_FORMAT, OUTPUT_FORMAT))
 

@@ -36,6 +36,10 @@ process SC__FILE_CONVERTER {
           f = f_cellranger_outs_v3
         }
         break;
+      case "csv":
+        break;
+      case "tsv":
+        break;
       default:
         throw new Exception("The given input format ${params.iff} is not recognized.")
         break;
