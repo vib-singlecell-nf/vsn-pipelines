@@ -21,6 +21,7 @@ process SC__SCANPY__DIM_REDUCTION {
          ${(params.containsKey('nComps')) ? '--n-comps ' + params.nComps : ''} \
          ${(params.containsKey('nPcs')) ? '--n-pcs ' + params.nPcs : ''} \
          ${(params.containsKey('nJobs')) ? '--n-jobs ' + params.nJobs : ''} \
+         ${(params.containsKey('useFastTsne') && !params.useFastTsne) ? '' : '--use-fast-tsne'} \
          $f \
          "${getBaseName(f)}.SC__SCANPY__DIM_REDUCTION_${method}.${params.off}"
     """
