@@ -47,14 +47,14 @@ args = parser.parse_args()
 ################################################################################
 
 
-def dfToNamedMatrix(df):
+def df_to_named_matrix(df):
     arr_ip = [tuple(i) for i in df.as_matrix()]
     dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
     arr = np.array(arr_ip, dtype=dtyp)
     return arr
 
 
-def integrateMotifTrack(args):
+def integrate_motif_track(args):
     ################################################################################
     # load data from loom
     ################################################################################
@@ -133,8 +133,8 @@ def integrateMotifTrack(args):
     ################################################################################
 
     # UMAP
-    runUmap = umap.UMAP(n_neighbors=10, min_dist=0.4, metric='correlation').fit_transform
-    dr_umap = runUmap(auc_mtx.dropna())
+    run_umap = umap.UMAP(n_neighbors=10, min_dist=0.4, metric='correlation').fit_transform
+    dr_umap = run_umap(auc_mtx.dropna())
     # pd.DataFrame(dr_umap, columns=['X', 'Y'], index=auc_mtx.dropna().index).to_csv("scenic_motif-track_umap.txt", sep='\t')
     # tSNE
     tsne = TSNE(n_jobs=args.num_workers)
@@ -144,21 +144,21 @@ def integrateMotifTrack(args):
     # embeddings
     ################################################################################
 
-    defaultEmbedding = pd.DataFrame(dr_umap, columns=['_X', '_Y'], index=auc_mtx.dropna().index)
+    default_embedding = pd.DataFrame(dr_umap, columns=['_X', '_Y'], index=auc_mtx.dropna().index)
 
-    Embeddings_X = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_X']].astype('float32')
-    Embeddings_Y = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_Y']].astype('float32')
+    embeddings_x = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_X']].astype('float32')
+    embeddings_y = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_Y']].astype('float32')
 
-    Embeddings_X.columns = ['1']
-    Embeddings_Y.columns = ['1']
+    embeddings_x.columns = ['1']
+    embeddings_y.columns = ['1']
 
     ################################################################################
     # metadata
     ################################################################################
 
-    metaJson = {}
+    metadata = {}
 
-    metaJson['embeddings'] = [
+    metadata['embeddings'] = [
         {
             "id": -1,
             "name": "SCENIC AUC UMAP"
@@ -169,7 +169,7 @@ def integrateMotifTrack(args):
         },
     ]
 
-    metaJson["metrics"] = [
+    metadata["metrics"] = [
         {
             "name": "nUMI"
         }, {
@@ -179,11 +179,11 @@ def integrateMotifTrack(args):
         }
     ]
 
-    metaJson["annotations"] = [
+    metadata["annotations"] = [
     ]
 
     # SCENIC regulon thresholds:
-    metaJson["regulonThresholds"] = rt
+    metadata["regulonThresholds"] = rt
 
     ################################################################################
     # row/column attributes
@@ -196,22 +196,22 @@ def integrateMotifTrack(args):
 
     col_attrs = {
         "CellID": lf.ca.CellID,  # np.array(adata.obs.index),
-        "Embedding": dfToNamedMatrix(defaultEmbedding),
-        "Embeddings_X": dfToNamedMatrix(Embeddings_X),
-        "Embeddings_Y": dfToNamedMatrix(Embeddings_Y),
-        "RegulonsAUC": dfToNamedMatrix(auc_mtx),
+        "Embedding": df_to_named_matrix(default_embedding),
+        "Embeddings_X": df_to_named_matrix(embeddings_x),
+        "Embeddings_Y": df_to_named_matrix(embeddings_y),
+        "RegulonsAUC": df_to_named_matrix(auc_mtx),
     }
 
     row_attrs = {
         "Gene": lf.ra.Gene,
-        "Regulons": dfToNamedMatrix(regulons),
+        "Regulons": df_to_named_matrix(regulons),
     }
 
     attrs = {
-        "MetaData": json.dumps(metaJson),
+        "MetaData": json.dumps(metadata),
     }
 
-    attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+    attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metadata).encode('ascii'))).decode('ascii')
 
     if "SCopeTreeL1" in attrs.keys():
         attrs['SCopeTreeL1'] = lf.attrs.SCopeTreeL1
@@ -231,4 +231,4 @@ def integrateMotifTrack(args):
 
 
 if __name__ == "__main__":
-    integrateMotifTrack(args)
+    integrate_motif_track(args)
