@@ -28,11 +28,13 @@ include '../processes/filter.nf' params(params.sc.scanpy.filter + params.global 
 
 workflow QC_FILTER {
     get:
-        cellrangercounts
+        data
     main:
-        SC__FILE_CONVERTER( cellrangercounts )
-        SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
-        SC__SCANPY__GENE_FILTER( SC__FILE_ANNOTATOR.out )
+        data = SC__FILE_CONVERTER( data )
+        if (params.sc.file_annotator.metaDataFilePath != '') {
+            data = SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
+        }
+        SC__SCANPY__GENE_FILTER( data )
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
         report = SC__SCANPY__PREPARE_FILTER_QC_REPORT()
         SC__SCANPY__FILTER_QC_REPORT( report, filtered )
