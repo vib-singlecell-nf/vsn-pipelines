@@ -7,10 +7,10 @@ process SC__STAR__LOAD_GENOME {
     file(transcriptome)
 
   output:
-    val genome_loaded 
+    val genomeLoaded 
 
   script:
-    genome_loaded = true
+    genomeLoaded = true
     """
     STAR \
       --genomeLoad LoadAndExit \
