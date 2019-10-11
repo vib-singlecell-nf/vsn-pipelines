@@ -64,7 +64,7 @@ if options.method == "PCA":
     # Run PCA
     sc.tl.pca(
         data=adata,
-        n_comps=options.n_comps,
+        n_comps=min(adata.shape[0], options.n_comps),
         svd_solver=options.svd_solver)
 elif options.method == "UMAP":
     # Run UMAP
