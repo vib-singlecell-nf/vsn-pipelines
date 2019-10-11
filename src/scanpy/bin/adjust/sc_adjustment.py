@@ -1,20 +1,27 @@
 #!/usr/bin/env python
 import os
 from optparse import OptionParser
+
 import scanpy as sc
 
-parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                      version="%prog 1.0")
-parser.add_option("-x", "--method",
-                  action="store",
-                  dest="method",
-                  default="linear_regression",
-                  help="Normalize the data. Choose one of : regress_out")
-parser.add_option("-r", "--variable-to-regress-out",
-                  action="append",
-                  dest="vars_to_regress_out",
-                  default=None,
-                  help="Variable to regress out. To regress multiple variables, add that many -v arguments. Used when running 'regress_out")
+parser = OptionParser(
+    usage="usage: %prog [options] h5ad_file_path",
+    version="%prog 1.0"
+)
+parser.add_option(
+    "-x", "--method",
+    action="store",
+    dest="method",
+    default="linear_regression",
+    help="Normalize the data. Choose one of : regress_out"
+)
+parser.add_option(
+    "-r", "--variable-to-regress-out",
+    action="append",
+    dest="vars_to_regress_out",
+    default=None,
+    help="Variable to regress out. To regress multiple variables, add that many -v arguments. Used when running 'regress_out"
+)
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
