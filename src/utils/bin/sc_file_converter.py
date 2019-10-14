@@ -5,9 +5,10 @@ from optparse import OptionParser
 import scanpy as sc
 
 in_formats = [
-    '10x_mtx', 
+    '10x_mtx',
     'tsv',
-    'csv']
+    'csv'
+]
 
 out_formats = [
     'h5ad'
@@ -23,14 +24,14 @@ parser.add_option(
     action="store",
     dest="input_format",
     default="",
-    help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(formats))
+    help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(in_formats))
 )
 parser.add_option(
     "-o", "--output-format",
     action="store",  # optional because action defaults to "store"
     dest="output_format",
     default="",
-    help="Output format which the file should be converted to. Choose one of: {}.".format(', '.join(formats))
+    help="Output format which the file should be converted to. Choose one of: {}.".format(', '.join(out_formats))
 )
 (options, args) = parser.parse_args()
 
