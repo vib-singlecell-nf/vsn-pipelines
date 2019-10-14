@@ -74,7 +74,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
 # Expects h5ad file
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except:
+except Exception:
     raise Exception("Can only handle .h5ad files.")
 
 #
@@ -102,7 +102,7 @@ elif options.method == "UMAP":
     sc.tl.umap(adata)
 elif options.method == "t-SNE":
     # Run t-SNE
-    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=args.use_fast_tsne)
+    sc.tl.tsne(adata=adata, n_jobs=options.n_jobs, use_fast_tsne=options.use_fast_tsne)
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(options.method))
 
