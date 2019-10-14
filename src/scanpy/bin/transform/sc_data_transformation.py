@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 import os
 from optparse import OptionParser
+
 import scanpy as sc
 
-parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                      version="%prog 1.0")
-parser.add_option("-x", "--method",
-                  action="store",
-                  dest="method",
-                  default="log1p",
-                  help="Transform the data.")
+parser = OptionParser(
+    usage="usage: %prog [options] h5ad_file_path",
+    version="%prog 1.0"
+)
+parser.add_option(
+    "-x", "--method",
+    action="store",
+    dest="method",
+    default="log1p",
+    help="Transform the data."
+)
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
