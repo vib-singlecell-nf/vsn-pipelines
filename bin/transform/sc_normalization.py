@@ -1,22 +1,29 @@
 #!/usr/bin/env python
 import os
 from optparse import OptionParser
+
 import scanpy as sc
 
-parser = OptionParser(usage="usage: %prog [options] h5ad_file_path",
-                      version="%prog 1.0")
-parser.add_option("-x", "--method",
-                  type="string",
-                  action="store",
-                  dest="method",
-                  default="cpx",
-                  help="Normalize the data. Choose one of : cpx, regress_out")
-parser.add_option("-f", "--counts-per-cell-after",
-                  type="int",
-                  action="store",
-                  dest="counts_per_cell_after",
-                  default=1e4,
-                  help="Multiplying factor used when running 'cpx' method.")
+parser = OptionParser(
+    usage="usage: %prog [options] h5ad_file_path",
+    version="%prog 1.0"
+)
+parser.add_option(
+    "-x", "--method",
+    type="string",
+    action="store",
+    dest="method",
+    default="cpx",
+    help="Normalize the data. Choose one of : cpx, regress_out"
+)
+parser.add_option(
+    "-f", "--counts-per-cell-after",
+    type="int",
+    action="store",
+    dest="counts_per_cell_after",
+    default=1e4,
+    help="Multiplying factor used when running 'cpx' method."
+)
 (options, args) = parser.parse_args()
 
 # Define the arguments properly
