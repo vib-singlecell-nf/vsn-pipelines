@@ -123,7 +123,7 @@ print(adata.obs.keys())
 
 def compute_percent_mito(adata):
     # mito and genes/counts cuts
-    mito_genes = adata.var_names.str.startswith('MT-')
+    mito_genes = adata.var_names.str.contains('^MT-|^mt[-:]')
     # for each cell compute fraction of counts in mito genes vs. all genes
     adata.obs['percent_mito'] = np.sum(
         adata[:, mito_genes].X, axis=1).A1 / np.sum(adata.X, axis=1).A1
