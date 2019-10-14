@@ -36,6 +36,10 @@ process SC__FILE_CONVERTER {
           f = f_cellranger_outs_v3
         }
         break;
+      case "csv":
+        break;
+      case "tsv":
+        break;
       default:
         throw new Exception("The given input format ${params.iff} is not recognized.")
         break;
@@ -72,6 +76,24 @@ process SC__FILE_CONCATENATOR() {
       --file-format $params.off \
       ${(params.containsKey('join')) ? '--join ' + params.join : ''} \
       --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
+    """
+}
+
+process SC__STAR_CONCATENATOR() {
+
+  container params.sc.scanpy.container
+  publishDir "${params.outdir}/data", mode: 'symlink'
+
+  input:
+    file(f)
+  output:
+    tuple id, file("${params.project_name}.SC__STAR_CONCATENATOR.${params.off}")
+  script:
+    id = params.project_name
+    """
+    ${workflow.projectDir}/src/utils/bin/sc_star_concatenator.py \
+      --stranded $params.stranded \
+      --output "${params.project_name}.SC__STAR_CONCATENATOR.${params.off}" $f
     """
 }
 

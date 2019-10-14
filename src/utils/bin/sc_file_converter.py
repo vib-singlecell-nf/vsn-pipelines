@@ -4,7 +4,15 @@ from optparse import OptionParser
 
 import scanpy as sc
 
-formats = ['10x_mtx', 'h5ad']
+in_formats = [
+    '10x_mtx', 
+    'tsv',
+    'csv']
+
+out_formats = [
+    'h5ad'
+]
+
 
 parser = OptionParser(
     usage="usage: %prog [options] datapath",
@@ -58,6 +66,22 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
     )
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+
+elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
+    
+    if INPUT_FORMAT == 'tsv':
+        delim='\t'
+    elif INPUT_FORMAT == 'csv':
+        delim=','
+
+    adata = sc.read_csv(
+        FILE_PATH_IN,
+        delimiter=delim,
+        first_column_names=True
+    ).T
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+
+
 else:
     raise Exception(
         "File format conversion {0} --> {1} hasn't been implemented yet.".format(INPUT_FORMAT, OUTPUT_FORMAT))
