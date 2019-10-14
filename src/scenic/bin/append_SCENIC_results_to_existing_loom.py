@@ -1,25 +1,43 @@
 #!/usr/bin/env python3
 
-import os
+import argparse
+import base64
+import json
 import sys
+import zlib
+from copy import deepcopy
+from shutil import copyfile
+
+import loompy as lp
 import numpy as np
 import pandas as pd
-import loompy as lp
-import json 
-import zlib
-import base64
-import argparse
-from shutil import copyfile
-from copy import deepcopy
 
 ################################################################################
 ################################################################################
 
-parser = argparse.ArgumentParser(description='Integrate output from pySCENIC with SCope loom from pipeline best-practices path')
-parser.add_argument('--loom_scope', help='Loom file for SCope from pipeline best-practices path', required=True, default='.loom' )
-parser.add_argument('--loom_scenic', help='Loom file from pySCENIC run', required=True, default='pyscenic_motif.loom' )
-parser.add_argument('--loom_output', help='Final loom file with pySCENIC results integrated', required=True, default='pyscenic.loom' )
+parser = argparse.ArgumentParser(
+    description='Integrate output from pySCENIC with SCope loom from pipeline best-practices path'
+)
+parser.add_argument(
+    '--loom_scope',
+    help='Loom file for SCope from pipeline best-practices path',
+    required=True,
+    default='.loom'
+)
+parser.add_argument(
+    '--loom_scenic',
+    help='Loom file from pySCENIC run',
+    required=True,
+    default='pyscenic_motif.loom'
+)
+parser.add_argument(
+    '--loom_output',
+    help='Final loom file with pySCENIC results integrated',
+    required=True,
+    default='pyscenic.loom'
+)
 args = parser.parse_args()
+
 
 ################################################################################
 ################################################################################
@@ -31,14 +49,14 @@ def dfToNamedMatrix(df):
     return arr
 
 
-def integrateSCENICloom( args ):
+def integrateSCENICloom(args):
     ################################################################################
     # load data from scenic loom
     ################################################################################
 
     # scenic output
-    lf = lp.connect( args.loom_scenic, mode='r', validate=False )
-    meta_scenic = json.loads(zlib.decompress(base64.b64decode( lf.attrs.MetaData )))
+    lf = lp.connect(args.loom_scenic, mode='r', validate=False)
+    meta_scenic = json.loads(zlib.decompress(base64.b64decode(lf.attrs.MetaData)))
     genes_scenic = lf.ra.Gene
     cellid_scenic = lf.ca.CellID
     regulonsAUC = lf.ca.RegulonsAUC
@@ -46,24 +64,23 @@ def integrateSCENICloom( args ):
 
     ### capture embeddings:
     dr = [
-        pd.DataFrame( lf.ca.Embedding, index=lf.ca.CellID )
+        pd.DataFrame(lf.ca.Embedding, index=lf.ca.CellID)
     ]
     dr_names = [
-        meta_scenic['embeddings'][0]['name'].replace(" ","_")
+        meta_scenic['embeddings'][0]['name'].replace(" ", "_")
     ]
 
     # add other embeddings
-    drx = pd.DataFrame( lf.ca.Embeddings_X, index=lf.ca.CellID )
-    dry = pd.DataFrame( lf.ca.Embeddings_Y, index=lf.ca.CellID )
+    drx = pd.DataFrame(lf.ca.Embeddings_X, index=lf.ca.CellID)
+    dry = pd.DataFrame(lf.ca.Embeddings_Y, index=lf.ca.CellID)
 
-    for i in range( len(drx.columns) ):
-        dr.append( pd.concat( [ drx.iloc[:,i], dry.iloc[:,i] ], sort=False, axis=1, join='outer' ))
-        dr_names.append( meta_scenic['embeddings'][i+1]['name'].replace(" ","_").replace('/','-') )
+    for i in range(len(drx.columns)):
+        dr.append(pd.concat([drx.iloc[:, i], dry.iloc[:, i]], sort=False, axis=1, join='outer'))
+        dr_names.append(meta_scenic['embeddings'][i + 1]['name'].replace(" ", "_").replace('/', '-'))
 
     # rename columns:
-    for i,x in enumerate( dr ):
-        x.columns = ['X','Y']
-    ###
+    for i, x in enumerate(dr):
+        x.columns = ['X', 'Y']
 
     lf.close()
 
@@ -71,17 +88,17 @@ def integrateSCENICloom( args ):
     # copy loom
     ################################################################################
 
-    copyfile( args.loom_scope, args.loom_output )
+    copyfile(args.loom_scope, args.loom_output)
 
     ################################################################################
     # add scenic data
     ################################################################################
 
-    lf = lp.connect( args.loom_output, mode='r+', validate=False )
+    lf = lp.connect(args.loom_output, mode='r+', validate=False)
 
-    if( not all(lf.ca.CellID == cellid_scenic) ):
+    if not all(lf.ca.CellID == cellid_scenic):
         sys.exit(f"ERROR: Column attribute CellIDs does not match between {args.loom_scope} and {args.loom_scenic}")
-    if( not all(lf.ra.Gene == genes_scenic) ):
+    if not all(lf.ra.Gene == genes_scenic):
         sys.exit(f"ERROR: Row attribute 'Gene' does not match between {args.loom_scope} and {args.loom_scenic}")
 
     # write regulon information:
@@ -89,7 +106,7 @@ def integrateSCENICloom( args ):
     lf.ra['Regulons'] = regulons
 
     # get existing metadata:
-    meta = json.loads(zlib.decompress(base64.b64decode( lf.attrs.MetaData )))
+    meta = json.loads(zlib.decompress(base64.b64decode(lf.attrs.MetaData)))
 
     # append regulon thresholds:
     meta['regulonThresholds'] = meta_scenic['regulonThresholds']
@@ -102,15 +119,15 @@ def integrateSCENICloom( args ):
     id = deepcopy(embeddings_start_index)
     for i, x in enumerate(dr_names):
         id += 1
-        meta['embeddings'].append({ 'id': id, 'name': x})
+        meta['embeddings'].append({'id': id, 'name': x})
 
     # get existing embeddings:
-    Embeddings_X = pd.DataFrame( lf.ca.Embeddings_X, index=lf.ca.CellID )
-    Embeddings_Y = pd.DataFrame( lf.ca.Embeddings_Y, index=lf.ca.CellID )
+    Embeddings_X = pd.DataFrame(lf.ca.Embeddings_X, index=lf.ca.CellID)
+    Embeddings_Y = pd.DataFrame(lf.ca.Embeddings_Y, index=lf.ca.CellID)
 
     # append scenic embeddings:
     id = deepcopy(embeddings_start_index)
-    for i,x in enumerate(dr):
+    for i, x in enumerate(dr):
         id += 1
         Embeddings_X[str(id)] = dr[i].iloc[:, 0]
         Embeddings_Y[str(id)] = dr[i].iloc[:, 1]
@@ -124,4 +141,4 @@ def integrateSCENICloom( args ):
 
 
 if __name__ == "__main__":
-    integrateSCENICloom( args )
+    integrateSCENICloom(args)
