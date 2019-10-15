@@ -20,7 +20,7 @@ You can have a quick test of the single sample analysis pipeline on the 1k pbmc
 datasets provided by 10x Genomics. This will take only **~3min** to run.
 ```
 nextflow run aertslab/SingleCellTxBenchmark \
-   -profile singularity,bbknn \
+   -profile singularity,single_sample \
    -entry single_sample
 ```
 The pipelines will generate 3 types of results in the output directory (`params.global.outdir`) 
@@ -35,26 +35,45 @@ If you would like to use the pipelines on a custom dataset, please go to the `Pi
 ## Running the pipeline directly from GitHub:
 
 ```bash
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,bbknn -user <GitHub-user>
+nextflow run aertslab/SingleCellTxBenchmark -profile singularity,single_sample -entry single_sample -user <GitHub-user>
 ```
-This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the worflow defined there, using the built-in configs, which are merged from each tool used.
+This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the workflow defined by the `-entry` setting (here, `single_sample`), using the built-in configs, which are merged from each tool used (defined in the `single_sample` profile).
+Specifying `nextflow run -latest ...` will download the latest commit prior to execution, or the `-r ...` option can be used to specify a specific commit or branch.
 
 ### Customizing config files
-In order to use a customized config file, the default file can be used as a template:
+#### Changing parameters in a single config file
+In order to use a customized config file, one of the tool-specific default files can be used as a template, then passed on to nextflow at run time. 
+For example:
 ```bash
-wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/nextflow.config
 wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/src/scanpy/scanpy.config
 # edit the config file parameters, then:
-nextflow -c nextflow.config,scanpy.config \
+nextflow -c scanpy.config \
    run aertslab/SingleCellTxBenchmark \
       -profile singularity,bbknn \
       -user <GitHub-user>
 ```
+However, note that it is not possible to pass a custom `nextflow.config` directly.
 
-In most cases, sub-workflows could also be run directly (locally only at this point):
+#### Generating a custom config file using `nextflow config`
+The preferred method is now to first run `nextflow config ...` to generate a template config file in your working directory.
+The tool-specific parameters, as well as Docker/Singularity profiles, are included when specifying the appropriate profiles to `nextflow config`.
+Any of the parameters in this config file can then be edited and used to run the workflow of your choice.
+For example, to run the `single_sample` workflow in a new working directory:
+
+* Generate the config using the `single_sample` and `singularity` profiles:
 ```bash
-nextflow run src/scenic/main.nf -profile singularity,scenic
+mkdir single_sample_test && cd single_sample_test
+
+nextflow config aertslab/SingleCellTxBenchmark \
+    -profile singularity,single_sample > single_sample.config
 ```
+* Now run the workflow using the new config file (using `-C` to use only this file), specifying the proper workflow as the entry point:
+```bash
+nextflow -C single_sample.config \
+   run aertslab/SingleCellTxBenchmark \
+      -entry single_sample
+```
+
 
 ## Multiple Datasets
 
@@ -112,7 +131,7 @@ A "module" consists of a folder labeled with the tool name (Scanpy, SCENIC, util
 * `processes/` (where Nextflow processes are defined)
 The root of the modules folder contains workflow files + associated configs (as many as there are workflows):
 * `main.nf` + `nextflow.config`
-* `workflow1.nf` + `workflow2.config`
+* `single_sample.nf` + `scenic.config`
 * ...
 
 ```
