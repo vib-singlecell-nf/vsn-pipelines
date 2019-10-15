@@ -1,40 +1,40 @@
-FROM python:3.7.4-slim-stretch AS compile-image
+FROM python:3.7.4-slim AS compile-image
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential gcc apt-utils cmake openssh-client git && \
-    apt-get install -y python-dev libhdf5-dev libxml2-dev zlib1g-dev # Needed for igraph && \
-    rm -rf /var/cache/apt/* && \
-    rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive
+RUN BUILDPKGS="build-essential apt-utils \
+        python3-dev libhdf5-dev libfreetype6-dev libtool \
+        m4 autoconf automake patch bison flex libpng-dev libopenblas-dev \
+        tcl-dev tk-dev libxml2-dev zlib1g-dev libffi-dev cmake" && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends apt-utils debconf locales && dpkg-reconfigure locales && \
+    apt-get install -y --no-install-recommends $BUILDPKGS
 
 RUN python -m venv /opt/venv
 # Make sure we use the virtualenv:
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir --upgrade numpy && \
-    pip install --no-cache-dir seaborn scikit-learn statsmodels tables && \
-    pip install --no-cache-dir python-igraph louvain && \
-    pip install --no-cache-dir MulticoreTSNE && \
-    pip install --no-cache-dir numba==0.43.1 && \
-    pip install --no-cache-dir scanpy && \
-    pip install --no-cache-dir mnnpy && \
-    pip install --no-cache-dir annoy==1.15.2 && \
-    pip install --no-cache-dir bbknn && \
-    pip install --no-cache-dir loompy && \
-    python3 -m pip install ipykernel && \
-    pip install --no-cache-dir papermill
+# install dependencies:
+COPY requirements.txt /tmp/
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r /tmp/requirements.txt
 
-FROM python:3.7.4-slim-stretch AS build-image
+RUN pip install --no-cache-dir scanpy==1.4.4.post1
+
+
+FROM python:3.7.4-slim AS build-image
+
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
-    # Need to run ps
-    apt-get -y install procps && \
-    apt-get -y install libxml2 && \
-    # Need to run MulticoreTSNE
-    apt-get -y install libgomp1 && \
+    apt-get -y --no-install-recommends install \
+        # Need to run ps
+        procps \
+        libxml2 \
+        # Need to run MulticoreTSNE
+        libgomp1 && \
     rm -rf /var/cache/apt/* && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=compile-image /opt/venv /opt/venv
-
 # Make sure we use the virtualenv:
 ENV PATH="/opt/venv/bin:$PATH"
+
