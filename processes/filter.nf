@@ -70,3 +70,22 @@ process SC__SCANPY__FILTER_QC_REPORT {
         -p FILE $f
     """
 }
+
+
+process SC__SCANPY__FILTER_QC_REPORT_HTML {
+
+  container params.sc.scanpy.container
+  publishDir "${params.outdir}/notebooks", mode: 'symlink'
+
+  input:
+    file(ipynb)
+
+  output:
+    file "${getBaseName(ipynb)}.SC__SCANPY__FILTER_QC_REPORT.html"
+  script:
+    """
+    jupyter nbconvert \
+        ${getBaseName(ipynb)}.SC__SCANPY__FILTER_QC_REPORT.ipynb \
+        --to html
+    """
+}
