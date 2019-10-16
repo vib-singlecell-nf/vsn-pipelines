@@ -37,3 +37,4 @@ if options.min_number_cells > -1:
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+
