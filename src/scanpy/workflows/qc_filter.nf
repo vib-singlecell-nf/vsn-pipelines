@@ -34,10 +34,11 @@ workflow QC_FILTER {
         if (params.sc.file_annotator.metaDataFilePath != '') {
             data = SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
         }
-        SC__SCANPY__GENE_FILTER( data )
+        unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
+        SC__SCANPY__GENE_FILTER( unfiltered )
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
         report = SC__SCANPY__PREPARE_FILTER_QC_REPORT()
-        report_notebook = SC__SCANPY__FILTER_QC_REPORT( report, filtered )
+        report_notebook = SC__SCANPY__FILTER_QC_REPORT( report, unfiltered, filtered )
         SC__SCANPY__FILTER_QC_REPORT_HTML( report_notebook )
     emit:
         filtered

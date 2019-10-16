@@ -2,6 +2,23 @@ nextflow.preview.dsl=2
 
 include getBaseName from '../../utils/processes/files.nf'
 
+process SC__SCANPY__COMPUTE_QC_STATS {
+
+  container params.sc.scanpy.container
+
+  input:
+    file(f)
+  output:
+    file "${getBaseName(f)}.SC__SCANPY__COMPUTE_QC_STATS.${params.off}"
+  script:
+    """
+    ${workflow.projectDir}/src/scanpy/bin/filter/sc_compute_qc_stats.py \
+      ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''} \
+      $f \
+      "${getBaseName(f)}.SC__SCANPY__COMPUTE_QC_STATS.${params.off}"
+    """
+}
+
 process SC__SCANPY__GENE_FILTER {
 
   container params.sc.scanpy.container
@@ -59,15 +76,16 @@ process SC__SCANPY__FILTER_QC_REPORT {
 
   input:
     file(ipynb)
-    file(f)
+    file(unfiltered)
+    file(filtered)
 
   output:
-    file "${getBaseName(f)}.SC__SCANPY__FILTER_QC_REPORT.ipynb"
+    file "${getBaseName(unfiltered)}.SC__SCANPY__FILTER_QC_REPORT.ipynb"
   script:
     """
     papermill ${ipynb} \
-        ${getBaseName(f)}.SC__SCANPY__FILTER_QC_REPORT.ipynb \
-        -p FILE $f
+        ${getBaseName(unfiltered)}.SC__SCANPY__FILTER_QC_REPORT.ipynb \
+        -p FILE1 $unfiltered -p FILE2 $filtered
     """
 }
 
@@ -89,3 +107,4 @@ process SC__SCANPY__FILTER_QC_REPORT_HTML {
         --to html
     """
 }
+
