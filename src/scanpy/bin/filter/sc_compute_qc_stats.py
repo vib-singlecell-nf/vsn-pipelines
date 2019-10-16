@@ -50,6 +50,14 @@ parser.add_option(
     default=-1,
     help="Filter out cells with more than the maximum percentage of mitochondrial genes expressed."
 )
+parser.add_option(
+    "--min-number-cells",
+    type=int,
+    action="store",
+    dest="min_number_cells",
+    default=-1,
+    help="Filter out genes that are detected in less than the minimum number of cells."
+)
 #
 parser.add_option(
     "-v", "--verbose",
@@ -74,33 +82,36 @@ except:
 
 
 #
-# Filter on min/Max number of counts
+# Compute number of counts
 #
 
-if options.min_n_counts > 0:
-    adata = adata[adata.obs['n_counts'] > options.min_n_counts, :]
+def compute_n_counts(adata):
+    adata.obs['n_counts'] = np.ravel(adata.X.sum(axis=1))
 
-if options.max_n_counts > 0:
-    adata = adata[adata.obs['n_counts'] < options.max_n_counts, :]
-
-#
-# Filter on min/Max number of genes
-#
-
-if options.min_n_genes > 0:
-    sc.pp.filter_cells(adata, min_genes=options.min_n_genes)
-
-if options.max_n_genes > 0:
-    adata = adata[adata.obs['n_genes'] < options.max_n_genes, :]
+compute_n_counts(adata=adata)
 
 #
-# Filter on percentage of mitochondrial genes
+# Compute number of genes
 #
 
-if options.max_percent_mito > 0:
-    adata = adata[adata.obs['percent_mito'] < options.max_percent_mito, :]
+def compute_n_genes(adata):
+    # simply compute the number of genes per cell (computes 'n_genes' column)
+    sc.pp.filter_cells(adata, min_genes=0)
 
-print(adata.obs.keys())
+compute_n_genes(adata=adata)
+
+#
+# Compute fraction of mitochondrial genes
+#
+
+def compute_percent_mito(adata):
+    # mito and genes/counts cuts
+    mito_genes = adata.var_names.str.contains('^MT-|^mt[-:]')
+    # for each cell compute fraction of counts in mito genes vs. all genes
+    adata.obs['percent_mito'] = np.ravel(np.sum(adata[:, mito_genes].X, axis=1)) / np.ravel(np.sum(adata.X, axis=1))
+    return adata
+
+adata = compute_percent_mito(adata=adata)
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
