@@ -37,7 +37,8 @@ workflow QC_FILTER {
         SC__SCANPY__GENE_FILTER( data )
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
         report = SC__SCANPY__PREPARE_FILTER_QC_REPORT()
-        SC__SCANPY__FILTER_QC_REPORT( report, filtered )
+        report_notebook = SC__SCANPY__FILTER_QC_REPORT( report, filtered )
+        SC__SCANPY__FILTER_QC_REPORT_HTML( report_notebook )
     emit:
         filtered
 }
