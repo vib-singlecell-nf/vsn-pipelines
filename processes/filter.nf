@@ -13,6 +13,9 @@ process SC__SCANPY__COMPUTE_QC_STATS {
   script:
     """
     ${workflow.projectDir}/src/scanpy/bin/filter/sc_compute_qc_stats.py \
+      ${(params.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + params.cellFilterMinNGenes : ''} \
+      ${(params.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + params.cellFilterMaxNGenes : ''} \
+      ${(params.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + params.cellFilterMaxPercentMito : ''} \
       ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''} \
       $f \
       "${getBaseName(f)}.SC__SCANPY__COMPUTE_QC_STATS.${params.off}"

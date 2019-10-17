@@ -113,6 +113,21 @@ def compute_percent_mito(adata):
 
 adata = compute_percent_mito(adata=adata)
 
+#
+# Write filtering value into adata.uns
+#
+adata.uns['sc']={
+        'scanpy': {
+            'filter': {
+                'cellFilterMinNGenes': options.min_n_genes,
+                'cellFilterMaxNGenes': options.max_n_genes,
+                'cellFilterMaxPercentMito': options.max_percent_mito,
+                'geneFilterMinNCells': options.min_number_cells,
+            }
+
+        }
+    }
+
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
