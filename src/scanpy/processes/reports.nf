@@ -20,7 +20,7 @@ process SC__SCANPY__GENERATE_REPORT {
     file "${getBaseName(adata)}.${report_title}.ipynb"
   script:
     """
-    papermill ${ipynb} \
+    papermill ${workflow.projectDir}/src/scanpy/bin/reports/${ipynb} \
         ${getBaseName(adata)}.${report_title}.ipynb \
         -p FILE $adata
     """
