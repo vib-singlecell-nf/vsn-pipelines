@@ -41,7 +41,7 @@ workflow QC_FILTER {
         unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
         SC__SCANPY__GENE_FILTER( unfiltered )
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
-        GENERATE_QC_REPORT( unfiltered, filtered, file(params.sc.scanpy.filter.report_ipynb), 'SC__SCANPY__FILTER_QC_REPORT' )
+        GENERATE_QC_REPORT( unfiltered, filtered, file(params.sc.scanpy.filter.report_ipynb), 'SC_QC_filtering_report' )
     emit:
         filtered
 }
