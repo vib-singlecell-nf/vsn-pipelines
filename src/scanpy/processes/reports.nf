@@ -67,3 +67,20 @@ process SC__SCANPY__REPORT_TO_HTML {
     """
 }
 
+process SC__SCANPY__MERGE_REPORTS {
+
+  container params.sc.scanpy.container
+  publishDir "${params.outdir}/notebooks", mode: 'symlink'
+
+  input:
+    file ipynbs
+    val report_title
+
+  output:
+    file "${getBaseName(adata)}.${report_title}.ipynb"
+  script:
+    """
+    nbmerge file1.ipynb file2.ipynb -o ${output}
+    """
+}
+
