@@ -162,7 +162,7 @@ workflow SCENIC_append {
         filteredloom
         scopeloom
     main:
-        scenicloom = SCENIC( file( params.sc.scenic.filteredloom ) )
+        scenicloom = SCENIC( filteredloom )
         SC__SCENIC__APPENDSCENICLOOM( scopeloom, scenicloom )
     emit:
         SC__SCENIC__APPENDSCENICLOOM.out
