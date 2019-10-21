@@ -10,7 +10,21 @@ workflow bbknn_scenic {
 
 workflow single_sample {
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    SINGLE_SAMPLE()  
+    SINGLE_SAMPLE()
+}
+
+// run single_sample, then scenic from the filtered output:
+workflow single_sample_scenic {
+    include SCENIC_append from './src/scenic/main.nf' params(params)
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    ss = SINGLE_SAMPLE()
+    SCENIC_append( ss.filteredloom, ss.scopeloom )
+}
+
+// run scenic directly from an existing loom file:
+workflow scenic {
+    include SCENIC as SCENIC_WF from './src/scenic/main.nf' params(params)
+    SCENIC_WF( file(params.sc.scenic.filteredloom) )
 }
 
 workflow star {
@@ -22,3 +36,4 @@ workflow single_sample_star {
     include single_sample_star as SINGLE_SAMPLE_STAR from './workflows/single_sample_star' params(params)
     SINGLE_SAMPLE_STAR()
 }
+
