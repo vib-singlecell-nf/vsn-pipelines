@@ -17,13 +17,14 @@ workflow CLUSTER_IDENTIFICATION {
         data
     main:
         SC__SCANPY__CLUSTERING( data )
-        GENERATE_REPORT(
+        report = GENERATE_REPORT(
             SC__SCANPY__CLUSTERING.out,
             file(params.sc.scanpy.clustering.report_ipynb),
             "SC_clustering_report"
         )
-        SC__SCANPY__MARKER_GENES( SC__SCANPY__CLUSTERING.out )
+        marker_genes = SC__SCANPY__MARKER_GENES( SC__SCANPY__CLUSTERING.out )
     emit:
-        SC__SCANPY__MARKER_GENES.out
+        marker_genes
+        report
 }
 
