@@ -18,12 +18,14 @@ workflow HVG_SELECTION {
         data
     main:
         SC__SCANPY__FEATURE_SELECTION( data )
-        SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
-        GENERATE_REPORT(
+        scaled = SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
+        report = GENERATE_REPORT(
             SC__SCANPY__FEATURE_SCALING.out,
             file(params.sc.scanpy.feature_selection.report_ipynb),
             "SC_HVG_report"
         )
     emit:
-        SC__SCANPY__FEATURE_SCALING.out
+        scaled
+        report
 }
+
