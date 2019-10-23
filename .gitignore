@@ -1,8 +1,16 @@
 *checkpoint.ipynb
+*checkpoint.py
+*.test.ipynb
+*.csv
+*.loom
+*.pickle
+*.pyc
 *egg*
 .nextflow
 .nextflow*
-data
+data/10x/tiny
+src/scenic/data
 refdata
 work
 out/
+tests/
