@@ -4,6 +4,7 @@ nextflow.preview.dsl=2
 //  Define the parameters for current testing proces
 
 include FASTP__CLEAN_AND_FASTQC from '../src/fastp/processes/clean_and_fastqc.nf' params(params.fastp + params.fastp.clean_and_fastqc + params)
+include PICARD__FASTQ_TO_BAM from '../src/picard/processes/fastq_to_bam.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -29,4 +30,5 @@ workflow nemesh {
     // selectedBarcodesByCustom.subscribe { println it }
 
     FASTP__CLEAN_AND_FASTQC( data )
+    PICARD__FASTQ_TO_BAM( FASTP__CLEAN_AND_FASTQC.out.fastq )
 }
