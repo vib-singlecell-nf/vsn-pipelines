@@ -1,7 +1,13 @@
 *checkpoint.ipynb
+*checkpoint*
+*.pyc
 *egg*
 .nextflow
 .nextflow*
+*.loom
 data
 refdata
 work
+out/notebooks
+src/scenic/out
+src/scenic/notebooks
