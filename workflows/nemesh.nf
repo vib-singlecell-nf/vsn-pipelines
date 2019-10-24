@@ -8,6 +8,7 @@ include PICARD__FASTQ_TO_BAM from '../src/picard/processes/fastq_to_bam.nf' para
 include DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE from '../src/dropseqtools/processes/tag_bam_with_read_sequence_extended.nf' params(params.dropseqtools.tag_unaligned_bam_with_cellbarcode + params)
 include DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR from '../src/dropseqtools/processes/tag_bam_with_read_sequence_extended.nf' params(params.dropseqtools.tag_unaligned_bam_with_cellmolecular + params)
 include DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM from '../src/dropseqtools/processes/filter_bam.nf' params(params.dropseqtools.filter_unaligned_tagged_bam + params)
+include DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM from '../src/dropseqtools/processes/trim_starting_sequence.nf' params(params.dropseqtools.trim_smart_unaligned_tagged_filtered_bam + params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -37,4 +38,5 @@ workflow nemesh {
     DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE( PICARD__FASTQ_TO_BAM.out.bam )
     DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR( DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE.out.bam )
     DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM( DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR.out.bam )
+    DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM( DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM.out.bam )
 }
