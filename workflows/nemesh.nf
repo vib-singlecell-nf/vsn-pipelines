@@ -23,6 +23,7 @@ include DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT from '../src/dropseqtools/processes/c
 include DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON from '../src/dropseqtools/processes/tag_read_with_gene_exon.nf' params(params)
 include DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS from '../src/dropseqtools/processes/detect_bead_synthesis_errors.nf' params(params)
 include DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM from '../src/dropseqtools/processes/bam_tag_histogram.nf' params(params)
+include DROPLET_UTILS__BARCODE_SELECTION from '../src/dropletutils/processes/barcode_selection.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -84,4 +85,5 @@ workflow nemesh {
     DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS( DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON.out )
     FINAL_BAM = DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS.out.bam
     DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM( FINAL_BAM )
+    DROPLET_UTILS__BARCODE_SELECTION( DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM.out )
 }
