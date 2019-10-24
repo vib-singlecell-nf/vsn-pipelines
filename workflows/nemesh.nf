@@ -13,6 +13,8 @@ include DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART from '../src/d
 include PICARD__BAM_TO_FASTQ from '../src/picard/processes/sam_to_fastq.nf' params(params)
 include GZIP from '../src/dropseqtools/processes/gzip.nf' params(params)
 include SC__STAR__BUILD_INDEX from '../src/star/processes/build_genome.nf' params(params.sc.star.build_genome + params)
+include SC__STAR__LOAD_GENOME from '../src/star/processes/load_genome.nf' params(params)
+include SC__STAR__MAP_COUNT from '../src/star/processes/map_count.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -47,4 +49,10 @@ workflow nemesh {
     PICARD__BAM_TO_FASTQ( DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam )
     GZIP( PICARD__BAM_TO_FASTQ.out.fastq )
     SC__STAR__BUILD_INDEX( file(params.annotation), file(params.genome) )
+    SC__STAR__LOAD_GENOME( SC__STAR__BUILD_INDEX.out )
+    SC__STAR__MAP_COUNT(
+        SC__STAR__BUILD_INDEX.out,
+        SC__STAR__LOAD_GENOME.out,
+        GZIP.out.fastq_gz
+    )
 }
