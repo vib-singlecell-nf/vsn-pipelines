@@ -20,6 +20,7 @@ include PICARD__CREATE_SEQUENCE_DICTIONARY from '../src/picard/processes/create_
 include PICARD__MERGE_BAM_ALIGNMENT from '../src/picard/processes/merge_bam_alignment.nf' params(params)
 include FORMAT_GTF_IGENOMES from '../src/utils/processes/gtf.nf' params(params)
 include DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT from '../src/dropseqtools/processes/convert_to_ref_flat.nf' params(params)
+include DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON '../src/dropseqtools/processes/tag_read_with_gene_exon.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -73,5 +74,9 @@ workflow nemesh {
     DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT(
         FORMAT_GTF_IGENOMES.out,
         PICARD__CREATE_SEQUENCE_DICTIONARY.out
+    )
+    DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON(
+        PICARD__MERGE_BAM_ALIGNMENT.out,
+        DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT.out
     )
 }
