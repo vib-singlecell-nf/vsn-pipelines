@@ -5,6 +5,8 @@ nextflow.preview.dsl=2
 
 include FASTP__CLEAN_AND_FASTQC from '../src/fastp/processes/clean_and_fastqc.nf' params(params.fastp + params.fastp.clean_and_fastqc + params)
 include PICARD__FASTQ_TO_BAM from '../src/picard/processes/fastq_to_bam.nf' params(params)
+include DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE from '../src/dropseqtools/processes/tag_bam_with_read_sequence_extended.nf' params(params.dropseqtools.tag_unaligned_bam_with_cellbarcode + params)
+include DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR from '../src/dropseqtools/processes/tag_bam_with_read_sequence_extended.nf' params(params.dropseqtools.tag_unaligned_bam_with_cellmolecular + params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -31,4 +33,6 @@ workflow nemesh {
 
     FASTP__CLEAN_AND_FASTQC( data )
     PICARD__FASTQ_TO_BAM( FASTP__CLEAN_AND_FASTQC.out.fastq )
+    DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE( PICARD__FASTQ_TO_BAM.out.bam )
+    DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR( DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE.out.bam )
 }
