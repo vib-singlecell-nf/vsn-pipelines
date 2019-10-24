@@ -12,6 +12,7 @@ include DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM from '../src/dr
 include DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART from '../src/dropseqtools/processes/polya_trimmer.nf' params(params.dropseqtools.trim_polya_unaligned_tagged_trimmed_smart + params)
 include PICARD__BAM_TO_FASTQ from '../src/picard/processes/sam_to_fastq.nf' params(params)
 include GZIP from '../src/dropseqtools/processes/gzip.nf' params(params)
+include SC__STAR__BUILD_INDEX from '../src/star/processes/build_genome.nf' params(params.sc.star.build_genome + params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -45,4 +46,5 @@ workflow nemesh {
     DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART( DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM.out.bam )
     PICARD__BAM_TO_FASTQ( DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam )
     GZIP( PICARD__BAM_TO_FASTQ.out.fastq )
+    SC__STAR__BUILD_INDEX( file(params.annotation), file(params.genome) )
 }
