@@ -17,6 +17,7 @@ include SC__STAR__LOAD_GENOME from '../src/star/processes/load_genome.nf' params
 include SC__STAR__MAP_COUNT from '../src/star/processes/map_count.nf' params(params)
 include PICARD__SORT_SAM from '../src/picard/processes/sort_sam.nf' params(params)
 include PICARD__CREATE_SEQUENCE_DICTIONARY from '../src/picard/processes/create_sequence_dictionary.nf' params(params)
+include PICARD__MERGE_BAM_ALIGNMENT from '../src/picard/processes/merge_bam_alignment.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -59,4 +60,10 @@ workflow nemesh {
     )
     PICARD__SORT_SAM( SC__STAR__MAP_COUNT.out.bam )
     PICARD__CREATE_SEQUENCE_DICTIONARY( file(params.genome) )
+    PICARD__MERGE_BAM_ALIGNMENT( 
+        DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam,
+        PICARD__SORT_SAM.out,
+        file( params.genome ),
+        PICARD__CREATE_SEQUENCE_DICTIONARY.out
+    )
 }
