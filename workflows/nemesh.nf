@@ -19,6 +19,7 @@ include PICARD__SORT_SAM from '../src/picard/processes/sort_sam.nf' params(param
 include PICARD__CREATE_SEQUENCE_DICTIONARY from '../src/picard/processes/create_sequence_dictionary.nf' params(params)
 include PICARD__MERGE_BAM_ALIGNMENT from '../src/picard/processes/merge_bam_alignment.nf' params(params)
 include FORMAT_GTF_IGENOMES from '../src/utils/processes/gtf.nf' params(params)
+include DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT from '../src/dropseqtools/processes/convert_to_ref_flat.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -69,4 +70,8 @@ workflow nemesh {
     )
     // FORMAT_GTF( file(params.annotation) )
     FORMAT_GTF_IGENOMES( file(params.annotation) )
+    DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT(
+        FORMAT_GTF_IGENOMES.out,
+        PICARD__CREATE_SEQUENCE_DICTIONARY.out
+    )
 }
