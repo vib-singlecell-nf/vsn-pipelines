@@ -16,8 +16,10 @@ include SC__STAR_CONCATENATOR from '../src/utils/processes/utils.nf' params(para
  */ 
 workflow star {
     main:
+        // data channel to start from 10x data:
+        include getChannel as getSingleEndChannel from '../src/channels/singleend.nf' params(params)
         SC__STAR__LOAD_GENOME( file(params.sc.star.map_count.transcriptome) )
-        (counts_done, counts_files) = SC__STAR__MAP_COUNT( file(params.sc.star.map_count.transcriptome), SC__STAR__LOAD_GENOME.out, Channel.fromPath(params.sc.star.map_count.fastqs) )
+        (counts_done, counts_files) = SC__STAR__MAP_COUNT( file(params.sc.star.map_count.transcriptome), SC__STAR__LOAD_GENOME.out, getSingleEndChannel(params.sc.star.map_count.fastqs) )
         SC__STAR__UNLOAD_GENOME( file(params.sc.star.map_count.transcriptome), counts_done.collect() )
         SC__STAR_CONCATENATOR( counts_files.collect() )
     emit:
