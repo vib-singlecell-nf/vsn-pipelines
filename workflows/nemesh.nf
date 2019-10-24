@@ -15,6 +15,7 @@ include GZIP from '../src/dropseqtools/processes/gzip.nf' params(params)
 include SC__STAR__BUILD_INDEX from '../src/star/processes/build_genome.nf' params(params.sc.star.build_genome + params)
 include SC__STAR__LOAD_GENOME from '../src/star/processes/load_genome.nf' params(params)
 include SC__STAR__MAP_COUNT from '../src/star/processes/map_count.nf' params(params)
+include PICARD__SORT_SAM from '../src/picard/processes/sort_sam.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the input data
@@ -55,4 +56,5 @@ workflow nemesh {
         SC__STAR__LOAD_GENOME.out,
         GZIP.out.fastq_gz
     )
+    PICARD__SORT_SAM( SC__STAR__MAP_COUNT.out.bam )
 }

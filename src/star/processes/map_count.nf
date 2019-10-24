@@ -11,9 +11,9 @@ process SC__STAR__MAP_COUNT {
     tuple val(sample), file(fastqs)
 
   output:
-    val success
-    file file("*ReadsPerGene.out.tab") optional params.sc.star.map_count.containsKey('quantMode') && params.sc.star.map_count.quantMode == "GeneCounts" ? true: false 
-    tuple val(sample), file("*.STAR_Aligned.sortedByCoord.out.bam")
+    val success, emit: isDone
+    tuple val(sample), file("*ReadsPerGene.out.tab"), emit: counts optional params.sc.star.map_count.containsKey('quantMode') && params.sc.star.map_count.quantMode == "GeneCounts" ? true: false
+    tuple val(sample), file("*.STAR_Aligned.sortedByCoord.out.bam"), emit: bam
 
   script:
     success = true
