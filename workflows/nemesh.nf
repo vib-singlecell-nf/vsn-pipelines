@@ -31,7 +31,7 @@ include SC__DROP_SEQ_TOOLS__DIGITAL_EXPRESSION from '../src/dropseqtools/process
 
 params.genome = '/ddn1/vol1/staging/leuven/res_00001/genomes/homo_sapiens/hg38_iGenomes/iGenomes_Raw/Sequence/WholeGenomeFasta/genome.fa'
 params.annotation = '/ddn1/vol1/staging/leuven/res_00001/genomes/homo_sapiens/hg38_iGenomes/iGenomes_Raw/Annotation/Archives/archive-2015-08-14-08-18-15/Genes/genes.gtf'
-
+params.tmpDir = '/ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax'
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -59,6 +59,7 @@ workflow nemesh {
     }
 
     FASTP__CLEAN_AND_FASTQC( data )
+    PICARD__FASTQ_TO_BAM( FASTP__CLEAN_AND_FASTQC.out.fastq, file( params.tmpDir ) )
     SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE( PICARD__FASTQ_TO_BAM.out.bam )
     SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR( SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE.out.bam )
     SC__DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM( SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR.out.bam )
@@ -75,13 +76,14 @@ workflow nemesh {
         SC__STAR__LOAD_GENOME.out,
         GZIP.out.fastq_gz
     )
-    PICARD__SORT_SAM( SC__STAR__MAP_COUNT.out.bam )
-    PICARD__CREATE_SEQUENCE_DICTIONARY( file(params.genome) )
+    PICARD__SORT_SAM( SC__STAR__MAP_COUNT.out.bam, file( params.tmpDir ) )
+    PICARD__CREATE_SEQUENCE_DICTIONARY( file(params.genome), file( params.tmpDir ) )
     PICARD__MERGE_BAM_ALIGNMENT( 
         SC__DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam,
         PICARD__SORT_SAM.out,
         file( params.genome ),
-        PICARD__CREATE_SEQUENCE_DICTIONARY.out
+        PICARD__CREATE_SEQUENCE_DICTIONARY.out,
+        file( params.tmpDir )
     )
     // FORMAT_GTF( file(params.annotation) )
     FORMAT_GTF_IGENOMES( file(params.annotation) )
