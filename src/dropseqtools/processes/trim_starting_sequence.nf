@@ -1,8 +1,9 @@
 nextflow.preview.dsl=2
 
-process DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
+process SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
+    
+    container params.sc.dropseqtools.container
     publishDir "${params.outdir}/01.clean", mode: 'symlink'
-
     clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=24:00:00 -A ${params.qsubaccount}"
 
     input:
@@ -12,14 +13,12 @@ process DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
         tuple file('*.adapter_trimming_report.txt'), emit: report
     script:
         """
-		source $DWMAX/documents/aertslab/scripts/src_dwmax/bash-utils/utils.sh
-		software load drop-seq_tools/1.12
 		TrimStartingSequence \
 			INPUT=${bam} \
 			OUTPUT=${sample}.unaligned_tagged_trimmed_smart.bam \
 			OUTPUT_SUMMARY=${sample}.adapter_trimming_report.txt \
-			SEQUENCE=${params.adapterSequence} \
-			MISMATCHES=${params.mismatches} \
-			NUM_BASES=${params.numBases}
+			SEQUENCE=${params.sc.dropseqtools.trim_smart_unaligned_tagged_filtered_bam.adapterSequence} \
+			MISMATCHES=${params.sc.dropseqtools.trim_smart_unaligned_tagged_filtered_bam.mismatches} \
+			NUM_BASES=${params.sc.dropseqtools.trim_smart_unaligned_tagged_filtered_bam.numBases}
         """
 }

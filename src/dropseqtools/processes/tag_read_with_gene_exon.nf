@@ -1,6 +1,6 @@
 nextflow.preview.dsl=2
 
-process DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON {
+process SC__DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON {
     publishDir "${params.outdir}/02.map", mode: 'symlink'
 
     clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=24:00:00 -A ${params.qsubaccount}"
@@ -18,6 +18,6 @@ process DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON {
 			I=${bam} \
 			O=${sample}.merged_gene-exon-tagged.bam \
 			ANNOTATIONS_FILE=${annotation} \
-			TAG=${params.dropseqtools.tag_read_with_gene_exon.tag}
+			TAG=${params.sc.dropseqtools.tag_read_with_gene_exon.tag}
         """    
 } 
