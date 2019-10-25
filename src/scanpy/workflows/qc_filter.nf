@@ -23,7 +23,6 @@ include SC__FILE_ANNOTATOR from '../../utils/processes/utils.nf' params(params.s
 // scanpy:
 include '../processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
 
-// include '../processes/reports.nf' params(params.sc.scanpy.filter + params.global + params)
 // reporting:
 include GENERATE_QC_REPORT from './create_report.nf' params(params.sc.scanpy.filter + params)
 
