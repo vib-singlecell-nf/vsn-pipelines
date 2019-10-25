@@ -5,8 +5,8 @@ nextflow.preview.dsl=2
  */
 process FASTP__CLEAN_AND_FASTQC {
 
+    container params.picard.container
     publishDir "${params.outdir}/01.clean", mode: 'symlink'
-
     clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=24:00:00 -A ${params.qsubaccount}"
 
     input:
