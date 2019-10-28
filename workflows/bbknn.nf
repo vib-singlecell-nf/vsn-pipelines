@@ -38,11 +38,11 @@ include SCENIC_append from '../src/scenic/main.nf' params(params)
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
 
-workflow bbknn_scenic {
-    // CELLRANGER()
+workflow bbknn {
 
     data = getTenXChannel( params.global.tenx_folder ).view()
     QC_FILTER( data ) // Remove concat
+    filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out )
     SC__FILE_CONCATENATOR( QC_FILTER.out.collect() )
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
@@ -50,7 +50,8 @@ workflow bbknn_scenic {
     CLUSTER_IDENTIFICATION( SC__SCANPY__DIM_REDUCTION__PCA.out )
     scopeloom = BEC_BBKNN( CLUSTER_IDENTIFICATION.out )
     
-    filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out )
-    SCENIC_append( filteredloom, scopeloom )
-
+    emit:
+        filteredloom
+        scopeloom
 }
+
