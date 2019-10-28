@@ -1,10 +1,14 @@
 # Datasets
 
-Datasets that can be used to have a quick test of a pipeline.
+Public datasets that can be used to test one of the pipelines.
+Start by creating a working directory to contain the data, intermediate Nextflow files, and final analysis outputs:
+```bash
+mkdir single_sample_test && cd single_sample_test
+```
 
 # 10x Genomics
 
-Some 10x datasets that can be used to run the `tenx_single_sample` pipeline:
+Some 10x datasets that can be used to run the `single_sample` pipeline:
 - 1k PBMCs from a Healthy Donor (v2 chemistry)
 ```
 wget http://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v2/pbmc_1k_v2_filtered_feature_bc_matrix.tar.gz
@@ -24,3 +28,4 @@ wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/dat
 ```
 
 If these links appear not work, you can always download them from https://support.10xgenomics.com/single-cell-gene-expression/datasets.
+
