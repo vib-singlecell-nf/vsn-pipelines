@@ -5,14 +5,14 @@ nextflow.preview.dsl=2
 
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
-    include bbknn as BBKNN from './workflows/bbknn_scenic' params(params)
+    include bbknn as BBKNN from './workflows/bbknn' params(params)
     BBKNN()
 }
 
 
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
-    include bbknn as BBKNN from './workflows/bbknn_scenic' params(params)
+    include bbknn as BBKNN from './workflows/bbknn' params(params)
     include SCENIC_append from './src/scenic/main.nf' params(params)
     BBKNN()
     SCENIC_append( BBKNN.out.filteredloom, BBKNN.out.scopeloom )
