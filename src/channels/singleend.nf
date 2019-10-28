@@ -1,7 +1,9 @@
 nextflow.preview.dsl=2
 
 def extractSample(path) {
-    (full, parentDir, id, whateverSuffix, compressionExtension) = (path =~ /(.+)\/(.+)_R1(.*)\.fastq(\.gz)?/)[0]
+    pattern = /(.+)\/(.+)_R[1-2](.*)\.fastq(\.gz)?/
+    (full, parentDir, id, whateverSuffix, compressionExtension) = (path =~ pattern)[0]
+
     return id
 }
 
