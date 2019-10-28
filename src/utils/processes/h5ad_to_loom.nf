@@ -4,7 +4,7 @@ include getBaseName from './files.nf'
 
 process SC__H5AD_TO_LOOM {
 
-  container "/ddn1/vol1/staging/leuven/res_00001/software/Scanpy/1.4.3/Scanpy.sif"
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/loom", mode: 'symlink'
 
   input:
@@ -21,7 +21,7 @@ process SC__H5AD_TO_LOOM {
 
 process SC__H5AD_TO_FILTERED_LOOM {
 
-  container "/ddn1/vol1/staging/leuven/res_00001/software/Scanpy/1.4.3/Scanpy.sif"
+  container params.sc.scanpy.container
   publishDir "${params.outdir}/loom", mode: 'symlink'
 
   input:

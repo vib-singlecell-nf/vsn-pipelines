@@ -14,65 +14,82 @@ Make sure you have the following softwares installed,
 
 # Quick start
 
-Data needs to be downloaded. More info can be found [here](https://github.com/aertslab/SingleCellTxBenchmark/tree/master/data).
+To run a quick test of the single sample analysis pipeline, we can use the 1k PBMC datasets provided by 10x Genomics.
+This will take only **~3min** to run.
 
-You can have a quick test of the single sample analysis pipeline on the 1k pbmc
-datasets provided by 10x Genomics. This will take only **~3min** to run.
+1. The data first needs to be downloaded (instructions can be found 
+    [here](data/README.md)).
+
+2. Next, a config file needs to be generated.
+In your working directory, run `nextflow config ...` with the appropriate profiles:
+```bash
+nextflow config aertslab/SingleCellTxBenchmark \
+    -profile singularity,single_sample > single_sample.config
 ```
-nextflow run aertslab/SingleCellTxBenchmark \
-   -profile singularity,single_sample \
-   -entry single_sample
+Now, edit `single_sample.config`.
+Most of the default values are already set for the test dataset, but certain variables (e.g. container links) may need to be changed.
+In particular, `params.global.tenx_folder` should point to the `outs/` folder in the 10x data, and
+    `params.sc.file_converter` should be a path to the sample metadata file.
+
+3. The pipeline can be run using the config file just generated (`-C ...`), and specifying the `single_sample` workflow as an entrypoint:
+```bash
+nextflow -C single_sample.config \
+   run aertslab/SingleCellTxBenchmark \
+      -entry single_sample
 ```
+
 The pipelines will generate 3 types of results in the output directory (`params.global.outdir`) 
 - `data`: contains all the intermediate files.
 - `loom`: contains final loom files which can be imported inside SCope visualization tool for further insight of the results.
 - `notebooks`: contains all the notebooks generated along the pipeline (e.g.: Quality control report)
+    - See the example output report from the 1k PBMC data 
+      [here](notebooks/10x_PBMC.merged_report.html).
+- `pipeline_reports` (if `-profile report` was passed to `nextflow config ...`)
 
 If you would like to use the pipelines on a custom dataset, please go to the `Pipelines` section (see below).
 
 # Pipelines
 
-## Running the pipeline directly from GitHub:
-
+## General workflow and strategy
+### Running the pipeline directly from GitHub:
+The intended usage for this pipeline is for the code to be run directly from GitHub.
+This results in a separation of the Nextflow code and the results stored in the working directory.
+For example:
 ```bash
-nextflow run aertslab/SingleCellTxBenchmark -profile singularity,single_sample -entry single_sample -user <GitHub-user>
+nextflow run aertslab/SingleCellTxBenchmark \
+    -profile singularity,single_sample \
+    -entry single_sample
 ```
 This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the workflow defined by the `-entry` setting (here, `single_sample`), using the built-in configs, which are merged from each tool used (defined in the `single_sample` profile).
 Specifying `nextflow run -latest ...` will download the latest commit prior to execution, or the `-r ...` option can be used to specify a specific commit or branch.
+However, in nearly all cases it will be necessary to run the pipeline with a customized config file.
 
-### Customizing config files
-#### Changing parameters in a single config file
-In order to use a customized config file, one of the tool-specific default files can be used as a template, then passed on to nextflow at run time. 
-For example:
-```bash
-wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/src/scanpy/scanpy.config
-# edit the config file parameters, then:
-nextflow -c scanpy.config \
-   run aertslab/SingleCellTxBenchmark \
-      -profile singularity,bbknn \
-      -user <GitHub-user>
-```
-However, note that it is not possible to pass a custom `nextflow.config` directly.
-
-#### Generating a custom config file using `nextflow config`
-The preferred method is now to first run `nextflow config ...` to generate a template config file in your working directory.
+### Running the pipeline with a customized config file
+The recommended method is to first run `nextflow config ...` to generate a complete config file (with the default parameters) in your working directory.
 The tool-specific parameters, as well as Docker/Singularity profiles, are included when specifying the appropriate profiles to `nextflow config`.
 Any of the parameters in this config file can then be edited and used to run the workflow of your choice.
-For example, to run the `single_sample` workflow in a new working directory:
+For example, to run the `single_sample` workflow in a new working directory using the `singularity` profile:
 
-* Generate the config using the `single_sample` and `singularity` profiles:
+1. Generate the config using the `single_sample` and `singularity` profiles:
 ```bash
 mkdir single_sample_test && cd single_sample_test
 
 nextflow config aertslab/SingleCellTxBenchmark \
     -profile singularity,single_sample > single_sample.config
 ```
-* Now run the workflow using the new config file (using `-C` to use only this file), specifying the proper workflow as the entry point:
+2. Now run the workflow using the new config file (using `-C` to use **only** this file), specifying the proper workflow as the entry point:
 ```bash
 nextflow -C single_sample.config \
    run aertslab/SingleCellTxBenchmark \
       -entry single_sample
 ```
+
+## Single-sample Datasets
+
+Pipelines to run a single sample.
+
+### single_sample
+The **single_sample** workflow will process 10x data,taking in 10x-structured data, and metadata file.
 
 
 ## Multiple Datasets
@@ -276,26 +293,6 @@ params {
 }
 
 ```
-
-# Limitations
-
-### Parameters structure:
-* Cannot override nested parameters from the command line (`nextflow run aertslab/SingleCellTxBenchmark --outdir output/` works, but `--sc.cellranger.outdir output/` does not.
-See also [this GitHub issue](https://github.com/nextflow-io/nextflow/issues/1182).
-
-### Bin folder is not added to the $PATH variable by nextflow.
-The current workaround is to use the full path in script calls to module bins: `${workflow.projectDir}/src/scanpy/bin/feature_selection/sc_select_variable_genes.py'.
-Alternatives are to add the module bin folders to the nextflow path in `nextflow.config`:
-```groovy
-env {
-    PATH = System.getProperty("user.dir").concat("/src/singlecelltxbenchmark/pipelines/scenic/bin/:${PATH}")
-}
-```
-but this using "user.dir" isn't a proper solution yet.
-
-### How to define multiple workflows in the master main.nf
-1. Create named master workflows in `main.nf` and use if/then statements to determine
-2. Create a github organization, and have separate repositories for each master workflow
 
 # Development
 

@@ -19,12 +19,14 @@ workflow DIM_REDUCTION {
     main:
         SC__SCANPY__DIM_REDUCTION__PCA( data )
         SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__PCA.out )
-        SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
-        GENERATE_REPORT(
+        dimred = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
+        report = GENERATE_REPORT(
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
             file(params.sc.scanpy.dim_reduction.report_ipynb),
             "SC_dimensionality_reduction_report"
         )
     emit:
-        SC__SCANPY__DIM_REDUCTION__UMAP.out
+        dimred
+        report
 }
+
