@@ -17,7 +17,7 @@ process SC__SCANPY__GENERATE_REPORT {
     val report_title
 
   output:
-    file "${getBaseName(adata)}.${report_title}.ipynb"
+    file("${getBaseName(adata)}.${report_title}.ipynb")
   script:
     """
     papermill ${workflow.projectDir}/src/scanpy/bin/reports/${ipynb} \
@@ -39,7 +39,7 @@ process SC__SCANPY__FILTER_QC_REPORT {
     val report_title
 
   output:
-    file "${getBaseName(unfiltered)}.${report_title}.ipynb"
+    file("${getBaseName(unfiltered)}.${report_title}.ipynb")
   script:
     """
     papermill ${workflow.projectDir}/src/scanpy/bin/reports/${ipynb} \
@@ -58,12 +58,10 @@ process SC__SCANPY__REPORT_TO_HTML {
     val report_title
 
   output:
-    file "${getBaseName(ipynb)}.${report_title}.html"
+    file "*.html"
   script:
     """
-    jupyter nbconvert \
-        ${getBaseName(ipynb)}.${report_title}.ipynb \
-        --to html
+    jupyter nbconvert ${ipynb} --to html
     """
 }
 
@@ -73,14 +71,14 @@ process SC__SCANPY__MERGE_REPORTS {
   publishDir "${params.outdir}/notebooks", mode: 'symlink'
 
   input:
-    file ipynbs
+    file(ipynbs)
     val report_title
 
   output:
-    file "${getBaseName(adata)}.${report_title}.ipynb"
+    file "${report_title}.ipynb"
   script:
     """
-    nbmerge file1.ipynb file2.ipynb -o ${output}
+    nbmerge ${ipynbs} -o "${report_title}.ipynb"
     """
 }
 
