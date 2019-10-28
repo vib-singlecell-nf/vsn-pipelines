@@ -85,26 +85,36 @@ nextflow -C single_sample.config \
 ```
 
 ## Single-sample Datasets
-
 Pipelines to run a single sample.
 
-### single_sample
+### `single_sample`
 The **single_sample** workflow will process 10x data,taking in 10x-structured data, and metadata file.
+The standard analysis steps are run: filtering, normalization, log-transformation, HVG selection, dimensionality reduction, clustering, and loom file generation.
+The output is a loom file with the results embedded.
+
+### `single_sample_scenic`
+Runs the `single_sample` workflow above, then runs the SCENIC workflow on the output, generating a comprehensive loom file with the combined results.
+This could be very resource intensive, depending on the dataset.
+
+### `scenic`
+Runs the SCENIC workflow alone, generating a loom file with only the SCENIC results.
 
 
 ## Multiple Datasets
-
 Pipelines to aggregate multiple datasets together.
 
-### BBKNN 
+### `bbknn`
+Runs the BBKNN pipeline (sample-specific filtering, merging of individual samples, normalization, log-transformation, HVG selection, PCA analysis, then the batch-effect correction steps: BBKNN, clustering, dimensionality reduction (UMAP only)).
+The output is a loom file with the results embedded.
+
 Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 
-**How to run on 10xGenomics datasets ?**
+### `bbknn_scenic`
+Runs the `bbknn` workflow above, then runs the SCENIC workflow on the output, generating a comprehensive loom file with the combined results.
+This could be very resource intensive, depending on the dataset.
 
-```{bash}
-OUTPUT_DIRECTORY="out"
-PROJECT_NAME="tiny"
-```
+
+## Information on using 10xGenomics datasets
 
 Let's say the file structure of your data looks like this,
 
@@ -121,20 +131,12 @@ Let's say the file structure of your data looks like this,
             └── ...
 ```
 
-Then the command to run the pipeline will be:
-
-Using singularity,
-```{bash}
-nextflow run \
-   src/scanpy/bec_bbknn.nf \
-      -profile singularity \
-      --tenx_folder /home/data/cellranger/**/filtered_feature_bc_matrix \
-      --sample_metadata /home/data/cellranger/metadata.tsv \
-      --outdir ${OUTPUT_DIRECTORY} \
-      --project_name ${PROJECT_NAME} \
-      -with-report report.html \
-      -with-trace
+Setting the input directory appropriately will collect all the samples listed in the `filtered_feature_bc_matrix` directories listed above.
+For example, in `params.global`, setting:
 ```
+tenx_folder = "/home/data/cellranger/Sample*/outs/"
+```
+will recursively find all 10x samples in that directory.
 
 # Repository structure
 
