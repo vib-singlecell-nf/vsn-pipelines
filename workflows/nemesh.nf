@@ -23,7 +23,7 @@ include SC__DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT from '../src/dropseqtools/process
 include SC__DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON from '../src/dropseqtools/processes/tag_read_with_gene_exon.nf' params(params)
 include SC__DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS from '../src/dropseqtools/processes/detect_bead_synthesis_errors.nf' params(params)
 include SC__DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM from '../src/dropseqtools/processes/bam_tag_histogram.nf' params(params)
-include DROPLET_UTILS__BARCODE_SELECTION from '../src/dropletutils/processes/barcode_selection.nf' params(params)
+include SC__DROPLET_UTILS__BARCODE_SELECTION from '../src/dropletutils/processes/barcode_selection.nf' params(params)
 include SC__DROP_SEQ_TOOLS__DIGITAL_EXPRESSION from '../src/dropseqtools/processes/digital_expression.nf' params(params)
 
 //////////////////////////////////////////////////////
@@ -98,9 +98,9 @@ workflow nemesh {
     SC__DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS( SC__DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON.out )
     FINAL_BAM = SC__DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS.out.bam
     SC__DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM( FINAL_BAM )
-    DROPLET_UTILS__BARCODE_SELECTION( SC__DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM.out )
-    a = FINAL_BAM.combine(DROPLET_UTILS__BARCODE_SELECTION.out.selectedCellBarcodesByKnee, by: 0)
-    b = FINAL_BAM.combine(DROPLET_UTILS__BARCODE_SELECTION.out.selectedCellBarcodesByInflection, by: 0)
+    SC__DROPLET_UTILS__BARCODE_SELECTION( SC__DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM.out )
+    a = FINAL_BAM.combine(SC__DROPLET_UTILS__BARCODE_SELECTION.out.selectedCellBarcodesByKnee, by: 0)
+    b = FINAL_BAM.combine(SC__DROPLET_UTILS__BARCODE_SELECTION.out.selectedCellBarcodesByInflection, by: 0)
 
     if (params.selected_barcodes) {
         c = FINAL_BAM.combine(selectedBarcodesByCustom, by: 0)
