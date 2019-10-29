@@ -85,7 +85,7 @@ nextflow -C single_sample.config \
 ```
 
 ## Single-sample Datasets
-Pipelines to run a single sample.
+Pipelines to run a single sample or multiple samples separately.
 
 ### `single_sample`
 The **single_sample** workflow will process 10x data,taking in 10x-structured data, and metadata file.
@@ -99,6 +99,10 @@ This could be very resource intensive, depending on the dataset.
 ### `scenic`
 Runs the SCENIC workflow alone, generating a loom file with only the SCENIC results.
 
+### `nemesh`
+Runs the Nemesh pipeline (Drop-seq) on a single sample or multiple samples separately.
+
+Source: http://mccarrolllab.org/wp-content/uploads/2016/03/Drop-seqAlignmentCookbookv1.2Jan2016.pdf
 
 ## Multiple Datasets
 Pipelines to aggregate multiple datasets together.
