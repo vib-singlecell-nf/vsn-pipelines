@@ -72,17 +72,21 @@ workflow SCENIC {
         /* cisTarget 
             track analysis
         */
-        trackDB = Channel
-            .fromPath( params.sc.scenic.cistarget.trkDB )
-            .collect() // use all files together in the ctx command
-        trackANN = file(params.sc.scenic.cistarget.trkANN)
-        ctx_trk = SC__SCENIC__CISTARGET__TRACK( runs, filteredloom, grn, trackDB, trackANN, 'trk' )
+        if(params.sc.scenic.cistarget.trkDB) {
+            trackDB = Channel
+                .fromPath( params.sc.scenic.cistarget.trkDB )
+                .collect() // use all files together in the ctx command
+            trackANN = file(params.sc.scenic.cistarget.trkANN)
+            ctx_trk = SC__SCENIC__CISTARGET__TRACK( runs, filteredloom, grn, trackDB, trackANN, 'trk' )
+        }
 
         /* AUCell, motif regulons */
         auc_mtf = SC__SCENIC__AUCELL__MOTIF( runs, filteredloom, ctx_mtf, 'mtf' )
 
-        /* AUCell, track regulons */
-        auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
+        if(params.sc.scenic.cistarget.trkDB) {
+            /* AUCell, track regulons */
+            auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
+        }
 
         // visualize and merge
         if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
@@ -94,11 +98,13 @@ workflow SCENIC {
                 ctx_mtf.collect(),
                 'mtf'
             )
-            /* Aggregate tracks from multiple runs */
-            aggr_features_trk = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__TRACK(
-                ctx_trk.collect(),
-                'trk'
-            )
+            if(params.sc.scenic.cistarget.trkDB) {
+                /* Aggregate tracks from multiple runs */
+                aggr_features_trk = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__TRACK(
+                    ctx_trk.collect(),
+                    'trk'
+                )
+            }
 
             // Aggregate regulons (motifs and tracks)
             /* Aggregate motif regulons from multiple runs */
@@ -106,11 +112,13 @@ workflow SCENIC {
                 auc_mtf.collect(),
                 'mtf'
             )
-            /* Aggregate track regulons from multiple runs */
-            regulons_folder_trk = SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK(
-                auc_trk.collect(),
-                'trk'
-            )
+            if(params.sc.scenic.cistarget.trkDB) {
+                /* Aggregate track regulons from multiple runs */
+                regulons_folder_trk = SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK(
+                    auc_trk.collect(),
+                    'trk'
+                )
+            }
 
             // Run AUCell on aggregated regulons
             /* Aggregate motif regulons from multiple runs */
@@ -119,12 +127,14 @@ workflow SCENIC {
                 regulons_folder_mtf,
                 'mtf'
             )
-            /* Aggregate track regulons from multiple runs */
-            regulons_auc_trk = SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK(
-                filteredloom,
-                regulons_folder_trk,
-                'trk'
-            )
+            if(params.sc.scenic.cistarget.trkDB) {
+                /* Aggregate track regulons from multiple runs */
+                regulons_auc_trk = SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK(
+                    filteredloom,
+                    regulons_folder_trk,
+                    'trk'
+                )
+            }
 
             // Save to loom
             /* Save multiple motif SCENIC runs to loom*/
@@ -135,26 +145,29 @@ workflow SCENIC {
                 regulons_auc_mtf,
                 'mtf'
             )
-            /* Save multiple track SCENIC runs to loom*/
-            scenic_loom_trk = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
-                filteredloom,
-                aggr_features_trk,
-                regulons_folder_trk,
-                regulons_auc_trk,
-                'trk'
-            )
-            SC__SCENIC__MERGESCENICLOOMS(
-                scenic_loom_mtf,
-                scenic_loom_trk
-            )
+            if(params.sc.scenic.cistarget.trkDB) {
+                /* Save multiple track SCENIC runs to loom*/
+                scenic_loom_trk = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
+                    filteredloom,
+                    aggr_features_trk,
+                    regulons_folder_trk,
+                    regulons_auc_trk,
+                    'trk'
+                )
+                SC__SCENIC__MERGESCENICLOOMS(
+                    scenic_loom_mtf,
+                    scenic_loom_trk
+                )
+            }
+            out = params.sc.scenic.cistarget.trkDB ? SC__SCENIC__MERGESCENICLOOMS.out: scenic_loom_mtf
         } else {
-            SC__SCENIC__MERGESCENICLOOMS( 
+            out = SC__SCENIC__MERGESCENICLOOMS( 
                 auc_mtf,
                 auc_trk
             )
         }
     emit:
-        SC__SCENIC__MERGESCENICLOOMS.out
+        out
 }
 
 workflow SCENIC_append {
@@ -162,7 +175,7 @@ workflow SCENIC_append {
         filteredloom
         scopeloom
     main:
-        scenicloom = SCENIC( file( params.sc.scenic.filteredloom ) )
+        scenicloom = SCENIC( filteredloom )
         SC__SCENIC__APPENDSCENICLOOM( scopeloom, scenicloom )
     emit:
         SC__SCENIC__APPENDSCENICLOOM.out
