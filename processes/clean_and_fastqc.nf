@@ -5,7 +5,7 @@ nextflow.preview.dsl=2
  */
 process FASTP__CLEAN_AND_FASTQC {
 
-    container params.picard.container
+    container params.fastp.container
     publishDir "${params.outdir}/01.clean", mode: 'symlink'
     clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=24:00:00 -A ${params.qsubaccount}"
 
@@ -16,7 +16,7 @@ process FASTP__CLEAN_AND_FASTQC {
         tuple file('*_fastp.{json,html}'), emit: report
     script:
         """
-        /ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/software/genius/fastp/0.20.0/bin/fastp --thread ${params.thread} \
+        fastp --thread ${params.thread} \
             -i ${reads[0]} \
             -I ${reads[1]} \
             -o ${sample}_R1.clean.fastq.gz \
