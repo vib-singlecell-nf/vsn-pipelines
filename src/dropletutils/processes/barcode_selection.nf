@@ -1,8 +1,9 @@
 nextflow.preview.dsl=2
 
-process DROPLET_UTILS__BARCODE_SELECTION {
+process SC__DROPLET_UTILS__BARCODE_SELECTION {
+    
+    container params.sc.dropletutils.container
     publishDir "03.count", mode: 'symlink'
-
     clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
