@@ -260,7 +260,7 @@ params {
             }
         }
         scanpy {
-            container = 'docker://dweemx/sctx-scanpy:0.2.0'
+            container = 'docker://dweemx/sctx-scanpy:0.4.0'
             filter {
                 ...
             }
