@@ -99,6 +99,8 @@ This could be very resource intensive, depending on the dataset.
 ### `scenic`
 Runs the SCENIC workflow alone, generating a loom file with only the SCENIC results.
 
+### `scenic_multiruns`
+Runs the SCENIC workflow multiple times (set by `params.sc.scenic.numRuns`), generating a loom file with the aggregated results from the multiple SCENIC runs.
 
 ## Multiple Datasets
 Pipelines to aggregate multiple datasets together.
