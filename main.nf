@@ -53,3 +53,7 @@ workflow single_sample_star {
     SINGLE_SAMPLE_STAR()
 }
 
+workflow nemesh {
+    include nemesh as NEMESH from './workflows/nemesh' params(params)
+    NEMESH()  
+}
