@@ -81,7 +81,7 @@ process SC__FILE_CONCATENATOR() {
 
 process SC__STAR_CONCATENATOR() {
 
-  container params.sc.scanpy.container
+  container "docker://dweemx/sctx-scanpy:0.3.0"
   publishDir "${params.outdir}/data", mode: 'symlink'
 
   input:
