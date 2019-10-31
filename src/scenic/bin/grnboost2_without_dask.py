@@ -30,7 +30,7 @@ parser_grn.add_argument(
 )
 parser_grn.add_argument(
     '-o', '--output',
-    type=argparse.FileType('w'),
+    type=str,
     default=sys.stdout,
     help='Output file/stream, i.e. a table of TF-target genes (CSV).'
 )
@@ -120,3 +120,4 @@ if __name__ == '__main__':
     end_time = time.time()
     print('Done in {} seconds.'.format(end_time - start_time), file=sys.stderr)
     adj.to_csv(args.output, index=False, sep="\t")
+
