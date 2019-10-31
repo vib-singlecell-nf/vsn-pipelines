@@ -33,6 +33,7 @@ include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_F
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
+include SC__SCENIC__PUBLISH_LOOM                                from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__MERGESCENICLOOMS                            from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__APPENDSCENICLOOM                            from './processes/scenicLoomHandler'     params(params)
 
@@ -161,10 +162,14 @@ workflow SCENIC {
             }
             out = params.sc.scenic.cistarget.trkDB ? SC__SCENIC__MERGESCENICLOOMS.out: scenic_loom_mtf
         } else {
-            out = SC__SCENIC__MERGESCENICLOOMS( 
-                auc_mtf,
-                auc_trk
-            )
+            if(params.sc.scenic.cistarget.trkDB) {
+                out = SC__SCENIC__MERGESCENICLOOMS(
+                    auc_mtf,
+                    auc_trk
+                )
+            } else {
+                out = SC__SCENIC__PUBLISH_LOOM( auc_mtf )
+            }
         }
     emit:
         out
