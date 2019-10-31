@@ -104,6 +104,9 @@ Runs the Nemesh pipeline (Drop-seq) on a single sample or multiple samples separ
 
 Source: http://mccarrolllab.org/wp-content/uploads/2016/03/Drop-seqAlignmentCookbookv1.2Jan2016.pdf
 
+### `scenic_multiruns`
+Runs the SCENIC workflow multiple times (set by `params.sc.scenic.numRuns`), generating a loom file with the aggregated results from the multiple SCENIC runs.
+
 ## Multiple Datasets
 Pipelines to aggregate multiple datasets together.
 
@@ -262,7 +265,7 @@ params {
             }
         }
         scanpy {
-            container = 'docker://dweemx/sctx-scanpy:0.2.0'
+            container = 'docker://dweemx/sctx-scanpy:0.4.0'
             filter {
                 ...
             }
