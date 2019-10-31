@@ -5,7 +5,7 @@ nextflow.preview.dsl=2
 process SC__SCENIC__CISTARGET {
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
+    publishDir "${params.sc.scenic.scenicoutdir}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks params.sc.scenic.maxForks
     
@@ -54,3 +54,4 @@ process SC__SCENIC__CISTARGET {
         --min_genes MIN_GENES
         --expression_mtx_fname EXPRESSION_MTX_FNAME
 */
+
