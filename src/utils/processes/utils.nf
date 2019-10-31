@@ -118,3 +118,19 @@ process SC__FILE_ANNOTATOR() {
       "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
     """
 }
+
+process SC__PUBLISH_H5AD {
+
+    publishDir "${params.outdir}/data", mode: 'link', overwrite: true
+
+    input:
+        file f_in
+        val f_out
+    output:
+        file "${f_out}.h5ad"
+    script:
+    """
+    ln -s ${f_in} ${f_out}.h5ad
+    """
+}
+
