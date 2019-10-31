@@ -9,7 +9,7 @@ if(!params.containsKey("test")) {
 process SC__SCENIC__AGGR_MULTI_RUNS_FEATURES {
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_cistarget/", mode: 'copy'
+    publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_cistarget/", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
