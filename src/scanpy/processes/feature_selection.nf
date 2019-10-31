@@ -5,7 +5,7 @@ include getBaseName from '../../utils/processes/files.nf'
 process SC__SCANPY__FEATURE_SELECTION {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -23,3 +23,4 @@ process SC__SCANPY__FEATURE_SELECTION {
         "${getBaseName(f)}.SC__SCANPY__FEATURE_SELECTION.${params.off}"
     """
 }
+

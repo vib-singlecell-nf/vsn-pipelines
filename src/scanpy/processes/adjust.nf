@@ -8,7 +8,7 @@ normalizationVariablesToRegressOutAsArguments = params.normalizationVariablesToR
 process SC__SCANPY__ADJUSTMENT {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -23,3 +23,4 @@ process SC__SCANPY__ADJUSTMENT {
          "${getBaseName(f)}.SC__SCANPY__ADJUSTMENT.${params.off}" 
     """
 }
+
