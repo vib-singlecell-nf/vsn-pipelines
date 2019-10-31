@@ -265,7 +265,7 @@ params {
             }
         }
         scanpy {
-            container = 'docker://dweemx/sctx-scanpy:0.4.0'
+            container = 'docker://aertslab/sctx-scanpy:0.5.0'
             filter {
                 ...
             }
