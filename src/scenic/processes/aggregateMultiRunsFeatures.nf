@@ -19,12 +19,13 @@ process SC__SCENIC__AGGR_MULTI_RUNS_FEATURES {
     val type
 
     output:
-    file "multi_runs_features_${type}.csv"
+    file "multi_runs_features_${type}.pickle"
 
     """
     ${binDir}aggregate_SCENIC_multi_runs_features.py \
         ${f} \
-        --output "multi_runs_features_${type}.csv"
+        --output "multi_runs_features_${type}.pickle" \
+        --output-format "pickle"
     """
 }
 
