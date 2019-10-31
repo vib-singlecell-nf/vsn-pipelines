@@ -12,7 +12,7 @@ process SC__FILE_CONVERTER {
 
   cache 'deep'
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     set id, file(f)
@@ -64,7 +64,7 @@ process SC__FILE_CONVERTER_HELP {
 process SC__FILE_CONCATENATOR() {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -82,7 +82,7 @@ process SC__FILE_CONCATENATOR() {
 process SC__STAR_CONCATENATOR() {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -102,7 +102,7 @@ include getBaseName from './files.nf'
 process SC__FILE_ANNOTATOR() {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
