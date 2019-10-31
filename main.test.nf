@@ -5,37 +5,37 @@
 // Test 1: SC__SCENIC__GRNBOOST2WITHOUTDASK (from processes/)
 // Time: ~2min
 // Command: 
-//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__GRNBOOST2WITHOUTDASK
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf -profile singularity --test SC__SCENIC__GRNBOOST2WITHOUTDASK
 
 // Test 2: SC__SCENIC__CISTARGET (from processes/)
 // Time: ~10min
 // Command:
-//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__CISTARGET
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf -profile singularity --test SC__SCENIC__CISTARGET
 
 // Test 3: SC__SCENIC__AUCELL (from processes/)
 // Time: ~1min
 // Command:
-//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL
 
 // Test 4: SC__SCENIC__AGGR_MULTI_RUNS_FEATURES (from processes/)
-// Time: ~?min
+// Time: ~1min
 // Command:
-//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AGGR_MULTI_RUNS_FEATURES
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf -profile singularity --test SC__SCENIC__AGGR_MULTI_RUNS_FEATURES
 
 // Test 5: SC__SCENIC__AGGR_MULTI_RUNS_REGULONS (from processes/)
 // Time: <1min
 // Command:
-//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AGGR_MULTI_RUNS_REGULONS
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf -profile singularity --test SC__SCENIC__AGGR_MULTI_RUNS_REGULONS
 
 // Test 6: SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER (from processes/)
 // Time: ~?min
 // Command:
-//  nextflow -C conf/test.config,scenic.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf -profile singularity --test SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER
 
 // Test 7: SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM (from processes/)
 // Time: ~?min
 // Command:
-//  nextflow -C conf/test.config,scenic.config run main.test.nf --test SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM
+//  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf --test SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM
 
 
 nextflow.preview.dsl=2
@@ -115,23 +115,6 @@ workflow test_SC__SCENIC__AUCELL {
 }
 
 // Make the test workflow 
-workflow test_SC__SCENIC__AGGR_MULTI_RUNS_FEATURES {
-    get:
-        reg_mtf
-        reg_trk
-    main:
-        /* Aggregate motifs from multiple runs */
-        aggr_features_mtf = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__MOTIF( reg_mtf, 'mtf' )
-
-        /* Aggregate tracks from multiple runs */
-        aggr_features_trk = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__TRACK( reg_trk, 'trk' )
-    emit:
-        aggr_features_mtf
-        aggr_features_trk
-}
-
-
-// Make the test workflow 
 workflow test_SC__SCENIC__AGGR_MULTI_RUNS_REGULONS {
     get:
         auc_mtf_looms
@@ -164,38 +147,6 @@ workflow test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
         regulons_auc_trk
 }
 
-workflow test_SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
-    get:
-        filteredloom
-        aggr_features_mtf
-        aggr_features_trk
-        regulons_folder_mtf
-        regulons_folder_trk
-        regulons_auc_mtf
-        regulons_auc_trk
-    main:
-        /* Save multiple motif SCENIC runs to loom*/
-        scenic_loom_mtf = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF( 
-            filteredloom,
-            aggr_features_mtf,
-            regulons_folder_mtf,
-            regulons_auc_mtf,
-            'mtf' 
-        )
-
-        /* Save multiple track SCENIC runs to loom*/
-        scenic_loom_trk = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
-            filteredloom,
-            aggr_features_trk,
-            regulons_folder_trk,
-            regulons_auc_trk,
-            'trk' 
-        )
-    emit:
-        scenic_loom_mtf
-        scenic_loom_trk
-}
-
 workflow {
     main:
         switch(params.test) {
@@ -212,9 +163,14 @@ workflow {
                 test_SC__SCENIC__AUCELL( file( params.sc.scenic.filteredloom ), ctx_mtf, ctx_trk )
             break;
             case "SC__SCENIC__AGGR_MULTI_RUNS_FEATURES":
+                /* Aggregate motifs from multiple runs */
                 reg_mtf = Channel.fromPath(params.sc.scenic.scenicoutdir + "/cistarget/run_*/run_*__reg_mtf.csv")
-                reg_trk = Channel.fromPath(params.sc.scenic.scenicoutdir + "/cistarget/run_*/run_*__reg_trk.csv")
-                test_SC__SCENIC__AGGR_MULTI_RUNS_FEATURES(reg_mtf.collect(), reg_trk.collect())
+                SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__MOTIF( reg_mtf.collect(), 'mtf' )
+                if(params.sc.scenic.cistarget.trkDB) {
+                    /* Aggregate tracks from multiple runs */
+                    reg_trk = Channel.fromPath(params.sc.scenic.scenicoutdir + "/cistarget/run_*/run_*__reg_trk.csv")
+                    SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__TRACK( reg_trk.collect(), 'trk' )
+                }
             break;
             case "SC__SCENIC__AGGR_MULTI_RUNS_REGULONS":
                 auc_mtf_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_mtf.loom")
@@ -222,26 +178,37 @@ workflow {
                 test_SC__SCENIC__AGGR_MULTI_RUNS_REGULONS(auc_mtf_looms.collect(), auc_trk_looms.collect())
             break;
             case "SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER":
-                mtf_regulons = file("out/multi_runs_regulons_mtf")
-                trk_regulons = file("out/multi_runs_regulons_trk")
+                mtf_regulons = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_mtf")
+                trk_regulons = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
                 test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER(file(params.sc.scenic.filteredloom), mtf_regulons, trk_regulons)
             break;
             case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM":
-                aggr_features_mtf = file("out/multi_runs_cistarget/multi_runs_features_mtf.csv")
-                aggr_features_trk = file("out/multi_runs_cistarget/multi_runs_features_trk.csv")
-                regulons_folder_mtf = file("out/multi_runs_regulons_mtf")
-                regulons_folder_trk = file("out/multi_runs_regulons_trk")
-                regulons_auc_mtf = file("out/multi_runs_aucell/multi_runs_regulons_auc_mtf.tsv")
-                regulons_auc_trk = file("out/multi_runs_aucell/multi_runs_regulons_auc_trk.tsv")
-                test_SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM(
-                    file(params.sc.scenic.filteredloom),
+                filteredloom = file(params.sc.scenic.filteredloom)
+                aggr_features_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_mtf.pickle")
+                regulons_folder_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_mtf")
+                regulons_auc_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_aucell/multi_runs_regulons_auc_mtf.tsv")
+                
+                /* Save multiple motif SCENIC runs to loom*/
+                SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF( 
+                    filteredloom,
                     aggr_features_mtf,
-                    aggr_features_trk,
                     regulons_folder_mtf,
-                    regulons_folder_trk,
                     regulons_auc_mtf,
-                    regulons_auc_trk
+                    'mtf' 
                 )
+                if(params.sc.scenic.cistarget.trkDB) {
+                    regulons_folder_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
+                    aggr_features_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_trk.pickle")
+                    regulons_auc_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_aucell/multi_runs_regulons_auc_trk.tsv")
+                    /* Save multiple track SCENIC runs to loom*/
+                    SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
+                        filteredloom,
+                        aggr_features_trk,
+                        regulons_folder_trk,
+                        regulons_auc_trk,
+                        'trk' 
+                    )
+                }
             break;
             default:
                 throw new Exception("The test parameters should be specified.")
