@@ -6,6 +6,22 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
+process SC__SCENIC__PUBLISH_LOOM {
+
+    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
+
+    input:
+    file loom
+
+    output:
+    file params.sc.scenic.scenicOutputLoom
+
+    script:
+    """
+    ln -s ${loom} ${params.sc.scenic.scenicOutputLoom}
+    """
+}
+
 process SC__SCENIC__MERGESCENICLOOMS {
     cache 'deep'
     container params.sc.scenic.container
