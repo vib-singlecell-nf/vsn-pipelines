@@ -9,8 +9,6 @@ from multiprocessing import cpu_count
 import loompy as lp
 import numpy as np
 import pandas as pd
-import umap
-from MulticoreTSNE import MulticoreTSNE as TSNE
 
 ################################################################################
 ################################################################################
@@ -26,19 +24,13 @@ parser.add_argument(
     '--loom_track',
     help='Loom file from pySCENIC track run',
     required=True,
-    default='pyscenic_motif.loom'
+    default='pyscenic_track.loom'
 )
 parser.add_argument(
     '--loom_output',
     help='Final loom file with pySCENIC motif and track results integrated',
     required=True,
     default='pyscenic.loom'
-)
-parser.add_argument(
-    '--num_workers',
-    type=int,
-    default=(cpu_count() - 1),
-    help='The number of workers to use. (default: {}).'.format(cpu_count() - 1)
 )
 args = parser.parse_args()
 
@@ -74,10 +66,6 @@ def integrate_motif_track(args):
     lf.close()
 
     ################################################################################
-    #
-    ################################################################################
-
-    ################################################################################
     # Fix track auc mtx names:
     ################################################################################
 
@@ -91,11 +79,8 @@ def integrate_motif_track(args):
     # fill NAs (if any) with 0s:
     auc_mtx.fillna(0, inplace=True)
 
-    # add underscore for SCope compatibility:
-    auc_mtx.columns = auc_mtx.columns.str.replace('\\(', '_(')
-
     ################################################################################
-    # Fix regulon objects to display properly in SCope:
+    # Combine track and motif
     ################################################################################
 
     # combine regulon assignment matrices:
@@ -108,19 +93,16 @@ def integrate_motif_track(args):
     # replace NAs with 0s:
     regulons.fillna(0, inplace=True)
 
-    # add underscore for SCope compatibility:
-    regulons.columns = regulons.columns.str.replace('\\(', '_(')
-
     # Rename regulons in the thresholds object, motif
     rt_mtf = meta_mtf['regulonThresholds']
     for i, x in enumerate(rt_mtf):
-        tmp = x.get('regulon').replace("(", "_(") + '-motif'
+        tmp = x.get('regulon') + '-motif'
         x.update({'regulon': tmp})
 
     # Rename regulons in the thresholds object, track
     rt_trk = meta_trk['regulonThresholds']
     for i, x in enumerate(rt_trk):
-        tmp = x.get('regulon').replace("(", "_(") + '-track'
+        tmp = x.get('regulon') + '-track'
         x.update({'regulon': tmp})
         # blank out the "motifData" field for track-based regulons:
         x.update({'mofitData': 'NA.png'})
@@ -129,45 +111,10 @@ def integrate_motif_track(args):
     rt = rt_mtf + rt_trk
 
     ################################################################################
-    # Visualize AUC matrix:
-    ################################################################################
-
-    # UMAP
-    run_umap = umap.UMAP(n_neighbors=10, min_dist=0.4, metric='correlation').fit_transform
-    dr_umap = run_umap(auc_mtx.dropna())
-    # pd.DataFrame(dr_umap, columns=['X', 'Y'], index=auc_mtx.dropna().index).to_csv("scenic_motif-track_umap.txt", sep='\t')
-    # tSNE
-    tsne = TSNE(n_jobs=args.num_workers)
-    dr_tsne = tsne.fit_transform(auc_mtx.dropna())
-
-    ################################################################################
-    # embeddings
-    ################################################################################
-
-    default_embedding = pd.DataFrame(dr_umap, columns=['_X', '_Y'], index=auc_mtx.dropna().index)
-
-    embeddings_x = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_X']].astype('float32')
-    embeddings_y = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_Y']].astype('float32')
-
-    embeddings_x.columns = ['1']
-    embeddings_y.columns = ['1']
-
-    ################################################################################
     # metadata
     ################################################################################
 
     metadata = {}
-
-    metadata['embeddings'] = [
-        {
-            "id": -1,
-            "name": "SCENIC AUC UMAP"
-        },
-        {
-            "id": 1,
-            "name": "SCENIC AUC t-SNE"
-        },
-    ]
 
     metadata["metrics"] = [
         {
@@ -179,9 +126,6 @@ def integrate_motif_track(args):
         }
     ]
 
-    metadata["annotations"] = [
-    ]
-
     # SCENIC regulon thresholds:
     metadata["regulonThresholds"] = rt
 
@@ -191,14 +135,9 @@ def integrate_motif_track(args):
 
     # re-open the connection to the loom file to copy the original expression data
     lf = lp.connect(args.loom_motif, mode='r', validate=False)
-    # exprMat = pd.DataFrame(lf[:,:], index=lf.ra.Gene, columns=lf.ca.CellID).T
-    # lf.close()
 
     col_attrs = {
         "CellID": lf.ca.CellID,  # np.array(adata.obs.index),
-        "Embedding": df_to_named_matrix(default_embedding),
-        "Embeddings_X": df_to_named_matrix(embeddings_x),
-        "Embeddings_Y": df_to_named_matrix(embeddings_y),
         "RegulonsAUC": df_to_named_matrix(auc_mtx),
     }
 
@@ -210,8 +149,6 @@ def integrate_motif_track(args):
     attrs = {
         "MetaData": json.dumps(metadata),
     }
-
-    attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metadata).encode('ascii'))).decode('ascii')
 
     if "SCopeTreeL1" in attrs.keys():
         attrs['SCopeTreeL1'] = lf.attrs.SCopeTreeL1
@@ -232,3 +169,4 @@ def integrate_motif_track(args):
 
 if __name__ == "__main__":
     integrate_motif_track(args)
+
