@@ -55,11 +55,11 @@ parser_grn.add_argument(
     help='The threshold used for filtering the regulons based on the number of targets (default: {}).'.format(5)
 )
 parser_grn.add_argument(
-    '--gene-occurence-threshold',
+    '--min-regulon-gene-occurrence',
     type=int,
     default=5,
-    dest="gene_occurence_threshold",
-    help='The threshold used for filtering the genes bases on their occurence (default: {}).'.format(5)
+    dest="min_regulon_gene_occurrence",
+    help='The threshold used for filtering the genes bases on their occurrence (default: {}).'.format(5)
 )
 parser_grn.add_argument(
     '--cell-id-attribute',
@@ -146,7 +146,7 @@ regulons = transform.df2regulons(
 signatures = utils.read_signatures_from_tsv_dir(
     dpath=args.signatures_fname,
     noweights=False,
-    weight_threshold=args.gene_occurence_threshold,
+    weight_threshold=args.min_regulon_gene_occurrence,
     min_genes=args.min_genes_regulon
 )
 
