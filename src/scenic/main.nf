@@ -33,9 +33,11 @@ include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_F
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
-include SC__SCENIC__PUBLISH_LOOM                                from './processes/scenicLoomHandler'     params(params)
-include SC__SCENIC__MERGESCENICLOOMS                            from './processes/scenicLoomHandler'     params(params)
-include SC__SCENIC__APPENDSCENICLOOM                            from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__PUBLISH_LOOM            from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__APPENDSCENICLOOM        from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__VISUALIZE               from './processes/scenicLoomHandler'     params(params)
+
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -55,14 +57,11 @@ workflow SCENIC {
     get:
         filteredloom
     main:
-        // filteredloom = file(params.sc.scenic.filteredloom)
         /* GRN */
         tfs = file(params.sc.scenic.grn.TFs)
         grn = SC__SCENIC__GRNBOOST2WITHOUTDASK( runs, filteredloom, tfs )
 
-        /* cisTarget 
-            motif analysis
-        */
+        /* cisTarget motif analysis */
         // channel for SCENIC databases resources:
         motifDB = Channel
             .fromPath( params.sc.scenic.cistarget.mtfDB )
@@ -70,9 +69,7 @@ workflow SCENIC {
         motifANN = file(params.sc.scenic.cistarget.mtfANN)
         ctx_mtf = SC__SCENIC__CISTARGET__MOTIF( runs, filteredloom, grn, motifDB, motifANN, 'mtf' )
 
-        /* cisTarget 
-            track analysis
-        */
+        /* cisTarget track analysis */
         if(params.sc.scenic.cistarget.trkDB) {
             trackDB = Channel
                 .fromPath( params.sc.scenic.cistarget.trkDB )
@@ -89,7 +86,7 @@ workflow SCENIC {
             auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
         }
 
-        // visualize and merge
+        // multi-runs aggregation:
         if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
             if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
                 throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
@@ -155,25 +152,28 @@ workflow SCENIC {
                     regulons_auc_trk,
                     'trk'
                 )
-                SC__SCENIC__MERGESCENICLOOMS(
+                SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS(
                     scenic_loom_mtf,
                     scenic_loom_trk
                 )
             }
-            out = params.sc.scenic.cistarget.trkDB ? SC__SCENIC__MERGESCENICLOOMS.out: scenic_loom_mtf
+            out = params.sc.scenic.cistarget.trkDB ? SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS.out: scenic_loom_mtf
         } else {
             if(params.sc.scenic.cistarget.trkDB) {
-                out = SC__SCENIC__MERGESCENICLOOMS(
-                    auc_mtf,
-                    auc_trk
-                )
+                out = SC__SCENIC__VISUALIZE(
+                    SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS(
+                        auc_mtf,
+                        auc_trk
+                    ))
             } else {
-                out = SC__SCENIC__PUBLISH_LOOM( auc_mtf )
+                out = SC__SCENIC__VISUALIZE(auc_mtf)
             }
         }
+        SC__SCENIC__PUBLISH_LOOM(out)
     emit:
         out
 }
+
 
 workflow SCENIC_append {
     get:
@@ -185,6 +185,7 @@ workflow SCENIC_append {
     emit:
         SC__SCENIC__APPENDSCENICLOOM.out
 }
+
 
 // Uncomment to test
 workflow {
