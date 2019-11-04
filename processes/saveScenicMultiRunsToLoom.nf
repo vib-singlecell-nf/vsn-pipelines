@@ -35,7 +35,7 @@ process SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
         $multiRunsAggrRegulonsAUC \
         -o "multi_runs_regulons_auc_${type}.loom" \
         --min-genes-regulon ${params.sc.scenic.aucell.min_genes_regulon} \
-        --gene-occurence-threshold ${params.sc.scenic.aucell.gene_occurence_threshold} \
+        --min-regulon-gene-occurrence ${params.sc.scenic.aucell.min_regulon_gene_occurrence} \
         --cell-id-attribute ${params.sc.scenic.cell_id_attribute} \
         --gene-attribute ${params.sc.scenic.gene_attribute} \
         --title "${params.global.project_name} - pySCENIC (${type})" \
