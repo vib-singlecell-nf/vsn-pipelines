@@ -4,7 +4,6 @@ import argparse
 import base64
 import json
 import zlib
-from multiprocessing import cpu_count
 
 import loompy as lp
 import numpy as np
