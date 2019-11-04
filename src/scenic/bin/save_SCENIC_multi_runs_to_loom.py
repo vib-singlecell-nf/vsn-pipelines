@@ -12,6 +12,7 @@ from pyscenic.utils import COLUMN_NAME_MOTIF_SIMILARITY_QVALUE, COLUMN_NAME_ORTH
     COLUMN_NAME_ANNOTATION
 import time
 import utils
+import export_to_loom
 
 ################################################################################
 # TODO:
@@ -175,7 +176,8 @@ print(f"... took {time.time() - start} seconds to run.", flush=True)
 # Create loom
 print(f"Exporting to loom...", flush=True)
 start = time.time()
-export2loom(
+# Create the basic loom
+scope_loom = export_to_loom.SCopeLoom(
     ex_mtx=ex_matrix_df,
     regulons=regulons,
     out_fname=args.output.name,
@@ -183,7 +185,19 @@ export2loom(
     nomenclature=args.nomenclature,
     auc_mtx=auc_mtx,
     tree_structure=[args.scope_tree_level_1, args.scope_tree_level_2, args.scope_tree_level_3],
-    compress=True
+    compress=True,
+    save_additional_regulon_meta_data=True
 )
+# Add additional stuff specific to multi-runs SCENIC
+scope_loom.add_row_attr_regulon_gene_weights()
+scope_loom.add_row_attr_regulon_gene_occurrences()
+scope_loom.add_meta_data(_dict={
+    "regulonSettings": {
+        "min_genes_regulon": args.min_genes_regulon,
+        "min_regulon_gene_occurrence": args.min_regulon_gene_occurrence
+    }
+})
+scope_loom.export()
+
 print(f"... took {time.time() - start} seconds to run.", flush=True)
 print(f"Done.", flush=True)
