@@ -67,13 +67,13 @@ def aggregate_genes_by_regulons(all_runs_regulons_stacked):
 def save_aggregated_regulons(all_runs_regulons_aggregated, output_dir):
     os.mkdir(output_dir)
     for regulon_name in np.unique(all_runs_regulons_aggregated["regulon"]):
-        regulon_target_gene_occurence_df = all_runs_regulons_aggregated[
+        regulon_target_gene_occurrence_df = all_runs_regulons_aggregated[
             (all_runs_regulons_aggregated.regulon == regulon_name)
         ].sort_values(
             by=['count'],
             ascending=False
         )[["gene", "count"]]
-        regulon_target_gene_occurence_df.to_csv(
+        regulon_target_gene_occurrence_df.to_csv(
             path_or_buf=os.path.join(output_dir, regulon_name + ".tsv"),
             header=False,
             sep="\t",

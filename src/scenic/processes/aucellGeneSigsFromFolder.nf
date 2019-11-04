@@ -31,7 +31,7 @@ process SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
         --min-genes ${params.sc.scenic.aucell.min_genes_regulon} \
         --auc-threshold ${params.sc.scenic.aucell.auc_threshold} \
         ${params.sc.scenic.aucell.containsKey('percentile_threshold') ? "--percentile-threshold " + params.sc.scenic.aucell.percentile_threshold : ""} \
-        --gene-occurence-threshold ${params.sc.scenic.aucell.gene_occurence_threshold} \
+        --min-regulon-gene-occurrence ${params.sc.scenic.aucell.min_regulon_gene_occurrence} \
         --num-workers ${params.sc.scenic.numWorkers} \
         --cell-id-attribute ${params.sc.scenic.cell_id_attribute} \
         --gene-attribute ${params.sc.scenic.gene_attribute}
