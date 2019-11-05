@@ -114,9 +114,9 @@ class SCopeLoom:
     # I/O
 
     @staticmethod
-    def read_loom(filename: str):
+    def read_loom(filename: str, tag: str = None):
         with lp.connect(filename, mode='r', validate=False) as loom:
-            scope_loom = SCopeLoom()
+            scope_loom = SCopeLoom(tag=tag)
             # Materialize i.e.: load the loom content otherwise storage is empty
             lp.to_html(loom)
             # Set the main matrix
@@ -126,7 +126,11 @@ class SCopeLoom:
             scope_loom.row_attrs = loom.ra.__dict__["storage"]
             scope_loom.global_attrs = loom.attrs.__dict__["storage"]
             # Decompress and decode the MetaData global attribute
-            scope_loom.global_attrs["MetaData"] = SCopeLoom.decompress_decode(value=scope_loom.global_attrs["MetaData"])
+            try:
+                scope_loom.global_attrs["MetaData"] = SCopeLoom.decompress_decode(value=scope_loom.global_attrs["MetaData"])
+            except Exception:
+                # MetaData is uncompressed
+                scope_loom.global_attrs["MetaData"] = json.loads(scope_loom.global_attrs["MetaData"])
         return scope_loom
 
     # Embeddings
@@ -153,12 +157,12 @@ class SCopeLoom:
             if embedding.is_default():
                 md_embeddings = md_embeddings + [{'id': '-1', 'name': embedding.get_embedding_name()}]
             else:
-            md_embeddings = md_embeddings + [
-                {
-                    'id': SCopeLoom.get_embedding_id(embedding=embedding, _list=md_embeddings),
-                    'name': embedding.get_embedding_name()
-                }
-            ]
+                md_embeddings = md_embeddings + [
+                    {
+                        'id': SCopeLoom.get_embedding_id(embedding=embedding, _list=md_embeddings),
+                        'name': embedding.get_embedding_name()
+                    }
+                ]
         return {"embeddings": md_embeddings}
 
     def create_loom_ca_embeddings(self):
@@ -201,6 +205,14 @@ class SCopeLoom:
             "Embeddings_Y": SCopeLoom.df_to_named_matrix(df=embeddings_Y)
         }
 
+    # Metrics
+
+    def add_metrics(self, metrics: List[str]):
+        md_metrics = []
+        for metric in metrics:
+            md_metrics.append({"name": metric})
+        self.global_attrs["MetaData"].update({'metrics': md_metrics})
+
     # SCENIC
 
     def fix_loom_md_regulon_data_for_scope(self):
@@ -225,11 +237,65 @@ class SCopeLoom:
     def fix_loom_ra_regulon_data_for_scope(self):
         regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
         # Add underscore for SCope compatibility:
-        print(regulons.columns)
         regulons.columns = regulons.columns.str.replace('\\(', '_(')
         return {
             'Regulons': SCopeLoom.df_to_named_matrix(regulons)
         }
+
+    def merge_regulon_data(self, scope_loom):
+        #######################
+        # Combine RegulonsAUC #
+        #######################
+        # Relabel columns with suffix indicating the regulon source
+        auc_mtx = pd.DataFrame(data=self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
+        auc_mtx.columns = auc_mtx.columns + '-' + self.tag
+
+        scope_loom_auc_mtx = pd.DataFrame(data=scope_loom.col_attrs['RegulonsAUC'], index=scope_loom.col_attrs['CellID'])
+        scope_loom_auc_mtx.columns = scope_loom_auc_mtx.columns + '-' + scope_loom.tag
+
+        # merge the AUC matrices:
+        auc_mtx_combined = pd.concat([auc_mtx, scope_loom_auc_mtx], sort=False, axis=1, join='outer')
+        # fill NAs (if any) with 0s:
+        auc_mtx_combined.fillna(0, inplace=True)
+
+        #######################
+        # Combine Regulons (regulon assignment matrices)
+        #######################
+        regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
+        regulons.columns = regulons.columns + '-' + self.tag
+
+        scope_loom_regulons = pd.DataFrame(scope_loom.row_attrs['Regulons'], index=scope_loom.row_attrs['Gene'])
+        scope_loom_regulons.columns = scope_loom_regulons.columns + '-' + scope_loom.tag
+
+        # merge the regulon assignment matrices:
+        regulons_combined = pd.concat([regulons, scope_loom_regulons], sort=False, axis=1, join='outer')
+        # replace NAs with 0s:
+        regulons_combined.fillna(0, inplace=True)
+
+        #######################
+        # Combine meta data Regulons
+        #######################
+        # Rename regulons in the thresholds object, motif
+        rt = self.global_attrs["MetaData"]["regulonThresholds"]
+        for _, x in enumerate(rt):
+            tmp = x.get('regulon') + '-' + self.tag
+            x.update({'regulon': tmp})
+
+        # Rename regulons in the thresholds object, track
+        scope_loom_rt = scope_loom.global_attrs["MetaData"]["regulonThresholds"]
+        for _, x in enumerate(scope_loom_rt):
+            tmp = x.get('regulon') + '-' + scope_loom.tag
+            x.update({'regulon': tmp})
+            # blank out the "motifData" field for track-based regulons:
+            x.update({'mofitData': 'NA.png'})
+
+        # merge regulon threshold dictionaries:
+        rt_merged = rt + scope_loom_rt
+
+        # Update the attributes
+        self.row_attrs.update({'Regulons': SCopeLoom.df_to_named_matrix(regulons_combined)})
+        self.col_attrs.update({'RegulonsAUC': SCopeLoom.df_to_named_matrix(auc_mtx_combined)})
+        self.global_attrs["MetaData"].update({'regulonThresholds': rt_merged})
 
     ####
 
@@ -387,14 +453,17 @@ class SCopeLoom:
         meta_data.update(_dict)
         self.global_attrs["MetaData"] = json.dumps(meta_data)
 
-    def export(self, out_fname: str, compress_meta_data: bool = False):
+    def export(self, out_fname: str, save_embeddings: bool = True, compress_meta_data: bool = False):
         if out_fname is None:
             raise ValueError("The given out_fname cannot be None.")
+
         # Embeddings
-        if 'Embedding' not in self.col_attrs.keys():
-            self.col_attrs.update(self.create_loom_ca_embeddings())
-        if 'embeddings' not in self.global_attrs.keys():
-            self.global_attrs["MetaData"].update(self.create_loom_md_embeddings())
+        if save_embeddings:
+            if 'Embedding' not in self.col_attrs.keys():
+                self.col_attrs.update(self.create_loom_ca_embeddings())
+            if 'embeddings' not in self.global_attrs.keys():
+                self.global_attrs["MetaData"].update(self.create_loom_md_embeddings())
+
         # SCENIC
         if 'Regulons' in self.row_attrs.keys():
             self.row_attrs.update(self.fix_loom_ra_regulon_data_for_scope())

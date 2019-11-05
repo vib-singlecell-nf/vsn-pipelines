@@ -115,22 +115,6 @@ workflow test_SC__SCENIC__AUCELL {
 }
 
 // Make the test workflow 
-workflow test_SC__SCENIC__AGGR_MULTI_RUNS_REGULONS {
-    get:
-        auc_mtf_looms
-        auc_trk_looms
-    main:
-        /* Aggregate motif regulons from multiple runs */
-        aggr_regulons_mtf = SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__MOTIF( auc_mtf_looms, 'mtf' )
-
-        /* Aggregate track regulons from multiple runs */
-        aggr_regulons_trk = SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK( auc_trk_looms, 'trk' )
-    emit:
-        aggr_regulons_mtf
-        aggr_regulons_trk
-}
-
-// Make the test workflow 
 workflow test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
     get:
         filteredloom
@@ -173,14 +157,24 @@ workflow {
                 }
             break;
             case "SC__SCENIC__AGGR_MULTI_RUNS_REGULONS":
+                /* Aggregate motif regulons from multiple runs */
                 auc_mtf_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_mtf.loom")
-                auc_trk_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_trk.loom")
-                test_SC__SCENIC__AGGR_MULTI_RUNS_REGULONS(auc_mtf_looms.collect(), auc_trk_looms.collect())
+                SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__MOTIF( auc_mtf_looms, 'mtf' )
+                if(params.sc.scenic.cistarget.trkDB) {
+                    /* Aggregate track regulons from multiple runs */
+                    auc_trk_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_trk.loom")
+                    SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK( auc_trk_looms, 'trk' )
+                }
             break;
             case "SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER":
-                mtf_regulons = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_mtf")
-                trk_regulons = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
-                test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER(file(params.sc.scenic.filteredloom), mtf_regulons, trk_regulons)
+                /* Aggregate motif regulons from multiple runs */
+                regulons_folder_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_mtf")
+                SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__MOTIF( file(params.sc.scenic.filteredloom), regulons_folder_mtf, 'mtf' )
+                if(params.sc.scenic.cistarget.trkDB) {
+                    /* Aggregate track regulons from multiple runs */
+                    regulons_folder_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
+                    SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK( file(params.sc.scenic.filteredloom), regulons_folder_trk, 'trk' )
+                }
             break;
             case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM":
                 filteredloom = file(params.sc.scenic.filteredloom)
