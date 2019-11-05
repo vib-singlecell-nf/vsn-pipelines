@@ -1,7 +1,7 @@
 # SCENIC
 
-## Running the pipeline
+## Testing the pipeline
 
 ```{bash}
-nextflow -C conf/test.config,scenic.config run main.nf --test
+nextflow -C conf/test.config,conf/test_multi_runs.config run main.nf --test
 ```
