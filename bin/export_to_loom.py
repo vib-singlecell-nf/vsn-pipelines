@@ -152,7 +152,7 @@ class SCopeLoom:
         for _, embedding in self.embeddings.items():
             if embedding.is_default():
                 md_embeddings = md_embeddings + [{'id': '-1', 'name': embedding.get_embedding_name()}]
-
+            else:
             md_embeddings = md_embeddings + [
                 {
                     'id': SCopeLoom.get_embedding_id(embedding=embedding, _list=md_embeddings),
