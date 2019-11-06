@@ -10,7 +10,7 @@ RUN python -m venv /opt/venv
 # Make sure we use the virtualenv:
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN git clone -b aucell_multi_runs_and_fix_empty_motif_data https://github.com/dweemx/pySCENIC.git && \
+RUN git clone -b aucell_multi_runs https://github.com/dweemx/pySCENIC.git && \
     cd pySCENIC && \
     pip install .
 
