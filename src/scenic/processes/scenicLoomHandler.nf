@@ -66,7 +66,7 @@ process SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS {
 /* options to implement:
 */
 
-process SC__SCENIC__APPENDSCENICLOOM {
+process SC__SCENIC__APPEND_SCENIC_LOOM {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'copy'
