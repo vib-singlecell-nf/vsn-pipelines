@@ -56,6 +56,8 @@ include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_F
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
+include SC__SCENIC__PUBLISH_LOOM            from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__VISUALIZE               from './processes/scenicLoomHandler'     params(params)
 
 // Create channel for the different runs
 runs = Channel.from( 1..params.sc.scenic.numRuns )
@@ -203,6 +205,11 @@ workflow {
                         'trk' 
                     )
                 }
+            break;
+            case "SC__SCENIC__VISUALIZE_PUBLISH":
+                /* Aggregate motif regulons from multiple runs */
+                multi_runs_aucell_mtf_loom = file(params.sc.scenic.scenicoutdir + "/multi_runs_looms/multi_runs_regulons_auc_mtf.loom")
+                SC__SCENIC__PUBLISH_LOOM( SC__SCENIC__VISUALIZE( multi_runs_aucell_mtf_loom ) )
             break;
             default:
                 throw new Exception("The test parameters should be specified.")
