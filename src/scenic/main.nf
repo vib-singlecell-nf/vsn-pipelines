@@ -39,7 +39,7 @@ include SC__SCENIC__APPEND_SCENIC_LOOM      from './processes/scenicLoomHandler'
 include SC__SCENIC__VISUALIZE               from './processes/scenicLoomHandler'     params(params)
 
 // reporting:
-include GENERATE_REPORT from '../scanpy/workflows/create_report.nf' params(params + params.global)
+include './processes/reports.nf' params(params + params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -188,12 +188,12 @@ workflow SCENIC_append {
     main:
         scenicloom = SCENIC( filteredloom )
         SC__SCENIC__APPEND_SCENIC_LOOM( scopeloom, scenicloom )
-
-        report = GENERATE_REPORT(
+        report_notebook = SC__SCENIC__GENERATE_REPORT(
+            file(workflow.projectDir + params.sc.scenic.report_ipynb),
             SC__SCENIC__APPEND_SCENIC_LOOM.out,
-            file(params.sc.scenic.report_ipynb),
-            "SC_SCENIC_report"
+            "SCENIC_report"
         )
+        SC__SCENIC__REPORT_TO_HTML(report_notebook)
     emit:
         SC__SCENIC__APPEND_SCENIC_LOOM.out
 }
