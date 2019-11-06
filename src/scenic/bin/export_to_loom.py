@@ -14,6 +14,7 @@ import networkx as nx
 import zlib
 import base64
 import json
+import re
 
 from typing import Mapping
 from collections import OrderedDict
@@ -97,16 +98,12 @@ class SCopeLoom:
         if self.auc_thresholds is None:
             self.auc_thresholds = self.binarize_regulon_enrichment()
         if len(self.embeddings) == 0:
-            self.embeddings = self.create_loom_default_embedding()
-        loom_embeddings = self.create_loom_ca_embeddings()
-        self.embeddings_X = loom_embeddings["embeddings_X"]
-        self.embeddings_Y = loom_embeddings["embeddings_Y"]
+            self.create_loom_default_embedding()
         self.regulon_gene_assignment = self.create_loom_regulon_gene_assignment()
         self.ngenes = self.calculate_nb_genes_per_cell()
-        self.default_embedding = self.get_default_embedding()
         self.clusterings = self.create_loom_clusterings()
         self.regulon_thresholds = self.create_loom_md_regulon_thresholds()
-        self.set_generic_columns_attrs()
+        self.set_generic_col_attrs()
         self.set_generic_row_attrs()
         self.set_generic_global_attrs()
         self.set_tree()
@@ -220,7 +217,7 @@ class SCopeLoom:
         # Rename regulons in the thresholds object, motif
         md_regulon_thresholds = self.global_attrs['MetaData']['regulonThresholds']
         for _, x in enumerate(md_regulon_thresholds):
-            tmp = x.get('regulon').replace("(", "_(")  # + '-motif'
+            tmp = re.sub(r"(_?)\(", '_(', x.get('regulon'))  # + '-motif'
             x.update({'regulon': tmp})
         return {
             'regulonThresholds': md_regulon_thresholds
@@ -229,7 +226,7 @@ class SCopeLoom:
     def fix_loom_ca_regulon_data_for_scope(self):
         auc_mtx = pd.DataFrame(self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
         # Add underscore for SCope compatibility:
-        auc_mtx.columns = auc_mtx.columns.str.replace('\\(', '_(')
+        auc_mtx.columns = auc_mtx.columns.str.replace('_?\\(', '_(')
         return {
             'RegulonsAUC': SCopeLoom.df_to_named_matrix(auc_mtx)
         }
@@ -237,7 +234,7 @@ class SCopeLoom:
     def fix_loom_ra_regulon_data_for_scope(self):
         regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
         # Add underscore for SCope compatibility:
-        regulons.columns = regulons.columns.str.replace('\\(', '_(')
+        regulons.columns = regulons.columns.str.replace('_?\\(', '_(')
         return {
             'Regulons': SCopeLoom.df_to_named_matrix(regulons)
         }
@@ -332,13 +329,7 @@ class SCopeLoom:
     def create_loom_default_embedding(self):
         # Create an embedding based on tSNE.
         # Name of columns should be "_X" and "_Y".
-        embedding = {
-            "tSNE (default)": pd.DataFrame(
-                data=TSNE().fit_transform(self.auc_mtx),
-                index=self.ex_mtx.index, columns=['_X', '_Y']
-            )
-        }  # (n_cells, 2)
-        return embedding
+        self.add_embedding(embedding=TSNE().fit_transform(self.auc_mtx), embedding_name="tSNE (default)", is_default=True)
 
     def create_loom_regulon_gene_assignment(self):
         # Encode genes in regulons as "binary" membership matrix.
@@ -354,11 +345,6 @@ class SCopeLoom:
             columns=list(map(attrgetter('name'), self.regulons))
         )
         return regulon_gene_assignment
-
-    def get_default_embedding(self):
-        default_embedding = next(iter(self.embeddings.values())).copy()
-        default_embedding.columns = ['_X', '_Y']
-        return default_embedding
 
     def name2idx(self):
         return dict(map(reversed, enumerate(sorted(set(self.cell_annotations.values())))))
@@ -405,16 +391,14 @@ class SCopeLoom:
     def create_loom_md_regulon_thresholds(self):
         return [self.get_regulon_meta_data(name, threshold) for name, threshold in self.auc_thresholds.iteritems()]
 
-    def set_generic_columns_attrs(self):
-        self.column_attrs = {
+    def set_generic_col_attrs(self):
+        self.col_attrs = {
             "CellID": self.ex_mtx.index.values.astype('str'),
             "nGene": self.ngenes.values,
-            "Embedding": SCopeLoom.df_to_named_matrix(self.default_embedding),
+            "Embedding": SCopeLoom.df_to_named_matrix(self.default_embedding.get_embedding()),
             "RegulonsAUC": SCopeLoom.df_to_named_matrix(self.auc_mtx),
             "Clusterings": SCopeLoom.df_to_named_matrix(self.clusterings),
-            "ClusterID": self.clusterings.values,
-            'Embeddings_X': SCopeLoom.df_to_named_matrix(self.embeddings_X),
-            'Embeddings_Y': SCopeLoom.df_to_named_matrix(self.embeddings_Y),
+            "ClusterID": self.clusterings.values
         }
 
     def set_generic_row_attrs(self):
@@ -451,7 +435,7 @@ class SCopeLoom:
         md = self.global_attrs["MetaData"]
         meta_data = json.loads(md)
         meta_data.update(_dict)
-        self.global_attrs["MetaData"] = json.dumps(meta_data)
+        self.global_attrs["MetaData"] = meta_data
 
     def export(self, out_fname: str, save_embeddings: bool = True, compress_meta_data: bool = False):
         if out_fname is None:
@@ -459,15 +443,13 @@ class SCopeLoom:
 
         # Embeddings
         if save_embeddings:
-            if 'Embedding' not in self.col_attrs.keys():
-                self.col_attrs.update(self.create_loom_ca_embeddings())
-            if 'embeddings' not in self.global_attrs.keys():
-                self.global_attrs["MetaData"].update(self.create_loom_md_embeddings())
+            self.col_attrs.update(self.create_loom_ca_embeddings())
+            self.global_attrs["MetaData"].update(self.create_loom_md_embeddings())
 
         # SCENIC
         if 'Regulons' in self.row_attrs.keys():
             self.row_attrs.update(self.fix_loom_ra_regulon_data_for_scope())
-        if 'RegulonsAUC' in self.row_attrs.keys():
+        if 'RegulonsAUC' in self.col_attrs.keys():
             self.col_attrs.update(self.fix_loom_ca_regulon_data_for_scope())
         if 'regulonThresholds' in self.global_attrs["MetaData"].keys():
             self.global_attrs["MetaData"].update(self.fix_loom_md_regulon_data_for_scope())

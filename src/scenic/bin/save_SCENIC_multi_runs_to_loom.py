@@ -180,14 +180,18 @@ start = time.time()
 scope_loom = export_to_loom.SCopeLoom(
     ex_mtx=ex_matrix_df,
     regulons=regulons,
-    out_fname=args.output.name,
     title=args.title,
     nomenclature=args.nomenclature,
     auc_mtx=auc_mtx,
-    tree_structure=[args.scope_tree_level_1, args.scope_tree_level_2, args.scope_tree_level_3],
+    tree_structure=[
+        args.scope_tree_level_1,
+        args.scope_tree_level_2,
+        args.scope_tree_level_3
+    ],
     compress=True,
     save_additional_regulon_meta_data=True
 )
+scope_loom.set_base_loom()
 # Add additional stuff specific to multi-runs SCENIC
 scope_loom.add_row_attr_regulon_gene_weights()
 scope_loom.add_row_attr_regulon_gene_occurrences()
@@ -197,7 +201,7 @@ scope_loom.add_meta_data(_dict={
         "min_regulon_gene_occurrence": args.min_regulon_gene_occurrence
     }
 })
-scope_loom.export()
+scope_loom.export(out_fname=args.output.name, save_embeddings=False)
 
 print(f"... took {time.time() - start} seconds to run.", flush=True)
 print(f"Done.", flush=True)
