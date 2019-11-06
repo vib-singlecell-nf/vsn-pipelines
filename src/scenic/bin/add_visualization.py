@@ -52,7 +52,7 @@ def visualize_AUCell(args):
     # load data from loom
     ################################################################################
 
-    # scenic motif output
+    # scenic output
     lf = lp.connect(args.loom_input, mode='r', validate=False)
     meta = json.loads(zlib.decompress(base64.b64decode(lf.attrs.MetaData)))
     auc_mtx = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
@@ -136,7 +136,9 @@ def visualize_AUCell(args):
         },
     ]
 
-    lf.attrs['MetaData'] = json.dumps(metaJson)
+    metaJson["regulonThresholds"] = rt
+
+    lf.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
 
     lf.close()
 
