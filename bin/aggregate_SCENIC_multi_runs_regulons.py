@@ -42,6 +42,19 @@ def from_loom_connection_regulon_incidence_matrix_to_long_df(loom):
     return df_
 
 
+def make_regulon_count_table(auc_looms):
+    regulon_names_all_runs = None
+    for i in range(0, len(auc_looms)):
+        loom = lp.connect(filename=auc_looms[i], validate=False)
+        df = from_loom_connection_regulon_incidence_matrix_to_long_df(loom=loom)
+        df = pd.DataFrame(df['regulon'].unique(), columns=['regulon'])
+        if regulon_names_all_runs is None:
+            regulon_names_all_runs = df
+        else:
+            regulon_names_all_runs = pd.concat([regulon_names_all_runs, df], axis=0)
+    return regulon_names_all_runs
+
+
 def stack_regulons(auc_looms):
     all_runs_regulons_stacked = None
 
@@ -81,6 +94,19 @@ def save_aggregated_regulons(all_runs_regulons_aggregated, output_dir):
         )
 
 
+# Make the regulon count table and save to regulons.tsv
+all_runs_regulon_count_table = make_regulon_count_table(auc_looms=args.auc_looms)
+all_runs_regulon_count_table['regulon'].value_counts().to_frame(
+    name="count"
+).to_csv(
+    path_or_buf=os.path.join(args.output, "regulons.tsv"),
+    sep="\t",
+    header=True,
+    index=True,
+    index_label="regulon"
+)
+
+# Aggregate all target genes for each regulon and save it
 all_runs_regulons_stacked = stack_regulons(auc_looms=args.auc_looms)
 all_runs_regulons_aggregated = aggregate_genes_by_regulons(all_runs_regulons_stacked=all_runs_regulons_stacked)
 save_aggregated_regulons(all_runs_regulons_aggregated=all_runs_regulons_aggregated, output_dir=args.output)
