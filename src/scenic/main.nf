@@ -38,6 +38,8 @@ include SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS from './processes/scenicLoomHandler'
 include SC__SCENIC__APPEND_SCENIC_LOOM      from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__VISUALIZE               from './processes/scenicLoomHandler'     params(params)
 
+// reporting:
+include GENERATE_REPORT from '../scanpy/workflows/create_report.nf' params(params + params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -182,6 +184,12 @@ workflow SCENIC_append {
     main:
         scenicloom = SCENIC( filteredloom )
         SC__SCENIC__APPEND_SCENIC_LOOM( scopeloom, scenicloom )
+
+        report = GENERATE_REPORT(
+            SC__SCENIC__APPEND_SCENIC_LOOM.out,
+            file(params.sc.scenic.report_ipynb),
+            "SC_SCENIC_report"
+        )
     emit:
         SC__SCENIC__APPEND_SCENIC_LOOM.out
 }
