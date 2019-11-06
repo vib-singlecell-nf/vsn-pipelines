@@ -57,7 +57,7 @@ workflow single_sample {
             CLUSTER_IDENTIFICATION.out.report
         ).collect(),
         params.global.project_name+".merged_report")
-    SC__SCANPY__REPORT_TO_HTML( SC__SCANPY__MERGE_REPORTS.out, params.global.project_name+".merged_report")
+    SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
     emit:
         filteredloom
         scopeloom

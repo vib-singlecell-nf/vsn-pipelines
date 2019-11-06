@@ -30,7 +30,7 @@ workflow GENERATE_QC_REPORT {
     main:
         report_notebook = SC__SCANPY__FILTER_QC_REPORT(
             ipynb, prefiltered, postfiltered, report_title )
-        SC__SCANPY__REPORT_TO_HTML( report_notebook, report_title )
+        SC__SCANPY__REPORT_TO_HTML(report_notebook)
     emit:
         report_notebook
 }
@@ -43,7 +43,7 @@ workflow GENERATE_REPORT {
     main:
         report_notebook = SC__SCANPY__GENERATE_REPORT(
             ipynb, data, report_title )
-        SC__SCANPY__REPORT_TO_HTML( report_notebook, report_title )
+        SC__SCANPY__REPORT_TO_HTML(report_notebook)
     emit:
         report_notebook
 }
