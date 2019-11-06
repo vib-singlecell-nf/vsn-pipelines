@@ -4,7 +4,6 @@ import argparse
 import base64
 import json
 import zlib
-from multiprocessing import cpu_count
 
 import loompy as lp
 import numpy as np
@@ -147,7 +146,7 @@ def integrate_motif_track(args):
     }
 
     attrs = {
-        "MetaData": json.dumps(metadata),
+        "MetaData": base64.b64encode(zlib.compress(json.dumps(metadata).encode('ascii'))).decode('ascii')
     }
 
     if "SCopeTreeL1" in attrs.keys():

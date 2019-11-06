@@ -159,7 +159,11 @@ workflow SCENIC {
                     scenic_loom_trk
                 )
             }
-            out = params.sc.scenic.cistarget.trkDB ? SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS.out: scenic_loom_mtf
+            if(params.sc.scenic.cistarget.trkDB) {
+                out = SC__SCENIC__VISUALIZE(SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS.out)
+            } else {
+                out = SC__SCENIC__VISUALIZE(scenic_loom_mtf)
+            }
         } else {
             if(params.sc.scenic.cistarget.trkDB) {
                 out = SC__SCENIC__VISUALIZE(

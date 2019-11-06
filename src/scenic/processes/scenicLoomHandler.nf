@@ -59,7 +59,6 @@ process SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS {
         --loom_motif ${motifloom} \
         --loom_track ${trackloom} \
         --loom_output ${params.sc.scenic.scenicOutputLoom} \
-        --num_workers ${params.sc.scenic.numWorkers} \
     """
 }
 
