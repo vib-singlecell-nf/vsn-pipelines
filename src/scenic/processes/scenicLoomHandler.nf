@@ -44,7 +44,7 @@ process SC__SCENIC__VISUALIZE {
 process SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS {
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'copy'
+    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
@@ -68,7 +68,7 @@ process SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS {
 process SC__SCENIC__APPEND_SCENIC_LOOM {
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'copy'
+    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
 
     input:
     file scopeloom

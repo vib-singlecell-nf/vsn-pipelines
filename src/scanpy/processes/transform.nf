@@ -5,7 +5,7 @@ include getBaseName from '../../utils/processes/files.nf'
 process SC__SCANPY__NORMALIZATION {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -24,7 +24,7 @@ process SC__SCANPY__NORMALIZATION {
 process SC__SCANPY__DATA_TRANSFORMATION {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -42,7 +42,7 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 process SC__SCANPY__FEATURE_SCALING {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -57,3 +57,4 @@ process SC__SCANPY__FEATURE_SCALING {
        "${getBaseName(f)}.SC__SCANPY__FEATURE_SCALING.${params.off}"
     """
 }
+
