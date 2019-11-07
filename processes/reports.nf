@@ -20,7 +20,7 @@ process SC__SCANPY__GENERATE_REPORT {
     file("${getBaseName(adata)}.${report_title}.ipynb")
   script:
     """
-    papermill ${workflow.projectDir}/src/scanpy/bin/reports/${ipynb} \
+    papermill ${ipynb} \
         ${getBaseName(adata)}.${report_title}.ipynb \
         -p FILE $adata
     """
@@ -42,7 +42,7 @@ process SC__SCANPY__FILTER_QC_REPORT {
     file("${getBaseName(unfiltered)}.${report_title}.ipynb")
   script:
     """
-    papermill ${workflow.projectDir}/src/scanpy/bin/reports/${ipynb} \
+    papermill ${ipynb} \
         ${getBaseName(unfiltered)}.${report_title}.ipynb \
         -p FILE1 $unfiltered -p FILE2 $filtered
     """
@@ -57,7 +57,6 @@ process SC__SCANPY__REPORT_TO_HTML {
 
   input:
     file ipynb
-    val report_title
 
   output:
     file "*.html"
