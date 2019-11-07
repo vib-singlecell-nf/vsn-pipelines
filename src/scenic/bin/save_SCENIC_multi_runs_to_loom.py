@@ -159,16 +159,12 @@ regulons = list(
         x.copy(gene2occurrence=list(filter(lambda y: y.name == x.name, signatures))[0].gene2weight), regulons
     )
 )
-# Rename regulons for SCope
-regulons = [r.rename(re.sub(r"\(([+-])\)", r'_(\1)', r.name)) for r in regulons]
 print(f"... took {time.time() - start} seconds to run.", flush=True)
 
 print(f"Reading AUCell matrix...", flush=True)
 start = time.time()
 # Read the regulons AUCell matrix
 auc_mtx = pd.read_csv(args.auc_mtx_fname.name, sep='\t', header=0, index_col=0)
-# Rename regulons for SCope
-auc_mtx.columns = [re.sub(r"\(([+-])\)", r'_(\1)', rname) for rname in auc_mtx.columns]
 auc_mtx.columns.name = "Regulon"
 print(f"... took {time.time() - start} seconds to run.", flush=True)
 
