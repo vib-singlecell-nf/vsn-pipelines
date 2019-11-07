@@ -8,11 +8,11 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__GRNBOOST2WITHOUTDASK {
+process SC__SCENIC__GRNBOOST2_WITHOUT_DASK {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/grnboost2withoutDask/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=${params.sc.scenic.grn.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks params.sc.scenic.maxForks
     
     input:
