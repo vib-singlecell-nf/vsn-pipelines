@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__GRNBOOST2WITHOUTDASK {
+process SC__SCENIC__GRNBOOST2_WITHOUT_DASK {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/grnboost2withoutDask/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
