@@ -30,7 +30,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
 process SC__SCANPY__GENE_FILTER {
 
     container params.sc.scanpy.container
-    publishDir "${params.outdir}/data", mode: 'symlink'
+    publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
         file(f)
@@ -50,7 +50,7 @@ process SC__SCANPY__GENE_FILTER {
 process SC__SCANPY__CELL_FILTER {
 
     container params.sc.scanpy.container
-    publishDir "${params.outdir}/data", mode: 'symlink'
+    publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
         file(f)
