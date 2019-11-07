@@ -12,7 +12,9 @@ process SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_looms/", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    // This process requires a large amount of memory especially for big datasets (force to use bigmem node)
+    // This process is quite slow (could take more than 1h for big datasets, so keep 24h for now)
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=6gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
     file exprMat

@@ -3,17 +3,20 @@
 import argparse
 import re
 import sys
-
 import pandas as pd
+import pickle
 from pyscenic import transform
 from pyscenic.export import export2loom
 from pyscenic.transform import COLUMN_NAME_NES
 from pyscenic.utils import COLUMN_NAME_MOTIF_SIMILARITY_QVALUE, COLUMN_NAME_ORTHOLOGOUS_IDENTITY, \
     COLUMN_NAME_ANNOTATION
-
+import time
 import utils
 
 ################################################################################
+# TODO:
+# This implementation should be optimized:
+# It's taking several hours to run (~5h for ~9k genes and ~13k cells)
 ################################################################################
 
 parser_grn = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
@@ -105,21 +108,37 @@ parser_grn.add_argument(
 
 args = parser_grn.parse_args()
 
+print(f"Extracting the matrix form the loom...", flush=True)
+start = time.time()
 ex_matrix_df = utils.get_matrix(
     loom_file_path=args.expression_mtx_fname.name,
     gene_attribute=args.gene_attribute,
     cell_id_attribute=args.cell_id_attribute
 )
+print(f"... took {time.time() - start} seconds", flush=True)
 
 # Transform motif enrichment table (generated from the cisTarget step) to regulons
-motif_enrichment_table = utils.read_feature_enrichment_table(fname=args.motif_enrichment_table_fname.name, sep=",")
+print(f"Reading aggregated motif enrichment table...", flush=True)
+start = time.time()
+f = args.motif_enrichment_table_fname.name
+if f.endswith('.pickle'):
+    with open(f, 'rb') as handle:
+        motif_enrichment_table = pickle.load(handle)
+elif f.endswith('.csv'):
+    motif_enrichment_table = utils.read_feature_enrichment_table(fname=args.motif_enrichment_table_fname.name, sep=",")
+else:
+    raise Exception("The aggregated feature enrichment table is in the wrong format. Expecting .pickle or .csv formats.")
+print(f"... took {time.time() - start} seconds to run.", flush=True)
+
+print(f"Making the regulons...", flush=True)
+start = time.time()
 regulons = transform.df2regulons(
     df=motif_enrichment_table,
     save_columns=[
-     COLUMN_NAME_NES,
-     COLUMN_NAME_ORTHOLOGOUS_IDENTITY,
-     COLUMN_NAME_MOTIF_SIMILARITY_QVALUE,
-     COLUMN_NAME_ANNOTATION
+        COLUMN_NAME_NES,
+        COLUMN_NAME_ORTHOLOGOUS_IDENTITY,
+        COLUMN_NAME_MOTIF_SIMILARITY_QVALUE,
+        COLUMN_NAME_ANNOTATION
     ]
 )
 
@@ -140,16 +159,18 @@ regulons = list(
         x.copy(gene2occurrence=list(filter(lambda y: y.name == x.name, signatures))[0].gene2weight), regulons
     )
 )
-# Rename regulons for SCope
-regulons = [r.rename(re.sub(r"\(([+-])\)", r'_(\1)', r.name)) for r in regulons]
+print(f"... took {time.time() - start} seconds to run.", flush=True)
 
+print(f"Reading AUCell matrix...", flush=True)
+start = time.time()
 # Read the regulons AUCell matrix
 auc_mtx = pd.read_csv(args.auc_mtx_fname.name, sep='\t', header=0, index_col=0)
-# Rename regulons for SCope
-auc_mtx.columns = [re.sub(r"\(([+-])\)", r'_(\1)', rname) for rname in auc_mtx.columns]
 auc_mtx.columns.name = "Regulon"
+print(f"... took {time.time() - start} seconds to run.", flush=True)
 
 # Create loom
+print(f"Exporting to loom...", flush=True)
+start = time.time()
 export2loom(
     ex_mtx=ex_matrix_df,
     regulons=regulons,
@@ -160,3 +181,5 @@ export2loom(
     tree_structure=[args.scope_tree_level_1, args.scope_tree_level_2, args.scope_tree_level_3],
     compress=True
 )
+print(f"... took {time.time() - start} seconds to run.", flush=True)
+print(f"Done.", flush=True)

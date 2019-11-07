@@ -81,7 +81,7 @@ process SC__FILE_CONCATENATOR() {
 
 process SC__STAR_CONCATENATOR() {
 
-  container params.sc.scanpy.container
+  container "aertslab/sctx-scanpy:0.5.0"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
