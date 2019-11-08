@@ -61,11 +61,12 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
     return signatures
 
 
-def read_feature_enrichment_table(fname, sep):
+def read_feature_enrichment_table(fname, sep, chunksize=None, raw=False):
     # ext = os.path.splitext(fname,)[1]
-    df = pd.read_csv(fname, sep=sep, index_col=[0, 1], header=[0, 1], skipinitialspace=True)
-    df[('Enrichment', COLUMN_NAME_CONTEXT)] = df[('Enrichment', COLUMN_NAME_CONTEXT)].apply(lambda s: eval(s))
-    df[('Enrichment', COLUMN_NAME_TARGET_GENES)] = df[('Enrichment', COLUMN_NAME_TARGET_GENES)].apply(lambda s: eval(s))
+    df = pd.read_csv(fname, sep=sep, index_col=[0, 1], header=[0, 1], skipinitialspace=True, chunksize=chunksize)
+    if not raw and chunksize is None:
+        df[('Enrichment', COLUMN_NAME_CONTEXT)] = df[('Enrichment', COLUMN_NAME_CONTEXT)].apply(lambda s: eval(s))
+        df[('Enrichment', COLUMN_NAME_TARGET_GENES)] = df[('Enrichment', COLUMN_NAME_TARGET_GENES)].apply(lambda s: eval(s))
     return df
 
 
