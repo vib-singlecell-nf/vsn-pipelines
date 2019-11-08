@@ -17,7 +17,7 @@ import export_to_loom
 ################################################################################
 # TODO:
 # This implementation should be optimized:
-# It's taking several hours to run (~5h for ~9k genes and ~13k cells)
+# It's taking several hours to run (~5h for 100 runs, ~9k genes and ~13k cells)
 ################################################################################
 
 parser_grn = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
@@ -122,10 +122,9 @@ print(f"... took {time.time() - start} seconds", flush=True)
 print(f"Reading aggregated motif enrichment table...", flush=True)
 start = time.time()
 f = args.motif_enrichment_table_fname.name
-if f.endswith('.pickle'):
-    with open(f, 'rb') as handle:
-        motif_enrichment_table = pickle.load(handle)
-elif f.endswith('.csv'):
+if f.endswith('.pkl') or f.endswith('.pkl.gz') or f.endswith('.pickle') or f.endswith('.pickle.gz'):
+    motif_enrichment_table = pd.read_pickle(path=f)
+elif f.endswith('.csv') or f.endswith('.csv.gz'):
     motif_enrichment_table = utils.read_feature_enrichment_table(fname=args.motif_enrichment_table_fname.name, sep=",")
 else:
     raise Exception("The aggregated feature enrichment table is in the wrong format. Expecting .pickle or .csv formats.")
