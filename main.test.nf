@@ -161,11 +161,11 @@ workflow {
             case "SC__SCENIC__AGGR_MULTI_RUNS_REGULONS":
                 /* Aggregate motif regulons from multiple runs */
                 auc_mtf_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_mtf.loom")
-                SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__MOTIF( auc_mtf_looms, 'mtf' )
+                SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__MOTIF( auc_mtf_looms.collect(), 'mtf' )
                 if(params.sc.scenic.cistarget.trkDB) {
                     /* Aggregate track regulons from multiple runs */
                     auc_trk_looms = Channel.fromPath(params.sc.scenic.scenicoutdir + "/aucell/run_*/run_*__auc_trk.loom")
-                    SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK( auc_trk_looms, 'trk' )
+                    SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK( auc_trk_looms.collect(), 'trk' )
                 }
             break;
             case "SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER":
@@ -180,7 +180,7 @@ workflow {
             break;
             case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM":
                 filteredloom = file(params.sc.scenic.filteredloom)
-                aggr_features_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_mtf.pickle")
+                aggr_features_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_mtf.csv.gz")
                 regulons_folder_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_mtf")
                 regulons_auc_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_aucell/multi_runs_regulons_auc_mtf.tsv")
                 
@@ -194,7 +194,7 @@ workflow {
                 )
                 if(params.sc.scenic.cistarget.trkDB) {
                     regulons_folder_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
-                    aggr_features_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_trk.pickle")
+                    aggr_features_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_trk.csv.gz")
                     regulons_auc_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_aucell/multi_runs_regulons_auc_trk.tsv")
                     /* Save multiple track SCENIC runs to loom*/
                     SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
