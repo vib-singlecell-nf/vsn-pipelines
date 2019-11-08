@@ -94,6 +94,11 @@ def save_aggregated_regulons(all_runs_regulons_aggregated, output_dir):
         )
 
 
+# Aggregate all target genes for each regulon and save it
+all_runs_regulons_stacked = stack_regulons(auc_looms=args.auc_looms)
+all_runs_regulons_aggregated = aggregate_genes_by_regulons(all_runs_regulons_stacked=all_runs_regulons_stacked)
+save_aggregated_regulons(all_runs_regulons_aggregated=all_runs_regulons_aggregated, output_dir=args.output)
+
 # Make the regulon count table and save to regulons.tsv
 all_runs_regulon_count_table = make_regulon_count_table(auc_looms=args.auc_looms)
 all_runs_regulon_count_table['regulon'].value_counts().to_frame(
@@ -105,8 +110,3 @@ all_runs_regulon_count_table['regulon'].value_counts().to_frame(
     index=True,
     index_label="regulon"
 )
-
-# Aggregate all target genes for each regulon and save it
-all_runs_regulons_stacked = stack_regulons(auc_looms=args.auc_looms)
-all_runs_regulons_aggregated = aggregate_genes_by_regulons(all_runs_regulons_stacked=all_runs_regulons_stacked)
-save_aggregated_regulons(all_runs_regulons_aggregated=all_runs_regulons_aggregated, output_dir=args.output)
