@@ -97,7 +97,7 @@ class SCopeLoom:
             self.auc_mtx = self.calculate_regulon_enrichment()
         if self.auc_thresholds is None:
             self.auc_thresholds = self.binarize_regulon_enrichment()
-        if len(self.embeddings) == 0:
+        if len(self.embeddings.keys()) == 0:
             self.create_loom_default_embedding()
         self.regulon_gene_assignment = self.create_loom_regulon_gene_assignment()
         self.ngenes = self.calculate_nb_genes_per_cell()
@@ -481,9 +481,8 @@ class SCopeLoom:
         n_regulons = len(self.regulons)
         data = np.zeros(shape=(n_genes, n_regulons), dtype=float)
         for idx, regulon in enumerate(self.regulons):
-            regulon_data = self.get_regulon_gene_data(regulon, key)
-            regulon_genes = list(dict(map(lambda x: x, regulon_data.items())).keys())
-            data[np.isin(genes, regulon_genes), idx] = list(dict(map(lambda x: x, regulon_data.items())).values())
+            regulon_data = pd.DataFrame.from_dict(self.get_regulon_gene_data(regulon, key), orient='index')
+            data[np.isin(genes, regulon_data.index), idx] = regulon_data[0][genes[np.isin(genes, regulon_data.index)]]
         return data
 
     def create_loom_regulon_gene_data(self, key):
