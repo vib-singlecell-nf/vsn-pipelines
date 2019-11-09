@@ -57,7 +57,7 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
     # Filter regulons with less than min_genes (>= min_genes)
     signatures = list(filter(lambda x: len(x.gene2weight) >= min_genes, signatures))
     # Subtract 1 because regulons.tsv should not be counted
-    print("Signatures passed filtering {0} out of {1}".format(len(signatures), len(gene_sig_file_paths)-1))
+    print("Signatures passed filtering {0} out of {1}".format(len(signatures), len(gene_sig_file_paths) - 1))
     return signatures
 
 
