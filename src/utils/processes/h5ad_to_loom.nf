@@ -5,7 +5,7 @@ include getBaseName from './files.nf'
 process SC__H5AD_TO_LOOM {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/loom", mode: 'symlink'
+  publishDir "${params.outdir}/loom", mode: 'link', overwrite: true
 
   input:
     file(f)
@@ -22,7 +22,7 @@ process SC__H5AD_TO_LOOM {
 process SC__H5AD_TO_FILTERED_LOOM {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/loom", mode: 'symlink'
+  publishDir "${params.outdir}/loom", mode: 'link', overwrite: true
 
   input:
     file(f)

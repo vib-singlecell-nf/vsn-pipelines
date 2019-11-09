@@ -5,7 +5,7 @@ include getBaseName from '../../utils/processes/files.nf'
 process SC__SCANPY__DIM_REDUCTION {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -26,3 +26,4 @@ process SC__SCANPY__DIM_REDUCTION {
          "${getBaseName(f)}.SC__SCANPY__DIM_REDUCTION_${method}.${params.off}"
     """
 }
+

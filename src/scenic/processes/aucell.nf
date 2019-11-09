@@ -5,7 +5,7 @@ nextflow.preview.dsl=2
 process SC__SCENIC__AUCELL {
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}/aucell/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
+    publishDir "${params.sc.scenic.scenicoutdir}/aucell/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=${params.sc.scenic.aucell.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks params.sc.scenic.maxForks
 
@@ -29,3 +29,4 @@ process SC__SCENIC__AUCELL {
         --num_workers ${params.sc.scenic.numWorkers}
     """
 }
+

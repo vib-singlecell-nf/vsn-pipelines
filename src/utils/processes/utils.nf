@@ -12,7 +12,7 @@ process SC__FILE_CONVERTER {
 
   cache 'deep'
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     set id, file(f)
@@ -64,7 +64,7 @@ process SC__FILE_CONVERTER_HELP {
 process SC__FILE_CONCATENATOR() {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -81,8 +81,8 @@ process SC__FILE_CONCATENATOR() {
 
 process SC__STAR_CONCATENATOR() {
 
-  container "docker://aertslab/sctx-scanpy:0.5.0"
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  container "aertslab/sctx-scanpy:0.5.0"
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -102,7 +102,7 @@ include getBaseName from './files.nf'
 process SC__FILE_ANNOTATOR() {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
     file(f)
@@ -118,3 +118,19 @@ process SC__FILE_ANNOTATOR() {
       "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
     """
 }
+
+process SC__PUBLISH_H5AD {
+
+    publishDir "${params.outdir}/data", mode: 'link', overwrite: true
+
+    input:
+        file f_in
+        val f_out
+    output:
+        file "${f_out}.h5ad"
+    script:
+    """
+    ln -s ${f_in} ${f_out}.h5ad
+    """
+}
+

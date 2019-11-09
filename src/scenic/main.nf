@@ -20,7 +20,7 @@ nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
-include SC__SCENIC__GRNBOOST2WITHOUTDASK                        from './processes/grnboost2withoutDask'  params(params)
+include SC__SCENIC__GRNBOOST2_WITHOUT_DASK                        from './processes/grnboost2withoutDask'  params(params)
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__MOTIF   from './processes/cistarget'             params(params)
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__TRACK   from './processes/cistarget'             params(params)
 include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from './processes/aucell'                params(params)
@@ -35,9 +35,11 @@ include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MU
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
 include SC__SCENIC__PUBLISH_LOOM            from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS from './processes/scenicLoomHandler'     params(params)
-include SC__SCENIC__APPENDSCENICLOOM        from './processes/scenicLoomHandler'     params(params)
+include SC__SCENIC__APPEND_SCENIC_LOOM      from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__VISUALIZE               from './processes/scenicLoomHandler'     params(params)
 
+// reporting:
+include './processes/reports.nf' params(params + params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -59,7 +61,7 @@ workflow SCENIC {
     main:
         /* GRN */
         tfs = file(params.sc.scenic.grn.TFs)
-        grn = SC__SCENIC__GRNBOOST2WITHOUTDASK( runs, filteredloom, tfs )
+        grn = SC__SCENIC__GRNBOOST2_WITHOUT_DASK( runs, filteredloom, tfs )
 
         /* cisTarget motif analysis */
         // channel for SCENIC databases resources:
@@ -185,9 +187,15 @@ workflow SCENIC_append {
         scopeloom
     main:
         scenicloom = SCENIC( filteredloom )
-        SC__SCENIC__APPENDSCENICLOOM( scopeloom, scenicloom )
+        SC__SCENIC__APPEND_SCENIC_LOOM( scopeloom, scenicloom )
+        report_notebook = SC__SCENIC__GENERATE_REPORT(
+            file(workflow.projectDir + params.sc.scenic.report_ipynb),
+            SC__SCENIC__APPEND_SCENIC_LOOM.out,
+            "SCENIC_report"
+        )
+        SC__SCENIC__REPORT_TO_HTML(report_notebook)
     emit:
-        SC__SCENIC__APPENDSCENICLOOM.out
+        SC__SCENIC__APPEND_SCENIC_LOOM.out
 }
 
 
