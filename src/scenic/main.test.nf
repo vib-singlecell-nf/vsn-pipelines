@@ -117,6 +117,27 @@ workflow test_SC__SCENIC__AUCELL {
 }
 
 // Make the test workflow 
+workflow test_SC__SCENIC__SINGLE_RUN_BY_ID {
+    get:
+        runId
+    main:
+        filteredloom = file( params.sc.scenic.filteredloom )
+        tfs = file(params.sc.scenic.grn.TFs)
+        run = Channel.from( runId..runId )
+        grn = SC__SCENIC__GRNBOOST2WITHOUTDASK( run, filteredloom, tfs )
+        // channel for SCENIC databases resources:
+        motifDB = Channel
+            .fromPath( params.sc.scenic.cistarget.mtfDB )
+            .collect() // use all files together in the ctx command
+        motifANN = file(params.sc.scenic.cistarget.mtfANN)
+        ctx_mtf = SC__SCENIC__CISTARGET__MOTIF( run, filteredloom, grn, motifDB, motifANN, 'mtf' )
+        /* AUCell, motif regulons */
+        auc_mtf = SC__SCENIC__AUCELL__MOTIF( run, filteredloom, ctx_mtf, 'mtf' )
+    emit:
+        auc_mtf
+}
+
+// Make the test workflow 
 workflow test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
     get:
         filteredloom
@@ -136,6 +157,9 @@ workflow test_SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
 workflow {
     main:
         switch(params.test) {
+            case "SC__SCENIC_SINGLE_RUN_BY_ID":
+                test_SC__SCENIC__SINGLE_RUN_BY_ID( params.runId )
+            break;
             case "SC__SCENIC__GRNBOOST2WITHOUTDASK":
                 test_SC__SCENIC__GRNBOOST2WITHOUTDASK( file( params.sc.scenic.filteredloom ) )
             break;
