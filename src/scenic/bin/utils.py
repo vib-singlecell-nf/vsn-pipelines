@@ -3,7 +3,7 @@ import ntpath
 import os
 import warnings
 from typing import List
-
+import gzip
 import loompy as lp
 import pandas as pd
 from pyscenic.genesig import GeneSignature
@@ -22,26 +22,25 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
 
     def signatures():
         for gene_sig_file_path in gene_sig_file_paths:
+            gene_sig = pd.read_csv(gene_sig_file_path, sep='\t', header=None, index_col=None)
             fname = ntpath.basename(gene_sig_file_path)
             regulon = os.path.splitext(fname)[0]
-            gene_sig = pd.read_csv(gene_sig_file_path, sep='\t', header=None, index_col=None)
+
+            # Check if the file is the regulon frequency file
+            if regulon == 'regulons':
+                continue
+
             # Do some sanity checks
             if len(gene_sig.columns) == 0:
-                assert (
-                    os.path.exists(gene_sig_file_path),
-                    "{} has 0 columns. Requires TSV with 1 or 2 columns. First column should be genes (required),"
-                    " second (optional) are weight for the given genes.".format(gene_sig_file_path)
-                )
+                raise Exception(f"{gene_sig_file_path} has 0 columns. Requires TSV with 1 or 2 columns. First column should be genes (required), second (optional) are weight for the given genes.")
             if len(gene_sig.columns) > 2:
-                assert (
-                    os.path.exists(gene_sig_file_path),
-                    "{} has more than 2 columns. Requires TSV with 1 or 2 columns. First column should be genes,"
-                    " second (optional) are weight for the given genes.".format(gene_sig_file_path)
-                )
+                raise Exception(f"{gene_sig_file_path} has more than 2 columns. Requires TSV with 1 or 2 columns. First column should be genes, second (optional) are weight for the given genes.")
             if len(gene_sig.columns) == 1 or noweights:
                 gene2weight = gene_sig[0]
             if len(gene_sig.columns) == 2 and not noweights:
                 # Filter the genes based on the given weight_threshold
+                # 1st column: genes
+                # 2nd column: weights
                 gene_sig = gene_sig[gene_sig[1] > weight_threshold]
                 if len(gene_sig.index) == 0:
                     if show_warnings:
@@ -57,17 +56,36 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
     signatures = list(signatures())
     # Filter regulons with less than min_genes (>= min_genes)
     signatures = list(filter(lambda x: len(x.gene2weight) >= min_genes, signatures))
-    print("Signatures passed filtering {0} out of {1}".format(len(signatures), len(gene_sig_file_paths)))
+    # Subtract 1 because regulons.tsv should not be counted
+    print("Signatures passed filtering {0} out of {1}".format(len(signatures), len(gene_sig_file_paths)-1))
     return signatures
 
 
 def read_feature_enrichment_table(fname, sep, chunksize=None, raw=False):
-    # ext = os.path.splitext(fname,)[1]
-    df = pd.read_csv(fname, sep=sep, index_col=[0, 1], header=[0, 1], skipinitialspace=True, chunksize=chunksize)
+    converters = None
+
     if not raw and chunksize is None:
-        df[('Enrichment', COLUMN_NAME_CONTEXT)] = df[('Enrichment', COLUMN_NAME_CONTEXT)].apply(lambda s: eval(s))
-        df[('Enrichment', COLUMN_NAME_TARGET_GENES)] = df[('Enrichment', COLUMN_NAME_TARGET_GENES)].apply(lambda s: eval(s))
-    return df
+        with gzip.open(fname, 'r') as fh:
+            fh.readline()
+            header_line2 = str(fh.readline()).rstrip('\n').split(',')
+            # Get the index column of COLUMN_NAME_CONTEXT and COLUMN_NAME_TARGET_GENES
+            column_name_context_idx = header_line2.index(COLUMN_NAME_CONTEXT)
+            column_name_target_genes_idx = header_line2.index(COLUMN_NAME_TARGET_GENES)
+            # Use converters to evaluate the expression a the given columns
+            converters = {
+                column_name_context_idx: eval,
+                column_name_target_genes_idx: eval,
+            }
+    return pd.read_csv(
+        fname,
+        sep=sep,
+        index_col=[0, 1],
+        header=[0, 1],
+        skipinitialspace=True,
+        chunksize=chunksize,
+        converters=converters,
+        engine='c'
+    )
 
 
 def get_matrix(loom_file_path, gene_attribute, cell_id_attribute):
