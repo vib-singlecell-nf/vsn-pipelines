@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
 
 process SC__SCENIC__PUBLISH_LOOM {
     
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicOutputLoom }
+    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicScopeOutputLoom }
 
     input:
     file f

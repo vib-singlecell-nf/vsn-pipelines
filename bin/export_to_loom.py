@@ -240,9 +240,9 @@ class SCopeLoom:
         }
 
     def merge_regulon_data(self, scope_loom):
-        #######################
-        # Combine RegulonsAUC #
-        #######################
+        ######################
+        # RegulonsAUC #
+        ######################
         # Relabel columns with suffix indicating the regulon source
         auc_mtx = pd.DataFrame(data=self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
         auc_mtx.columns = auc_mtx.columns + '-' + self.tag
@@ -250,13 +250,8 @@ class SCopeLoom:
         scope_loom_auc_mtx = pd.DataFrame(data=scope_loom.col_attrs['RegulonsAUC'], index=scope_loom.col_attrs['CellID'])
         scope_loom_auc_mtx.columns = scope_loom_auc_mtx.columns + '-' + scope_loom.tag
 
-        # merge the AUC matrices:
-        auc_mtx_combined = pd.concat([auc_mtx, scope_loom_auc_mtx], sort=False, axis=1, join='outer')
-        # fill NAs (if any) with 0s:
-        auc_mtx_combined.fillna(0, inplace=True)
-
         #######################
-        # Combine Regulons (regulon assignment matrices)
+        # Regulons (regulon assignment matrices)
         #######################
         regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
         regulons.columns = regulons.columns + '-' + self.tag
@@ -264,13 +259,26 @@ class SCopeLoom:
         scope_loom_regulons = pd.DataFrame(scope_loom.row_attrs['Regulons'], index=scope_loom.row_attrs['Gene'])
         scope_loom_regulons.columns = scope_loom_regulons.columns + '-' + scope_loom.tag
 
-        # merge the regulon assignment matrices:
-        regulons_combined = pd.concat([regulons, scope_loom_regulons], sort=False, axis=1, join='outer')
-        # replace NAs with 0s:
-        regulons_combined.fillna(0, inplace=True)
+        #######################
+        # Rename Regulons Gene Occurrences
+        #######################
+        regulon_gene_occurrences = pd.DataFrame(self.row_attrs['RegulonGeneOccurrences'], index=self.row_attrs['Gene'])
+        regulon_gene_occurrences.columns = regulon_gene_occurrences.columns + '-' + self.tag
+
+        scope_loom_regulon_gene_occurrences = pd.DataFrame(scope_loom.row_attrs['RegulonGeneOccurrences'], index=scope_loom.row_attrs['Gene'])
+        scope_loom_regulon_gene_occurrences.columns = scope_loom_regulon_gene_occurrences.columns + '-' + scope_loom.tag
 
         #######################
-        # Combine meta data Regulons
+        # Rename Regulons Gene Weights
+        #######################
+        regulon_gene_weights = pd.DataFrame(self.row_attrs['RegulonGeneWeights'], index=self.row_attrs['Gene'])
+        regulon_gene_weights.columns = regulon_gene_weights.columns + '-' + self.tag
+
+        scope_loom_regulon_gene_weights = pd.DataFrame(scope_loom.row_attrs['RegulonGeneWeights'], index=scope_loom.row_attrs['Gene'])
+        scope_loom_regulon_gene_weights.columns = scope_loom_regulon_gene_weights.columns + '-' + scope_loom.tag
+
+        #######################
+        # Combine meta data regulons
         #######################
         # Rename regulons in the thresholds object, motif
         rt = self.global_attrs["MetaData"]["regulonThresholds"]
@@ -289,9 +297,22 @@ class SCopeLoom:
         # merge regulon threshold dictionaries:
         rt_merged = rt + scope_loom_rt
 
+        # Remove because we will save them separately
+        del self.row_attrs["Regulons"]
+        del self.row_attrs["RegulonGeneOccurrences"]
+        del self.row_attrs["RegulonGeneWeights"]
+        del self.col_attrs["RegulonsAUC"]
+
         # Update the attributes
-        self.row_attrs.update({'Regulons': SCopeLoom.df_to_named_matrix(regulons_combined)})
-        self.col_attrs.update({'RegulonsAUC': SCopeLoom.df_to_named_matrix(auc_mtx_combined)})
+        self.row_attrs.update({f'{self.tag.capitalize()}Regulons': SCopeLoom.df_to_named_matrix(regulons)})
+        self.row_attrs.update({f'{self.tag.capitalize()}RegulonGeneOccurrences': SCopeLoom.df_to_named_matrix(regulon_gene_occurrences)})
+        self.row_attrs.update({f'{self.tag.capitalize()}RegulonGeneWeights': SCopeLoom.df_to_named_matrix(regulon_gene_weights)})
+        self.col_attrs.update({f'{self.tag.capitalize()}RegulonsAUC': SCopeLoom.df_to_named_matrix(auc_mtx)})
+
+        self.row_attrs.update({f'{scope_loom.tag.capitalize()}Regulons': SCopeLoom.df_to_named_matrix(scope_loom_regulons)})
+        self.row_attrs.update({f'{scope_loom.tag.capitalize()}RegulonGeneOccurrences': SCopeLoom.df_to_named_matrix(scope_loom_regulon_gene_occurrences)})
+        self.row_attrs.update({f'{scope_loom.tag.capitalize()}RegulonGeneWeights': SCopeLoom.df_to_named_matrix(scope_loom_regulon_gene_weights)})
+        self.col_attrs.update({f'{scope_loom.tag.capitalize()}RegulonsAUC': SCopeLoom.df_to_named_matrix(scope_loom_auc_mtx)})
         self.global_attrs["MetaData"].update({'regulonThresholds': rt_merged})
 
     ####

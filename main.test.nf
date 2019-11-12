@@ -43,7 +43,7 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
-include SC__SCENIC__GRNBOOST2WITHOUTDASK from './processes/grnboost2withoutDask' params(params)
+include SC__SCENIC__GRNBOOST2_WITHOUT_DASK from './processes/grnboost2withoutDask' params(params)
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__MOTIF   from './processes/cistarget'             params(params)
 include SC__SCENIC__CISTARGET as SC__SCENIC__CISTARGET__TRACK   from './processes/cistarget'             params(params)
 include SC__SCENIC__AUCELL as SC__SCENIC__AUCELL__MOTIF         from './processes/aucell'                params(params)
@@ -56,6 +56,7 @@ include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_F
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
+include SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__PUBLISH_LOOM            from './processes/scenicLoomHandler'     params(params)
 include SC__SCENIC__VISUALIZE               from './processes/scenicLoomHandler'     params(params)
 
@@ -202,7 +203,7 @@ workflow {
                     SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK( file(params.sc.scenic.filteredloom), regulons_folder_trk, 'trk' )
                 }
             break;
-            case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM":
+            case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF":
                 filteredloom = file(params.sc.scenic.filteredloom)
                 aggr_features_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_mtf.csv.gz")
                 regulons_folder_mtf = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_mtf")
@@ -216,24 +217,33 @@ workflow {
                     regulons_auc_mtf,
                     'mtf' 
                 )
-                if(params.sc.scenic.cistarget.trkDB) {
-                    regulons_folder_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
-                    aggr_features_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_trk.csv.gz")
-                    regulons_auc_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_aucell/multi_runs_regulons_auc_trk.tsv")
-                    /* Save multiple track SCENIC runs to loom*/
-                    SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
-                        filteredloom,
-                        aggr_features_trk,
-                        regulons_folder_trk,
-                        regulons_auc_trk,
-                        'trk' 
-                    )
-                }
+            break;
+            case "SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK":
+                filteredloom = file(params.sc.scenic.filteredloom)
+                regulons_folder_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_regulons_trk")
+                aggr_features_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_cistarget/multi_runs_features_trk.csv.gz")
+                regulons_auc_trk = file(params.sc.scenic.scenicoutdir + "/multi_runs_aucell/multi_runs_regulons_auc_trk.tsv")
+                /* Save multiple track SCENIC runs to loom*/
+                SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
+                    filteredloom,
+                    aggr_features_trk,
+                    regulons_folder_trk,
+                    regulons_auc_trk,
+                    'trk' 
+                )
+            break;
+            case "SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS":
+                scenic_loom_mtf = file( params.sc.scenic.scenicoutdir + "/multi_runs_looms/multi_runs_regulons_auc_mtf.loom" )
+                scenic_loom_trk = file( params.sc.scenic.scenicoutdir + "/multi_runs_looms/multi_runs_regulons_auc_trk.loom" )
+                SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS(
+                    scenic_loom_mtf,
+                    scenic_loom_trk
+                )
             break;
             case "SC__SCENIC__VISUALIZE_PUBLISH":
                 /* Aggregate motif regulons from multiple runs */
-                multi_runs_aucell_mtf_loom = file(params.sc.scenic.scenicoutdir + "/multi_runs_looms/multi_runs_regulons_auc_mtf.loom")
-                SC__SCENIC__PUBLISH_LOOM( SC__SCENIC__VISUALIZE( multi_runs_aucell_mtf_loom ) )
+                scenic_loom = file( params.sc.scenic.scenicoutdir + "/" + params.sc.scenic.scenicOutputLoom )
+                SC__SCENIC__PUBLISH_LOOM( SC__SCENIC__VISUALIZE( scenic_loom ) )
             break;
             default:
                 throw new Exception("The test parameters should be specified.")
