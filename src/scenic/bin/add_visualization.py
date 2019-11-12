@@ -48,7 +48,17 @@ def visualize_AUCell(args):
     ################################################################################
 
     with lp.connect(args.loom_input, mode='r', validate=False) as lf:
-        auc_mtx = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
+
+        if "RegulonsAUC" in lf.ca.keys():
+            auc_mtx = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
+        else:
+            print("Loom with motif & track regulons detected, merging the regulons AUC matrices...")
+            mtf_auc_mtx = pd.DataFrame(lf.ca.MotifRegulonsAUC, index=lf.ca.CellID)
+            trk_auc_mtx = pd.DataFrame(lf.ca.TrackRegulonsAUC, index=lf.ca.CellID)
+            # merge the AUC matrices:
+            auc_mtx = pd.concat([mtf_auc_mtx, trk_auc_mtx], sort=False, axis=1, join='outer')
+            # fill NAs (if any) with 0s:
+            auc_mtx.fillna(0, inplace=True)
 
     ################################################################################
     # Visualize AUC matrix:
