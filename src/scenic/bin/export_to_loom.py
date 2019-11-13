@@ -108,7 +108,9 @@ class SCopeLoom:
         self.set_generic_global_attrs()
         self.set_tree()
 
-    # I/O
+    #######
+    # I/O #
+    #######
 
     @staticmethod
     def read_loom(filename: str, tag: str = None):
@@ -130,7 +132,9 @@ class SCopeLoom:
                 scope_loom.global_attrs["MetaData"] = json.loads(scope_loom.global_attrs["MetaData"])
         return scope_loom
 
-    # Embeddings
+    ##############
+    # Embeddings #
+    ##############
 
     def add_embedding(self, embedding: np.ndarray, embedding_name, is_default: bool = False):
         df_embedding = pd.DataFrame(embedding, columns=['_X', '_Y'], index=self.ex_mtx.index)
@@ -202,7 +206,41 @@ class SCopeLoom:
             "Embeddings_Y": SCopeLoom.df_to_named_matrix(df=embeddings_Y)
         }
 
-    # Metrics
+    def create_loom_default_embedding(self):
+        # Create an embedding based on tSNE.
+        # Name of columns should be "_X" and "_Y".
+        self.add_embedding(embedding=TSNE().fit_transform(self.auc_mtx), embedding_name="tSNE (default)", is_default=True)
+
+    ###############
+    # Clusterings #
+    ###############
+
+    def create_loom_clusterings(self):
+        # Encode cell type clusters.
+        # The name of the column should match the identifier of the clustering.
+        return pd.DataFrame(
+            data=self.ex_mtx.index.values,
+            index=self.ex_mtx.index,
+            columns=['0']
+        ).replace(self.cell_annotations).replace(self.name2idx())
+
+    ###############
+    # Annotations #
+    ###############
+
+    def set_cell_annotations(self):
+        if self.cell_annotations is None:
+            self.cell_annotations = dict(zip(self.ex_mtx.index.astype(str), ['-'] * self.ex_mtx.shape[0]))
+
+    ###########
+    # Metrics #
+    ###########
+
+    def calculate_nb_genes_per_cell(self):
+        # Calculate the number of genes per cell.
+        binary_mtx = self.ex_mtx.copy()
+        binary_mtx[binary_mtx != 0] = 1.0
+        return binary_mtx.sum(axis=1).astype(int)
 
     def add_metrics(self, metrics: List[str]):
         md_metrics = []
@@ -210,7 +248,9 @@ class SCopeLoom:
             md_metrics.append({"name": metric})
         self.global_attrs["MetaData"].update({'metrics': md_metrics})
 
-    # SCENIC
+    ##########
+    # SCENIC #
+    ##########
 
     def fix_loom_md_regulon_data_for_scope(self):
         # Fix regulon objects to display properly in SCope:
@@ -239,10 +279,21 @@ class SCopeLoom:
             'Regulons': SCopeLoom.df_to_named_matrix(regulons)
         }
 
+    def calculate_regulon_enrichment(self):
+        # Calculate regulon enrichment per cell using AUCell.
+        # Create regulons with weight based on given key
+        print("Using {} to weight the genes when running AUCell.".format(self.auc_regulon_weights_key))
+        regulon_signatures = list(map(lambda x: GeneSignature(name=x.name, gene2weight=self.get_regulon_gene_data(x, self.auc_regulon_weights_key)), self.regulons))
+        auc_mtx = aucell(self.ex_mtx, regulon_signatures, num_workers=self.num_workers)  # (n_cells x n_regulons)
+        auc_mtx = auc_mtx.loc[self.ex_mtx.index]
+        return auc_mtx
+
+    def binarize_regulon_enrichment(self):
+        _, auc_thresholds = binarize(self.auc_mtx)
+        return auc_thresholds
+
     def merge_regulon_data(self, scope_loom):
-        ######################
-        # RegulonsAUC #
-        ######################
+        # RegulonsAUC
         # Relabel columns with suffix indicating the regulon source
         auc_mtx = pd.DataFrame(data=self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
         auc_mtx.columns = auc_mtx.columns + '-' + self.tag
@@ -250,36 +301,28 @@ class SCopeLoom:
         scope_loom_auc_mtx = pd.DataFrame(data=scope_loom.col_attrs['RegulonsAUC'], index=scope_loom.col_attrs['CellID'])
         scope_loom_auc_mtx.columns = scope_loom_auc_mtx.columns + '-' + scope_loom.tag
 
-        #######################
         # Regulons (regulon assignment matrices)
-        #######################
         regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
         regulons.columns = regulons.columns + '-' + self.tag
 
         scope_loom_regulons = pd.DataFrame(scope_loom.row_attrs['Regulons'], index=scope_loom.row_attrs['Gene'])
         scope_loom_regulons.columns = scope_loom_regulons.columns + '-' + scope_loom.tag
 
-        #######################
         # Rename Regulons Gene Occurrences
-        #######################
         regulon_gene_occurrences = pd.DataFrame(self.row_attrs['RegulonGeneOccurrences'], index=self.row_attrs['Gene'])
         regulon_gene_occurrences.columns = regulon_gene_occurrences.columns + '-' + self.tag
 
         scope_loom_regulon_gene_occurrences = pd.DataFrame(scope_loom.row_attrs['RegulonGeneOccurrences'], index=scope_loom.row_attrs['Gene'])
         scope_loom_regulon_gene_occurrences.columns = scope_loom_regulon_gene_occurrences.columns + '-' + scope_loom.tag
 
-        #######################
         # Rename Regulons Gene Weights
-        #######################
         regulon_gene_weights = pd.DataFrame(self.row_attrs['RegulonGeneWeights'], index=self.row_attrs['Gene'])
         regulon_gene_weights.columns = regulon_gene_weights.columns + '-' + self.tag
 
         scope_loom_regulon_gene_weights = pd.DataFrame(scope_loom.row_attrs['RegulonGeneWeights'], index=scope_loom.row_attrs['Gene'])
         scope_loom_regulon_gene_weights.columns = scope_loom_regulon_gene_weights.columns + '-' + scope_loom.tag
 
-        #######################
         # Combine meta data regulons
-        #######################
         # Rename regulons in the thresholds object, motif
         rt = self.global_attrs["MetaData"]["regulonThresholds"]
         for _, x in enumerate(rt):
@@ -315,69 +358,12 @@ class SCopeLoom:
         self.col_attrs.update({f'{scope_loom.tag.capitalize()}RegulonsAUC': SCopeLoom.df_to_named_matrix(scope_loom_auc_mtx)})
         self.global_attrs["MetaData"].update({'regulonThresholds': rt_merged})
 
-    ####
-
-    def set_cell_annotations(self):
-        if self.cell_annotations is None:
-            self.cell_annotations = dict(zip(self.ex_mtx.index.astype(str), ['-'] * self.ex_mtx.shape[0]))
-
     def get_regulon_gene_data(self, regulon, key):
         if key == 'gene2occurrence':
             return regulon.gene2occurrence
         if key == 'gene2weight':
             return regulon.gene2weight
         raise Exception('Cannot retrieve {} from given regulon. Not implemented.'.format(key))
-
-    def calculate_regulon_enrichment(self):
-        # Calculate regulon enrichment per cell using AUCell.
-        # Create regulons with weight based on given key
-        print("Using {} to weight the genes when running AUCell.".format(self.auc_regulon_weights_key))
-        regulon_signatures = list(map(lambda x: GeneSignature(name=x.name, gene2weight=self.get_regulon_gene_data(x, self.auc_regulon_weights_key)), self.regulons))
-        auc_mtx = aucell(self.ex_mtx, regulon_signatures, num_workers=self.num_workers)  # (n_cells x n_regulons)
-        auc_mtx = auc_mtx.loc[self.ex_mtx.index]
-        return auc_mtx
-
-    def binarize_regulon_enrichment(self):
-        _, auc_thresholds = binarize(self.auc_mtx)
-        return auc_thresholds
-
-    def calculate_nb_genes_per_cell(self):
-        # Calculate the number of genes per cell.
-        binary_mtx = self.ex_mtx.copy()
-        binary_mtx[binary_mtx != 0] = 1.0
-        return binary_mtx.sum(axis=1).astype(int)
-
-    def create_loom_default_embedding(self):
-        # Create an embedding based on tSNE.
-        # Name of columns should be "_X" and "_Y".
-        self.add_embedding(embedding=TSNE().fit_transform(self.auc_mtx), embedding_name="tSNE (default)", is_default=True)
-
-    def create_loom_regulon_gene_assignment(self):
-        # Encode genes in regulons as "binary" membership matrix.
-        genes = np.array(self.ex_mtx.columns)
-        n_genes = len(genes)
-        n_regulons = len(self.regulons)
-        data = np.zeros(shape=(n_genes, n_regulons), dtype=int)
-        for idx, regulon in enumerate(self.regulons):
-            data[:, idx] = np.isin(genes, regulon.genes).astype(int)
-        regulon_gene_assignment = pd.DataFrame(
-            data=data,
-            index=self.ex_mtx.columns,
-            columns=list(map(attrgetter('name'), self.regulons))
-        )
-        return regulon_gene_assignment
-
-    def name2idx(self):
-        return dict(map(reversed, enumerate(sorted(set(self.cell_annotations.values())))))
-
-    def create_loom_clusterings(self):
-        # Encode cell type clusters.
-        # The name of the column should match the identifier of the clustering.
-        return pd.DataFrame(
-            data=self.ex_mtx.index.values,
-            index=self.ex_mtx.index,
-            columns=['0']
-        ).replace(self.cell_annotations).replace(self.name2idx())
 
     def get_regulon_meta_data(self, name, threshold):
 
@@ -411,6 +397,57 @@ class SCopeLoom:
 
     def create_loom_md_regulon_thresholds(self):
         return [self.get_regulon_meta_data(name, threshold) for name, threshold in self.auc_thresholds.iteritems()]
+
+    def create_loom_regulon_gene_assignment(self):
+        # Encode genes in regulons as "binary" membership matrix.
+        genes = np.array(self.ex_mtx.columns)
+        n_genes = len(genes)
+        n_regulons = len(self.regulons)
+        data = np.zeros(shape=(n_genes, n_regulons), dtype=int)
+        for idx, regulon in enumerate(self.regulons):
+            data[:, idx] = np.isin(genes, regulon.genes).astype(int)
+        regulon_gene_assignment = pd.DataFrame(
+            data=data,
+            index=self.ex_mtx.columns,
+            columns=list(map(attrgetter('name'), self.regulons))
+        )
+        return regulon_gene_assignment
+
+    # Multi-runs SCENIC additional data
+
+    def encode_regulon_gene_data(self, key):
+        genes = np.array(self.ex_mtx.columns)
+        n_genes = len(genes)
+        n_regulons = len(self.regulons)
+        data = np.zeros(shape=(n_genes, n_regulons), dtype=float)
+        for idx, regulon in enumerate(self.regulons):
+            regulon_data = pd.DataFrame.from_dict(self.get_regulon_gene_data(regulon, key), orient='index')
+            data[np.isin(genes, regulon_data.index), idx] = regulon_data[0][genes[np.isin(genes, regulon_data.index)]]
+        return data
+
+    def create_loom_regulon_gene_data(self, key):
+        return pd.DataFrame(
+            data=self.encode_regulon_gene_data(key=key),
+            index=self.ex_mtx.columns,
+            columns=list(map(attrgetter('name'), self.regulons))
+        )
+
+    def add_row_attr_regulon_gene_weights(self):
+        regulon_gene_weights = self.create_loom_regulon_gene_data(key='gene2weight')
+        if 'RegulonGeneWeights' not in self.row_attrs.keys():
+            print("Added 'RegulonGeneWeights' to the row attributes.")
+            self.row_attrs['RegulonGeneWeights'] = SCopeLoom.df_to_named_matrix(regulon_gene_weights)
+
+    def add_row_attr_regulon_gene_occurrences(self):
+        regulon_gene_occurrences = self.create_loom_regulon_gene_data(key='gene2occurrence')
+        if 'RegulonGeneOccurrences' not in self.row_attrs.keys():
+            print("Added 'RegulonGeneOccurrences' to the row attributes.")
+            self.row_attrs['RegulonGeneOccurrences'] = SCopeLoom.df_to_named_matrix(regulon_gene_occurrences)
+
+    ####
+
+    def name2idx(self):
+        return dict(map(reversed, enumerate(sorted(set(self.cell_annotations.values())))))
 
     def set_generic_col_attrs(self):
         self.col_attrs = {
@@ -493,37 +530,6 @@ class SCopeLoom:
             col_attrs=self.col_attrs,
             file_attrs=self.global_attrs
         )
-
-    # Multi-runs SCENIC additional data
-
-    def encode_regulon_gene_data(self, key):
-        genes = np.array(self.ex_mtx.columns)
-        n_genes = len(genes)
-        n_regulons = len(self.regulons)
-        data = np.zeros(shape=(n_genes, n_regulons), dtype=float)
-        for idx, regulon in enumerate(self.regulons):
-            regulon_data = pd.DataFrame.from_dict(self.get_regulon_gene_data(regulon, key), orient='index')
-            data[np.isin(genes, regulon_data.index), idx] = regulon_data[0][genes[np.isin(genes, regulon_data.index)]]
-        return data
-
-    def create_loom_regulon_gene_data(self, key):
-        return pd.DataFrame(
-            data=self.encode_regulon_gene_data(key=key),
-            index=self.ex_mtx.columns,
-            columns=list(map(attrgetter('name'), self.regulons))
-        )
-
-    def add_row_attr_regulon_gene_weights(self):
-        regulon_gene_weights = self.create_loom_regulon_gene_data(key='gene2weight')
-        if 'RegulonGeneWeights' not in self.row_attrs.keys():
-            print("Added 'RegulonGeneWeights' to the row attributes.")
-            self.row_attrs['RegulonGeneWeights'] = SCopeLoom.df_to_named_matrix(regulon_gene_weights)
-
-    def add_row_attr_regulon_gene_occurrences(self):
-        regulon_gene_occurrences = self.create_loom_regulon_gene_data(key='gene2occurrence')
-        if 'RegulonGeneOccurrences' not in self.row_attrs.keys():
-            print("Added 'RegulonGeneOccurrences' to the row attributes.")
-            self.row_attrs['RegulonGeneOccurrences'] = SCopeLoom.df_to_named_matrix(regulon_gene_occurrences)
 
     # Utility functions
 
