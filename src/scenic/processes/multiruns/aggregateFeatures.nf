@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__AGGR_MULTI_RUNS_FEATURES {
+process AGGR_MULTI_RUNS_FEATURES {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_cistarget/", mode: 'link', overwrite: true

@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
+process SAVE_MULTI_RUNS_TO_LOOM {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_looms/", mode: 'link', overwrite: true
@@ -41,4 +41,3 @@ process SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM {
         --scope-tree-level-3 "${params.sc.scope.tree.level_3}"
     """
 }
-

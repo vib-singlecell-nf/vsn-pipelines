@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER {
+process AUCELL_FROM_FOLDER {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_aucell/", mode: 'link', overwrite: true

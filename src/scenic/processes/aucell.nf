@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 // include getBaseName from '../../utils/files.nf'
 
-process SC__SCENIC__AUCELL {
+process AUCELL {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/aucell/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
