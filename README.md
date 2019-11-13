@@ -51,6 +51,12 @@ nextflow -C nextflow.config run \
       -with-trace
 ```
 
+### Miscellaneous
+
+Here is the DAG summarizing the multi-runs SCENIC workflow:
+
+![Multi-Runs Motif and Track based SCENIC](assets/multi_runs_motif_track_scenic.svg)
+
 ## Testing the pipeline
 
 ```{bash}
