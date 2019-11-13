@@ -10,14 +10,12 @@ process SC__SCENIC__AUCELL {
     maxForks params.sc.scenic.maxForks
 
     input:
-    val runId
+    tuple val(runId), file(regulons)
     file exprMat
-    file regulons
     val type
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__auc_" + type + ".loom": "auc_" + type + ".loom"}"
-    // file params.output
+    file("${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__auc_" + type + ".loom": "auc_" + type + ".loom"}")
 
     """
     pyscenic aucell \

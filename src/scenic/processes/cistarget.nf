@@ -10,15 +10,14 @@ process SC__SCENIC__CISTARGET {
     maxForks params.sc.scenic.maxForks
     
     input:
-    val runId
+    tuple val(runId), file("${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}")
     file filteredloom
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}"
     file featherDB
     file annotation
     val type
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"}"
+    tuple val(runId), file("${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"}")
 
     """
     pyscenic ctx \

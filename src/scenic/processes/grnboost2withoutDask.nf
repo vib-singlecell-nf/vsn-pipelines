@@ -21,7 +21,7 @@ process SC__SCENIC__GRNBOOST2_WITHOUT_DASK {
     file tfs
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}"
+    tuple val(runId), file("${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}")
 
     script:
     """
