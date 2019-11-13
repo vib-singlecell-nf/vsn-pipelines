@@ -29,6 +29,8 @@ include SC__SCENIC__AGGR_MULTI_RUNS_FEATURES as SC__SCENIC__AGGR_MULTI_RUNS_FEAT
 include SC__SCENIC__AGGR_MULTI_RUNS_FEATURES as SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__TRACK from './processes/aggregateMultiRunsFeatures' params(params)
 include SC__SCENIC__AGGR_MULTI_RUNS_REGULONS as SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__MOTIF from './processes/aggregateMultiRunsRegulons' params(params)
 include SC__SCENIC__AGGR_MULTI_RUNS_REGULONS as SC__SCENIC__AGGR_MULTI_RUNS_REGULONS__TRACK from './processes/aggregateMultiRunsRegulons' params(params)
+include SC__SCENIC__CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS as SC__SCENIC__CONVERT_MULTI_RUNS_MOTIFS_TO_REGULONS from './processes/convertMultiRunsMotifsToRegulons' params(params)
+include SC__SCENIC__CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS as SC__SCENIC__CONVERT_MULTI_RUNS_TRACKS_TO_REGULONS from './processes/convertMultiRunsMotifsToRegulons' params(params)
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__MOTIF from './processes/aucellGeneSigsFromFolder' params(params)
 include SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER as SC__SCENIC__AUCELL_GENESIGS_FROM_FOLDER__TRACK from './processes/aucellGeneSigsFromFolder' params(params)
 include SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
@@ -95,13 +97,13 @@ workflow SCENIC {
             // Aggregate features (motifs and tracks)
             /* Aggregate motifs from multiple runs */
             aggr_features_mtf = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__MOTIF(
-                ctx_mtf.collect(),
+                ctx_mtf.map{ it -> it[1] }.collect(),
                 'mtf'
             )
             if(params.sc.scenic.cistarget.trkDB) {
                 /* Aggregate tracks from multiple runs */
                 aggr_features_trk = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__TRACK(
-                    ctx_trk.collect(),
+                    ctx_trk.map{ it -> it[1] }.collect(),
                     'trk'
                 )
             }
@@ -136,21 +138,31 @@ workflow SCENIC {
                 )
             }
 
-            // Save to loom
+            /* Convert aggregated motif enrichment table to regulons */
+            aggr_regulons_mtf = SC__SCENIC__CONVERT_MULTI_RUNS_MOTIFS_TO_REGULONS(
+                aggr_features_mtf,
+                regulons_folder_mtf,
+                'mtf'
+            )
+
             /* Save multiple motif SCENIC runs to loom*/
             scenic_loom_mtf = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF( 
                 filteredloom,
-                aggr_features_mtf,
-                regulons_folder_mtf,
+                aggr_regulons_mtf,
                 regulons_auc_mtf,
                 'mtf'
             )
             if(params.sc.scenic.cistarget.trkDB) {
+                /* Convert aggregated motif enrichment table to regulons */
+                aggr_regulons_trk = SC__SCENIC__CONVERT_MULTI_RUNS_TRACKS_TO_REGULONS(
+                    aggr_features_trk,
+                    regulons_folder_trk,
+                    'trk'
+                )
                 /* Save multiple track SCENIC runs to loom*/
                 scenic_loom_trk = SC__SCENIC__SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK( 
                     filteredloom,
-                    aggr_features_trk,
-                    regulons_folder_trk,
+                    aggr_regulons_trk,
                     regulons_auc_trk,
                     'trk'
                 )
