@@ -5,20 +5,10 @@ import re
 import sys
 import pandas as pd
 import pickle
-from pyscenic import transform
-from pyscenic.export import export2loom
-from pyscenic.transform import COLUMN_NAME_NES
-from pyscenic.utils import COLUMN_NAME_MOTIF_SIMILARITY_QVALUE, COLUMN_NAME_ORTHOLOGOUS_IDENTITY, \
-    COLUMN_NAME_ANNOTATION
+import gzip
 import time
 import utils
 import export_to_loom
-
-################################################################################
-# TODO:
-# This implementation should be optimized:
-# It's taking several hours to run (~5h for 100 runs, ~9k genes and ~13k cells)
-################################################################################
 
 parser_grn = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
 
@@ -29,13 +19,9 @@ parser_grn.add_argument(
          ' Two file formats are supported: csv (rows=cells x columns=genes) or loom (rows=genes x columns=cells).'
 )
 parser_grn.add_argument(
-    'motif_enrichment_table_fname',
+    'aggregated_regulons_fname',
     type=argparse.FileType('r'),
-    help='The name of the file that contains the motif enrichments.'
-)
-parser_grn.add_argument(
-    'signatures_fname',
-    help='The name of the folder containing the signatures as TSV files.'
+    help='The name of the file (.pkl.gz aka compressed pickle format) that contains the regulons resulting from the aggregated motif enrichment table.'
 )
 parser_grn.add_argument(
     'auc_mtx_fname',
@@ -118,51 +104,10 @@ ex_matrix_df = utils.get_matrix(
 )
 print(f"... took {time.time() - start} seconds", flush=True)
 
-# Transform motif enrichment table (generated from the cisTarget step) to regulons
-print(f"Reading aggregated motif enrichment table...", flush=True)
+print(f"Reading the aggregated regulons...", flush=True)
 start = time.time()
-f = args.motif_enrichment_table_fname.name
-if f.endswith('.pkl') or f.endswith('.pkl.gz') or f.endswith('.pickle') or f.endswith('.pickle.gz'):
-    motif_enrichment_table = pd.read_pickle(path=f)
-elif f.endswith('.csv') or f.endswith('.csv.gz'):
-    motif_enrichment_table = utils.read_feature_enrichment_table(fname=args.motif_enrichment_table_fname.name, sep=",")
-else:
-    raise Exception("The aggregated feature enrichment table is in the wrong format. Expecting .pickle or .csv formats.")
-print(f"... took {time.time() - start} seconds to run.", flush=True)
-
-print(f"Making the regulons...", flush=True)
-start = time.time()
-regulons = transform.df2regulons(
-    df=motif_enrichment_table,
-    save_columns=[
-        COLUMN_NAME_NES,
-        COLUMN_NAME_ORTHOLOGOUS_IDENTITY,
-        COLUMN_NAME_MOTIF_SIMILARITY_QVALUE,
-        COLUMN_NAME_ANNOTATION
-    ]
-)
-print(f"{len(regulons)} regulons from df2regulons.")
-
-# Read the signatures saved in out/multi_runs_regulons_[mtf|trk]
-# Keep all regulons and targets (so that all can be visualized in SCope)
-signatures = utils.read_signatures_from_tsv_dir(
-    dpath=args.signatures_fname,
-    noweights=False,
-    weight_threshold=0,
-    min_genes=0
-)
-print(f"{len(signatures)} all regulons from out/multi_runs_regulons_[mtf|trk].")
-
-# Filter regulons (regulons from motifs enrichment table) by the filtered signatures
-regulons = list(filter(lambda x: x.name in list(map(lambda x: x.name, signatures)), regulons))
-# Add gene2occurrence from filtered signatures to regulons
-regulons = list(
-    map(
-        lambda x:
-        x.copy(gene2occurrence=list(filter(lambda y: y.name == x.name, signatures))[0].gene2weight), regulons
-    )
-)
-print(f"{len(regulons)} final regulons.")
+with gzip.open(args.aggregated_regulons_fname.name, 'rb') as file_handler:
+    regulons = pickle.load(file_handler)
 print(f"... took {time.time() - start} seconds to run.", flush=True)
 
 print(f"Reading AUCell matrix...", flush=True)
