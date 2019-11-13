@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 // include getBaseName from '../../utils/files.nf'
 
-process SC__SCENIC__CISTARGET {
+process CISTARGET {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true

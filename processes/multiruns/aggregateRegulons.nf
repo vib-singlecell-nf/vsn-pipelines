@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__AGGR_MULTI_RUNS_REGULONS {
+process AGGR_MULTI_RUNS_REGULONS {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true

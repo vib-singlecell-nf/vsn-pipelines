@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__PUBLISH_LOOM {
+process PUBLISH_LOOM {
     
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicScopeOutputLoom }
 
@@ -21,7 +21,7 @@ process SC__SCENIC__PUBLISH_LOOM {
 }
 
 
-process SC__SCENIC__VISUALIZE {
+process VISUALIZE {
     cache 'deep'
     container params.sc.scenic.container
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -41,7 +41,7 @@ process SC__SCENIC__VISUALIZE {
 }
 
 
-process SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS {
+process MERGE_MOTIF_TRACK_LOOMS {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
@@ -65,7 +65,7 @@ process SC__SCENIC__MERGE_MOTIF_TRACK_LOOMS {
 /* options to implement:
 */
 
-process SC__SCENIC__APPEND_SCENIC_LOOM {
+process APPEND_SCENIC_LOOM {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true

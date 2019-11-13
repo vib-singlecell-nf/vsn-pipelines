@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
   binDir = ""
 }
 
-process SC__SCENIC__CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS {
+process CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/multi_runs_cistarget/", mode: 'link', overwrite: true
