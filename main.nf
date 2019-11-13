@@ -69,7 +69,7 @@ workflow SCENIC {
             .fromPath( params.sc.scenic.cistarget.mtfDB )
             .collect() // use all files together in the ctx command
         motifANN = file(params.sc.scenic.cistarget.mtfANN)
-        ctx_mtf = SC__SCENIC__CISTARGET__MOTIF( runs, filteredloom, grn, motifDB, motifANN, 'mtf' )
+        ctx_mtf = SC__SCENIC__CISTARGET__MOTIF( grn, filteredloom, motifDB, motifANN, 'mtf' )
 
         /* cisTarget track analysis */
         if(params.sc.scenic.cistarget.trkDB) {
@@ -77,21 +77,21 @@ workflow SCENIC {
                 .fromPath( params.sc.scenic.cistarget.trkDB )
                 .collect() // use all files together in the ctx command
             trackANN = file(params.sc.scenic.cistarget.trkANN)
-            ctx_trk = SC__SCENIC__CISTARGET__TRACK( runs, filteredloom, grn, trackDB, trackANN, 'trk' )
+            ctx_trk = SC__SCENIC__CISTARGET__TRACK( grn, filteredloom, trackDB, trackANN, 'trk' )
         }
 
         /* AUCell, motif regulons */
-        auc_mtf = SC__SCENIC__AUCELL__MOTIF( runs, filteredloom, ctx_mtf, 'mtf' )
+        auc_mtf = SC__SCENIC__AUCELL__MOTIF( ctx_mtf, filteredloom, 'mtf' )
 
         if(params.sc.scenic.cistarget.trkDB) {
             /* AUCell, track regulons */
-            auc_trk = SC__SCENIC__AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
+            auc_trk = SC__SCENIC__AUCELL__TRACK( ctx_trk, filteredloom, 'trk' )
         }
 
         // multi-runs aggregation:
         if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
-            if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
-                throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
+            // if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
+            //     throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
             // Aggregate features (motifs and tracks)
             /* Aggregate motifs from multiple runs */
             aggr_features_mtf = SC__SCENIC__AGGR_MULTI_RUNS_FEATURES__MOTIF(
