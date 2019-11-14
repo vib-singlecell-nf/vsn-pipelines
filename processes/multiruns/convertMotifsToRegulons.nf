@@ -25,7 +25,7 @@ process CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS {
     file "multi_runs_regulons_${type}.pkl.gz"
 
     """
-    ${binDir}convert_SCENIC_multi_runs_features_to_regulons.py \
+    ${binDir}convert_multi_runs_features_to_regulons.py \
         $multiRunsAggrMotifEnrichmentTable \
         $multiRunsAggrRegulonsFolder \
         -o "multi_runs_regulons_${type}.pkl.gz"

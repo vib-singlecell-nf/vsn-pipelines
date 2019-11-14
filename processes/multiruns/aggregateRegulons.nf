@@ -20,7 +20,7 @@ process AGGR_MULTI_RUNS_REGULONS {
     file "multi_runs_regulons_${type}"
 
     """
-    ${binDir}aggregate_SCENIC_multi_runs_regulons.py \
+    ${binDir}aggregate_multi_runs_regulons.py \
         ${f} \
         --output "multi_runs_regulons_${type}" \
     """
