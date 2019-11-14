@@ -56,9 +56,9 @@ include AUCELL_FROM_FOLDER as AUCELL_FROM_FOLDER__MOTIF from './processes/aucell
 include AUCELL_FROM_FOLDER as AUCELL_FROM_FOLDER__TRACK from './processes/aucellFromFolder' params(params)
 include SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
 include SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
-include MERGE_MOTIF_TRACK_LOOMS from './processes/scenicLoomHandler'     params(params)
-include PUBLISH_LOOM            from './processes/scenicLoomHandler'     params(params)
-include VISUALIZE               from './processes/scenicLoomHandler'     params(params)
+include MERGE_MOTIF_TRACK_LOOMS from './processes/loomHandler'     params(params)
+include PUBLISH_LOOM            from './processes/loomHandler'     params(params)
+include VISUALIZE               from './processes/loomHandler'     params(params)
 
 // Create channel for the different runs
 runs = Channel.from( 1..params.sc.scenic.numRuns )
