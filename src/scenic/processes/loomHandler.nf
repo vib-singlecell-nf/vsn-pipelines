@@ -55,7 +55,7 @@ process MERGE_MOTIF_TRACK_LOOMS {
     file params.sc.scenic.scenicOutputLoom
 
     """
-    ${binDir}merge_SCENIC_motif_track_loom.py \
+    ${binDir}merge_motif_track_loom.py \
         --loom_motif ${motifloom} \
         --loom_track ${trackloom} \
         --loom_output ${params.sc.scenic.scenicOutputLoom} \
@@ -78,7 +78,7 @@ process APPEND_SCENIC_LOOM {
     file params.sc.scenic.scenicScopeOutputLoom
 
     """
-    ${binDir}append_SCENIC_results_to_existing_loom.py \
+    ${binDir}append_results_to_existing_loom.py \
         --loom_scope ${scopeloom} \
         --loom_scenic ${scenicloom} \
         --loom_output ${params.sc.scenic.scenicScopeOutputLoom} \

@@ -21,10 +21,10 @@ include AUCELL as AUCELL__MOTIF                                   from './proces
 include AUCELL as AUCELL__TRACK                                   from './processes/aucell'                params(params)
 include AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__MOTIF from './workflows/aggregateMultiRuns'    params(params)
 include AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__TRACK from './workflows/aggregateMultiRuns'    params(params)
-include PUBLISH_LOOM                                              from './processes/scenicLoomHandler'     params(params)
-include MERGE_MOTIF_TRACK_LOOMS                                   from './processes/scenicLoomHandler'     params(params)
-include APPEND_SCENIC_LOOM                                        from './processes/scenicLoomHandler'     params(params)
-include VISUALIZE                                                 from './processes/scenicLoomHandler'     params(params)
+include PUBLISH_LOOM                                              from './processes/loomHandler'     params(params)
+include MERGE_MOTIF_TRACK_LOOMS                                   from './processes/loomHandler'     params(params)
+include APPEND_SCENIC_LOOM                                        from './processes/loomHandler'     params(params)
+include VISUALIZE                                                 from './processes/loomHandler'     params(params)
 
 // reporting:
 include './processes/reports.nf' params(params + params.global)

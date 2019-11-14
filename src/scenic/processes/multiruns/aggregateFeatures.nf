@@ -33,7 +33,7 @@ process AGGR_MULTI_RUNS_FEATURES {
       compression_ext = '.gz'
     }
     """
-    ${binDir}aggregate_SCENIC_multi_runs_features.py \
+    ${binDir}aggregate_multi_runs_features.py \
         ${f} \
         --output "multi_runs_features_${type}.${output_format_ext}${compression_ext}" \
         --output-format ${output_format} \

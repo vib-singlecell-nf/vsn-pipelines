@@ -24,7 +24,7 @@ process AUCELL_FROM_FOLDER {
     // file params.output
 
     """
-    ${binDir}aucell_genesigs_from_folder.py \
+    ${binDir}aucell_from_folder.py \
         $exprMat \
         $multiRunsAggrRegulonsFolder \
         -o "multi_runs_regulons_auc_${type}.tsv" \

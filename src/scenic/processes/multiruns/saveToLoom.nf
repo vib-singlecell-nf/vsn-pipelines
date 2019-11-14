@@ -25,7 +25,7 @@ process SAVE_MULTI_RUNS_TO_LOOM {
     // file params.output
 
     """
-    ${binDir}save_SCENIC_multi_runs_to_loom.py \
+    ${binDir}save_multi_runs_to_loom.py \
         $exprMat \
         $multiRunsAggrRegulons \
         $multiRunsAggrRegulonsAUC \
