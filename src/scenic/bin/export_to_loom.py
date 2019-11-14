@@ -264,20 +264,34 @@ class SCopeLoom:
         }
 
     def fix_loom_ca_regulon_data_for_scope(self):
-        auc_mtx = pd.DataFrame(self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
-        # Add underscore for SCope compatibility:
-        auc_mtx.columns = auc_mtx.columns.str.replace('_?\\(', '_(')
-        return {
-            'RegulonsAUC': SCopeLoom.df_to_named_matrix(auc_mtx)
-        }
+        regulons_auc_col_attrs = list(filter(lambda col_attrs_key: 'RegulonsAUC' in col_attrs_key, self.col_attrs.keys()))
+
+        def fix(col_attrs_key):
+            regulons = pd.DataFrame(self.col_attrs[col_attrs_key], index=self.col_attrs['CellID'])
+            # Add underscore for SCope compatibility:
+            regulons.columns = regulons.columns.str.replace('_?\\(', '_(')
+            return {
+                col_attrs_key: SCopeLoom.df_to_named_matrix(regulons)
+            }
+        # Update the keys
+        regulons_auc_col_attrs_update = map(fix, regulons_auc_col_attrs)
+        # Convert list of dict to dict
+        return {next(iter(x)): x.get(next(iter(x))) for x in regulons_auc_col_attrs_update}
 
     def fix_loom_ra_regulon_data_for_scope(self):
-        regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
-        # Add underscore for SCope compatibility:
-        regulons.columns = regulons.columns.str.replace('_?\\(', '_(')
-        return {
-            'Regulons': SCopeLoom.df_to_named_matrix(regulons)
-        }
+        regulons_row_attrs = list(filter(lambda row_attrs_key: 'Regulons' in row_attrs_key, self.row_attrs.keys()))
+
+        def fix(row_attrs_key):
+            regulons = pd.DataFrame(self.row_attrs[row_attrs_key], index=self.row_attrs['Gene'])
+            # Add underscore for SCope compatibility:
+            regulons.columns = regulons.columns.str.replace('_?\\(', '_(')
+            return {
+                row_attrs_key: SCopeLoom.df_to_named_matrix(regulons)
+            }
+        # Update the keys
+        regulons_row_attrs_update = map(fix, regulons_row_attrs)
+        # Convert list of dict to dict
+        return {next(iter(x)): x.get(next(iter(x))) for x in regulons_row_attrs_update}
 
     def calculate_regulon_enrichment(self):
         # Calculate regulon enrichment per cell using AUCell.
@@ -292,7 +306,14 @@ class SCopeLoom:
         _, auc_thresholds = binarize(self.auc_mtx)
         return auc_thresholds
 
+    @staticmethod
+    def is_SCENIC_multi_runs_mode(scopeloom):
+        return 'RegulonGeneOccurrences' in scopeloom.row_attrs.keys() and 'RegulonGeneWeights' in scopeloom.row_attrs.keys()
+
     def merge_regulon_data(self, scope_loom):
+        # Check if SCENIC has been run in multi-runs mode
+        is_multi_runs_mode = SCopeLoom.is_SCENIC_multi_runs_mode(self) and SCopeLoom.is_SCENIC_multi_runs_mode(scope_loom)
+
         # RegulonsAUC
         # Relabel columns with suffix indicating the regulon source
         auc_mtx = pd.DataFrame(data=self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
@@ -308,19 +329,23 @@ class SCopeLoom:
         scope_loom_regulons = pd.DataFrame(scope_loom.row_attrs['Regulons'], index=scope_loom.row_attrs['Gene'])
         scope_loom_regulons.columns = scope_loom_regulons.columns + '-' + scope_loom.tag
 
+        # If multi-runs SCENIC
         # Rename Regulons Gene Occurrences
-        regulon_gene_occurrences = pd.DataFrame(self.row_attrs['RegulonGeneOccurrences'], index=self.row_attrs['Gene'])
-        regulon_gene_occurrences.columns = regulon_gene_occurrences.columns + '-' + self.tag
+        if is_multi_runs_mode:
+            regulon_gene_occurrences = pd.DataFrame(self.row_attrs['RegulonGeneOccurrences'], index=self.row_attrs['Gene'])
+            regulon_gene_occurrences.columns = regulon_gene_occurrences.columns + '-' + self.tag
 
-        scope_loom_regulon_gene_occurrences = pd.DataFrame(scope_loom.row_attrs['RegulonGeneOccurrences'], index=scope_loom.row_attrs['Gene'])
-        scope_loom_regulon_gene_occurrences.columns = scope_loom_regulon_gene_occurrences.columns + '-' + scope_loom.tag
+            scope_loom_regulon_gene_occurrences = pd.DataFrame(scope_loom.row_attrs['RegulonGeneOccurrences'], index=scope_loom.row_attrs['Gene'])
+            scope_loom_regulon_gene_occurrences.columns = scope_loom_regulon_gene_occurrences.columns + '-' + scope_loom.tag
 
+        # If multi-runs SCENIC
         # Rename Regulons Gene Weights
-        regulon_gene_weights = pd.DataFrame(self.row_attrs['RegulonGeneWeights'], index=self.row_attrs['Gene'])
-        regulon_gene_weights.columns = regulon_gene_weights.columns + '-' + self.tag
+        if is_multi_runs_mode:
+            regulon_gene_weights = pd.DataFrame(self.row_attrs['RegulonGeneWeights'], index=self.row_attrs['Gene'])
+            regulon_gene_weights.columns = regulon_gene_weights.columns + '-' + self.tag
 
-        scope_loom_regulon_gene_weights = pd.DataFrame(scope_loom.row_attrs['RegulonGeneWeights'], index=scope_loom.row_attrs['Gene'])
-        scope_loom_regulon_gene_weights.columns = scope_loom_regulon_gene_weights.columns + '-' + scope_loom.tag
+            scope_loom_regulon_gene_weights = pd.DataFrame(scope_loom.row_attrs['RegulonGeneWeights'], index=scope_loom.row_attrs['Gene'])
+            scope_loom_regulon_gene_weights.columns = scope_loom_regulon_gene_weights.columns + '-' + scope_loom.tag
 
         # Combine meta data regulons
         # Rename regulons in the thresholds object, motif
@@ -342,20 +367,27 @@ class SCopeLoom:
 
         # Remove because we will save them separately
         del self.row_attrs["Regulons"]
-        del self.row_attrs["RegulonGeneOccurrences"]
-        del self.row_attrs["RegulonGeneWeights"]
         del self.col_attrs["RegulonsAUC"]
+
+        if is_multi_runs_mode:
+            del self.row_attrs["RegulonGeneOccurrences"]
+            del self.row_attrs["RegulonGeneWeights"]
 
         # Update the attributes
         self.row_attrs.update({f'{self.tag.capitalize()}Regulons': SCopeLoom.df_to_named_matrix(regulons)})
-        self.row_attrs.update({f'{self.tag.capitalize()}RegulonGeneOccurrences': SCopeLoom.df_to_named_matrix(regulon_gene_occurrences)})
-        self.row_attrs.update({f'{self.tag.capitalize()}RegulonGeneWeights': SCopeLoom.df_to_named_matrix(regulon_gene_weights)})
         self.col_attrs.update({f'{self.tag.capitalize()}RegulonsAUC': SCopeLoom.df_to_named_matrix(auc_mtx)})
 
+        if is_multi_runs_mode:
+            self.row_attrs.update({f'{self.tag.capitalize()}RegulonGeneOccurrences': SCopeLoom.df_to_named_matrix(regulon_gene_occurrences)})
+            self.row_attrs.update({f'{self.tag.capitalize()}RegulonGeneWeights': SCopeLoom.df_to_named_matrix(regulon_gene_weights)})
+
         self.row_attrs.update({f'{scope_loom.tag.capitalize()}Regulons': SCopeLoom.df_to_named_matrix(scope_loom_regulons)})
-        self.row_attrs.update({f'{scope_loom.tag.capitalize()}RegulonGeneOccurrences': SCopeLoom.df_to_named_matrix(scope_loom_regulon_gene_occurrences)})
-        self.row_attrs.update({f'{scope_loom.tag.capitalize()}RegulonGeneWeights': SCopeLoom.df_to_named_matrix(scope_loom_regulon_gene_weights)})
         self.col_attrs.update({f'{scope_loom.tag.capitalize()}RegulonsAUC': SCopeLoom.df_to_named_matrix(scope_loom_auc_mtx)})
+
+        if is_multi_runs_mode:
+            self.row_attrs.update({f'{scope_loom.tag.capitalize()}RegulonGeneOccurrences': SCopeLoom.df_to_named_matrix(scope_loom_regulon_gene_occurrences)})
+            self.row_attrs.update({f'{scope_loom.tag.capitalize()}RegulonGeneWeights': SCopeLoom.df_to_named_matrix(scope_loom_regulon_gene_weights)})
+
         self.global_attrs["MetaData"].update({'regulonThresholds': rt_merged})
 
     def get_regulon_gene_data(self, regulon, key):
@@ -505,9 +537,9 @@ class SCopeLoom:
             self.global_attrs["MetaData"].update(self.create_loom_md_embeddings())
 
         # SCENIC
-        if 'Regulons' in self.row_attrs.keys():
+        if any('Regulons' in s for s in self.row_attrs.keys()):
             self.row_attrs.update(self.fix_loom_ra_regulon_data_for_scope())
-        if 'RegulonsAUC' in self.col_attrs.keys():
+        if any('RegulonsAUC' in s for s in self.col_attrs.keys()):
             self.col_attrs.update(self.fix_loom_ca_regulon_data_for_scope())
         if 'regulonThresholds' in self.global_attrs["MetaData"].keys():
             self.global_attrs["MetaData"].update(self.fix_loom_md_regulon_data_for_scope())
