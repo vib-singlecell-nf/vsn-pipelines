@@ -135,7 +135,7 @@ scope_loom = export_to_loom.SCopeLoom(
     compress=True,
     save_additional_regulon_meta_data=True
 )
-scope_loom.set_base_loom()
+scope_loom.set_generic_loom()
 # Add additional stuff specific to multi-runs SCENIC
 scope_loom.add_row_attr_regulon_gene_weights()
 scope_loom.add_row_attr_regulon_gene_occurrences()
