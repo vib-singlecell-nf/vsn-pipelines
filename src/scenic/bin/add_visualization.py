@@ -44,7 +44,7 @@ args = parser.parse_args()
 def visualize_AUCell(args):
 
     ################################################################################
-    # load data from loom
+    # Load the data from the loom and merge if needed
     ################################################################################
 
     with lp.connect(args.loom_input, mode='r', validate=False) as lf:
@@ -73,7 +73,7 @@ def visualize_AUCell(args):
     dr_tsne = tsne.fit_transform(auc_mtx.dropna())
 
     ################################################################################
-    # update scenic data
+    # Add visualization data
     ################################################################################
 
     scope_loom = export_to_loom.SCopeLoom.read_loom(filename=args.loom_input)
