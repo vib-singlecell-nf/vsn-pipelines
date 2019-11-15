@@ -5,7 +5,7 @@ import loompy as lp
 from sklearn.manifold.t_sne import TSNE
 from pyscenic.aucell import aucell
 from pyscenic.genesig import Regulon, GeneSignature
-from typing import List, Mapping, Union, Sequence, Optional
+from typing import List, Mapping, Sequence, Optional, Dict
 from operator import attrgetter
 from multiprocessing import cpu_count
 from pyscenic.binarization import binarize
@@ -15,8 +15,8 @@ import zlib
 import base64
 import json
 import re
+import sys
 
-from typing import Mapping
 from collections import OrderedDict
 
 
@@ -41,51 +41,55 @@ class SCopeLoom:
 
     def __init__(
         self,
+        filename: str = None,
         out_fname: str = None,
         ex_mtx: pd.DataFrame = None,
         regulons: List[Regulon] = None,
         cell_annotations: Optional[Mapping[str, str]] = None,
-        tree_structure: Sequence[str] = (),
+        tree_structure: Sequence[str] = None,
         title: Optional[str] = None,
         nomenclature: str = "Unknown",
         num_workers: int = cpu_count(),
-        embeddings: Mapping[str, pd.DataFrame] = {},
         auc_mtx=None,
         auc_regulon_weights_key='gene2weight',
         auc_thresholds=None,
         compress: bool = False,
         save_additional_regulon_meta_data: bool = False,  # Should be set to true only for multi-runs SCENIC
-        set_base_loom: bool = False,
-        tag: str = None  # Used when merging track and motif-based SCENIC runs
+        set_generic_loom: bool = False,
+        tag: str = None,  # Used when merging track and motif-based SCENIC run
+        col_attrs: Mapping[str, np.ndarray] = None,
+        row_attrs: Mapping[str, np.ndarray] = None,
+        global_attrs: Dict = None,
+        embeddings: Mapping[str, pd.DataFrame] = None
     ):
+        self.filename = filename
         self.out_fname = out_fname
-        if ex_mtx is not None:
-            self.ex_mtx = ex_mtx
-        if regulons is not None:
-            self.regulons = regulons
+        self.ex_mtx = ex_mtx
+        self.regulons = regulons
         self.cell_annotations = cell_annotations
-        self.tree_structure = tree_structure
+        self.tree_structure = tree_structure if tree_structure else ()
         self.title = title
         self.nomenclature = nomenclature
         self.num_workers = num_workers
-        self.embeddings = embeddings
         self.auc_mtx = auc_mtx
         self.auc_regulon_weights_key = auc_regulon_weights_key
         self.auc_thresholds = auc_thresholds
         self.compress = compress
         self.save_additional_regulon_meta_data = save_additional_regulon_meta_data
         self.tag = tag
+        # Loom representation
+        self.col_attrs = col_attrs if col_attrs else {}
+        self.row_attrs = row_attrs if row_attrs else {}
+        self.global_attrs = global_attrs if global_attrs else {}
+        # Internal representation
+        self.embeddings = embeddings if embeddings else {}
         # Utils
         self.id2name = OrderedDict()
-        # Loom Data
-        self.col_attrs = {}
-        self.row_attrs = {}
-        self.global_attrs = {}
         # Set Base Loom
-        if set_base_loom:
-            self.set_base_loom()
+        if set_generic_loom:
+            self.set_generic_loom()
 
-    def set_base_loom(self):
+    def set_generic_loom(self):
         if(self.regulons[0].name.find('_') == -1):
             print(
                 "Regulon name does not seem to be compatible with SCOPE. It should include a space to allow selection of the TF.",
@@ -115,26 +119,124 @@ class SCopeLoom:
     @staticmethod
     def read_loom(filename: str, tag: str = None):
         with lp.connect(filename, mode='r', validate=False) as loom:
-            scope_loom = SCopeLoom(tag=tag)
-            # Materialize i.e.: load the loom content otherwise storage is empty
-            lp.to_html(loom)
+
+            # Load the content into memory
             # Set the main matrix
-            scope_loom.ex_mtx = pd.DataFrame(loom[:, :], index=loom.ra.Gene, columns=loom.ca.CellID).T
+            ex_mtx = pd.DataFrame(loom[:, :], index=loom.ra.Gene, columns=loom.ca.CellID).T
             # Set the column, row and global attribute using the underlying Dict of the AttributeManager
-            scope_loom.col_attrs = loom.ca.__dict__["storage"]
-            scope_loom.row_attrs = loom.ra.__dict__["storage"]
-            scope_loom.global_attrs = loom.attrs.__dict__["storage"]
+            col_attrs = {k: v for k, v in loom.ca.items()}
+            row_attrs = {k: v for k, v in loom.ra.items()}
+            global_attrs = {k: v for k, v in loom.attrs.items()}
             # Decompress and decode the MetaData global attribute
             try:
-                scope_loom.global_attrs["MetaData"] = SCopeLoom.decompress_decode(value=scope_loom.global_attrs["MetaData"])
+                global_attrs["MetaData"] = SCopeLoom.decompress_decode(value=global_attrs["MetaData"])
             except Exception:
                 # MetaData is uncompressed
-                scope_loom.global_attrs["MetaData"] = json.loads(scope_loom.global_attrs["MetaData"])
+                global_attrs["MetaData"] = json.loads(global_attrs["MetaData"])
+
+        scope_loom = SCopeLoom(
+            filename=filename,
+            ex_mtx=ex_mtx,
+            col_attrs=col_attrs,
+            row_attrs=row_attrs,
+            global_attrs=global_attrs,
+            tag=tag
+        )
+        if 'embeddings' in scope_loom.get_meta_data():
+            scope_loom.convert_loom_embeddings_repr_to_internal_repr()
         return scope_loom
+
+    #############
+    # Meta Data #
+    #############
+
+    def add_meta_data(self, _dict):
+        md = self.global_attrs["MetaData"]
+        meta_data = json.loads(md)
+        meta_data.update(_dict)
+        self.global_attrs["MetaData"] = meta_data
+
+    def get_meta_data(self):
+        return self.global_attrs["MetaData"]
+
+    def set_tree(self):
+        assert len(self.tree_structure) <= 3, ""
+        self.global_attrs.update(("SCopeTreeL{}".format(idx + 1), category) for idx, category in enumerate(list(islice(chain(self.tree_structure, repeat("")), 3))))
+
+    #############
+    # Features  #
+    #############
+
+    def get_genes(self):
+        return self.row_attrs['Gene']
+
+    ################
+    # Observations #
+    ################
+
+    def get_cell_ids(self):
+        return self.col_attrs['CellID']
+
+    ###############
+    # Annotations #
+    ###############
+
+    def set_cell_annotations(self):
+        if self.cell_annotations is None:
+            self.cell_annotations = dict(zip(self.ex_mtx.index.astype(str), ['-'] * self.ex_mtx.shape[0]))
+
+    ###########
+    # Metrics #
+    ###########
+
+    def calculate_nb_genes_per_cell(self):
+        # Calculate the number of genes per cell.
+        binary_mtx = self.ex_mtx.copy()
+        binary_mtx[binary_mtx != 0] = 1.0
+        return binary_mtx.sum(axis=1).astype(int)
+
+    def add_metrics(self, metrics: List[str]):
+        md_metrics = []
+        for metric in metrics:
+            md_metrics.append({"name": metric})
+        self.global_attrs["MetaData"].update({'metrics': md_metrics})
 
     ##############
     # Embeddings #
     ##############
+
+    @staticmethod
+    def get_embedding_id(embedding: Embedding, _list):
+        """ Returns the appropriate index as a string given the _list
+
+        Parameters:
+            None
+
+        Returns:
+            str: Returns -1 if the given embedding is the default, 0 if the given _list is empty and length of the given _list minus 1
+
+        """
+        if embedding.is_default():
+            return '-1'
+        elif len(_list) == '0':
+            return '0'
+        else:
+            return str(len(_list) - 1)
+
+    def convert_loom_embeddings_repr_to_internal_repr(self):
+        for embedding in self.get_meta_data()['embeddings']:
+            self.add_embedding(
+                embedding=self.get_embedding_by_id(embedding_id=embedding['id']),
+                embedding_name=embedding['name'],
+                is_default=True if str(embedding['id']) == '-1' else False
+            )
+
+    def get_embedding_by_id(self, embedding_id):
+        if str(embedding_id) == '-1':
+            return self.col_attrs['Embedding']
+        x = self.col_attrs['Embeddings_X'][str(embedding_id)]
+        y = self.col_attrs['Embeddings_Y'][str(embedding_id)]
+        return np.column_stack((x, y))
 
     def add_embedding(self, embedding: np.ndarray, embedding_name, is_default: bool = False):
         df_embedding = pd.DataFrame(embedding, columns=['_X', '_Y'], index=self.ex_mtx.index)
@@ -143,16 +245,21 @@ class SCopeLoom:
             self.default_embedding = _embedding
         self.embeddings[embedding_name] = _embedding
 
-    @staticmethod
-    def get_embedding_id(embedding: Embedding, _list):
-        if embedding.is_default():
-            return '-1'
-        elif len(_list) == '0':
-            return '0'
-        else:
-            return str(len(_list) - 1)
+    def create_loom_default_embedding(self):
+        # Create an embedding based on tSNE.
+        # Name of columns should be "_X" and "_Y".
+        self.add_embedding(embedding=TSNE().fit_transform(self.auc_mtx), embedding_name="tSNE (default)", is_default=True)
 
-    def create_loom_md_embeddings(self):
+    def create_loom_md_embeddings_repr(self):
+        """ Returns a Dictionary (Dict) for the global meta data embeddings with preformated data to be stored in Loom file format and compatible with SCope.
+
+        Parameters:
+            None
+
+        Returns:
+            dict: A Dictionary (Dict) for the global meta data embeddings with preformated data to be stored in Loom file format and compatible with SCope.
+
+        """
         md_embeddings = []
         for _, embedding in self.embeddings.items():
             if embedding.is_default():
@@ -166,14 +273,14 @@ class SCopeLoom:
                 ]
         return {"embeddings": md_embeddings}
 
-    def create_loom_ca_embeddings(self):
-        """ Returns a Dictionary (Dict) with preformated data to be stored in Loom file format.
+    def create_loom_ca_embeddings_repr(self):
+        """ Returns a Dictionary (Dict) for the embeddings with preformated data to be stored in Loom file format and compatible with SCope.
 
         Parameters:
             None
 
         Returns:
-            dict: A Dictionary (Dict) with preformated data to be stored in Loom file format.
+            dict: A Dictionary (Dict) for the embeddings with preformated data to be stored in Loom file format and compatible with SCope.
 
         """
         default_embedding = None
@@ -206,11 +313,6 @@ class SCopeLoom:
             "Embeddings_Y": SCopeLoom.df_to_named_matrix(df=embeddings_Y)
         }
 
-    def create_loom_default_embedding(self):
-        # Create an embedding based on tSNE.
-        # Name of columns should be "_X" and "_Y".
-        self.add_embedding(embedding=TSNE().fit_transform(self.auc_mtx), embedding_name="tSNE (default)", is_default=True)
-
     ###############
     # Clusterings #
     ###############
@@ -224,35 +326,14 @@ class SCopeLoom:
             columns=['0']
         ).replace(self.cell_annotations).replace(self.name2idx())
 
-    ###############
-    # Annotations #
-    ###############
-
-    def set_cell_annotations(self):
-        if self.cell_annotations is None:
-            self.cell_annotations = dict(zip(self.ex_mtx.index.astype(str), ['-'] * self.ex_mtx.shape[0]))
-
-    ###########
-    # Metrics #
-    ###########
-
-    def calculate_nb_genes_per_cell(self):
-        # Calculate the number of genes per cell.
-        binary_mtx = self.ex_mtx.copy()
-        binary_mtx[binary_mtx != 0] = 1.0
-        return binary_mtx.sum(axis=1).astype(int)
-
-    def add_metrics(self, metrics: List[str]):
-        md_metrics = []
-        for metric in metrics:
-            md_metrics.append({"name": metric})
-        self.global_attrs["MetaData"].update({'metrics': md_metrics})
-
     ##########
     # SCENIC #
     ##########
 
-    def fix_loom_md_regulon_data_for_scope(self):
+    def has_scenic_multi_runs_data(self):
+        return 'RegulonGeneOccurrences' in self.row_attrs.keys() and 'RegulonGeneWeights' in self.row_attrs.keys()
+
+    def scopify_md_regulon_data(self):
         # Fix regulon objects to display properly in SCope:
         # Rename regulons in the thresholds object, motif
         md_regulon_thresholds = self.global_attrs['MetaData']['regulonThresholds']
@@ -263,7 +344,7 @@ class SCopeLoom:
             'regulonThresholds': md_regulon_thresholds
         }
 
-    def fix_loom_ca_regulon_data_for_scope(self):
+    def scopify_loom_ca_regulon_data(self):
         regulons_auc_col_attrs = list(filter(lambda col_attrs_key: 'RegulonsAUC' in col_attrs_key, self.col_attrs.keys()))
 
         def fix(col_attrs_key):
@@ -278,7 +359,7 @@ class SCopeLoom:
         # Convert list of dict to dict
         return {next(iter(x)): x.get(next(iter(x))) for x in regulons_auc_col_attrs_update}
 
-    def fix_loom_ra_regulon_data_for_scope(self):
+    def scopify_loom_ra_regulon_data(self):
         regulons_row_attrs = list(filter(lambda row_attrs_key: 'Regulons' in row_attrs_key, self.row_attrs.keys()))
 
         def fix(row_attrs_key):
@@ -306,13 +387,9 @@ class SCopeLoom:
         _, auc_thresholds = binarize(self.auc_mtx)
         return auc_thresholds
 
-    @staticmethod
-    def is_SCENIC_multi_runs_mode(scopeloom):
-        return 'RegulonGeneOccurrences' in scopeloom.row_attrs.keys() and 'RegulonGeneWeights' in scopeloom.row_attrs.keys()
-
     def merge_regulon_data(self, scope_loom):
         # Check if SCENIC has been run in multi-runs mode
-        is_multi_runs_mode = SCopeLoom.is_SCENIC_multi_runs_mode(self) and SCopeLoom.is_SCENIC_multi_runs_mode(scope_loom)
+        is_multi_runs_mode = self.has_scenic_multi_runs_data() and scope_loom.has_scenic_multi_runs_data()
 
         # RegulonsAUC
         # Relabel columns with suffix indicating the regulon source
@@ -476,7 +553,9 @@ class SCopeLoom:
             print("Added 'RegulonGeneOccurrences' to the row attributes.")
             self.row_attrs['RegulonGeneOccurrences'] = SCopeLoom.df_to_named_matrix(regulon_gene_occurrences)
 
-    ####
+    ###########
+    # Generic #
+    ###########
 
     def name2idx(self):
         return dict(map(reversed, enumerate(sorted(set(self.cell_annotations.values())))))
@@ -517,35 +596,78 @@ class SCopeLoom:
             "Genome": self.nomenclature
         }
 
-    def set_tree(self):
-        assert len(self.tree_structure) <= 3, ""
-        self.global_attrs.update(("SCopeTreeL{}".format(idx + 1), category) for idx, category in enumerate(list(islice(chain(self.tree_structure, repeat("")), 3))))
+    def merge(self, loom):
+        # Check all the cells and genes are in the same order
+        if not all(self.get_cell_ids() == loom.get_cell_ids()):
+            sys.exit(f"ERROR: Column attribute CellIDs does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
+        if not all(self.get_genes() == loom.get_genes()):
+            sys.exit(f"ERROR: Row attribute 'Gene' does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
 
-    def add_meta_data(self, _dict):
-        md = self.global_attrs["MetaData"]
-        meta_data = json.loads(md)
-        meta_data.update(_dict)
-        self.global_attrs["MetaData"] = meta_data
+        # Add the embeddings of the given loom (SCopeLoom) to this SCopeLoom
+        if 'embeddings' in loom.get_meta_data():
+
+            print(f"Merging embeddings from {os.path.basename(loom.filename)} into {os.path.basename(self.filename)}...")
+            for embedding in loom.get_meta_data()['embeddings']:
+                self.add_embedding(
+                    embedding_name=embedding['name'],
+                    embedding=loom.get_embedding_by_id(embedding_id=embedding['id'])
+                )
+            print("Done.")
+
+        # Add SCENIC results if present in the given loom
+        if any('Regulon' in s for s in loom.row_attrs.keys()) and any('Regulon' in s for s in loom.col_attrs.keys()):
+
+            print(f"Merging SCENIC results from {os.path.basename(loom.filename)} into {os.path.basename(self.filename)}...")
+
+            # Regulon information from row attributes
+            # All the row attributes containing the substring 'Regulon' within the given SCopeLoom
+            # will be merged with this SCopeLoom
+            regulons_row_attrs_keys = list(filter(lambda row_attrs_key: 'Regulon' in row_attrs_key, loom.row_attrs.keys()))
+            regulons_row_attrs = {
+                regulons_row_attr_key: loom.row_attrs[regulons_row_attr_key] for regulons_row_attr_key in regulons_row_attrs_keys
+            }
+            self.row_attrs.update(regulons_row_attrs)
+            # Regulon information from column attributes
+            # All the column attributes containing the substring 'Regulon' within the given SCopeLoom
+            # will be merged with this SCopeLoom
+            regulons_auc_col_attrs_keys = list(filter(lambda col_attrs_key: 'Regulon' in col_attrs_key, loom.col_attrs.keys()))
+            regulons_auc_col_attrs = {
+                regulons_auc_col_attr_key: loom.col_attrs[regulons_auc_col_attr_key] for regulons_auc_col_attr_key in regulons_auc_col_attrs_keys
+            }
+            self.col_attrs.update(regulons_auc_col_attrs)
+            # regulonThresholds MetaData global attribute
+            self.global_attrs["MetaData"].update(
+                {
+                    'regulonThresholds': loom.get_meta_data()['regulonThresholds']
+                }
+            )
+
+            print("Done.")
 
     def export(self, out_fname: str, save_embeddings: bool = True, compress_meta_data: bool = False):
+
         if out_fname is None:
             raise ValueError("The given out_fname cannot be None.")
 
-        # Embeddings
+        ##############
+        # Embeddings #
+        ##############
         if save_embeddings:
-            self.col_attrs.update(self.create_loom_ca_embeddings())
-            self.global_attrs["MetaData"].update(self.create_loom_md_embeddings())
+            self.col_attrs.update(self.create_loom_ca_embeddings_repr())
+            self.global_attrs["MetaData"].update(self.create_loom_md_embeddings_repr())
 
-        # SCENIC
+        ##########
+        # SCENIC #
+        ##########
         if any('Regulons' in s for s in self.row_attrs.keys()):
-            self.row_attrs.update(self.fix_loom_ra_regulon_data_for_scope())
+            self.row_attrs.update(self.scopify_loom_ra_regulon_data())
         if any('RegulonsAUC' in s for s in self.col_attrs.keys()):
-            self.col_attrs.update(self.fix_loom_ca_regulon_data_for_scope())
+            self.col_attrs.update(self.scopify_loom_ca_regulon_data())
         if 'regulonThresholds' in self.global_attrs["MetaData"].keys():
-            self.global_attrs["MetaData"].update(self.fix_loom_md_regulon_data_for_scope())
+            self.global_attrs["MetaData"].update(self.scopify_md_regulon_data())
 
         # Compress MetaData global attribute
-        # Should be compressed if Loompy version 2
+        # (Should be compressed if Loompy version 2)
         self.global_attrs["MetaData"] = json.dumps(self.global_attrs["MetaData"])
         if compress_meta_data:
             self.global_attrs["MetaData"] = SCopeLoom.compress_encode(value=self.global_attrs["MetaData"])
@@ -563,7 +685,9 @@ class SCopeLoom:
             file_attrs=self.global_attrs
         )
 
-    # Utility functions
+    #########
+    # Utils #
+    #########
 
     @staticmethod
     def df_to_named_matrix(df: pd.DataFrame):
