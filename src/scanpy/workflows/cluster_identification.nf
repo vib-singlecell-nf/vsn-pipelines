@@ -27,4 +27,3 @@ workflow CLUSTER_IDENTIFICATION {
         marker_genes
         report
 }
-

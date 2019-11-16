@@ -2,6 +2,12 @@ nextflow.preview.dsl=2
 
 include getBaseName from '../../utils/processes/files.nf'
 
+if(!params.containsKey("test")) {
+  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+} else {
+  binDir = ""
+}
+
 process SC__SCANPY__FEATURE_SELECTION {
 
   container params.sc.scanpy.container
@@ -13,7 +19,7 @@ process SC__SCANPY__FEATURE_SELECTION {
     file "${getBaseName(f)}.SC__SCANPY__FEATURE_SELECTION.${params.off}"
   script:
     """
-    ${workflow.projectDir}/src/scanpy/bin/feature_selection/sc_select_variable_genes.py \
+    ${binDir}feature_selection/sc_select_variable_genes.py \
         --method $params.featureSelectionMethod \
         ${(params.containsKey('featureSelectionMinMean')) ? '--min-mean ' + params.featureSelectionMinMean : ''} \
         ${(params.containsKey('featureSelectionMaxMean')) ? '--max-mean ' + params.featureSelectionMaxMean : ''} \

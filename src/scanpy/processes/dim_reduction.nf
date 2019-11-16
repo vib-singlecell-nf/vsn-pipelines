@@ -2,6 +2,12 @@ nextflow.preview.dsl=2
 
 include getBaseName from '../../utils/processes/files.nf'
 
+if(!params.containsKey("test")) {
+  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+} else {
+  binDir = ""
+}
+
 process SC__SCANPY__DIM_REDUCTION {
 
   container params.sc.scanpy.container
@@ -14,7 +20,7 @@ process SC__SCANPY__DIM_REDUCTION {
   script:
     method = params.dimReductionMethod.replaceAll('-','').toUpperCase()
     """
-    ${workflow.projectDir}/src/scanpy/bin/dim_reduction/sc_dim_reduction.py \
+    ${binDir}dim_reduction/sc_dim_reduction.py \
          ${(params.containsKey('dimReductionMethod')) ? '--method ' + params.dimReductionMethod : ''} \
          ${(params.containsKey('svdSolver')) ? '--svd-solver ' + params.svdSolver : ''} \
          ${(params.containsKey('nNeighbors')) ? '--n-neighbors ' + params.nNeighbors : ''} \
