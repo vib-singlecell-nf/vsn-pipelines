@@ -68,9 +68,9 @@ process SC__FILE_CONCATENATOR() {
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    file "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}"
+    tuple val(params.project_name), file("${params.project_name}.SC__FILE_CONCATENATOR.${params.off}")
   script:
     """
     ${binDir}sc_file_concatenator.py \
@@ -86,9 +86,9 @@ process SC__STAR_CONCATENATOR() {
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    tuple id, file("${params.project_name}.SC__STAR_CONCATENATOR.${params.off}")
+    tuple val(id), file("${params.project_name}.SC__STAR_CONCATENATOR.${params.off}")
   script:
     id = params.project_name
     """
@@ -97,8 +97,6 @@ process SC__STAR_CONCATENATOR() {
       --output "${params.project_name}.SC__STAR_CONCATENATOR.${params.off}" $f
     """
 }
-
-// include getBaseName from './files.nf'
 
 process SC__FILE_ANNOTATOR() {
 
@@ -110,7 +108,7 @@ process SC__FILE_ANNOTATOR() {
     tuple val(id), file(f)
     file(metaDataFilePath)
   output:
-    file("${id}.SC__FILE_ANNOTATOR.${params.off}")
+    tuple val(id), file("${id}.SC__FILE_ANNOTATOR.${params.off}")
   script:
     """
     ${binDir}sc_file_annotator.py \
@@ -126,10 +124,10 @@ process SC__PUBLISH_H5AD {
     publishDir "${params.outdir}/data", mode: 'link', overwrite: true
 
     input:
-        file f_in
-        val f_out
+        tuple val(id), file(f_in)
+        val(f_out)
     output:
-        file "${f_out}.h5ad"
+        tuple val(id), file("${f_out}.h5ad")
     script:
     """
     ln -s ${f_in} ${f_out}.h5ad

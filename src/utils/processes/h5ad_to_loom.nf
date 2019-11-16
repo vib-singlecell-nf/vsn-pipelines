@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-include getBaseName from './files.nf'
-
 if(!params.containsKey("test")) {
   binDir = "${workflow.projectDir}/src/utils/bin/"
 } else {
@@ -15,14 +13,14 @@ process SC__H5AD_TO_LOOM {
   publishDir "${params.outdir}/loom", mode: 'link', overwrite: true
 
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    file "${getBaseName(f)}.SC__H5AD_TO_LOOM.loom" 
+    tuple val(id), file("${id}.SC__H5AD_TO_LOOM.loom")
   script:
     """
     ${binDir}h5ad_to_loom.py \
          $f \
-         "${getBaseName(f)}.SC__H5AD_TO_LOOM.loom" 
+         "${id}.SC__H5AD_TO_LOOM.loom" 
     """
 }
 
@@ -32,14 +30,14 @@ process SC__H5AD_TO_FILTERED_LOOM {
   publishDir "${params.outdir}/loom", mode: 'link', overwrite: true
 
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    file "${getBaseName(f)}.filtered.loom"
+    tuple val(id), file("${id}.filtered.loom")
   script:
     """
     ${binDir}h5ad_to_filtered_loom.py \
          $f \
-         "${getBaseName(f)}.filtered.loom"
+         "${id}.filtered.loom"
     """
 }
 
