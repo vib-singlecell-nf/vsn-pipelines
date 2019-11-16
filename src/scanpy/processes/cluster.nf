@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-include getBaseName from '../../utils/processes/files.nf'
-
 if(!params.containsKey("test")) {
   binDir = "${workflow.projectDir}/src/scanpy/bin/"
 } else {
@@ -14,16 +12,15 @@ process SC__SCANPY__CLUSTERING {
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    file "${getBaseName(f)}.SC__SCANPY__CLUSTERING.${params.off}"
+    tuple val(id), file("${id}.SC__SCANPY__CLUSTERING.${params.off}")
   script:
     """
     ${binDir}cluster/sc_clustering.py \
          ${(params.containsKey('clusteringMethod')) ? '--method ' + params.clusteringMethod : ''} \
          ${(params.containsKey('resolution')) ? '--resolution ' + params.resolution : ''} \
          $f \
-         "${getBaseName(f)}.SC__SCANPY__CLUSTERING.${params.off}"
+         "${id}.SC__SCANPY__CLUSTERING.${params.off}"
     """
 }
-
