@@ -2,6 +2,11 @@ nextflow.preview.dsl=2
 
 include getBaseName from '../../utils/processes/files.nf'
 
+if(!params.containsKey("test")) {
+  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+} else {
+  binDir = ""
+}
 
 process SC__SCANPY__COMPUTE_QC_STATS {
 
@@ -13,7 +18,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
     file "${getBaseName(f)}.SC__SCANPY__COMPUTE_QC_STATS.${params.off}"
   script:
     """
-    ${workflow.projectDir}/src/scanpy/bin/filter/sc_cell_gene_filtering.py \
+    ${binDir}filter/sc_cell_gene_filtering.py \
       compute \
       $f \
       ${getBaseName(f)}.SC__SCANPY__COMPUTE_QC_STATS.${params.off} \
@@ -38,7 +43,7 @@ process SC__SCANPY__GENE_FILTER {
         file "${getBaseName(f)}.SC__SCANPY__GENE_FILTER.${params.off}"
     script:
     """
-    ${workflow.projectDir}/src/scanpy/bin/filter/sc_cell_gene_filtering.py \
+    ${binDir}filter/sc_cell_gene_filtering.py \
         genefilter \
         $f \
         ${getBaseName(f)}.SC__SCANPY__GENE_FILTER.${params.off} \
@@ -58,7 +63,7 @@ process SC__SCANPY__CELL_FILTER {
         file "${getBaseName(f)}.SC__SCANPY__CELL_FILTER.${params.off}"
     script:
     """
-    ${workflow.projectDir}/src/scanpy/bin/filter/sc_cell_gene_filtering.py \
+    ${binDir}filter/sc_cell_gene_filtering.py \
         cellfilter \
         $f \
         ${getBaseName(f)}.SC__SCANPY__CELL_FILTER.${params.off} \
@@ -69,4 +74,3 @@ process SC__SCANPY__CELL_FILTER {
         ${(params.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + params.cellFilterMaxPercentMito : ''}
     """
 }
-

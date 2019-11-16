@@ -2,6 +2,12 @@ nextflow.preview.dsl=2
 
 include getBaseName from '../../utils/processes/files.nf'
 
+if(!params.containsKey("test")) {
+  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+} else {
+  binDir = ""
+}
+
 process SC__SCANPY__CLUSTERING {
 
   container params.sc.scanpy.container
@@ -13,7 +19,7 @@ process SC__SCANPY__CLUSTERING {
     file "${getBaseName(f)}.SC__SCANPY__CLUSTERING.${params.off}"
   script:
     """
-    ${workflow.projectDir}/src/scanpy/bin/cluster/sc_clustering.py \
+    ${binDir}cluster/sc_clustering.py \
          ${(params.containsKey('clusteringMethod')) ? '--method ' + params.clusteringMethod : ''} \
          ${(params.containsKey('resolution')) ? '--resolution ' + params.resolution : ''} \
          $f \
