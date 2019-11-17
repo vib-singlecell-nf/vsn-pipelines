@@ -45,7 +45,7 @@ process SC__SCANPY__GENE_FILTER {
         genefilter \
         $f \
         ${id}.SC__SCANPY__GENE_FILTER.${params.off} \
-        ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''} \
+        ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''}
     """
 }
 

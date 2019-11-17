@@ -68,7 +68,7 @@ process SC__FILE_CONCATENATOR() {
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
-    tuple val(id), file(f)
+    file("*")
   output:
     tuple val(params.project_name), file("${params.project_name}.SC__FILE_CONCATENATOR.${params.off}")
   script:
@@ -76,7 +76,7 @@ process SC__FILE_CONCATENATOR() {
     ${binDir}sc_file_concatenator.py \
       --file-format $params.off \
       ${(params.containsKey('join')) ? '--join ' + params.join : ''} \
-      --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
+      --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" *
     """
 }
 
