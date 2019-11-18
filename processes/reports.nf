@@ -7,6 +7,7 @@ outputs ipynb named by the value in ${report_title}
 process GENERATE_REPORT {
 
   container params.sc.scenic.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/notebooks", mode: 'link', overwrite: true
 
   input:
@@ -27,6 +28,7 @@ process GENERATE_REPORT {
 process REPORT_TO_HTML {
 
   container params.sc.scenic.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/notebooks", mode: 'link', overwrite: true
 
   input:
@@ -39,4 +41,3 @@ process REPORT_TO_HTML {
     jupyter nbconvert ${ipynb} --to html
     """
 }
-
