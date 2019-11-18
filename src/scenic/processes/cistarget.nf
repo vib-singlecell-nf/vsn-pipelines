@@ -2,23 +2,22 @@ nextflow.preview.dsl=2
 
 // include getBaseName from '../../utils/files.nf'
 
-process SC__SCENIC__CISTARGET {
+process CISTARGET {
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=${params.sc.scenic.cistarget.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks params.sc.scenic.maxForks
     
     input:
-    val runId
+    tuple val(runId), file("${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}")
     file filteredloom
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}"
     file featherDB
     file annotation
     val type
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"}"
+    tuple val(runId), file("${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"}")
 
     """
     pyscenic ctx \
