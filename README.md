@@ -1,6 +1,6 @@
 # SingleCellTxBenchmark
 
-[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.09.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-19.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
 A repository of pipelines for single-cell data in Nextflow DSL2.
 
