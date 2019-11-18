@@ -10,6 +10,7 @@ if(!params.containsKey("test")) {
 process SC__H5AD_TO_LOOM {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/loom", mode: 'link', overwrite: true
 
   input:
@@ -27,6 +28,7 @@ process SC__H5AD_TO_LOOM {
 process SC__H5AD_TO_FILTERED_LOOM {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/loom", mode: 'link', overwrite: true
 
   input:
