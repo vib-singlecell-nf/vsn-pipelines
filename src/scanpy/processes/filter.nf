@@ -9,6 +9,7 @@ if(!params.containsKey("test")) {
 process SC__SCANPY__COMPUTE_QC_STATS {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
   input:
     tuple val(id), file(f)
@@ -33,6 +34,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
 process SC__SCANPY__GENE_FILTER {
 
     container params.sc.scanpy.container
+    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
@@ -53,6 +55,7 @@ process SC__SCANPY__GENE_FILTER {
 process SC__SCANPY__CELL_FILTER {
 
     container params.sc.scanpy.container
+    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
