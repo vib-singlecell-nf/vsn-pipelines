@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-// include getBaseName from '../../utils/files.nf'
-
 if(!params.containsKey("test")) {
   binDir = "${workflow.projectDir}/src/scenic/bin/"
 } else {
