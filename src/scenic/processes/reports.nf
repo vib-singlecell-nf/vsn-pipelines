@@ -4,7 +4,7 @@ nextflow.preview.dsl=2
 takes a template ipynb and adata as input,
 outputs ipynb named by the value in ${report_title}
 */
-process SC__SCENIC__GENERATE_REPORT {
+process GENERATE_REPORT {
 
   container params.sc.scenic.container
   publishDir "${params.outdir}/notebooks", mode: 'link', overwrite: true
@@ -24,7 +24,7 @@ process SC__SCENIC__GENERATE_REPORT {
     """
 }
 
-process SC__SCENIC__REPORT_TO_HTML {
+process REPORT_TO_HTML {
 
   container params.sc.scenic.container
   publishDir "${params.outdir}/notebooks", mode: 'link', overwrite: true

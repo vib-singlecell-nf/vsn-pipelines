@@ -175,12 +175,10 @@ src/
 ├── scenic
 │   ├── bin
 │   │   ├── grnboost2_without_dask.py
-│   │   └── merge_SCENIC_motif_track_loom.py
 │   ├── processes
 │   │   ├── aucell.nf
 │   │   ├── cistarget.nf
 │   │   ├── grnboost2withoutDask.nf
-│   │   └── mergeScenicLooms.nf
 │   ├── main.nf
 │   └── scenic.config
 │
