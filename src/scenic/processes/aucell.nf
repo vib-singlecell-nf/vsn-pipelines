@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-// include getBaseName from '../../utils/files.nf'
-
 process AUCELL {
     cache 'deep'
     container params.sc.scenic.container

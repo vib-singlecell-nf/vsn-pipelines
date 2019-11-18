@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-// include getBaseName from '../../utils/files.nf'
-
 process CISTARGET {
     cache 'deep'
     container params.sc.scenic.container

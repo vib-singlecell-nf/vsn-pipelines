@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-include getBaseName from '../../utils/processes/files.nf'
-
 /* general reporting function: 
 takes a template ipynb and adata as input,
 outputs ipynb named by the value in ${report_title}
@@ -13,15 +11,14 @@ process SC__SCANPY__GENERATE_REPORT {
 
   input:
     file ipynb
-    file adata
+    tuple val(id), file(adata)
     val report_title
-
   output:
-    file("${getBaseName(adata)}.${report_title}.ipynb")
+    file("${id}.${report_title}.ipynb")
   script:
     """
     papermill ${ipynb} \
-        ${getBaseName(adata)}.${report_title}.ipynb \
+        ${id}.${report_title}.ipynb \
         -p FILE $adata
     """
 }
@@ -34,16 +31,14 @@ process SC__SCANPY__FILTER_QC_REPORT {
 
   input:
     file(ipynb)
-    file(unfiltered)
-    file(filtered)
+    tuple val(id), file(unfiltered), file(filtered)
     val report_title
-
   output:
-    file("${getBaseName(unfiltered)}.${report_title}.ipynb")
+    file("${id}.${report_title}.ipynb")
   script:
     """
     papermill ${ipynb} \
-        ${getBaseName(unfiltered)}.${report_title}.ipynb \
+        ${id}.${report_title}.ipynb \
         -p FILE1 $unfiltered -p FILE2 $filtered
     """
 }
@@ -57,7 +52,6 @@ process SC__SCANPY__REPORT_TO_HTML {
 
   input:
     file ipynb
-
   output:
     file "*.html"
   script:
