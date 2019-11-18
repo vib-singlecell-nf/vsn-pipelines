@@ -14,6 +14,8 @@ import pandas as pd
 import umap
 from MulticoreTSNE import MulticoreTSNE as TSNE
 
+import export_to_loom
+
 ################################################################################
 ################################################################################
 
@@ -39,43 +41,24 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def df_to_named_matrix(df):
-    arr_ip = [tuple(i) for i in df.as_matrix()]
-    dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
-    arr = np.array(arr_ip, dtype=dtyp)
-    return arr
-
-
 def visualize_AUCell(args):
 
     ################################################################################
-    # load data from loom
+    # Load the data from the loom and merge if needed
     ################################################################################
 
-    # scenic output
-    lf = lp.connect(args.loom_input, mode='r', validate=False)
-    meta = json.loads(zlib.decompress(base64.b64decode(lf.attrs.MetaData)))
-    auc_mtx = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
-    regulons = pd.DataFrame(lf.ra.Regulons, index=lf.ra.Gene)
-    lf.close()
+    with lp.connect(args.loom_input, mode='r', validate=False) as lf:
 
-
-    ################################################################################
-    # Fix regulon objects to display properly in SCope:
-    ################################################################################
-
-    # add underscore for SCope compatibility:
-    auc_mtx.columns = auc_mtx.columns.str.replace('\\(', '_(')
-
-    # add underscore for SCope compatibility:
-    regulons.columns = regulons.columns.str.replace('\\(', '_(')
-
-    # Rename regulons in the thresholds object, motif
-    rt = meta['regulonThresholds']
-    for i, x in enumerate(rt):
-        tmp = x.get('regulon').replace("(", "_(") # + '-motif'
-        x.update({'regulon': tmp})
-
+        if "RegulonsAUC" in lf.ca.keys():
+            auc_mtx = pd.DataFrame(lf.ca.RegulonsAUC, index=lf.ca.CellID)
+        else:
+            print("Loom with motif & track regulons detected, merging the regulons AUC matrices...")
+            mtf_auc_mtx = pd.DataFrame(lf.ca.MotifRegulonsAUC, index=lf.ca.CellID)
+            trk_auc_mtx = pd.DataFrame(lf.ca.TrackRegulonsAUC, index=lf.ca.CellID)
+            # merge the AUC matrices:
+            auc_mtx = pd.concat([mtf_auc_mtx, trk_auc_mtx], sort=False, axis=1, join='outer')
+            # fill NAs (if any) with 0s:
+            auc_mtx.fillna(0, inplace=True)
 
     ################################################################################
     # Visualize AUC matrix:
@@ -84,65 +67,20 @@ def visualize_AUCell(args):
     # UMAP
     run_umap = umap.UMAP(n_neighbors=10, min_dist=0.4, metric='correlation').fit_transform
     dr_umap = run_umap(auc_mtx.dropna())
+
     # tSNE
     tsne = TSNE(n_jobs=args.num_workers)
     dr_tsne = tsne.fit_transform(auc_mtx.dropna())
 
-
     ################################################################################
-    # embeddings
-    ################################################################################
-
-    default_embedding = pd.DataFrame(dr_umap, columns=['_X', '_Y'], index=auc_mtx.dropna().index)
-
-    embeddings_x = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_X']].astype('float32')
-    embeddings_y = pd.DataFrame(dr_tsne, columns=['_X', '_Y'], index=auc_mtx.dropna().index)[['_Y']].astype('float32')
-
-    embeddings_x.columns = ['1']
-    embeddings_y.columns = ['1']
-
-
-    ################################################################################
-    # copy loom
+    # Add visualization data
     ################################################################################
 
-    copyfile(args.loom_input, args.loom_output)
-
-
-    ################################################################################
-    # update scenic data
-    ################################################################################
-
-    lf = lp.connect(args.loom_output, mode='r+', validate=False)
-
-    # write regulon information:
-    lf.ca['RegulonsAUC'] = df_to_named_matrix(auc_mtx)
-    lf.ra['Regulons'] = df_to_named_matrix(regulons)
-
-    # write embeddings:
-    lf.ca['Embedding']    = df_to_named_matrix(default_embedding)
-    lf.ca['Embeddings_X'] = df_to_named_matrix(embeddings_x)
-    lf.ca['Embeddings_Y'] = df_to_named_matrix(embeddings_y)
-
-    metaJson = {}
-    metaJson['embeddings'] = [
-        {
-            "id": -1,
-            "name": "SCENIC AUC UMAP"
-        },
-        {
-            "id": 1,
-            "name": "SCENIC AUC t-SNE"
-        },
-    ]
-
-    metaJson["regulonThresholds"] = rt
-
-    lf.attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-
-    lf.close()
+    scope_loom = export_to_loom.SCopeLoom.read_loom(filename=args.loom_input)
+    scope_loom.add_embedding(embedding=dr_umap, embedding_name="SCENIC AUC UMAP", is_default=True)
+    scope_loom.add_embedding(embedding=dr_tsne, embedding_name="SCENIC AUC t-SNE", is_default=False)
+    scope_loom.export(out_fname=args.loom_output)
 
 
 if __name__ == "__main__":
     visualize_AUCell(args)
-

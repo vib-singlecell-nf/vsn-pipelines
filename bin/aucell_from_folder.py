@@ -51,10 +51,10 @@ parser_grn.add_argument(
          ' of a feature as fraction of ranked genes (default: {}).'.format(0.05)
 )
 parser_grn.add_argument(
-    '--gene-occurence-threshold',
+    '--min-regulon-gene-occurrence',
     type=int,
     default=5,
-    dest="gene_occurence_threshold",
+    dest="min_regulon_gene_occurrence",
     help='The threshold used for filtering the genes bases on their occurrence (default: {}).'.format(5)
 )
 parser_grn.add_argument(
@@ -90,7 +90,7 @@ ex_matrix_df = utils.get_matrix(
 signatures = utils.read_signatures_from_tsv_dir(
     dpath=args.signatures_fname,
     noweights=False,
-    weight_threshold=args.gene_occurence_threshold,
+    weight_threshold=args.min_regulon_gene_occurrence,
     min_genes=args.min_genes
 )
 auc_threshold = args.auc_threshold
