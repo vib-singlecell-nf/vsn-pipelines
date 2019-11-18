@@ -10,8 +10,10 @@ RUN python -m venv /opt/venv
 # Make sure we use the virtualenv:
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN git clone -b aucell_multi_runs_and_fix_empty_motif_data https://github.com/dweemx/pySCENIC.git && \
+RUN git clone -b aucell_multi_runs https://github.com/dweemx/pySCENIC.git && \
     cd pySCENIC && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements_docker.txt && \
     pip install .
 
 FROM python:3.6.8-slim-stretch AS build-image
@@ -19,6 +21,8 @@ RUN apt-get -y update && \
     # Need to run ps
     apt-get -y install procps && \
     apt-get -y install libxml2 && \
+    # Need to run MulticoreTSNE
+    apt-get -y install libgomp1 && \
     rm -rf /var/cache/apt/* && \
     rm -rf /var/lib/apt/lists/*
 
