@@ -1,4 +1,4 @@
-name: single_sample CI
+name: single_sample
 
 on: [push, pull_request]
 
@@ -18,11 +18,7 @@ jobs:
       run: |
         wget https://raw.githubusercontent.com/aertslab/scenic-nf/master/example/sample_data.tar.gz
         tar xvf sample_data.tar.gz
-        pwd
     - name: Run single_sample test
       run: |
         nextflow run ${GITHUB_WORKSPACE} -profile single_sample,test__single_sample,docker -entry single_sample
-    - name: Run single_sample_scenic test
-      run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scenic,test__single_sample_scenic,docker -entry single_sample_scenic
 
