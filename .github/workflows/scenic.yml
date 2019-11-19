@@ -16,5 +16,6 @@ jobs:
         sudo mv nextflow /usr/local/bin/
     - name: Run scenic test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile scenic,test__scenic,docker -entry scenic
+        nextflow run ${GITHUB_WORKSPACE} -profile scenic,test__scenic,docker -entry scenic -ansi-log false
+        cat .nextflow.log
 
