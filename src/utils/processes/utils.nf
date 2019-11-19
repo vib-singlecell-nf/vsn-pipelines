@@ -11,8 +11,12 @@ if(!params.containsKey("test")) {
 process SC__FILE_CONVERTER {
 
   cache 'deep'
-  container params.sc.scanpy.container
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+  if (params.off == 'h5ad') {
+    container params.sc.scanpy.container
+  } else if (params.off == 'sce.rds') {
+    container params.sc.scater.container
+  }
 
   input:
     tuple val(id), file(f)
@@ -44,11 +48,38 @@ process SC__FILE_CONVERTER {
         throw new Exception("The given input format ${params.iff} is not recognized.")
         break;
     }
-    """
-    ${binDir}sc_file_converter.py \
-       --input-format $params.iff \
-       --output-format $params.off ${f} "${id}.SC__FILE_CONVERTER.${params.off}"
-    """
+
+    switch(params.off) {
+      case "h5ad":
+        def iffs = ['10x_mtx']
+
+        if (iffs.contains(params.iff)) {
+          """
+          ${binDir}sc_file_converter.py \
+            --input-format $params.iff \
+            --output-format $params.off ${f} "${id}.SC__FILE_CONVERTER.${params.off}"
+          """
+        }
+        break;
+        
+      case "sce.rds":
+        def iffs = ['10x_mtx']
+
+        if (iffs.contains(params.iff)) {
+          """
+          Rscript ${binDir}sc_file_converter.R \
+            --input-format $params.iff \
+            --output-format $params.off ${f} "${id}.SC__FILE_CONVERTER.${params.off}"         
+
+          """
+        }
+        break;
+      default:
+        throw new Exception("The given output format ${params.off} is not recognized.")
+        break;
+      
+    }
+
 }
 
 process SC__FILE_CONVERTER_HELP {
