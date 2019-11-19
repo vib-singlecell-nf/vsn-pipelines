@@ -1,6 +1,6 @@
 name: scenic
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build:

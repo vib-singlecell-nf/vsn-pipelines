@@ -1,6 +1,6 @@
 name: single_sample_scenic
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build:
