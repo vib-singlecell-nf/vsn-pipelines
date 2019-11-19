@@ -8,6 +8,7 @@ if(!params.containsKey("test")) {
 
 process PUBLISH_LOOM {
     
+    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicScopeOutputLoom }
 
     input:
@@ -44,8 +45,8 @@ process VISUALIZE {
 process MERGE_MOTIF_TRACK_LOOMS {
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
 
     input:
     file motifloom
@@ -68,6 +69,7 @@ process MERGE_MOTIF_TRACK_LOOMS {
 process APPEND_SCENIC_LOOM {
     cache 'deep'
     container params.sc.scenic.container
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
 
     input:
