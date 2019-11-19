@@ -12,6 +12,7 @@ process SC__FILE_CONVERTER {
 
   cache 'deep'
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
@@ -65,6 +66,7 @@ process SC__FILE_CONCATENATOR() {
 
   cache 'deep'
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
@@ -83,6 +85,7 @@ process SC__FILE_CONCATENATOR() {
 process SC__STAR_CONCATENATOR() {
 
   container "aertslab/sctx-scanpy:0.5.0"
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
@@ -102,6 +105,7 @@ process SC__FILE_ANNOTATOR() {
 
   cache 'deep'
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
@@ -121,6 +125,7 @@ process SC__FILE_ANNOTATOR() {
 
 process SC__PUBLISH_H5AD {
 
+    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.outdir}/data", mode: 'link', overwrite: true
 
     input:
@@ -133,4 +138,3 @@ process SC__PUBLISH_H5AD {
     ln -s ${f_in} ${f_out}.h5ad
     """
 }
-

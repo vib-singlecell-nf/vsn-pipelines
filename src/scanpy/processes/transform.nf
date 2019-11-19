@@ -9,6 +9,7 @@ if(!params.containsKey("test")) {
 process SC__SCANPY__NORMALIZATION {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
@@ -28,6 +29,7 @@ process SC__SCANPY__NORMALIZATION {
 process SC__SCANPY__DATA_TRANSFORMATION {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
@@ -46,6 +48,7 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 process SC__SCANPY__FEATURE_SCALING {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
