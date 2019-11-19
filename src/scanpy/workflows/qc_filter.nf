@@ -33,11 +33,11 @@ workflow QC_FILTER {
     get:
         data
     main:
-        SC__FILE_CONVERTER( data )
-        if (params.sc.file_annotator.metaDataFilePath != '') {
-            SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
+        data = SC__FILE_CONVERTER( data )
+        if (params.sc.file_annotator.metaDataFilePath && params.sc.file_annotator.metaDataFilePath != '') {
+            data = SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
         }
-        unfiltered = SC__SCANPY__COMPUTE_QC_STATS( SC__FILE_ANNOTATOR.out )
+        unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
         SC__SCANPY__GENE_FILTER( unfiltered )
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
         report = GENERATE_QC_REPORT( 
