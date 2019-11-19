@@ -69,11 +69,11 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
 elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
-    
+
     if INPUT_FORMAT == 'tsv':
-        delim='\t'
+        delim = '\t'
     elif INPUT_FORMAT == 'csv':
-        delim=','
+        delim = ','
 
     adata = sc.read_csv(
         FILE_PATH_IN,
