@@ -1,6 +1,12 @@
 name: single_sample_scenic
 
-on: [pull_request]
+on: 
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
