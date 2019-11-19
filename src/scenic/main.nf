@@ -124,8 +124,8 @@ workflow SCENIC_append {
         filteredloom
         scopeloom
     main:
-        scenicloom = SCENIC( filteredloom )
-        APPEND_SCENIC_LOOM( scopeloom, scenicloom )
+        scenicloom = SCENIC( filteredloom.map { it -> it[1] } )
+        APPEND_SCENIC_LOOM( scopeloom.map { it -> it[1] }, scenicloom )
         report_notebook = GENERATE_REPORT(
             file(workflow.projectDir + params.sc.scenic.report_ipynb),
             APPEND_SCENIC_LOOM.out,
@@ -142,4 +142,3 @@ workflow {
     main:
         SCENIC( file( params.sc.scenic.filteredloom ) )
 }
-
