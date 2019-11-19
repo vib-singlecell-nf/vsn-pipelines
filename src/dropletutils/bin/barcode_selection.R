@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 args <- base::commandArgs(trailingOnly=TRUE)
 
 base::suppressMessages(expr = { 
