@@ -12,10 +12,13 @@ process SC__FILE_CONVERTER {
 
   cache 'deep'
   publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+
   if (params.off == 'h5ad') {
     container params.sc.scanpy.container
   } else if (params.off == 'sce.rds') {
     container params.sc.scater.container
+  } else if (params.off == 'seurat.rds') {
+    container params.sc.seurat.container
   }
 
   input:
@@ -49,7 +52,7 @@ process SC__FILE_CONVERTER {
         break;
     }
 
-    switch(params.off) {
+    switch (params.off) {
       case "h5ad":
         def iffs = ['10x_mtx']
 
@@ -62,7 +65,7 @@ process SC__FILE_CONVERTER {
         }
         break;
         
-      case "sce.rds":
+      case ["sce.rds", "seurat.rds"]:
         def iffs = ['10x_mtx']
 
         if (iffs.contains(params.iff)) {
@@ -70,7 +73,6 @@ process SC__FILE_CONVERTER {
           Rscript ${binDir}sc_file_converter.R \
             --input-format $params.iff \
             --output-format $params.off ${f} "${id}.SC__FILE_CONVERTER.${params.off}"         
-
           """
         }
         break;
