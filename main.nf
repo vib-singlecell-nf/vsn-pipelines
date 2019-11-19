@@ -62,3 +62,8 @@ workflow nemesh {
     include nemesh as NEMESH from './workflows/nemesh' params(params)
     NEMESH()  
 }
+
+workflow r_single_sample {
+    include r_single_sample as R_SINGLE_SAMPLE from './workflows/r_single_sample' params(params)
+    R_SINGLE_SAMPLE()
+}

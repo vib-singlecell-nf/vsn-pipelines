@@ -65,4 +65,3 @@ workflow single_sample {
         filteredloom
         scopeloom
 }
-
