@@ -5,10 +5,9 @@ nextflow.preview.dsl=2
 
 // utils:
 include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
-include SC__FILE_ANNOTATOR from '../../utils/processes/utils.nf' params(params.sc.file_annotator + params.global + params)
 
 // scanpy:
-include '../processes/filter.nf' params(params.sc.scater.filter + params.global + params)
+include SC__SCATER__CELL_FILTER from '../processes/filter.nf' params(params.sc.scater.filter + params.global + params)
 
 workflow QC_FILTER {
     get:
