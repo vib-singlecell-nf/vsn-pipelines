@@ -7,6 +7,7 @@ outputs ipynb named by the value in ${report_title}
 process SC__SCANPY__GENERATE_REPORT {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 
   input:
@@ -27,6 +28,7 @@ process SC__SCANPY__GENERATE_REPORT {
 process SC__SCANPY__FILTER_QC_REPORT {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 
   input:
@@ -46,6 +48,7 @@ process SC__SCANPY__FILTER_QC_REPORT {
 process SC__SCANPY__REPORT_TO_HTML {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
   // copy final "merged_report" to notbooks root:
   publishDir "${params.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
@@ -63,6 +66,7 @@ process SC__SCANPY__REPORT_TO_HTML {
 process SC__SCANPY__MERGE_REPORTS {
 
   container params.sc.scanpy.container
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   publishDir "${params.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
   // copy final "merged_report" to notbooks root:
   publishDir "${params.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
