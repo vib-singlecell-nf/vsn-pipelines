@@ -47,6 +47,11 @@ workflow star {
     STAR()
 }
 
+workflow scater {
+    include scater as SCATER from './workflows/scater' params(params)
+    SCATER()
+}
+
 
 workflow single_sample_star {
     include single_sample_star as SINGLE_SAMPLE_STAR from './workflows/single_sample_star' params(params)
