@@ -51,8 +51,9 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
         )
     if not os.path.exists(FILE_PATH_IN):
         raise Exception("The given directory {} does not exist.".format(FILE_PATH_IN))
-    if not (not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx"))
-            or not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx.gz"))):
+    if not (
+        not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx")) or not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx.gz"))
+    ):
         raise Exception(
             "The given directory {} is not a proper 10xGenomics CellRanger folder. No .mtx[.gz] file found.".format(
                 FILE_PATH_IN
@@ -69,11 +70,11 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
 elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
-    
+
     if INPUT_FORMAT == 'tsv':
-        delim='\t'
+        delim = '\t'
     elif INPUT_FORMAT == 'csv':
-        delim=','
+        delim = ','
 
     adata = sc.read_csv(
         FILE_PATH_IN,

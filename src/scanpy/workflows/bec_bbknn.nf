@@ -28,7 +28,7 @@ include '../processes/batch_effect_correct.nf' params(params.sc.scanpy.batch_eff
 
 include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params.sc.scanpy.clustering + params.global + params)
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.umap + params.global + params)
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5ad_to_loom.nf' params(params.global + params)
+include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params.global + params)
 include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params + params.global)
 include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params + params.global)
 
