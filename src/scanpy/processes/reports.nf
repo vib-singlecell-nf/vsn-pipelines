@@ -15,7 +15,7 @@ process SC__SCANPY__GENERATE_REPORT {
     tuple val(id), file(adata)
     val report_title
   output:
-    file("${id}.${report_title}.ipynb")
+    tuple val(id), file("${id}.${report_title}.ipynb")
   script:
     """
     papermill ${ipynb} \
@@ -36,7 +36,7 @@ process SC__SCANPY__FILTER_QC_REPORT {
     tuple val(id), file(unfiltered), file(filtered)
     val report_title
   output:
-    file("${id}.${report_title}.ipynb")
+    tuple val(id), file("${id}.${report_title}.ipynb")
   script:
     """
     papermill ${ipynb} \
@@ -54,7 +54,7 @@ process SC__SCANPY__REPORT_TO_HTML {
   publishDir "${params.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
   input:
-    file ipynb
+    tuple val(id), file(ipynb)
   output:
     file "*.html"
   script:
@@ -72,14 +72,14 @@ process SC__SCANPY__MERGE_REPORTS {
   publishDir "${params.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
   input:
-    file(ipynbs)
+    tuple val(id), file(ipynbs)
     val report_title
 
   output:
-    file "${report_title}.ipynb"
+    tuple val(id), file("${params.global.project_name}.${id}.${report_title}.ipynb")
   script:
     """
-    nbmerge ${ipynbs} -o "${report_title}.ipynb"
+    nbmerge ${ipynbs} -o "${params.global.project_name}.${id}.${report_title}.ipynb"
     """
 }
 
