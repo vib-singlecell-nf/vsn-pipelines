@@ -19,6 +19,7 @@ nextflow.preview.dsl=2
 // utils:
 include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
 include SC__FILE_ANNOTATOR from '../../utils/processes/utils.nf' params(params.sc.file_annotator + params.global + params)
+include FILTER_BY_CELL_META_DATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
 
 // scanpy:
 include '../processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
@@ -34,8 +35,11 @@ workflow QC_FILTER {
         data
     main:
         data = SC__FILE_CONVERTER( data )
+        if(params.sc.cell_filter) {
+            data = FILTER_BY_CELL_META_DATA( data )
+        }
         if (params.sc.file_annotator.metaDataFilePath && params.sc.file_annotator.metaDataFilePath != '') {
-            data = SC__FILE_ANNOTATOR( SC__FILE_CONVERTER.out, file(params.sc.file_annotator.metaDataFilePath) )
+            data = SC__FILE_ANNOTATOR( data, file(params.sc.file_annotator.metaDataFilePath) )
         }
         unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
         SC__SCANPY__GENE_FILTER( unfiltered )
