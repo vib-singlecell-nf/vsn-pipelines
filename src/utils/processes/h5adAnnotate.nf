@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
     binDir = ""
 }
 
-process SC__ANNOTATE_BY_CELL_META_DATA {
+process SC__ANNOTATE_BY_CELL_METADATA {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
@@ -15,20 +15,20 @@ process SC__ANNOTATE_BY_CELL_META_DATA {
     input:
         tuple val(id), file(f)
     output:
-        tuple val(id), file("${id}.SC__ANNOTATE_BY_CELL_META_DATA.h5ad")
+        tuple val(id), file("${id}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
     script:
         annotationColumnNamesAsArguments = params.sc.cell_annotate.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
         """
-        ${binDir}sc_h5ad_annotate_by_cell_meta_data.py \
+        ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
             --index-column-name ${params.sc.cell_annotate.indexColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
             ${params.sc.cell_annotate.cellMetaDataFilePath} \
-            --output "${id}.SC__ANNOTATE_BY_CELL_META_DATA.h5ad"
+            --output "${id}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
         """
 }
 
-process SC__ANNOTATE_BY_SAMPLE_META_DATA() {
+process SC__ANNOTATE_BY_SAMPLE_METADATA() {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
@@ -38,13 +38,13 @@ process SC__ANNOTATE_BY_SAMPLE_META_DATA() {
         tuple val(id), file(f)
         file(metaDataFilePath)
     output:
-        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_META_DATA.${params.off}")
+        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.off}")
     script:
         """
         ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
             ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
             ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
             $f \
-            "${id}.SC__ANNOTATE_BY_SAMPLE_META_DATA.${params.off}"
+            "${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.off}"
     """
 }
