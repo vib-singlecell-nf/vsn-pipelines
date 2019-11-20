@@ -36,7 +36,8 @@ workflow test_SC__FILE_CONCATENATOR {
         SC__FILE_CONCATENATOR.out
 }
 
-include './workflows/filterByCellMetadata' params(params)
+include FILTER_BY_CELL_META_DATA from './workflows/filterByCellMetadata' params(params)
+include SC__ANNOTATE_BY_CELL_META_DATA from './processes/h5adAnnotate' params(params)
 
 workflow {
     main:
@@ -48,11 +49,18 @@ workflow {
                 test_SC__FILE_CONCATENATOR( getTenXChannel( params.global.tenx_folder ) )
             break;
             case "FILTER_BY_CELL_META_DATA":
-                tenxFolder = ''
                 if(params.sc.cell_filter) {
-                    data = getTenXChannel( tenxFolder )
+                    data = getTenXChannel( params.global.tenx_folder )
                     SC__FILE_CONVERTER( data )    
                     FILTER_BY_CELL_META_DATA( SC__FILE_CONVERTER.out )
+                }
+            break;
+            case "FILTER_AND_ANNOTATE_BY_CELL_META_DATA":
+                if(params.sc.cell_filter && params.sc.cell_annotate) {
+                    data = getTenXChannel( params.global.tenx_folder )
+                    SC__FILE_CONVERTER( data )    
+                    FILTER_BY_CELL_META_DATA( SC__FILE_CONVERTER.out )
+                    SC__ANNOTATE_BY_CELL_META_DATA( FILTER_BY_CELL_META_DATA.out )
                 }
             break;
             default:
