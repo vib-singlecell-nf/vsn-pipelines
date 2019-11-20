@@ -48,7 +48,7 @@ workflow {
                 test_SC__FILE_CONCATENATOR( getTenXChannel( params.global.tenx_folder ) )
             break;
             case "FILTER_BY_CELL_META_DATA":
-                tenxFolder = ''
+                tenxFolder = params.global.tenx_folder
                 if(params.sc.cell_filter) {
                     data = getTenXChannel( tenxFolder )
                     SC__FILE_CONVERTER( data )    
