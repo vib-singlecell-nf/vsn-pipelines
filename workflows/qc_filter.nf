@@ -18,7 +18,8 @@ nextflow.preview.dsl=2
 
 // utils:
 include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
-include SC__FILE_ANNOTATOR from '../../utils/processes/utils.nf' params(params.sc.file_annotator + params.global + params)
+include SC__ANNOTATE_BY_SAMPLE_META_DATA from '../../utils/processes/h5adAnnotate.nf' params(params.sc.sample_annotate + params.global + params)
+include SC__ANNOTATE_BY_CELL_META_DATA from '../../utils/processes/h5adAnnotate' params(params)
 include FILTER_BY_CELL_META_DATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
 
 // scanpy:
@@ -38,8 +39,14 @@ workflow QC_FILTER {
         if(params.sc.cell_filter) {
             data = FILTER_BY_CELL_META_DATA( data )
         }
-        if (params.sc.file_annotator.metaDataFilePath && params.sc.file_annotator.metaDataFilePath != '') {
-            data = SC__FILE_ANNOTATOR( data, file(params.sc.file_annotator.metaDataFilePath) )
+        if(params.sc.cell_annotate) {
+            data = SC__ANNOTATE_BY_CELL_META_DATA( data )
+        }
+        if (params.sc.sample_annotate
+            && params.sc.sample_annotate.metaDataFilePath
+            && params.sc.sample_annotate.metaDataFilePath != ''
+        ) {
+            data = SC__ANNOTATE_BY_SAMPLE_META_DATA( data, file(params.sc.sample_annotate.metaDataFilePath) )
         }
         unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
         SC__SCANPY__GENE_FILTER( unfiltered )
