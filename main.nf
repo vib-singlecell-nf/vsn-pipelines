@@ -49,7 +49,7 @@ workflow SCENIC {
     main:
         /* GRN */
         tfs = file(params.sc.scenic.grn.TFs)
-        grn = GRNBOOST2_WITHOUT_DASK( runs, filteredloom, tfs )
+        grn = GRNBOOST2_WITHOUT_DASK( filteredLoom.combine(runs), tfs )
 
         /* cisTarget motif analysis */
         // channel for SCENIC databases resources:
