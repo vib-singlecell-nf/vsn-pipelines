@@ -20,7 +20,7 @@ include SC__APPLY_OBS_FILTER from './../processes/h5adSubset' params(params)
 //////////////////////////////////////////////////////
 //  Define the workflow 
 
-workflow FILTER_BY_CELL_META_DATA {
+workflow FILTER_BY_CELL_METADATA {
     get:
         data
     main:

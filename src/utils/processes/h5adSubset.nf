@@ -7,6 +7,11 @@ if(!params.containsKey("test")) {
 }
 
 process SC__PREPARE_OBS_FILTER {
+
+    container params.sc.scanpy.container
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+
     input:
         tuple val(id), file(f)
         val(filterConfig)
@@ -29,7 +34,7 @@ process SC__PREPARE_OBS_FILTER {
 process SC__APPLY_OBS_FILTER {
 
     container params.sc.scanpy.container
-    publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
