@@ -101,28 +101,6 @@ process SC__STAR_CONCATENATOR() {
     """
 }
 
-process SC__FILE_ANNOTATOR() {
-
-  cache 'deep'
-  container params.sc.scanpy.container
-  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
-
-  input:
-    tuple val(id), file(f)
-    file(metaDataFilePath)
-  output:
-    tuple val(id), file("${id}.SC__FILE_ANNOTATOR.${params.off}")
-  script:
-    """
-    ${binDir}sc_file_annotator.py \
-      ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
-      ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
-      $f \
-      "${id}.SC__FILE_ANNOTATOR.${params.off}"
-    """
-}
-
 process SC__PUBLISH_H5AD {
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"

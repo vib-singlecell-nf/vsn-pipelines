@@ -27,3 +27,24 @@ process SC__ANNOTATE_BY_CELL_META_DATA {
             --output "${id}.SC__ANNOTATE_BY_CELL_META_DATA.h5ad"
         """
 }
+
+process SC__ANNOTATE_BY_SAMPLE_META_DATA() {
+
+    container params.sc.scanpy.container
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+
+    input:
+        tuple val(id), file(f)
+        file(metaDataFilePath)
+    output:
+        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_META_DATA.${params.off}")
+    script:
+        """
+        ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
+            ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
+            ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
+            $f \
+            "${id}.SC__ANNOTATE_BY_SAMPLE_META_DATA.${params.off}"
+    """
+}
