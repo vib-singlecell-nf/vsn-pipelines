@@ -9,6 +9,11 @@ workflow bbknn {
     BBKNN()
 }
 
+// run multi-sample with mnncorrect, output a scope loom file
+workflow mnncorrect {
+    include mnncorrect as MNNCORRECT from './workflows/mnncorrect' params(params)
+    MNNCORRECT()
+}
 
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
