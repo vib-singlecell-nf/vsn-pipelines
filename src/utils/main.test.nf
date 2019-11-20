@@ -12,7 +12,7 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
-include SC__FILE_CONVERTER from './processes/utils' params(params.sc.file_converter + params.global + params)
+include SC__FILE_CONVERTER from './processes/utils' params(params.sc.sc_file_converter + params.global + params)
 
 // Uncomment to test
 include getChannel as getTenXChannel from '../channels/tenx.nf'
@@ -36,6 +36,7 @@ workflow test_SC__FILE_CONCATENATOR {
         SC__FILE_CONCATENATOR.out
 }
 
+include './workflows/filterByCellMetadata' params(params)
 
 workflow {
     main:
@@ -45,6 +46,14 @@ workflow {
             break;
             case "SC__FILE_CONCATENATOR":
                 test_SC__FILE_CONCATENATOR( getTenXChannel( params.global.tenx_folder ) )
+            break;
+            case "FILTER_BY_CELL_META_DATA":
+                tenxFolder = ''
+                if(params.sc.cell_filter) {
+                    data = getTenXChannel( tenxFolder )
+                    SC__FILE_CONVERTER( data )    
+                    FILTER_BY_CELL_META_DATA( SC__FILE_CONVERTER.out )
+                }
             break;
             default:
                 throw new Exception("The test parameters should be specified.")
