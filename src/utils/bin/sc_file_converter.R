@@ -35,11 +35,11 @@ if (opt$o == 'sce.rds') {
 } else if (opt$o == 'seurat.rds') {
   suppressPackageStartupMessages(library("Seurat"))
 
-  if (file.exists(cat(files[1], 'genes.tsv'))) {
+  if (file.exists(file.path(files[1], 'genes.tsv'))) {
     data <- Read10X(data.dir = files[1])
     seurat_object = CreateSeuratObject(counts = data)
 
-  } else if (file.exists(cat(files[1], 'features.tsv.gz'))) {
+  } else if (file.exists(file.path(files[1], 'features.tsv.gz'))) {
     data <- Read10X(data.dir = files[1])
     seurat_object = CreateSeuratObject(counts = data$`Gene Expression`)
 
