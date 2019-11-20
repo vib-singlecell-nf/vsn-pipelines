@@ -15,13 +15,12 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include SC__PREPARE_OBS_FILTER from './../processes/h5adSubset' params(params)
-include CAT from './../processes/utils' params(params)
 include SC__APPLY_OBS_FILTER from './../processes/h5adSubset' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
 
-workflow FILTER_BY_CELL_META_DATA {
+workflow FILTER_BY_CELL_METADATA {
     get:
         data
     main:
