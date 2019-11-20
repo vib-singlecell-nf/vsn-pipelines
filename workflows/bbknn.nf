@@ -33,6 +33,11 @@ include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
 
+// reporting:
+include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params + params.global)
+include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
+
+
 workflow bbknn {
 
     data = getTenXChannel( params.global.tenx_folder ).view()
@@ -42,10 +47,19 @@ workflow bbknn {
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     SC__SCANPY__DIM_REDUCTION__PCA( HVG_SELECTION.out.scaled )
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-    scopeloom = BEC_BBKNN( SC__SCANPY__DIM_REDUCTION__PCA.out )
+    BEC_BBKNN( SC__SCANPY__DIM_REDUCTION__PCA.out )
+
+    // collect the reports:
+    ipynbs = HVG_SELECTION.out.report
+        .join(BEC_BBKNN.out.cluster_report)
+        .join(BEC_BBKNN.out.bbknn_report)
+        .map{ tuple( it[0], it.drop(1) ) }
+    // reporting:
+    SC__SCANPY__MERGE_REPORTS(ipynbs, "merged_report")
+    SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
     emit:
         filteredloom
-        scopeloom
+        scopeloom = BEC_BBKNN.out.scopeloom
 }
 
