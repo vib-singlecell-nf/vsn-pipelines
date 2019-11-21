@@ -30,7 +30,7 @@ process SAVE_MULTI_RUNS_TO_LOOM {
         --min-regulon-gene-occurrence ${params.sc.scenic.aucell.min_regulon_gene_occurrence} \
         --cell-id-attribute ${params.sc.scenic.cell_id_attribute} \
         --gene-attribute ${params.sc.scenic.gene_attribute} \
-        --title "${params.global.project_name} - pySCENIC (${type})" \
+        --title "${sampleId} - pySCENIC (${type})" \
         --nomenclature "${params.sc.scope.genome}" \
         --scope-tree-level-1 "${params.sc.scope.tree.level_1}" \
         --scope-tree-level-2 "${params.sc.scope.tree.level_2}" \
