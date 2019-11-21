@@ -13,10 +13,9 @@ process SC__PREPARE_OBS_FILTER {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
-        tuple val(id), file(f)
-        val(filterConfig)
+        tuple val(id), file(f), val(filterConfig)
     output:
-        tuple val(id), file("${id}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
+        tuple val(id), file(f), file("${id}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
     script:
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
@@ -38,8 +37,7 @@ process SC__APPLY_OBS_FILTER {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
-        tuple val(id), file(f)
-        file(filters)
+        tuple val(id), file(f), file(filters)
     output:
         tuple val(id), file("${id}.SC__APPLY_OBS_FILTER.${params.sc.cell_filter.off}")
     script:
