@@ -2,6 +2,8 @@ nextflow.preview.dsl=2
 
 process CISTARGET {
 
+    // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
+    label params.sc.scenic.labels.processExecutor
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
