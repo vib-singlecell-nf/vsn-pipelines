@@ -29,7 +29,7 @@ nextflow config \
 Make sure the following parameters are correctly set:
 - `params.global.project_name`
 - `params.global.qsubaccount` if running on a cluster (SGE cluster)
-- `params.sc.scenic.filteredloom`
+- `params.sc.scenic.filteredLoom`
 - `params.sc.scenic.grn.TFs`
 - `params.sc.scenic.cistarget.mtfDB`
 - `params.sc.scenic.cistarget.mtfANN`
