@@ -27,42 +27,44 @@ include SAVE_MULTI_RUNS_TO_LOOM as SAVE_TO_LOOM from './../processes/multiruns/s
 
 workflow AGGREGATE_MULTI_RUNS_TO_LOOM {
     get:
-        filteredloom
+        filteredLoom
         ctx
         auc
         type
     main:
         /* Aggregate features (motifs or tracks) from multiple runs */
-        ctx_aggr_features = AGGR_FEATURES(
-            ctx.map{ it -> it[1] }.collect(),
+        ctxAggrFeatures = AGGR_FEATURES(
+            ctx
+                // (sampleId, loom, resultFromStep, runId)
+                .map { it -> tuple(it[0], it[2]) }
+                .groupTuple(),
             type
         )
 
         /* Aggregate regulons (motifs or tracks) from multiple runs */
-        regulons_folder = AGGR_REGULONS( 
-            auc.collect(),
+        regulonsFolder = AGGR_REGULONS( 
+            auc
+                // (sampleId, loom, resultFromStep, runId)
+                .map { it -> tuple(it[0], it[2]) }
+                .groupTuple(),
             type
         )
 
         /* Run AUCell on aggregated regulons */
-        regulons_auc = AUCELL(
-            filteredloom,
-            regulons_folder,
+        regulonAuc = AUCELL(
+            filteredLoom.join(regulonsFolder),
             type
         )
 
         /* Convert aggregated motif enrichment table to regulons */
-        aggr_regulons = FEATURES_TO_REGULONS(
-            ctx_aggr_features,
-            regulons_folder,
+        aggrRegulons = FEATURES_TO_REGULONS(
+            ctxAggrFeatures.join(regulonsFolder),
             type
         )
 
         /* Save multiple motifs (or tracks) SCENIC runs to loom */
         scenic_loom = SAVE_TO_LOOM( 
-            filteredloom,
-            aggr_regulons,
-            regulons_auc,
+            filteredLoom.join(aggrRegulons).join(regulonAuc),
             type
         )
     emit:
