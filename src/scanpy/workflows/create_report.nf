@@ -16,7 +16,7 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 
-include '../processes/reports.nf' params(params.sc.scanpy.filter + params.global + params)
+include '../processes/reports.nf' params(params.global + params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
