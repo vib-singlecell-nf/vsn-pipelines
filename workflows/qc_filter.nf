@@ -24,7 +24,7 @@ include SC__FILE_ANNOTATOR from '../../utils/processes/utils.nf' params(params.s
 include '../processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
 
 // reporting:
-include GENERATE_QC_REPORT from './create_report.nf' params(params.sc.scanpy.filter + params)
+include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params.sc.scanpy.filter + params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -40,7 +40,7 @@ workflow QC_FILTER {
         unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
         SC__SCANPY__GENE_FILTER( unfiltered )
         filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
-        report = GENERATE_QC_REPORT( 
+        report = GENERATE_DUAL_INPUT_REPORT(
             unfiltered, 
             filtered,
             file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
