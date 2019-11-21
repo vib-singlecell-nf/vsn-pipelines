@@ -22,19 +22,14 @@ include SC__APPLY_OBS_FILTER from './../processes/h5adSubset' params(params)
 
 workflow FILTER_BY_CELL_METADATA {
     get:
+        // Expects (sampleId, h5ad)
         data
     main:
         Channel
             .from(params.sc.cell_filter.filters)
             .set{ filters }
-        SC__PREPARE_OBS_FILTER( 
-            data,
-            filters
-        )
-        out = SC__APPLY_OBS_FILTER( 
-            data,
-            SC__PREPARE_OBS_FILTER.out.map{ it -> it[1] }.collect()
-        )
+        SC__PREPARE_OBS_FILTER( data.combine(filters) )
+        out = SC__APPLY_OBS_FILTER( SC__PREPARE_OBS_FILTER.out.groupTuple() )
     emit:
         out
 }
