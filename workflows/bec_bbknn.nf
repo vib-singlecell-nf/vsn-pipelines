@@ -33,7 +33,7 @@ include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params 
 include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params + params.global)
 
 // reporting:
-include GENERATE_REPORT from './create_report.nf' params(params.sc.scanpy.feature_scaling + params)
+include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -49,8 +49,9 @@ workflow BEC_BBKNN {
             params.global.project_name+".BEC_BBKNN.output")
         scopeloom = SC__H5AD_TO_LOOM(SC__SCANPY__DIM_REDUCTION__UMAP.out )
         // Not using t-SNE as it does not use the neighbour graph (which BBKNN alters) when constructing its dimensionality reduction
-        bbknn_report = GENERATE_REPORT(
-            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+        bbknn_report = GENERATE_DUAL_INPUT_REPORT(
+            data,
+            SC__PUBLISH_H5AD.out,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report"
         )
