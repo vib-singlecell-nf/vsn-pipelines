@@ -44,8 +44,10 @@ workflow single_sample_star {
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     DIM_REDUCTION( HVG_SELECTION.out.scaled )
     CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
-    SC__PUBLISH_H5AD( CLUSTER_IDENTIFICATION.out.marker_genes,
-        params.global.project_name+".single_sample.output")
+    SC__PUBLISH_H5AD( 
+        CLUSTER_IDENTIFICATION.out.marker_genes,
+        "single_sample.output"
+    )
     filteredloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
     
 }

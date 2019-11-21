@@ -107,12 +107,12 @@ process SC__PUBLISH_H5AD {
     publishDir "${params.outdir}/data", mode: 'link', overwrite: true
 
     input:
-        tuple val(id), file(f_in)
-        val(f_out)
+        tuple val(id), file(fIn)
+        val(fOutSuffix)
     output:
-        tuple val(id), file("${f_out}.h5ad")
+        tuple val(id), file("${id}.${fOutSuffix}.h5ad")
     script:
     """
-    ln -s ${f_in} ${f_out}.h5ad
+    ln -s ${fIn} "${id}.${fOutSuffix}.h5ad"
     """
 }
