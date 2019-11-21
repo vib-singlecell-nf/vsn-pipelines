@@ -22,11 +22,11 @@ jobs:
         sudo mv nextflow /usr/local/bin/
     - name: Get sample data
       run: |
-        mkdir data
+        mkdir testdata
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
         tar xvf sample_data.tar.gz
-        cp -r sample_data data/sample1
-        mv sample_data data/sample2
+        cp -r sample_data testdata/sample1
+        mv sample_data testdata/sample2
     - name: Run single_sample test
       run: |
         nextflow run ${GITHUB_WORKSPACE} -profile bbknn,test__bbknn,docker -entry bbknn -ansi-log false
