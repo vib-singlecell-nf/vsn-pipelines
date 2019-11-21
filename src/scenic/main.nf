@@ -45,9 +45,11 @@ if(params.sc.scenic.containsKey("numRuns")) {
 
 workflow SCENIC {
     get:
-        filteredloom
+        // Expects (sampleId, loom)
+        filteredLoom
     main:
         /* GRN */
+        filteredLoom.view()
         tfs = file(params.sc.scenic.grn.TFs)
         grn = GRNBOOST2_WITHOUT_DASK( filteredLoom.combine(runs), tfs )
 
@@ -57,7 +59,7 @@ workflow SCENIC {
             .fromPath( params.sc.scenic.cistarget.mtfDB )
             .collect() // use all files together in the ctx command
         motifANN = file(params.sc.scenic.cistarget.mtfANN)
-        ctx_mtf = CISTARGET__MOTIF( grn, filteredloom, motifDB, motifANN, 'mtf' )
+        ctx_mtf = CISTARGET__MOTIF( grn, motifDB, motifANN, 'mtf' )
 
         /* cisTarget track analysis */
         if(params.sc.scenic.cistarget.trkDB) {
@@ -65,15 +67,15 @@ workflow SCENIC {
                 .fromPath( params.sc.scenic.cistarget.trkDB )
                 .collect() // use all files together in the ctx command
             trackANN = file(params.sc.scenic.cistarget.trkANN)
-            ctx_trk = CISTARGET__TRACK( grn, filteredloom, trackDB, trackANN, 'trk' )
+            ctx_trk = CISTARGET__TRACK( grn, trackDB, trackANN, 'trk' )
         }
 
         /* AUCell, motif regulons */
-        auc_mtf = AUCELL__MOTIF( ctx_mtf, filteredloom, 'mtf' )
+        auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
 
         if(params.sc.scenic.cistarget.trkDB) {
             /* AUCell, track regulons */
-            auc_trk = AUCELL__TRACK( ctx_trk, filteredloom, 'trk' )
+            auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
         }
 
         // multi-runs aggregation:
@@ -82,21 +84,20 @@ workflow SCENIC {
                 throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
             
             scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
-                filteredloom,
+                filteredLoom,
                 ctx_mtf,
                 auc_mtf,
                 'mtf'
             )
             if(params.sc.scenic.cistarget.trkDB) {
                 scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
-                    filteredloom,
+                    filteredLoom,
                     ctx_trk,
                     auc_trk,
                     'trk'
                 )
                 MERGE_MOTIF_TRACK_LOOMS(
-                    scenic_loom_mtf,
-                    scenic_loom_trk
+                    scenic_loom_mtf.join(scenic_loom_trk)
                 )
                 out = VISUALIZE(MERGE_MOTIF_TRACK_LOOMS.out)
             } else {
@@ -106,11 +107,14 @@ workflow SCENIC {
             if(params.sc.scenic.cistarget.trkDB) {
                 out = VISUALIZE(
                     MERGE_MOTIF_TRACK_LOOMS(
-                        auc_mtf,
-                        auc_trk
+                        auc_mtf
+                            .map { it -> tuple(it[0], it[2]) }
+                            .join(auc_trk.map { it -> tuple(it[0], it[2]) })
                     ))
             } else {
-                out = VISUALIZE(auc_mtf)
+                out = VISUALIZE(
+                    auc_mtf.map { it -> tuple(it[0], it[2]) }
+                )
             }
         }
         PUBLISH_LOOM(out)
@@ -121,11 +125,11 @@ workflow SCENIC {
 
 workflow SCENIC_append {
     get:
-        filteredloom
-        scopeloom
+        filteredLoom
+        scopeLoom
     main:
-        scenicloom = SCENIC( filteredloom.map { it -> it[1] } )
-        APPEND_SCENIC_LOOM( scopeloom.map { it -> it[1] }, scenicloom )
+        scenicLoom = SCENIC( filteredLoom )
+        APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
         report_notebook = GENERATE_REPORT(
             file(workflow.projectDir + params.sc.scenic.report_ipynb),
             APPEND_SCENIC_LOOM.out,
@@ -140,5 +144,5 @@ workflow SCENIC_append {
 // Uncomment to test
 workflow {
     main:
-        SCENIC( file( params.sc.scenic.filteredloom ) )
+        SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
 }
