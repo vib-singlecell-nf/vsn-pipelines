@@ -25,7 +25,7 @@ jobs:
         mkdir data
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
         tar xvf sample_data.tar.gz
-        cp sample_data data/sample1
+        cp -r sample_data data/sample1
         mv sample_data data/sample2
     - name: Run single_sample test
       run: |
