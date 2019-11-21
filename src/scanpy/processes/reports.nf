@@ -25,7 +25,7 @@ process SC__SCANPY__GENERATE_REPORT {
 }
 
 // QC report takes two inputs, so needs it own process
-process SC__SCANPY__FILTER_QC_REPORT {
+process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
   container params.sc.scanpy.container
   clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -33,7 +33,7 @@ process SC__SCANPY__FILTER_QC_REPORT {
 
   input:
     file(ipynb)
-    tuple val(id), file(unfiltered), file(filtered)
+    tuple val(id), file(data1), file(data2)
     val report_title
   output:
     tuple val(id), file("${id}.${report_title}.ipynb")
@@ -41,7 +41,7 @@ process SC__SCANPY__FILTER_QC_REPORT {
     """
     papermill ${ipynb} \
         ${id}.${report_title}.ipynb \
-        -p FILE1 $unfiltered -p FILE2 $filtered
+        -p FILE1 $data1 -p FILE2 $data2
     """
 }
 
