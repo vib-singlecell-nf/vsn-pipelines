@@ -29,7 +29,8 @@ include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global)
-include SC__H5AD_TO_LOOM from '../src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
+include SC__H5AD_TO_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
+include SC__PUBLISH_H5AD from '../src/utils/processes/utils.nf' params(params + params.global)
 
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
@@ -39,10 +40,15 @@ workflow single_sample_star {
     
     data = STAR()
     QC_FILTER( data )
-    NORMALIZE_TRANSFORM( QC_FILTER.out )
+    NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-    DIM_REDUCTION( HVG_SELECTION.out )
-    CLUSTER_IDENTIFICATION( DIM_REDUCTION.out )
-    filteredloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out )
+    DIM_REDUCTION( HVG_SELECTION.out.scaled )
+    CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
+    SC__PUBLISH_H5AD( 
+        CLUSTER_IDENTIFICATION.out.marker_genes,
+        "single_sample.output"
+    )
+    filteredloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
     
 }
+

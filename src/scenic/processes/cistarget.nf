@@ -1,37 +1,37 @@
 nextflow.preview.dsl=2
 
-// include getBaseName from '../../utils/files.nf'
+process CISTARGET {
 
-process SC__SCENIC__CISTARGET {
+    // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
+    label params.sc.scenic.labels.processExecutor
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-    maxForks params.sc.scenic.maxForks
+    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/cistarget/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=${params.sc.scenic.cistarget.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    maxForks params.sc.scenic.cistarget.maxForks
     
     input:
-    val runId
-    file filteredloom
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}"
+    tuple val(sampleId), file(filteredLoom), file("${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
     file featherDB
     file annotation
     val type
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"}"
+    tuple val(sampleId), file(filteredLoom), file("${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"}"), val(runId)
 
     """
     pyscenic ctx \
-        ${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"} \
+        ${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
         ${featherDB} \
         --annotations_fname ${annotation} \
-        --expression_mtx_fname ${filteredloom} \
+        --expression_mtx_fname ${filteredLoom} \
         --cell_id_attribute ${params.sc.scenic.cell_id_attribute} \
         --gene_attribute ${params.sc.scenic.gene_attribute} \
         --mode "dask_multiprocessing" \
-        --output ${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__reg_" + type + ".csv" : "reg_" + type + ".csv"} \
+        --output ${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"} \
         --num_workers ${params.sc.scenic.numWorkers} \
     """
+
 }
 
 /* options to implement:
@@ -54,3 +54,4 @@ process SC__SCENIC__CISTARGET {
         --min_genes MIN_GENES
         --expression_mtx_fname EXPRESSION_MTX_FNAME
 */
+

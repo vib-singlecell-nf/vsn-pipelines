@@ -12,7 +12,7 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
-include SC__FILE_CONVERTER from './processes/utils' params(params.sc.file_converter + params.global + params)
+include SC__FILE_CONVERTER from './processes/utils' params(params.sc.sc_file_converter + params.global + params)
 
 // Uncomment to test
 include getChannel as getTenXChannel from '../channels/tenx.nf'
@@ -36,6 +36,8 @@ workflow test_SC__FILE_CONCATENATOR {
         SC__FILE_CONCATENATOR.out
 }
 
+include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
+include SC__ANNOTATE_BY_CELL_METADATA from './processes/h5adAnnotate' params(params)
 
 workflow {
     main:
@@ -45,6 +47,21 @@ workflow {
             break;
             case "SC__FILE_CONCATENATOR":
                 test_SC__FILE_CONCATENATOR( getTenXChannel( params.global.tenx_folder ) )
+            break;
+            case "FILTER_BY_CELL_METADATA":
+                if(params.sc.cell_filter) {
+                    data = getTenXChannel( params.global.tenx_folder )
+                    SC__FILE_CONVERTER( data )    
+                    FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
+                }
+            break;
+            case "FILTER_AND_ANNOTATE_BY_CELL_METADATA":
+                if(params.sc.cell_filter && params.sc.cell_annotate) {
+                    data = getTenXChannel( params.global.tenx_folder )
+                    SC__FILE_CONVERTER( data )    
+                    FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
+                    SC__ANNOTATE_BY_CELL_METADATA( FILTER_BY_CELL_METADATA.out )
+                }
             break;
             default:
                 throw new Exception("The test parameters should be specified.")

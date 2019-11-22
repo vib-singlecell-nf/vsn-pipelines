@@ -1,21 +1,26 @@
 nextflow.preview.dsl=2
 
-include getBaseName from '../../utils/processes/files.nf'
+if(!params.containsKey("test")) {
+  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+} else {
+  binDir = ""
+}
 
 process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=6gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    file "${params.project_name}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" //#"${getBaseName(f).get()}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" 
+    tuple val(id), file("${id}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}")
   script:
     """
-    ${workflow.projectDir}/src/scanpy/bin/aggregate/sc_batch_effect_correction.py \
+    ${binDir}aggregate/sc_batch_effect_correction.py \
         ${(params.containsKey('batchEffectCorrectionMethod')) ? '--method ' + params.batchEffectCorrectionMethod : ''} \
-        --output-file "${params.project_name}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" \
+        --output-file "${id}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${params.off}" \
         ${(params.containsKey('key')) ? '--key ' + params.key : ''} \
         ${(params.containsKey('batchKey')) ? '--batch-key ' + params.batchKey : ''} \
         ${(params.containsKey('nPcs')) ? '--n-pcs ' + params.nPcs : ''} \

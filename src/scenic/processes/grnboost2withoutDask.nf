@@ -1,38 +1,39 @@
 nextflow.preview.dsl=2
 
-// include getBaseName from '../../utils/files.nf'
-
 if(!params.containsKey("test")) {
   binDir = "${workflow.projectDir}/src/scenic/bin/"
 } else {
   binDir = ""
 }
 
-process SC__SCENIC__GRNBOOST2WITHOUTDASK {
+process GRNBOOST2_WITHOUT_DASK {
+
+    // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
+    label params.sc.scenic.labels.processExecutor
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}/grnboost2withoutDask/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-    maxForks params.sc.scenic.maxForks
+    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/grnboost2withoutDask/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=${params.sc.scenic.grn.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    maxForks params.sc.scenic.grn.maxForks
     
     input:
-    val runId
-    file filteredloom
+    tuple val(sampleId), file(filteredLoom), val(runId)
     file tfs
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"}"
+    tuple val(sampleId), file(filteredLoom), file("${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
 
     script:
     """
     ${binDir}grnboost2_without_dask.py \
-        $filteredloom \
+        $filteredLoom \
         $tfs \
-        --output ${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__adj.tsv" : "adj.tsv"} \
+        --output ${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
         --num_workers ${params.sc.scenic.numWorkers} \
         --cell_id_attribute ${params.sc.scenic.cell_id_attribute} \
         --gene_attribute ${params.sc.scenic.gene_attribute}
     """
+
 }
 
 /* options to implement:
