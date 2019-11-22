@@ -18,7 +18,7 @@ nextflow.preview.dsl=2
 
 // utils:
 include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
-include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params.sc.sample_annotate + params.global + params)
+include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
 include SC__ANNOTATE_BY_CELL_METADATA from '../../utils/processes/h5adAnnotate' params(params)
 include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
 
