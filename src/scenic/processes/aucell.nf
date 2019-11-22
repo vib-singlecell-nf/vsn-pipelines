@@ -1,31 +1,30 @@
 nextflow.preview.dsl=2
 
-// include getBaseName from '../../utils/files.nf'
+process AUCELL {
 
-process SC__SCENIC__AUCELL {
+    // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
+    label params.sc.scenic.labels.processExecutor
     cache 'deep'
     container params.sc.scenic.container
-    publishDir "${params.sc.scenic.scenicoutdir}/aucell/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-    maxForks params.sc.scenic.maxForks
+    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/aucell/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=${params.sc.scenic.aucell.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    maxForks params.sc.scenic.aucell.maxForks
 
     input:
-    val runId
-    file exprMat
-    file regulons
+    tuple val(sampleId), file(filteredLoom), file(regulons), val(runId)
     val type
 
     output:
-    file "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__auc_" + type + ".loom": "auc_" + type + ".loom"}"
-    // file params.output
+    tuple val(sampleId), file(filteredLoom), file("${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}"), val(runId)
 
     """
     pyscenic aucell \
-        $exprMat \
+        $filteredLoom \
         $regulons \
-        -o "${params.sc.scenic.numRuns > 1 ? "run_" + runId +"__auc_" + type + ".loom": "auc_" + type + ".loom"}" \
+        -o "${params.sc.scenic.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}" \
         --cell_id_attribute ${params.sc.scenic.cell_id_attribute} \
         --gene_attribute ${params.sc.scenic.gene_attribute} \
         --num_workers ${params.sc.scenic.numWorkers}
     """
+
 }

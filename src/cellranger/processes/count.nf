@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 process SC__CELLRANGER__COUNT {
 
-  publishDir "${params.global.outdir}/counts", mode: 'symlink'
+  publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
   container params.sc.cellranger.container
 
   input:
@@ -36,3 +36,4 @@ process SC__CELLRANGER__COUNT {
         ${(params.sc.cellranger.count.containsKey('indicies')) ? '--indicies ' + params.sc.cellranger.count.indicies: ''} 
     """
 }
+

@@ -12,12 +12,13 @@ process SC__FILE_CONVERTER {
 
   cache 'deep'
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
-    set id, file(f)
+    tuple val(id), file(f)
   output:
-    file "${id}.SC__FILE_CONVERTER.${params.off}"
+    tuple val(id), file("${id}.SC__FILE_CONVERTER.${params.off}")
   script:
     switch(params.iff) {
       case "10x_mtx":
@@ -57,64 +58,61 @@ process SC__FILE_CONVERTER_HELP {
     stdout()
   script:
     """
-    ${workflow.projectDir}/src/utils/bin/sc_file_converter.py -h | awk '/-h/{y=1;next}y'
+    ${binDir}sc_file_converter.py -h | awk '/-h/{y=1;next}y'
     """
 }
 
 process SC__FILE_CONCATENATOR() {
 
+  cache 'deep'
   container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
-    file(f)
+    file("*")
   output:
-    file "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}"
+    tuple val(params.project_name), file("${params.project_name}.SC__FILE_CONCATENATOR.${params.off}")
   script:
     """
-    ${workflow.projectDir}/src/utils/bin/sc_file_concatenator.py \
+    ${binDir}sc_file_concatenator.py \
       --file-format $params.off \
       ${(params.containsKey('join')) ? '--join ' + params.join : ''} \
-      --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" $f
+      --output "${params.project_name}.SC__FILE_CONCATENATOR.${params.off}" *
     """
 }
 
 process SC__STAR_CONCATENATOR() {
 
-  container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
+  container "aertslab/sctx-scanpy:0.5.0"
+  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   input:
-    file(f)
+    tuple val(id), file(f)
   output:
-    tuple id, file("${params.project_name}.SC__STAR_CONCATENATOR.${params.off}")
+    tuple val(id), file("${params.project_name}.SC__STAR_CONCATENATOR.${params.off}")
   script:
     id = params.project_name
     """
-    ${workflow.projectDir}/src/utils/bin/sc_star_concatenator.py \
+    ${binDir}sc_star_concatenator.py \
       --stranded $params.stranded \
       --output "${params.project_name}.SC__STAR_CONCATENATOR.${params.off}" $f
     """
 }
 
-include getBaseName from './files.nf'
+process SC__PUBLISH_H5AD {
 
-process SC__FILE_ANNOTATOR() {
+    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    publishDir "${params.outdir}/data", mode: 'link', overwrite: true
 
-  container params.sc.scanpy.container
-  publishDir "${params.outdir}/data", mode: 'symlink'
-
-  input:
-    file(f)
-    file(metaDataFilePath)
-  output:
-    file "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
-  script:
+    input:
+        tuple val(id), file(fIn)
+        val(fOutSuffix)
+    output:
+        tuple val(id), file("${id}.${fOutSuffix}.h5ad")
+    script:
     """
-    ${workflow.projectDir}/src/utils/bin/sc_file_annotator.py \
-      ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
-      ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
-      $f \
-      "${getBaseName(f)}.SC__FILE_ANNOTATOR.${params.off}"
+    ln -s ${fIn} "${id}.${fOutSuffix}.h5ad"
     """
 }

@@ -19,7 +19,7 @@ workflow CLUSTER_IDENTIFICATION {
         SC__SCANPY__CLUSTERING( data )
         report = GENERATE_REPORT(
             SC__SCANPY__CLUSTERING.out,
-            file(params.sc.scanpy.clustering.report_ipynb),
+            file(workflow.projectDir + params.sc.scanpy.clustering.report_ipynb),
             "SC_clustering_report"
         )
         marker_genes = SC__SCANPY__MARKER_GENES( SC__SCANPY__CLUSTERING.out )
@@ -27,4 +27,3 @@ workflow CLUSTER_IDENTIFICATION {
         marker_genes
         report
 }
-

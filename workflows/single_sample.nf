@@ -29,8 +29,9 @@ include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global)
-include SC__H5AD_TO_LOOM from '../src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
-include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
+include SC__H5AD_TO_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
+include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
+include SC__PUBLISH_H5AD from '../src/utils/processes/utils.nf' params(params + params.global)
 
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
@@ -49,17 +50,21 @@ workflow single_sample {
     DIM_REDUCTION( HVG_SELECTION.out.scaled )
     CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
     scopeloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
+    SC__PUBLISH_H5AD( 
+        CLUSTER_IDENTIFICATION.out.marker_genes,
+        "single_sample.output"
+    )
     // reporting:
     SC__SCANPY__MERGE_REPORTS(
         QC_FILTER.out.report.mix(
             HVG_SELECTION.out.report,
             DIM_REDUCTION.out.report,
             CLUSTER_IDENTIFICATION.out.report
-        ).collect(),
-        params.global.project_name+".merged_report")
-    SC__SCANPY__REPORT_TO_HTML( SC__SCANPY__MERGE_REPORTS.out, params.global.project_name+".merged_report")
+        ).groupTuple(),
+        "merged_report"
+    )
+    SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
     emit:
         filteredloom
         scopeloom
 }
-

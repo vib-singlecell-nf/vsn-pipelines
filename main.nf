@@ -9,6 +9,11 @@ workflow bbknn {
     BBKNN()
 }
 
+// run multi-sample with mnncorrect, output a scope loom file
+workflow mnncorrect {
+    include mnncorrect as MNNCORRECT from './workflows/mnncorrect' params(params)
+    MNNCORRECT()
+}
 
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
@@ -38,7 +43,7 @@ workflow single_sample_scenic {
 // run scenic directly from an existing loom file:
 workflow scenic {
     include SCENIC as SCENIC_WF from './src/scenic/main.nf' params(params)
-    SCENIC_WF( file(params.sc.scenic.filteredloom) )
+    SCENIC_WF( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) )
 }
 
 
@@ -53,3 +58,7 @@ workflow single_sample_star {
     SINGLE_SAMPLE_STAR()
 }
 
+workflow nemesh {
+    include nemesh as NEMESH from './workflows/nemesh' params(params)
+    NEMESH()  
+}
