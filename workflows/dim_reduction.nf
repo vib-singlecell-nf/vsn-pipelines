@@ -4,12 +4,12 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__TSNE from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.tsne + params.global + params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.umap + params.global + params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params + [method: "pca"])
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__TSNE from '../processes/dim_reduction.nf' params(params + [method: "tsne"])
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
 
 // reporting:
-include GENERATE_REPORT from './create_report.nf' params(params.sc.scanpy.feature_scaling + params)
+include GENERATE_REPORT from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 
