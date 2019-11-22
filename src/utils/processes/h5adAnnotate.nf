@@ -36,14 +36,13 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
 
     input:
         tuple val(id), file(f)
-        file(metaDataFilePath)
     output:
         tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.sc.sample_annotate.off}")
     script:
         """
         ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
-            ${(params.containsKey('type')) ? '--type ' + params.sc.sample_annotate.type : ''} \
-            ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
+            ${(params.sc.sample_annotate.containsKey('type')) ? '--type ' + params.sc.sample_annotate.type : ''} \
+            ${(params.sc.sample_annotate.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + params.sc.sample_annotate.metaDataFilePath : ''} \
             $f \
             "${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.sc.sample_annotate.off}"
     """
