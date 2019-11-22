@@ -10,7 +10,7 @@ process SC__PREPARE_OBS_FILTER {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
         tuple val(id), file(f), val(filterConfig)
@@ -28,24 +28,29 @@ process SC__PREPARE_OBS_FILTER {
             ${filterConfig.cellMetaDataFilePath} \
             "${id}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt"
         """
+
 }
 
 process SC__APPLY_OBS_FILTER {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(id), file(f), file(filters)
+    tuple val(id), file(f), file(filters)
+    
     output:
-        tuple val(id), file("${id}.SC__APPLY_OBS_FILTER.${params.sc.cell_filter.off}")
+    tuple val(id), file("${id}.SC__APPLY_OBS_FILTER.${processParams.off}")
+    
     script:
-        filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
-        """
-        ${binDir}sc_h5ad_apply_obs_filter.py \
-            $f \
-            --output "${id}.SC__APPLY_OBS_FILTER.${params.sc.cell_filter.off}" \
-            $filtersAsArguments
-        """
+    processParams = params.sc.cell_filter
+    filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
+    """
+    ${binDir}sc_h5ad_apply_obs_filter.py \
+        $f \
+        --output "${id}.SC__APPLY_OBS_FILTER.${processParams.off}" \
+        $filtersAsArguments
+    """
+
 }
