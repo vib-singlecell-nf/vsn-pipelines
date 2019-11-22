@@ -1,27 +1,30 @@
 nextflow.preview.dsl=2
 
 if(!params.containsKey("test")) {
-  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+  	binDir = "${workflow.projectDir}/src/scanpy/bin/"
 } else {
-  binDir = ""
+  	binDir = ""
 }
 
 process SC__SCANPY__CLUSTERING {
 
-  container params.sc.scanpy.container
-  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-  publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+  	container params.sc.scanpy.container
+  	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
-  input:
+  	input:
     tuple val(id), file(f)
-  output:
-    tuple val(id), file("${id}.SC__SCANPY__CLUSTERING.${params.off}")
-  script:
+
+  	output:
+    tuple val(id), file("${id}.SC__SCANPY__CLUSTERING.${processParams.off}")
+
+  	script:
+    processParams = params.sc.scanpy.clustering
     """
     ${binDir}cluster/sc_clustering.py \
-         ${(params.containsKey('clusteringMethod')) ? '--method ' + params.clusteringMethod : ''} \
-         ${(params.containsKey('resolution')) ? '--resolution ' + params.resolution : ''} \
+         ${(processParams.containsKey('clusteringMethod')) ? '--method ' + processParams.clusteringMethod : ''} \
+         ${(processParams.containsKey('resolution')) ? '--resolution ' + processParams.resolution : ''} \
          $f \
-         "${id}.SC__SCANPY__CLUSTERING.${params.off}"
+         "${id}.SC__SCANPY__CLUSTERING.${processParams.off}"
     """
 }
