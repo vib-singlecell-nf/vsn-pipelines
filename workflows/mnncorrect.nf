@@ -4,12 +4,12 @@ nextflow.preview.dsl=2
 //  Import sub-workflows from the modules:
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
-include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
-include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
-include SC__SCANPY__ADJUSTMENT from '../src/scanpy/processes/adjust.nf' params(params + params.global)
-include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
-include BEC_MNN_CORRECT from '../src/scanpy/workflows/bec_mnn_correct.nf' params(params.sc.file_concatenator + params)
+include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(params)
+include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
+include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
+include SC__SCANPY__ADJUSTMENT from '../src/scanpy/processes/adjust.nf' params(params)
+include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
+include BEC_MNN_CORRECT from '../src/scanpy/workflows/bec_mnn_correct.nf' params(params)
 
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
