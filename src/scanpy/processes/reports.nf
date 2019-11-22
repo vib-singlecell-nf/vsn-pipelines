@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 /* general reporting function: 
 takes a template ipynb and adata as input,
-outputs ipynb named by the value in ${report_title}
+outputs ipynb named by the value in ${reportTitle}
 */
 process SC__SCANPY__GENERATE_REPORT {
 
@@ -12,14 +12,14 @@ process SC__SCANPY__GENERATE_REPORT {
 
   input:
     file ipynb
-    tuple val(id), file(adata)
-    val report_title
+    tuple val(sampleId), file(adata)
+    val(reportTitle)
   output:
-    tuple val(id), file("${id}.${report_title}.ipynb")
+    tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
   script:
     """
     papermill ${ipynb} \
-        ${id}.${report_title}.ipynb \
+        ${sampleId}.${reportTitle}.ipynb \
         -p FILE $adata
     """
 }
@@ -33,14 +33,14 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
   input:
     file(ipynb)
-    tuple val(id), file(data1), file(data2)
-    val report_title
+    tuple val(sampleId), file(data1), file(data2)
+    val reportTitle
   output:
-    tuple val(id), file("${id}.${report_title}.ipynb")
+    tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
   script:
     """
     papermill ${ipynb} \
-        ${id}.${report_title}.ipynb \
+        ${sampleId}.${reportTitle}.ipynb \
         -p FILE1 $data1 -p FILE2 $data2
     """
 }
@@ -54,9 +54,9 @@ process SC__SCANPY__REPORT_TO_HTML {
   publishDir "${params.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
   input:
-    tuple val(id), file(ipynb)
+    tuple val(sampleId), file(ipynb)
   output:
-    file "*.html"
+    file("*.html")
   script:
     """
     jupyter nbconvert ${ipynb} --to html
@@ -72,14 +72,14 @@ process SC__SCANPY__MERGE_REPORTS {
   publishDir "${params.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
   input:
-    tuple val(id), file(ipynbs)
-    val report_title
+    tuple val(sampleId), file(ipynbs)
+    val(reportTitle)
 
   output:
-    tuple val(id), file("${params.global.project_name}.${id}.${report_title}.ipynb")
+    tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
   script:
     """
-    nbmerge ${ipynbs} -o "${params.global.project_name}.${id}.${report_title}.ipynb"
+    nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.ipynb"
     """
 }
 

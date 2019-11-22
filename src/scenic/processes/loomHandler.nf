@@ -9,13 +9,13 @@ if(!params.containsKey("test")) {
 process PUBLISH_LOOM {
     
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicScopeOutputLoom }
+    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicScopeOutputLoom }
 
     input:
-    file f
+    tuple val(sampleId), file(f)
 
     output:
-    file f
+    tuple val(sampleId), file(f)
 
     """
     """
@@ -23,67 +23,67 @@ process PUBLISH_LOOM {
 
 
 process VISUALIZE {
-    cache 'deep'
+
     container params.sc.scenic.container
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    file input_loom
+    tuple val(sampleId), file(inputLoom)
 
     output:
-    file "scenic_visualize.loom"
+    tuple val(sampleId), file("scenic_visualize.loom")
 
     """
     ${binDir}add_visualization.py \
-        --loom_input ${input_loom} \
+        --loom_input ${inputLoom} \
         --loom_output scenic_visualize.loom \
-        --num_workers ${params.sc.scenic.numWorkers} \
+        --num_workers ${params.sc.scenic.numWorkers}
     """
+
 }
 
 
 process MERGE_MOTIF_TRACK_LOOMS {
-    cache 'deep'
+
     container params.sc.scenic.container
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
+    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true
 
     input:
-    file motifloom
-    file trackloom
+    tuple val(sampleId), file(motifLoom), file(trackLoom)
 
     output:
-    file params.sc.scenic.scenicOutputLoom
+    tuple val(sampleId), file(params.sc.scenic.scenicOutputLoom)
 
     """
     ${binDir}merge_motif_track_loom.py \
-        --loom_motif ${motifloom} \
-        --loom_track ${trackloom} \
-        --loom_output ${params.sc.scenic.scenicOutputLoom} \
+        --loom_motif ${motifLoom} \
+        --loom_track ${trackLoom} \
+        --loom_output ${params.sc.scenic.scenicOutputLoom}
     """
+
 }
 
 /* options to implement:
 */
 
 process APPEND_SCENIC_LOOM {
-    cache 'deep'
+
     container params.sc.scenic.container
     clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.sc.scenic.scenicoutdir}", mode: 'link', overwrite: true
+    publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
     input:
-    file scopeloom
-    file scenicloom
+    tuple val(sampleId), file(scopeLoom), file(scenicLoom)
 
     output:
-    file params.sc.scenic.scenicScopeOutputLoom
+    tuple val(sampleId), file("${sampleId}.${params.sc.scenic.scenicScopeOutputLoom}")
 
     """
     ${binDir}append_results_to_existing_loom.py \
-        --loom_scope ${scopeloom} \
-        --loom_scenic ${scenicloom} \
-        --loom_output ${params.sc.scenic.scenicScopeOutputLoom} \
+        --loom_scope ${scopeLoom} \
+        --loom_scenic ${scenicLoom} \
+        --loom_output ${sampleId}.${params.sc.scenic.scenicScopeOutputLoom}
     """
-}
 
+}
