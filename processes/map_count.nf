@@ -2,33 +2,34 @@ nextflow.preview.dsl=2
 
 process SC__STAR__MAP_COUNT {
 
-  container params.sc.star.container
-  maxForks 2
+	container params.sc.star.container
+	maxForks 2
 
-  input:
-    file(starIndex)
-    val starIndexLoaded
-    tuple val(sample), file(fastqs)
+	input:
+	file(starIndex)
+	val starIndexLoaded
+	tuple val(sample), file(fastqs)
 
-  output:
-    val success, emit: isDone
-    tuple val(sample), file("*ReadsPerGene.out.tab"), emit: counts optional params.sc.star.map_count.containsKey('quantMode') && params.sc.star.map_count.quantMode == "GeneCounts" ? true: false
-    tuple val(sample), file("*.STAR_Aligned.sortedByCoord.out.bam"), emit: bam
+	output:
+	val success, emit: isDone
+	tuple val(sample), file("*ReadsPerGene.out.tab"), emit: counts optional processParams.containsKey('quantMode') && processParams.quantMode == "GeneCounts" ? true: false
+	tuple val(sample), file("*.STAR_Aligned.sortedByCoord.out.bam"), emit: bam
 
-  script:
-    success = true
+	script:
+	processParams = params.sc.star.map_count
+	success = true
+	"""
+	STAR \
+		--genomeLoad LoadAndKeep \
+		--genomeDir ${starIndex} \
+		${(processParams.containsKey('runThreadN')) ? '--runThreadN ' + processParams.runThreadN: ''} \
+		${(processParams.containsKey('limitBAMsortRAM')) ? '--limitBAMsortRAM ' + processParams.limitBAMsortRAM: ''} \
+		${(processParams.containsKey('outSAMtype')) ? '--outSAMtype ' + processParams.outSAMtype: ''} \
+		${(processParams.containsKey('quantMode')) ? '--quantMode ' + processParams.quantMode: ''} \
+		${(processParams.containsKey('outReadsUnmapped')) ? '--outReadsUnmapped ' + processParams.outReadsUnmapped: ''} \
+		--readFilesIn ${fastqs} \
+		${(fastqs.name.endsWith(".gz")) ? '--readFilesCommand zcat' : ''} \
+		--outFileNamePrefix ${sample}.STAR_
+	"""
 
-    """
-    STAR \
-      --genomeLoad LoadAndKeep \
-      --genomeDir ${starIndex} \
-      ${(params.sc.star.map_count.containsKey('runThreadN')) ? '--runThreadN ' + params.sc.star.map_count.runThreadN: ''} \
-      ${(params.sc.star.map_count.containsKey('limitBAMsortRAM')) ? '--limitBAMsortRAM ' + params.sc.star.map_count.limitBAMsortRAM: ''} \
-      ${(params.sc.star.map_count.containsKey('outSAMtype')) ? '--outSAMtype ' + params.sc.star.map_count.outSAMtype: ''} \
-      ${(params.sc.star.map_count.containsKey('quantMode')) ? '--quantMode ' + params.sc.star.map_count.quantMode: ''} \
-      ${(params.sc.star.map_count.containsKey('outReadsUnmapped')) ? '--outReadsUnmapped ' + params.sc.star.map_count.outReadsUnmapped: ''} \
-      --readFilesIn ${fastqs} \
-      ${(fastqs.name.endsWith(".gz")) ? '--readFilesCommand zcat' : ''} \
-      --outFileNamePrefix ${sample}.STAR_
-    """
 }
