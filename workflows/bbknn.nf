@@ -23,11 +23,11 @@ nextflow.preview.dsl=2
 //  Import sub-workflows from the modules:
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
-include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
-include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../src/scanpy/processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
-include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
+include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(params)
+include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
+include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../src/scanpy/processes/dim_reduction.nf' params(params + [method: "pca"])
+include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
 include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 
 // data channel to start from 10x data:
