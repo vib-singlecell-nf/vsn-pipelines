@@ -119,6 +119,8 @@ Runs the SCENIC workflow multiple times (set by `params.sc.scenic.numRuns`), gen
 Pipelines to aggregate multiple datasets together.
 
 ### `bbknn`
+![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/bbknn/badge.svg)
+
 Runs the BBKNN pipeline (sample-specific filtering, merging of individual samples, normalization, log-transformation, HVG selection, PCA analysis, then the batch-effect correction steps: BBKNN, clustering, dimensionality reduction (UMAP only)).
 The output is a loom file with the results embedded.
 
