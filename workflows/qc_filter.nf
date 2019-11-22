@@ -17,16 +17,16 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // utils:
-include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
+include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params)
 include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
 include SC__ANNOTATE_BY_CELL_METADATA from '../../utils/processes/h5adAnnotate' params(params)
 include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
 
 // scanpy:
-include '../processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
+include '../processes/filter.nf' params(params)
 
 // reporting:
-include GENERATE_QC_REPORT from './create_report.nf' params(params.sc.scanpy.filter + params)
+include GENERATE_QC_REPORT from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
