@@ -9,12 +9,12 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include '../processes/batch_effect_correct.nf' params(params.sc.scanpy.batch_effect_correct + params.global + params)
-include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params + params.global)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.pca + params.global + params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.umap + params.global + params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__TSNE from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.tsne + params.global + params)
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params.global + params)
+include '../processes/batch_effect_correct.nf' params(params)
+include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params + [method: "pca"])
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__TSNE from '../processes/dim_reduction.nf' params(params + [method: "tsne"])
+include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

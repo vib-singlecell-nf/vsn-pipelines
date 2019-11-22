@@ -12,7 +12,7 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
-include SC__FILE_CONVERTER from './processes/utils' params(params.sc.sc_file_converter + params.global + params)
+include SC__FILE_CONVERTER from './processes/utils' params(params)
 
 // Uncomment to test
 include getChannel as getTenXChannel from '../channels/tenx.nf'
