@@ -46,7 +46,7 @@ workflow QC_FILTER {
             && params.sc.sample_annotate.metaDataFilePath
             && params.sc.sample_annotate.metaDataFilePath != ''
         ) {
-            data = SC__ANNOTATE_BY_SAMPLE_METADATA( data, file(params.sc.sample_annotate.metaDataFilePath) )
+            data = SC__ANNOTATE_BY_SAMPLE_METADATA( data )
         }
         unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
         SC__SCANPY__GENE_FILTER( unfiltered )
