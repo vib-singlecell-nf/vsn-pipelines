@@ -38,7 +38,7 @@ workflow single_sample_scenic {
 // run scenic directly from an existing loom file:
 workflow scenic {
     include SCENIC as SCENIC_WF from './src/scenic/main.nf' params(params)
-    SCENIC_WF( file(params.sc.scenic.filteredloom) )
+    SCENIC_WF( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) )
 }
 
 

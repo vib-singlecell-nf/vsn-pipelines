@@ -50,17 +50,19 @@ workflow single_sample {
     DIM_REDUCTION( HVG_SELECTION.out.scaled )
     CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
     scopeloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
-    SC__PUBLISH_H5AD( CLUSTER_IDENTIFICATION.out.marker_genes,
-        params.global.project_name+".single_sample.output")
-
-    // collect the reports:
-    ipynbs = QC_FILTER.out.report
-        .join(HVG_SELECTION.out.report)
-        .join(DIM_REDUCTION.out.report)
-        .join(CLUSTER_IDENTIFICATION.out.report)
-        .map{ tuple( it[0], it.drop(1) ) }
+    SC__PUBLISH_H5AD( 
+        CLUSTER_IDENTIFICATION.out.marker_genes,
+        params.global.project_name+".single_sample.output"
+    )
     // reporting:
-    SC__SCANPY__MERGE_REPORTS(ipynbs, "merged_report")
+    SC__SCANPY__MERGE_REPORTS(
+        QC_FILTER.out.report.mix(
+            HVG_SELECTION.out.report,
+            DIM_REDUCTION.out.report,
+            CLUSTER_IDENTIFICATION.out.report
+        ).groupTuple(),
+        "merged_report"
+    )
     SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
     emit:
