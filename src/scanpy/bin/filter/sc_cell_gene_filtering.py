@@ -7,11 +7,13 @@ import scanpy as sc
 
 
 def add_IO_arguments(parser):
-    parser.add_argument("input",
+    parser.add_argument(
+        "input",
         type=argparse.FileType('r'),
         help='The path to the anndata file.'
     )
-    parser.add_argument("output",
+    parser.add_argument(
+        "output",
         type=argparse.FileType('w'),
         help='The path to the anndata output file.',
     )
@@ -149,7 +151,7 @@ def read_data(args):
     # Expects h5ad file
     try:
         adata = sc.read_h5ad(filename=args.input.name)
-    except Exception:
+    except IOError:
         raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(args.input)[0]))
     return adata
 

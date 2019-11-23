@@ -39,7 +39,7 @@ for FILE_PATH_IN in args:
         cell_name = os.path.basename(FILE_PATH_IN)[:-len("ReadsPerGene.out.tab")]
         counts = pd.read_csv(FILE_PATH_IN, sep='\t', index_col=0, skiprows=4, header=None)
         files.append((counts, cell_name))
-    except Exception:
+    except IOError:
         raise Exception("Wrong input format. Expects .tab files, got .{}".format(FILE_PATH_IN))
 
 #
@@ -49,7 +49,7 @@ try:
     all_counts = pd.DataFrame()
     for counts, cell_name in files:
         all_counts.loc[:, cell_name] = counts[strand_options[options.stranded]].astype(int)
-except Exception:
+except IOError:
     raise Exception("Concatenation failed.")
 
 all_counts.to_csv(f"{FILE_PATH_OUT_BASENAME}.tsv", header=True, index=True, sep='\t')

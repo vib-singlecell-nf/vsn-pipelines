@@ -130,7 +130,7 @@ class SCopeLoom:
             # Decompress and decode the MetaData global attribute
             try:
                 global_attrs["MetaData"] = SCopeLoom.decompress_decode(value=global_attrs["MetaData"])
-            except Exception:
+            except IOError:
                 # MetaData is uncompressed
                 global_attrs["MetaData"] = json.loads(global_attrs["MetaData"])
 

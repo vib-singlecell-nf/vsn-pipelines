@@ -19,7 +19,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
 
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except:
+except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 row_attrs = {

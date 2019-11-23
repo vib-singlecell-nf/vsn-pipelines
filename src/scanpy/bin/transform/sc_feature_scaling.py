@@ -35,7 +35,7 @@ SCALE__MAX_SD = options.max_sd if options.max_sd > 0 else None
 # Expects h5ad file
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except:
+except IOError:
     raise Exception("Can only handle .h5ad files.")
 
 #
