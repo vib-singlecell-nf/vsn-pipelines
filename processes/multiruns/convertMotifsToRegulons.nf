@@ -8,6 +8,8 @@ if(!params.containsKey("test")) {
 
 process CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS {
 
+    // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
+    label "${params.sc.scenic.labels ? params.sc.scenic.labels.processExecutor : "local"}"
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/multi_runs_cistarget/", mode: 'link', overwrite: true
