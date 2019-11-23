@@ -1,15 +1,17 @@
 nextflow.preview.dsl=2
 
 if(!params.containsKey("test")) {
-  binDir = "${workflow.projectDir}/src/scenic/bin/"
+    binDir = "${workflow.projectDir}/src/scenic/bin/"
 } else {
-  binDir = ""
+    binDir = ""
 }
 
+toolParams = params.sc.scenic
+
 process PUBLISH_LOOM {
-    
+
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true, saveAs: { filename -> params.sc.scenic.scenicScopeOutputLoom }
+    publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true, saveAs: { filename -> toolParams.scenicScopeOutputLoom }
 
     input:
     tuple val(sampleId), file(f)
@@ -17,15 +19,17 @@ process PUBLISH_LOOM {
     output:
     tuple val(sampleId), file(f)
 
+    script:
     """
     """
+
 }
 
 
 process VISUALIZE {
 
-    container params.sc.scenic.container
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    container toolParams.container
+    clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=2gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
     tuple val(sampleId), file(inputLoom)
@@ -33,11 +37,12 @@ process VISUALIZE {
     output:
     tuple val(sampleId), file("scenic_visualize.loom")
 
+    script:
     """
     ${binDir}add_visualization.py \
         --loom_input ${inputLoom} \
         --loom_output scenic_visualize.loom \
-        --num_workers ${params.sc.scenic.numWorkers}
+        --num_workers ${toolParams.numWorkers}
     """
 
 }
@@ -45,21 +50,23 @@ process VISUALIZE {
 
 process MERGE_MOTIF_TRACK_LOOMS {
 
-    container params.sc.scenic.container
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true
+    container toolParams.container
+    clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true
 
     input:
     tuple val(sampleId), file(motifLoom), file(trackLoom)
 
     output:
-    tuple val(sampleId), file(params.sc.scenic.scenicOutputLoom)
+    tuple val(sampleId), file(toolParams.scenicOutputLoom)
 
+    script:
+    toolParams = params.sc.scenic
     """
     ${binDir}merge_motif_track_loom.py \
         --loom_motif ${motifLoom} \
         --loom_track ${trackLoom} \
-        --loom_output ${params.sc.scenic.scenicOutputLoom}
+        --loom_output ${toolParams.scenicOutputLoom}
     """
 
 }
@@ -69,21 +76,23 @@ process MERGE_MOTIF_TRACK_LOOMS {
 
 process APPEND_SCENIC_LOOM {
 
-    container params.sc.scenic.container
-    clusterOptions "-l nodes=1:ppn=${params.sc.scenic.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    container toolParams.container
+    clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
     input:
     tuple val(sampleId), file(scopeLoom), file(scenicLoom)
 
     output:
-    tuple val(sampleId), file("${sampleId}.${params.sc.scenic.scenicScopeOutputLoom}")
+    tuple val(sampleId), file("${sampleId}.${toolParams.scenicScopeOutputLoom}")
 
+    script:
+    toolParams = params.sc.scenic
     """
     ${binDir}append_results_to_existing_loom.py \
         --loom_scope ${scopeLoom} \
         --loom_scenic ${scenicLoom} \
-        --loom_output ${sampleId}.${params.sc.scenic.scenicScopeOutputLoom}
+        --loom_output ${sampleId}.${toolParams.scenicScopeOutputLoom}
     """
 
 }
