@@ -27,7 +27,7 @@ include APPEND_SCENIC_LOOM                                        from './proces
 include VISUALIZE                                                 from './processes/loomHandler'     params(params)
 
 // reporting:
-include './processes/reports.nf' params(params + params.global)
+include './processes/reports.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
