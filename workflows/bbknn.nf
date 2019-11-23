@@ -28,7 +28,7 @@ include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global)
-include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5ad_to_loom.nf' params(params + params.global)
+include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
 include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 
 // data channel to start from 10x data:
@@ -41,8 +41,8 @@ include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' par
 
 workflow bbknn {
 
-    data = getTenXChannel( params.global.tenx_folder )
-    QC_FILTER( data ) // Remove concat
+    data = getTenXChannel( params.global.tenx_folder ).view()
+    QC_FILTER( data ) // Remove concat 
     SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )

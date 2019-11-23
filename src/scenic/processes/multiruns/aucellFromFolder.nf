@@ -8,6 +8,8 @@ if(!params.containsKey("test")) {
 
 process AUCELL_FROM_FOLDER {
 
+    // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
+    label "${params.sc.scenic.labels ? params.sc.scenic.labels.processExecutor : "local"}"
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/multi_runs_aucell/", mode: 'link', overwrite: true
