@@ -37,7 +37,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 # Expects h5ad file
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except Exception:
+except IOError:
     raise Exception("Can only handle .h5ad files.")
 
 #

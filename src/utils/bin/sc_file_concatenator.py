@@ -42,7 +42,7 @@ if options.format == 'h5ad':
         try:
             adata = sc.read_h5ad(filename=FILE_PATH_IN)
             files.append(adata)
-        except Exception:
+        except IOError:
             raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(FILE_PATH_IN))
 
 #

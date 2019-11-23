@@ -120,7 +120,7 @@ for FILE_PATH_IN in args:
     try:
         adata = sc.read_h5ad(filename=FILE_PATH_IN)
         adatas.append(adata)
-    except Exception:
+    except IOError:
         raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 # Get all HVG into a list
