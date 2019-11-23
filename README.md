@@ -195,7 +195,6 @@ src/
 └── utils
     ├── bin
     │   ├── h5ad_to_loom.py
-    │   ├── sc_file_annotator.py
     │   ├── sc_file_concatenator.py
     │   └── sc_file_converter.py
     ├── utils.config
