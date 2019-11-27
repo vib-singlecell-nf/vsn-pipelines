@@ -16,10 +16,10 @@ process SC__FILE_CONVERTER {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 	
 	output:
-	tuple val(id), file("${id}.SC__FILE_CONVERTER.${processParams.off}")
+	tuple val(sampleId), file("${sampleId}.SC__FILE_CONVERTER.${processParams.off}")
 	
 	script:
 	processParams = params.sc.file_converter
@@ -58,7 +58,7 @@ process SC__FILE_CONVERTER {
 	"""
 	${binDir}sc_file_converter.py \
 	--input-format $processParams.iff \
-	--output-format $processParams.off ${f} "${id}.SC__FILE_CONVERTER.${processParams.off}"
+	--output-format $processParams.off ${f} "${sampleId}.SC__FILE_CONVERTER.${processParams.off}"
 	"""
 
 }
@@ -108,10 +108,10 @@ process SC__STAR_CONCATENATOR() {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 	
 	output:
-	tuple val(id), file("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
+	tuple val(sampleId), file("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 	
 	script:
 	processParams = params.sc.star_concatenator
@@ -130,15 +130,15 @@ process SC__PUBLISH_H5AD {
     publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true
 
     input:
-    tuple val(id), file(fIn)
+    tuple val(sampleId), file(fIn)
     val(fOutSuffix)
 
     output:
-    tuple val(id), file("${id}.${fOutSuffix}.h5ad")
+    tuple val(sampleId), file("${sampleId}.${fOutSuffix}.h5ad")
     
 	script:
     """
-    ln -s ${fIn} "${id}.${fOutSuffix}.h5ad"
+    ln -s ${fIn} "${sampleId}.${fOutSuffix}.h5ad"
     """
 
 }

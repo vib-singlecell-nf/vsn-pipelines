@@ -13,10 +13,10 @@ process SC__SCANPY__NORMALIZATION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 
 	output:
-	tuple val(id), file("${id}.SC__SCANPY__NORMALIZATION.${processParams.off}")
+	tuple val(sampleId), file("${sampleId}.SC__SCANPY__NORMALIZATION.${processParams.off}")
 
 	script:
 	processParams = params.sc.scanpy.normalization
@@ -25,7 +25,7 @@ process SC__SCANPY__NORMALIZATION {
 		${(processParams.containsKey('normalizationMethod')) ? '--method ' + processParams.normalizationMethod : ''} \
 		${(processParams.containsKey('countsPerCellAfter')) ? '--counts-per-cell-after ' + processParams.countsPerCellAfter : ''} \
 		$f \
-		"${id}.SC__SCANPY__NORMALIZATION.${processParams.off}"
+		"${sampleId}.SC__SCANPY__NORMALIZATION.${processParams.off}"
 	"""
 
 }
@@ -37,10 +37,10 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 	
 	output:
-	tuple val(id), file("${id}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}")
+	tuple val(sampleId), file("${sampleId}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}")
 	
 	script:
 	processParams = params.sc.scanpy.data_transformation
@@ -48,7 +48,7 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 	${binDir}transform/sc_data_transformation.py \
 		${(processParams.containsKey('dataTransformationMethod')) ? '--method ' + processParams.dataTransformationMethod : ''} \
 		$f \
-		"${id}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}"
+		"${sampleId}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}"
 	"""
 
 }
@@ -60,10 +60,10 @@ process SC__SCANPY__FEATURE_SCALING {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 	
 	output:
-	tuple val(id), file("${id}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
+	tuple val(sampleId), file("${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
 	
 	script:
 	processParams = params.sc.scanpy.feature_scaling
@@ -72,7 +72,7 @@ process SC__SCANPY__FEATURE_SCALING {
 		${(processParams.containsKey('featureScalingMthod')) ? '--method ' + processParams.featureScalingMthod : ''} \
 		${(processParams.containsKey('featureScalingMaxSD')) ? '--max-sd ' + processParams.featureScalingMaxSD : ''} \
 		$f \
-		"${id}.SC__SCANPY__FEATURE_SCALING.${processParams.off}"
+		"${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}"
 	"""
 
 }
