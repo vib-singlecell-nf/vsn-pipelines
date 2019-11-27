@@ -13,17 +13,17 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   	input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
 
   	output:
-    tuple val(id), file("${id}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")
   	
 	script:
     processParams = params.sc.scanpy.batch_effect_correct
     """
     ${binDir}aggregate/sc_batch_effect_correction.py \
         ${(processParams.containsKey('batchEffectCorrectionMethod')) ? '--method ' + processParams.batchEffectCorrectionMethod : ''} \
-        --output-file "${id}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}" \
+        --output-file "${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}" \
         ${(processParams.containsKey('key')) ? '--key ' + processParams.key : ''} \
         ${(processParams.containsKey('batchKey')) ? '--batch-key ' + processParams.batchKey : ''} \
         ${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \

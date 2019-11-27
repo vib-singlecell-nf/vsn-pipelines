@@ -13,10 +13,10 @@ process SC__ANNOTATE_BY_CELL_METADATA {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
     
     output:
-    tuple val(id), file("${id}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+    tuple val(sampleId), file("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
     
     script:
     processParams = params.sc.cell_annotate
@@ -27,7 +27,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         ${annotationColumnNamesAsArguments} \
         $f \
         ${processParams.cellMetaDataFilePath} \
-        --output "${id}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
+        --output "${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
     """
 
 }
@@ -39,9 +39,9 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(id), file(f)
+        tuple val(sampleId), file(f)
     output:
-        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
+        tuple val(sampleId), file("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
     script:
     processParams = params.sc.sample_annotate
     """
@@ -49,6 +49,6 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
         ${(processParams.containsKey('type')) ? '--type ' + processParams.type : ''} \
         ${(processParams.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + processParams.metaDataFilePath : ''} \
         $f \
-        "${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}"
+        "${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}"
     """
 }

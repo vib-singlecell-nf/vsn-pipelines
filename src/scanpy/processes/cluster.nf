@@ -13,10 +13,10 @@ process SC__SCANPY__CLUSTERING {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   	input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
 
   	output:
-    tuple val(id), file("${id}.SC__SCANPY__CLUSTERING.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}")
 
   	script:
     processParams = params.sc.scanpy.clustering
@@ -25,6 +25,6 @@ process SC__SCANPY__CLUSTERING {
          ${(processParams.containsKey('clusteringMethod')) ? '--method ' + processParams.clusteringMethod : ''} \
          ${(processParams.containsKey('resolution')) ? '--resolution ' + processParams.resolution : ''} \
          $f \
-         "${id}.SC__SCANPY__CLUSTERING.${processParams.off}"
+         "${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}"
     """
 }
