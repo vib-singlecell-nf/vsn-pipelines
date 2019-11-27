@@ -20,6 +20,8 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         annotationColumnNamesAsArguments = params.sc.cell_annotate.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
+            --sample-id ${id} \
+            --sample-column-name ${params.sc.cell_annotate.sampleColumnName} \
             --index-column-name ${params.sc.cell_annotate.indexColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
