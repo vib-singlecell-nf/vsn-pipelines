@@ -13,10 +13,10 @@ process SC__SCANPY__NORMALIZATION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), file(f)
+	tuple val(sampleId), path(f)
 
 	output:
-	tuple val(sampleId), file("${sampleId}.SC__SCANPY__NORMALIZATION.${processParams.off}")
+	tuple val(sampleId), path("${sampleId}.SC__SCANPY__NORMALIZATION.${processParams.off}")
 
 	script:
 	processParams = params.sc.scanpy.normalization
@@ -37,10 +37,10 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), file(f)
+	tuple val(sampleId), path(f)
 	
 	output:
-	tuple val(sampleId), file("${sampleId}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}")
+	tuple val(sampleId), path("${sampleId}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}")
 	
 	script:
 	processParams = params.sc.scanpy.data_transformation
@@ -60,10 +60,10 @@ process SC__SCANPY__FEATURE_SCALING {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), file(f)
+	tuple val(sampleId), path(f)
 	
 	output:
-	tuple val(sampleId), file("${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
+	tuple val(sampleId), path("${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
 	
 	script:
 	processParams = params.sc.scanpy.feature_scaling

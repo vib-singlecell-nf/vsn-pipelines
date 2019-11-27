@@ -16,10 +16,10 @@ process SC__FILE_CONVERTER {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), file(f)
+	tuple val(sampleId), path(f)
 	
 	output:
-	tuple val(sampleId), file("${sampleId}.SC__FILE_CONVERTER.${processParams.off}")
+	tuple val(sampleId), path("${sampleId}.SC__FILE_CONVERTER.${processParams.off}")
 	
 	script:
 	processParams = params.sc.file_converter
@@ -88,7 +88,7 @@ process SC__FILE_CONCATENATOR() {
 	file("*")
 	
 	output:
-	tuple val(params.global.project_name), file("${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}")
+	tuple val(params.global.project_name), path("${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}")
 	
 	script:
 	processParams = params.sc.file_concatenator
@@ -108,10 +108,10 @@ process SC__STAR_CONCATENATOR() {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), file(f)
+	tuple val(sampleId), path(f)
 	
 	output:
-	tuple val(sampleId), file("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
+	tuple val(sampleId), path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 	
 	script:
 	processParams = params.sc.star_concatenator
@@ -130,11 +130,11 @@ process SC__PUBLISH_H5AD {
     publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true
 
     input:
-    tuple val(sampleId), file(fIn)
+    tuple val(sampleId), path(fIn)
     val(fOutSuffix)
 
     output:
-    tuple val(sampleId), file("${sampleId}.${fOutSuffix}.h5ad")
+    tuple val(sampleId), path("${sampleId}.${fOutSuffix}.h5ad")
     
 	script:
     """

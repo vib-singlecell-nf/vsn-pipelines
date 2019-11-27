@@ -55,15 +55,15 @@ workflow nemesh {
     }
 
     FASTP__CLEAN_AND_FASTQC( data )
-    PICARD__FASTQ_TO_BAM( FASTP__CLEAN_AND_FASTQC.out.fastq, file( params.global.tmpDir ) )
+    PICARD__FASTQ_TO_BAM( FASTP__CLEAN_AND_FASTQC.out.fastq, path( params.global.tmpDir ) )
     SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE( PICARD__FASTQ_TO_BAM.out.bam )
     SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR( SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE.out.bam )
     SC__DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM( SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR.out.bam )
     SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM( SC__DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM.out.bam )
     SC__DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART( SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM.out.bam )
-    PICARD__BAM_TO_FASTQ( SC__DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam, file( params.global.tmpDir ) )
+    PICARD__BAM_TO_FASTQ( SC__DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam, path( params.global.tmpDir ) )
     GZIP( PICARD__BAM_TO_FASTQ.out.fastq )
-    SC__STAR__BUILD_INDEX( file(params.global.genome_annotation), file(params.global.genome) )
+    SC__STAR__BUILD_INDEX( file(params.global.genome_annotation), path(params.global.genome) )
     // STAR_index = file("")
     // STAR__LOAD( STAR_index )
     SC__STAR__LOAD_GENOME( SC__STAR__BUILD_INDEX.out )
@@ -72,8 +72,8 @@ workflow nemesh {
         SC__STAR__LOAD_GENOME.out,
         GZIP.out.fastq_gz
     )
-    PICARD__SORT_SAM( SC__STAR__MAP_COUNT.out.bam, file( params.global.tmpDir ) )
-    PICARD__CREATE_SEQUENCE_DICTIONARY( file(params.global.genome), file( params.global.tmpDir ) )
+    PICARD__SORT_SAM( SC__STAR__MAP_COUNT.out.bam, path( params.global.tmpDir ) )
+    PICARD__CREATE_SEQUENCE_DICTIONARY( file(params.global.genome), path( params.global.tmpDir ) )
     PICARD__MERGE_BAM_ALIGNMENT( 
         SC__DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART.out.bam,
         PICARD__SORT_SAM.out,

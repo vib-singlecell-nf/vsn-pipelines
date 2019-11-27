@@ -20,11 +20,11 @@ process AUCELL {
     maxForks processParams.maxForks
 
     input:
-    tuple val(sampleId), file(filteredLoom), file(regulons), val(runId)
+    tuple val(sampleId), path(filteredLoom), path(regulons), val(runId)
     val type
 
     output:
-    tuple val(sampleId), file(filteredLoom), file("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}"), val(runId)
+    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}"), val(runId)
 
     script:
     """

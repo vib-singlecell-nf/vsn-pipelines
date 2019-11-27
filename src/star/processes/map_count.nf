@@ -8,12 +8,12 @@ process SC__STAR__MAP_COUNT {
 	input:
 	file(starIndex)
 	val starIndexLoaded
-	tuple val(sample), file(fastqs)
+	tuple val(sample), path(fastqs)
 
 	output:
 	val success, emit: isDone
-	tuple val(sample), file("*ReadsPerGene.out.tab"), emit: counts optional processParams.containsKey('quantMode') && processParams.quantMode == "GeneCounts" ? true: false
-	tuple val(sample), file("*.STAR_Aligned.sortedByCoord.out.bam"), emit: bam
+	tuple val(sample), path("*ReadsPerGene.out.tab"), emit: counts optional processParams.containsKey('quantMode') && processParams.quantMode == "GeneCounts" ? true: false
+	tuple val(sample), path("*.STAR_Aligned.sortedByCoord.out.bam"), emit: bam
 
 	script:
 	processParams = params.sc.star.map_count

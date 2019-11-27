@@ -14,10 +14,10 @@ process PUBLISH_LOOM {
     publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true, saveAs: { filename -> toolParams.scenicScopeOutputLoom }
 
     input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
 
     output:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
 
     script:
     """
@@ -32,10 +32,10 @@ process VISUALIZE {
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=2gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sampleId), file(inputLoom)
+    tuple val(sampleId), path(inputLoom)
 
     output:
-    tuple val(sampleId), file("scenic_visualize.loom")
+    tuple val(sampleId), path("scenic_visualize.loom")
 
     script:
     """
@@ -55,10 +55,10 @@ process MERGE_MOTIF_TRACK_LOOMS {
     publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true
 
     input:
-    tuple val(sampleId), file(motifLoom), file(trackLoom)
+    tuple val(sampleId), path(motifLoom), path(trackLoom)
 
     output:
-    tuple val(sampleId), file(toolParams.scenicOutputLoom)
+    tuple val(sampleId), path(toolParams.scenicOutputLoom)
 
     script:
     toolParams = params.sc.scenic
@@ -81,10 +81,10 @@ process APPEND_SCENIC_LOOM {
     publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
     input:
-    tuple val(sampleId), file(scopeLoom), file(scenicLoom)
+    tuple val(sampleId), path(scopeLoom), path(scenicLoom)
 
     output:
-    tuple val(sampleId), file("${sampleId}.${toolParams.scenicScopeOutputLoom}")
+    tuple val(sampleId), path("${sampleId}.${toolParams.scenicScopeOutputLoom}")
 
     script:
     toolParams = params.sc.scenic

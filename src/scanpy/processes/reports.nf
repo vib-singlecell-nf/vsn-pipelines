@@ -12,11 +12,11 @@ process SC__SCANPY__GENERATE_REPORT {
 
 	input:
 	file ipynb
-	tuple val(sampleId), file(adata)
+	tuple val(sampleId), path(adata)
 	val(reportTitle)
 	
 	output:
-	tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
+	tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 	
 	script:
 	"""
@@ -36,11 +36,11 @@ process SC__SCANPY__FILTER_QC_REPORT {
 
 	input:
 	file(ipynb)
-	tuple val(sampleId), file(unfiltered), file(filtered)
+	tuple val(sampleId), path(unfiltered), path(filtered)
 	val reportTitle
 
 	output:
-	tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
+	tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 
 	script:
 	"""
@@ -60,7 +60,7 @@ process SC__SCANPY__REPORT_TO_HTML {
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), file(ipynb)
+	tuple val(sampleId), path(ipynb)
 	
 	output:
 	file("*.html")
@@ -81,11 +81,11 @@ process SC__SCANPY__MERGE_REPORTS {
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), file(ipynbs)
+	tuple val(sampleId), path(ipynbs)
 	val(reportTitle)
 
 	output:
-	tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
+	tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 	
 	script:
 	"""

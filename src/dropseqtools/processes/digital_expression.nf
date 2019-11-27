@@ -7,7 +7,7 @@ process SC__DROP_SEQ_TOOLS__DIGITAL_EXPRESSION {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(bam), val(tag), file(selectedBarcodes)
+    tuple val(sample), path(bam), val(tag), path(selectedBarcodes)
 
     output:
     tuple file("*.${tag}.cells_dge.txt.gz"), emit: dgem

@@ -11,7 +11,7 @@ process PICARD__FASTQ_TO_BAM {
     file(tmpDir)
     
     output:
-    tuple val(sample), file('*.unaligned.bam'), emit: bam
+    tuple val(sample), path('*.unaligned.bam'), emit: bam
     
     script:
     sample = reads[0].toString() - ~/(_R1)?(\.clean)?(\.fq)?(\.fastq)?(\.gz)?$/

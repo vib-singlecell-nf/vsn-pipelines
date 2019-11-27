@@ -18,7 +18,7 @@ workflow getChannel {
         channel = Channel
             .fromPath(glob, checkIfExists: true)
             .map {
-                path -> tuple(extractSample( "${path}" ), file("${path}"))
+                path -> tuple(extractSample( "${path}" ), path("${path}"))
             }
     emit:
         channel

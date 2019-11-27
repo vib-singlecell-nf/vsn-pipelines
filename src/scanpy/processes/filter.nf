@@ -12,10 +12,10 @@ process SC__SCANPY__COMPUTE_QC_STATS {
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
   	input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
   	
 	output:
-    tuple val(sampleId), file("${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
+    tuple val(sampleId), path("${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
   	
 	script:
 	processParams = params.sc.scanpy.filter
@@ -41,10 +41,10 @@ process SC__SCANPY__GENE_FILTER {
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
     
 	output:
-    tuple val(sampleId), file("${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off}")
+    tuple val(sampleId), path("${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off}")
     
 	script:
 	processParams = params.sc.scanpy.filter
@@ -65,10 +65,10 @@ process SC__SCANPY__CELL_FILTER {
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
     
 	output:
-    tuple val(sampleId), file("${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off}")
+    tuple val(sampleId), path("${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off}")
     
 	script:
 	processParams = params.sc.scanpy.filter

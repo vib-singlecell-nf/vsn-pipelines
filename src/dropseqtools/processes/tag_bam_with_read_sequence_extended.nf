@@ -6,10 +6,10 @@ process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(bam)
+    tuple val(sample), path(bam)
 
 	output:
-    tuple val(sample), file('*.unaligned_tagged_Cell.bam'), emit: bam
+    tuple val(sample), path('*.unaligned_tagged_Cell.bam'), emit: bam
     tuple file('*.unaligned_tagged_Cellular.bam_summary.txt'), emit: report
 
 	script:
@@ -35,10 +35,10 @@ process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(bam)
+    tuple val(sample), path(bam)
 
 	output:
-    tuple val(sample), file('*.unaligned_tagged_CellMolecular.bam'), emit: bam
+    tuple val(sample), path('*.unaligned_tagged_CellMolecular.bam'), emit: bam
     tuple file('*.unaligned_tagged_Molecular.bam_summary.txt'), emit: report
 
 	script:

@@ -17,11 +17,11 @@ process SAVE_MULTI_RUNS_TO_LOOM {
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sampleId), file(filteredLoom), file(multiRunsAggrRegulons), file(multiRunsAggrRegulonsAUC)
+    tuple val(sampleId), path(filteredLoom), path(multiRunsAggrRegulons), path(multiRunsAggrRegulonsAUC)
     val type
 
     output:
-    tuple val(sampleId), file("multi_runs_regulons_auc_${type}.loom")
+    tuple val(sampleId), path("multi_runs_regulons_auc_${type}.loom")
 
     """
     ${binDir}save_multi_runs_to_loom.py \

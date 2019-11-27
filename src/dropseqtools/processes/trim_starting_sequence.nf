@@ -7,10 +7,10 @@ process SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(bam)
+    tuple val(sample), path(bam)
 
     output:
-    tuple val(sample), file('*.unaligned_tagged_trimmed_smart.bam'), emit: bam
+    tuple val(sample), path('*.unaligned_tagged_trimmed_smart.bam'), emit: bam
     tuple file('*.adapter_trimming_report.txt'), emit: report
 
     script:

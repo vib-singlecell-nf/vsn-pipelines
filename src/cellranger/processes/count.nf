@@ -10,7 +10,7 @@ process SC__CELLRANGER__COUNT {
     file(fastqs)
 
   output:
-    tuple(_sampleName, file("${_sampleName}/outs") )
+    tuple(_sampleName, path("${_sampleName}/outs") )
 
   script:
     sample = fastqs.getName() =~ /(.*)_fastqOut/
