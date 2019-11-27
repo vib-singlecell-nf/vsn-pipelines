@@ -20,11 +20,11 @@ process GRNBOOST2_WITHOUT_DASK {
     maxForks processParams.maxForks
 
     input:
-    tuple val(sampleId), file(filteredLoom), val(runId)
+    tuple val(sampleId), path(filteredLoom), val(runId)
     file tfs
 
     output:
-    tuple val(sampleId), file(filteredLoom), file("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
+    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
 
     script:
     """

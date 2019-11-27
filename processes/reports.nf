@@ -21,11 +21,11 @@ process GENERATE_REPORT {
 
 	input:
 	file ipynb
-	tuple val(sampleId), file(loom)
+	tuple val(sampleId), path(loom)
 	val reportTitle
 
 	output:
-	tuple val(sampleId), file("${reportTitle}.ipynb")
+	tuple val(sampleId), path("${reportTitle}.ipynb")
 	
 	script:
 	"""
@@ -43,10 +43,10 @@ process REPORT_TO_HTML {
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), file(ipynb)
+	tuple val(sampleId), path(ipynb)
 
 	output:
-	tuple val(sampleId), file("*.html")
+	tuple val(sampleId), path("*.html")
 	
 	script:
 	"""

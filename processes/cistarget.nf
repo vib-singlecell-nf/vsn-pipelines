@@ -20,13 +20,13 @@ process CISTARGET {
     maxForks processParams.maxForks
     
     input:
-    tuple val(sampleId), file(filteredLoom), file("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
+    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
     file featherDB
     file annotation
     val type
 
     output:
-    tuple val(sampleId), file(filteredLoom), file("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"}"), val(runId)
+    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"}"), val(runId)
 
     script:
     """
