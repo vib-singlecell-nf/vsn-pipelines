@@ -7,10 +7,10 @@ process SC__DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(bam)
+    tuple val(sample), path(bam)
 
 	output:
-	tuple val(sample), file("*.final_cleaned.bam"), emit: bam
+	tuple val(sample), path("*.final_cleaned.bam"), emit: bam
 	tuple file("*.synthesis_stats.txt"), emit: stats
 	// tuple file("*.synthesis_stats.summary.txt"), emit: statsSummary
 

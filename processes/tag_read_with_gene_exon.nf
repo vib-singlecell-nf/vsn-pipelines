@@ -6,11 +6,11 @@ process SC__DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(bam)
+    tuple val(sample), path(bam)
     file(annotation)
 
     output:
-    tuple val(sample), file("*.merged_gene-exon-tagged.bam")
+    tuple val(sample), path("*.merged_gene-exon-tagged.bam")
 
     script:
     processParams = params.sc.dropseqtools.tag_read_with_gene_exon
