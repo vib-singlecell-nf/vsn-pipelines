@@ -13,10 +13,10 @@ process SC__SCANPY__CLUSTERING {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   	input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
 
   	output:
-    tuple val(sampleId), file("${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}")
+    tuple val(sampleId), path("${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}")
 
   	script:
     processParams = params.sc.scanpy.clustering

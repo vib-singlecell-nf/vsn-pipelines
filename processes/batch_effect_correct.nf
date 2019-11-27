@@ -13,10 +13,10 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   	input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
 
   	output:
-    tuple val(sampleId), file("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")
+    tuple val(sampleId), path("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")
   	
 	script:
     processParams = params.sc.scanpy.batch_effect_correct
