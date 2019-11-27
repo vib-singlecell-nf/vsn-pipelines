@@ -13,10 +13,10 @@ process SC__SCANPY__DIM_REDUCTION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 	
 	output:
-	tuple val(id), file("${id}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}")
+	tuple val(sampleId), file("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}")
 	
 	script:
 	processParams = params.sc.scanpy.dim_reduction.get(params.method)
@@ -31,6 +31,6 @@ process SC__SCANPY__DIM_REDUCTION {
 		${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
 		${(processParams.containsKey('useFastTsne') && !processParams.useFastTsne) ? '' : '--use-fast-tsne'} \
 		$f \
-		"${id}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}"
+		"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}"
 """
 }

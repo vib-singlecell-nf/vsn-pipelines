@@ -13,10 +13,10 @@ process SC__SCANPY__MARKER_GENES {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   	input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
   
   	output:
-    tuple val(id), file("${id}.SC__SCANPY__MARKER_GENES.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}")
   
   	script:
 	processParams = params.sc.scanpy.marker_genes
@@ -26,6 +26,6 @@ process SC__SCANPY__MARKER_GENES {
          ${(processParams.containsKey('groupby')) ? '--groupby ' + processParams.groupby : ''} \
          ${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
          $f \
-         "${id}.SC__SCANPY__MARKER_GENES.${processParams.off}"
+         "${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}"
     """
 }

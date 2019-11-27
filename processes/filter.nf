@@ -12,10 +12,10 @@ process SC__SCANPY__COMPUTE_QC_STATS {
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
   	input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
   	
 	output:
-    tuple val(id), file("${id}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
   	
 	script:
 	processParams = params.sc.scanpy.filter
@@ -23,7 +23,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
     ${binDir}filter/sc_cell_gene_filtering.py \
     	compute \
       	$f \
-		${id}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off} \
+		${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off} \
 		${(processParams.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
 		${(processParams.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
 		${(processParams.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
@@ -41,10 +41,10 @@ process SC__SCANPY__GENE_FILTER {
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
     
 	output:
-    tuple val(id), file("${id}.SC__SCANPY__GENE_FILTER.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off}")
     
 	script:
 	processParams = params.sc.scanpy.filter
@@ -52,7 +52,7 @@ process SC__SCANPY__GENE_FILTER {
     ${binDir}filter/sc_cell_gene_filtering.py \
         genefilter \
         $f \
-        ${id}.SC__SCANPY__GENE_FILTER.${processParams.off} \
+        ${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off} \
         ${(processParams.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
     """
 }
@@ -65,10 +65,10 @@ process SC__SCANPY__CELL_FILTER {
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
     
 	output:
-    tuple val(id), file("${id}.SC__SCANPY__CELL_FILTER.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off}")
     
 	script:
 	processParams = params.sc.scanpy.filter
@@ -76,7 +76,7 @@ process SC__SCANPY__CELL_FILTER {
     ${binDir}filter/sc_cell_gene_filtering.py \
         cellfilter \
         $f \
-        ${id}.SC__SCANPY__CELL_FILTER.${processParams.off} \
+        ${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off} \
         ${(processParams.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
         ${(processParams.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
         ${(processParams.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \

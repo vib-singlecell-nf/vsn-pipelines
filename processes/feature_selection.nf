@@ -13,10 +13,10 @@ process SC__SCANPY__FEATURE_SELECTION {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   	input:
-    tuple val(id), file(f)
+    tuple val(sampleId), file(f)
   
   	output:
-    tuple val(id), file("${id}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}")
+    tuple val(sampleId), file("${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}")
   
   	script:
 	processParams = params.sc.scanpy.feature_selection
@@ -28,7 +28,7 @@ process SC__SCANPY__FEATURE_SELECTION {
         ${(processParams.containsKey('featureSelectionMinDisp')) ? '--min-disp ' + processParams.featureSelectionMinDisp : ''} \
         ${(processParams.containsKey('featureSelectionMaxDisp')) ? '--max-disp ' + processParams.featureSelectionMaxDisp : ''} \
         $f \
-        "${id}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}"
+        "${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}"
     """
 }
 

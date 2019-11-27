@@ -13,10 +13,10 @@ process SC__SCANPY__ADJUSTMENT {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(id), file(f)
+	tuple val(sampleId), file(f)
 
 	output:
-	tuple val(id), file("${id}.SC__SCANPY__ADJUSTMENT.${params.off}")
+	tuple val(sampleId), file("${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}")
 
 	script:
 	processParams = params.sc.scanpy.data_adjustment
@@ -26,7 +26,7 @@ process SC__SCANPY__ADJUSTMENT {
 		${(processParams.containsKey('adjustmentMethod')) ? '--method ' + processParams.adjustmentMethod : ''} \
 		${(processParams.containsKey('normalizationVariablesToRegressOut')) ? normalizationVariablesToRegressOutAsArguments : ''} \
 		$f \
-		"${id}.SC__SCANPY__ADJUSTMENT.${params.off}" 
+		"${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}" 
 	"""
 
 }
