@@ -144,5 +144,5 @@ workflow SCENIC_append {
 // Uncomment to test
 workflow {
     main:
-        SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
+        SCENIC( Channel.of( tuple("foobar", path(params.sc.scenic.filteredLoom)) ) )
 }

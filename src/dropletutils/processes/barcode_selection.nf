@@ -7,11 +7,11 @@ process SC__DROPLET_UTILS__BARCODE_SELECTION {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), file(readCounts)
+    tuple val(sample), path(readCounts)
     
     output:
-	tuple val(sample), val("knee"), file("*.selected_cell_barcodes_by_knee.txt"), emit: selectedCellBarcodesByKnee
-    tuple val(sample), val("inflection"), file("*.selected_cell_barcodes_by_inflection.txt"), emit: selectedCellBarcodesByInflection
+	tuple val(sample), val("knee"), path("*.selected_cell_barcodes_by_knee.txt"), emit: selectedCellBarcodesByKnee
+    tuple val(sample), val("inflection"), path("*.selected_cell_barcodes_by_inflection.txt"), emit: selectedCellBarcodesByInflection
     tuple file("*.barcode_rank_vs_total_umi_plot.png"), emit: plot
     
     script:

@@ -13,10 +13,10 @@ process SC__ANNOTATE_BY_CELL_METADATA {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sampleId), file(f)
+    tuple val(sampleId), path(f)
     
     output:
-    tuple val(sampleId), file("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+    tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
     
     script:
     processParams = params.sc.cell_annotate
@@ -39,9 +39,9 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(sampleId), file(f)
+        tuple val(sampleId), path(f)
     output:
-        tuple val(sampleId), file("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
+        tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
     script:
     processParams = params.sc.sample_annotate
     """

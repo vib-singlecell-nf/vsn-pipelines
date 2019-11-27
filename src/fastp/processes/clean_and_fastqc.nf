@@ -10,7 +10,7 @@ process FASTP__CLEAN_AND_FASTQC {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    set val(sample), file(reads)
+    set val(sample), path(reads)
     
     output:
     tuple file('*_R{1,2}.clean.fastq.gz'), emit: fastq

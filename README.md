@@ -214,7 +214,7 @@ include SC__CELLRANGER__COUNT   from './processes/count'    params(params)
 
 workflow CELLRANGER {
     main:
-        SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), file(params.sc.cellranger.mkfastq.runFolder))
+        SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), path(params.sc.cellranger.mkfastq.runFolder))
         SC__CELLRANGER__COUNT(file(params.sc.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
     emit:
         SC__CELLRANGER__COUNT.out
