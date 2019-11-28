@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import fnmatch
 import argparse
 from argparse import RawTextHelpFormatter
 from pysradb.sraweb import SRAweb
@@ -24,7 +25,13 @@ Convert a SRA ID to a meta data TSV file with the following information
 - run_total_spots, e.g.: 3552575
 - run_total_bases, e.g.: 176271295
 - geo_accession, e.g.: GSM3142622
-- sample_title, e.g.: w1118_1d_WholeBrain_Unstranded_RNA-seq
+- sample_name, e.g.: w1118_1d_WholeBrain_Unstranded_RNA-seq
+
+Example:
+    python bin/sra_to_metadata.py \\
+        -o test.tsv SRP125768 \\
+        --sample-filter "DGRP-551_*d_r*" \\
+        --sample-filter "w1118_*d_r*"
 
 Using:
 Zhu, Yuelin, Robert M. Stephens, Paul S. Meltzer, and Sean R. Davis. "SRAdb: query and use public next-generation sequencing data from within R." BMC bioinformatics 14, no. 1 (2013): 19.
@@ -37,6 +44,14 @@ parser.add_argument(
     "sra_project_id",
     type=str,
     help='The SRA project ID to get the metadata from.'
+)
+
+parser.add_argument(
+    '-f', '--sample-filter',
+    type=str,
+    action="append",
+    dest="sample_filters",
+    help="A glob used as filter to keep only the matching samples."
 )
 
 parser.add_argument(
@@ -72,6 +87,19 @@ metadata = pd.concat(
     ],
     axis=1
 )
+# Filter the meta data based on the given ilters (if provided)
+if "sample_filters" in args:
+    metadata = pd.concat(
+        list(map(
+            lambda glob: metadata[
+                list(map(
+                    lambda x: fnmatch.fnmatch(str(x), glob),
+                    metadata['sample_name'].values
+                ))
+            ].drop_duplicates(),
+            args.sample_filters
+        ))
+    )
 
 # I/O
 metadata.to_csv(path_or_buf=args.output, index=False, header=True, sep="\t")
