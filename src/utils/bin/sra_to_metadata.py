@@ -4,6 +4,7 @@ import os
 import fnmatch
 import argparse
 from argparse import RawTextHelpFormatter
+from pysradb import SRAdb
 from pysradb.sraweb import SRAweb
 import pandas as pd
 
@@ -55,6 +56,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-d", "--sra-db",
+    type=argparse.FileType('r'),
+    required=False,
+    dest="sra_db",
+    help='The file path of the unzipped SQLite SRA database.'
+)
+
+parser.add_argument(
     "-o", "--output",
     type=argparse.FileType('w'),
     required=True,
@@ -67,8 +76,19 @@ args = parser.parse_args()
 # Get the metadata
 #
 
-db = SRAweb()
-metadata = db.sra_metadata(srp=args.sra_project_id)
+if "sra_db" in args:
+    db = SRAdb(args.sra_db.name)
+    print(f"Using local SRA SQLite database to query...")
+else:
+    print(f"Using NCBi's esearch and esummary interface to query...")
+    db = SRAweb()
+
+metadata = db.sra_metadata(
+    acc=args.sra_project_id,
+    detailed=True,
+    expand_sample_attributes=True,
+    sample_attribute=True
+)
 metadata = pd.concat(
     [
         metadata,
