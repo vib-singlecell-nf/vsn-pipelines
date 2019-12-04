@@ -58,27 +58,6 @@ process SRA_TO_METADATA {
 
 }
 
-process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
-
-    container "ncbi/sra-toolkit"
-    // publishDir "${params.global.outdir}/data", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
-    maxForks 2
-
-    input:
-    tuple val(sraId), val(sampleId)
-    
-    output:
-    tuple val(sraId), file("${sraId}*.fastq.gz")
-    
-    script:
-    """
-    fasterq-dump -S -v -p -e4 -O . ${sraId}
-    gzip *.fastq
-    """
-
-}
-
 def normalizeSRAFastqs(fastqPaths, index, sampleName) {
     /*
      * Rename samples SRRXXXXXX_[1|2].fastq.gz to more comprehensive file name ${sampleName}_S1_L00${index+1}_R[1|2]_001.fastq.gz
