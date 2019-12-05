@@ -89,11 +89,7 @@ for annotation_column_name in args.annotation_column_names:
         np.logical_and(
             metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
             metadata[args.index_column_name].isin(adata.obs.index.values))
-    ].drop_duplicates(
-        subset=args.index_column_name,
-        keep="first",
-        inplace=False
-    )
+    ]
     # Annotate
     adata.obs[annotation_column_name] = None
     adata.obs[annotation_column_name][metadata_subset[args.index_column_name]] = metadata_subset[annotation_column_name]

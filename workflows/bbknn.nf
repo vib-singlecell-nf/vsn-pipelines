@@ -39,32 +39,57 @@ include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' para
 include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
 
 
-workflow bbknn {
+workflow bbknn_base {
 
-    data = getTenXChannel( params.global.tenx_folder ).view()
-    QC_FILTER( data ) // Remove concat 
-    SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
-    NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
-    HVG_SELECTION( NORMALIZE_TRANSFORM.out )
+    get:
+        data
+    
+    main:
+        QC_FILTER( data ) // Remove concat 
+        SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
+        NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
+        HVG_SELECTION( NORMALIZE_TRANSFORM.out )
 
-    // include all pre-merge dim reductions. These will be replaced in the bbknn step
-    DIM_REDUCTION( HVG_SELECTION.out.scaled )
-    CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
-    BEC_BBKNN( CLUSTER_IDENTIFICATION.out.marker_genes )
+        // include all pre-merge dim reductions. These will be replaced in the bbknn step
+        DIM_REDUCTION( HVG_SELECTION.out.scaled )
+        CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
+        BEC_BBKNN( CLUSTER_IDENTIFICATION.out.marker_genes )
 
-    filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
+        filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
 
-    // collect the reports:
-    ipynbs = HVG_SELECTION.out.report
-        .join(BEC_BBKNN.out.cluster_report)
-        .join(BEC_BBKNN.out.bbknn_report)
-        .map{ tuple( it[0], it.drop(1) ) }
-    // reporting:
-    SC__SCANPY__MERGE_REPORTS(ipynbs, "merged_report")
-    SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
+        // collect the reports:
+        ipynbs = HVG_SELECTION.out.report
+            .join(BEC_BBKNN.out.cluster_report)
+            .join(BEC_BBKNN.out.bbknn_report)
+            .map{ tuple( it[0], it.drop(1) ) }
+        // reporting:
+        SC__SCANPY__MERGE_REPORTS(ipynbs, "merged_report")
+        SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
     emit:
         filteredloom
         scopeloom = BEC_BBKNN.out.scopeloom
 }
 
+workflow bbknn_standalone {
+
+    main:
+        data = getTenXChannel( params.global.tenx_folder ).view()
+        bbknn_base( data )
+    emit:
+        bbknn_base.out.filteredloom
+        bbknn_base.out.scopeloom
+
+}
+
+workflow bbknn {
+
+    get:
+        data
+    main:
+        bbknn_base( data )
+    emit:
+        bbknn_base.out.filteredloom
+        bbknn_base.out.scopeloom
+
+}
