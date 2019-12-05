@@ -2,15 +2,19 @@ nextflow.preview.dsl=2
 
 process SC__CELLRANGER__COUNT {
 
-  	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
-  	container params.sc.cellranger.container
+	label params.sc.cellranger.labels.processExecutor
+    cache 'deep'
+    container params.sc.cellranger.container
+    publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+    clusterOptions "-l nodes=1:ppn=${params.sc.cellranger.count.ppn} -l pmem=${params.sc.cellranger.count.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+	maxForks = params.sc.cellranger.count.maxForks
 
   	input:
     file(transcriptome)
     tuple val(sampleId), file(fastqs)
 
   	output:
-    tuple(_sampleName, file("${_sampleName}/outs") )
+    tuple val(sampleId), file("${sampleId}/outs")
 
   	script:
 	"""
