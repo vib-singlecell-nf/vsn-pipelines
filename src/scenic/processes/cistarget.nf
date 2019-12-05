@@ -12,7 +12,7 @@ processParams = params.sc.scenic.cistarget
 process CISTARGET {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label toolParams.labels.processExecutor
+    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/cistarget/${toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true

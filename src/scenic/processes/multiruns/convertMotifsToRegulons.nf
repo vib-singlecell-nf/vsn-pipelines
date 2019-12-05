@@ -12,7 +12,7 @@ processParams = params.sc.scenic.motifs_to_regulons
 process CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label toolParams.labels.processExecutor
+    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/multi_runs_cistarget/", mode: 'link', overwrite: true

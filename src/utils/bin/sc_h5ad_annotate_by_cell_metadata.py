@@ -29,7 +29,21 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '-i', '--index-column-name',
+    '-i', '--sample-id',
+    type=str,
+    dest="sample_id",
+    help="The sample ID to annotate the cells from."
+)
+
+parser.add_argument(
+    '-s', '--sample-column-name',
+    type=str,
+    dest="sample_column_name",
+    help="The column name containing the sample ID for each cell entry in the cell meta data."
+)
+
+parser.add_argument(
+    '-b', '--index-column-name',
     type=str,
     required=True,
     dest="index_column_name",
@@ -72,12 +86,10 @@ metadata = pd.read_csv(
 for annotation_column_name in args.annotation_column_names:
     # Extract the metadata for the cells from the adata
     metadata_subset = metadata[
-        metadata[args.index_column_name].isin(adata.obs.index.values)
-    ].drop_duplicates(
-        subset=args.index_column_name,
-        keep="first",
-        inplace=False
-    )
+        np.logical_and(
+            metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
+            metadata[args.index_column_name].isin(adata.obs.index.values))
+    ]
     # Annotate
     adata.obs[annotation_column_name] = None
     adata.obs[annotation_column_name][metadata_subset[args.index_column_name]] = metadata_subset[annotation_column_name]

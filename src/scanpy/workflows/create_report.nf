@@ -21,16 +21,16 @@ include '../processes/reports.nf' params(params)
 //////////////////////////////////////////////////////
 //  Define the workflow 
 
-workflow GENERATE_QC_REPORT {
+workflow GENERATE_DUAL_INPUT_REPORT {
     get:
-        prefiltered  // anndata
-        postfiltered // anndata
+        data1  // anndata
+        data2 // anndata
         ipynb
         report_title
     main:
-        report_notebook = SC__SCANPY__FILTER_QC_REPORT(
+        report_notebook = SC__SCANPY__GENERATE_DUAL_INPUT_REPORT(
             ipynb,
-            prefiltered.join(postfiltered),
+            data1.join(data2),
             report_title
         )
         SC__SCANPY__REPORT_TO_HTML(report_notebook)
