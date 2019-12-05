@@ -10,7 +10,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
         tuple val(id), file(f)
@@ -20,6 +20,8 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         annotationColumnNamesAsArguments = params.sc.cell_annotate.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
+            --sample-id ${id} \
+            --sample-column-name ${params.sc.cell_annotate.sampleColumnName} \
             --index-column-name ${params.sc.cell_annotate.indexColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
@@ -32,19 +34,18 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
         tuple val(id), file(f)
-        file(metaDataFilePath)
     output:
-        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.off}")
+        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.sc.sample_annotate.off}")
     script:
         """
         ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
-            ${(params.containsKey('type')) ? '--type ' + params.type : ''} \
-            ${(params.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + metaDataFilePath.getName() : ''} \
+            ${(params.sc.sample_annotate.containsKey('type')) ? '--type ' + params.sc.sample_annotate.type : ''} \
+            ${(params.sc.sample_annotate.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + params.sc.sample_annotate.metaDataFilePath : ''} \
             $f \
-            "${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.off}"
+            "${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.sc.sample_annotate.off}"
     """
 }
