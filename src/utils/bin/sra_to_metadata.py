@@ -89,6 +89,12 @@ metadata = db.sra_metadata(
     expand_sample_attributes=True,
     sample_attribute=True
 )
+# Drop any None columns
+# pysradb does not lock the versions
+# pandas 0.25.3 generates an additional None column compared to pandas 0.25.0
+# Bug in 0.25.3 ?
+metadata = metadata[metadata.columns.dropna()]
+
 metadata = pd.concat(
     [
         metadata,
@@ -102,11 +108,14 @@ metadata = pd.concat(
                 3: 'library_type'
             }, inplace=False
         ).drop(
-            ["library_type", "species"], axis=1, inplace=False
+            ["species", "library_type"],
+            axis=1,
+            inplace=False
         )
     ],
     axis=1
 )
+
 # Filter the meta data based on the given ilters (if provided)
 if "sample_filters" in args:
     metadata = pd.concat(
