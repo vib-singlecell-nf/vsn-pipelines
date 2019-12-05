@@ -9,11 +9,11 @@ if(!params.containsKey("test")) {
     binDir = ""
 }
 
-processParams = params.sc.utils.sra_metadata
+processParams = params.utils.sra_metadata
 
 process GET_SRA_DB {
 
-    // container params.sc.utils.container
+    container params.utils.container
     publishDir "${processParams.sraDbOutDir}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
@@ -30,7 +30,7 @@ process GET_SRA_DB {
 
 process SRA_TO_METADATA {
 
-    // container params.sc.utils.container
+    container params.utils.container
     publishDir "${params.global.outdir}/metadata", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
 

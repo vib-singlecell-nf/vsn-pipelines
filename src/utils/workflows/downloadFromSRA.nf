@@ -26,12 +26,12 @@ include NORMALIZE_SRA_FASTQS from './../processes/sra' params(params)
 //  Define the workflow 
 
 // dataParams = params.data.sra
-utilsParams = params.sc.utils
+utilsParams = params.utils
 
 if(!utilsParams.containsKey("sra_metadata"))
     throw new Exception("DOWNLOAD_FROM_SRA workflow requires sra_metadata.config")
 
-workflowParams = params.sc.utils.sra_metadata
+workflowParams = params.utils.sra_metadata
 
 workflow DOWNLOAD_FROM_SRA {
     get:
