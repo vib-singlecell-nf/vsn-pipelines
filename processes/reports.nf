@@ -32,7 +32,7 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
 	container params.sc.scanpy.container
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-	publishDir "${params.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 
   	input:
 	file(ipynb)
