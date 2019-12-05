@@ -1,30 +1,25 @@
 *checkpoint.ipynb
-<<<<<<< HEAD
 *checkpoint*
-=======
 *checkpoint.py
 *.test.ipynb
 *.csv
 *.loom
 *.pickle
->>>>>>> master
 *.pyc
+*.html
 *egg*
 .nextflow
 .nextflow*
-<<<<<<< HEAD
-*.loom
 data
 refdata
 work
 out/notebooks
 src/scenic/out
 src/scenic/notebooks
-=======
-data/10x/tiny
 src/scenic/data
 refdata
-work
+data/10x/tiny
+work/
 out/
 tests/
->>>>>>> master
+debug/
