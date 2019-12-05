@@ -58,17 +58,14 @@ process SRA_TO_METADATA {
 
 }
 
-def normalizeSRAFastqs(fastqPaths, index, sampleName) {
+def normalizeSRAFastQ(fastQPath, sampleName) {
     /*
-     * Rename samples SRRXXXXXX_[1|2].fastq.gz to more comprehensive file name ${sampleName}_S1_L00${index+1}_R[1|2]_001.fastq.gz
+     * Rename samples SRRXXXXXX_[1|2].fastq.gz to more comprehensive file name ${sampleName}_S1_L001_R[1|2]_001.fastq.gz
      * Here we follow 10xGenomics file naming convention
      */
-    return fastqPaths.collect {
-        fastqPath ->
-            (full, parentDir, srrId, readType) = (fastqPath =~ /(.+)\/(SRR[0-9]*)_([1-2]).fastq.gz/)[0]
-            normalizedFastQName = "${sampleName}_S1_L00${index+1}_R${readType}_001.fastq.gz"
-            return [fastqPath, normalizedFastQName]
-    }
+    (full, srrId, readType) = (fastQPath =~ /(SRR[0-9]*)_([1-2]).fastq.gz/)[0]
+    normalizedFastQName = "${sampleName}_S1_L001_R${readType}_001.fastq.gz"
+    return [fastQPath, normalizedFastQName]
 }
 
 process NORMALIZE_SRA_FASTQS {
@@ -77,19 +74,16 @@ process NORMALIZE_SRA_FASTQS {
     clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
-    tuple val(sampleId), val(fastqs)
+    tuple val(sampleId), file(fastqs)
     
     output:
     tuple val(sampleId), path("*.fastq.gz")
     
     script:
     def normalizedFastqs = fastqs
-        .withIndex()
         .collect {
-            fastq, index -> normalizeSRAFastqs(fastq, index, sampleId)
+            fastq -> normalizeSRAFastQ(fastq, sampleId)
         }
-        .flatten()
-        .collate(2)
     def cmd = ''
     for(int i = 0; i < normalizedFastqs.size(); i++)
         cmd += "ln -s ${normalizedFastqs[i][0]} ${normalizedFastqs[i][1]}; " 

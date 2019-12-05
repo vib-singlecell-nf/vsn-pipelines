@@ -71,7 +71,7 @@ workflow DOWNLOAD_FROM_SRA {
         ).map {
             // Put sample as primary key
             run -> tuple(run[2], run[1])
-        }.groupTuple()
+        }
         out = NORMALIZE_SRA_FASTQS( data )
     emit:
         out
