@@ -12,7 +12,7 @@ processParams = params.sc.scenic.grn
 process GRNBOOST2_WITHOUT_DASK {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label toolParams.labels.processExecutor
+    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/grnboost2withoutDask/${toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
