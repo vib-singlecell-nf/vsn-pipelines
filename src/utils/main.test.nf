@@ -75,8 +75,18 @@ workflow {
                 DOWNLOAD_FROM_SRA(
                     tuple('SRP125768', ["w1118_15d_*"]) //["DGRP-551_*d_r*","w1118_*d_r*"]
                 )
-                SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.view() )//.view()
-                SC__CELLRANGER__COUNT(file("/ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/resources/refs/flybase/r6.16/cellranger/2.0.0/flybase_r6.16"), SC__CELLRANGER__PREPARE_FOLDER.out)
+            break;
+            case "DOWNLOAD_FROM_SRA_AND_RUN_CELLRANGER":
+                // Imports
+                include DOWNLOAD_FROM_SRA from './workflows/downloadFromSRA' params(params)
+                include SC__CELLRANGER__PREPARE_FOLDER from './../cellranger/processes/utils.nf'
+                include SC__CELLRANGER__COUNT   from './../cellranger/processes/count'    params(params)
+                // Run 
+                DOWNLOAD_FROM_SRA(
+                    tuple('SRP125768', ["w1118_15d_r1"]) //["DGRP-551_*d_r*","w1118_*d_r*"] //,"w1118_30d_*" //"w1118_15d_*" 
+                )
+                SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() ).view()
+                SC__CELLRANGER__COUNT( file("/ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/resources/refs/flybase/r6.16/cellranger/2.0.0/flybase_r6.16"), SC__CELLRANGER__PREPARE_FOLDER.out )
             break;
             default:
                 throw new Exception("The test parameters should be specified.")
