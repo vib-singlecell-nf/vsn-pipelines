@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 process AUCELL {
 
     // Process will be submitted as job if params.sc.scenic.labels.processExecutor = 'qsub' (default)
-    label params.sc.scenic.labels.processExecutor
+    label "${params.sc.scenic.labels ? params.sc.scenic.labels.processExecutor : "local"}"
     cache 'deep'
     container params.sc.scenic.container
     publishDir "${params.sc.scenic.scenicoutdir}/${sampleId}/aucell/${params.sc.scenic.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true

@@ -52,7 +52,7 @@ workflow single_sample {
     scopeloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
     SC__PUBLISH_H5AD( 
         CLUSTER_IDENTIFICATION.out.marker_genes,
-        "single_sample.output"
+        params.global.project_name+".single_sample.output"
     )
     // reporting:
     SC__SCANPY__MERGE_REPORTS(
@@ -64,7 +64,9 @@ workflow single_sample {
         "merged_report"
     )
     SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
+
     emit:
         filteredloom
         scopeloom
 }
+
