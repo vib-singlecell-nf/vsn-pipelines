@@ -5,7 +5,7 @@ nextflow.preview.dsl=2
 
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
-    include bbknn as BBKNN from './workflows/bbknn' params(params)
+    include bbknn_standalone as BBKNN from './workflows/bbknn' params(params)
     BBKNN()
 }
 
@@ -17,7 +17,7 @@ workflow mnncorrect {
 
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
-    include bbknn as BBKNN from './workflows/bbknn' params(params)
+    include bbknn_standalone as BBKNN from './workflows/bbknn' params(params)
     include SCENIC_append from './src/scenic/main.nf' params(params)
     BBKNN()
     SCENIC_append( BBKNN.out.filteredloom, BBKNN.out.scopeloom )
@@ -61,4 +61,21 @@ workflow single_sample_star {
 workflow nemesh {
     include nemesh as NEMESH from './workflows/nemesh' params(params)
     NEMESH()  
+}
+
+workflow sra_cellranger_bbknn {
+    include getChannel as getSRAChannel from './src/channels/sra' params(params)
+    include DOWNLOAD_FROM_SRA from './src/utils/workflows/downloadFromSRA' params(params)
+    include SC__CELLRANGER__PREPARE_FOLDER from './src/cellranger/processes/utils.nf'
+    include SC__CELLRANGER__COUNT from './src/cellranger/processes/count' params(params)
+    include bbknn as BBKNN from './workflows/bbknn' params(params)
+    
+    // Run 
+    DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) ).view()
+    SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() ).view()
+    SC__CELLRANGER__COUNT(
+        file(params.sc.cellranger.count.transcriptome),
+        SC__CELLRANGER__PREPARE_FOLDER.out
+    )
+    BBKNN( SC__CELLRANGER__COUNT.out )
 }
