@@ -79,6 +79,7 @@ class SCopeLoom:
         self.compress = compress
         self.save_additional_regulon_meta_data = save_additional_regulon_meta_data
         self.tag = tag
+        self.regulon_filter = None
         # Loom representation
         self.col_attrs = col_attrs if col_attrs else {}
         self.row_attrs = row_attrs if row_attrs else {}
@@ -132,7 +133,7 @@ class SCopeLoom:
             # Decompress and decode the MetaData global attribute
             try:
                 global_attrs["MetaData"] = SCopeLoom.decompress_decode(value=global_attrs["MetaData"])
-            except IOError:
+            except Exception:
                 # MetaData is uncompressed
                 global_attrs["MetaData"] = json.loads(global_attrs["MetaData"])
 
@@ -332,6 +333,9 @@ class SCopeLoom:
     # SCENIC #
     ##########
 
+    def set_regulon_filter(self, regulons):
+        self.regulon_filter = regulons
+
     def has_scenic_multi_runs_data(self):
         return 'RegulonGeneOccurrences' in self.row_attrs.keys() and 'RegulonGeneWeights' in self.row_attrs.keys()
 
@@ -389,6 +393,26 @@ class SCopeLoom:
         _, auc_thresholds = binarize(self.auc_mtx)
         return auc_thresholds
 
+    @staticmethod
+    def format_tag(tag):
+        # return f"{tag[0]}{tag[-1]}"
+        return tag
+
+    def get_regulon_gene_weights(self):
+        if self.regulon_filter is not None:
+            return self.row_attrs['RegulonGeneWeights'][self.regulon_filter]
+        return self.row_attrs["RegulonGeneWeights"]
+
+    def get_regulon_gene_occurrences(self):
+        if self.regulon_filter is not None:
+            return self.row_attrs['RegulonGeneOccurrences'][self.regulon_filter]
+        return self.row_attrs["RegulonGeneOccurrences"]
+
+    def get_regulons(self):
+        if self.regulon_filter is not None:
+            return self.row_attrs['Regulons'][self.regulon_filter]
+        return self.row_attrs["Regulons"]
+
     def merge_regulon_data(self, scope_loom):
         # Check if SCENIC has been run in multi-runs mode
         is_multi_runs_mode = self.has_scenic_multi_runs_data() and scope_loom.has_scenic_multi_runs_data()
@@ -396,47 +420,47 @@ class SCopeLoom:
         # RegulonsAUC
         # Relabel columns with suffix indicating the regulon source
         auc_mtx = pd.DataFrame(data=self.col_attrs['RegulonsAUC'], index=self.col_attrs['CellID'])
-        auc_mtx.columns = auc_mtx.columns + '-' + self.tag
+        auc_mtx.columns = auc_mtx.columns + '-' + SCopeLoom.format_tag(self.tag)
 
         scope_loom_auc_mtx = pd.DataFrame(data=scope_loom.col_attrs['RegulonsAUC'], index=scope_loom.col_attrs['CellID'])
-        scope_loom_auc_mtx.columns = scope_loom_auc_mtx.columns + '-' + scope_loom.tag
+        scope_loom_auc_mtx.columns = scope_loom_auc_mtx.columns + '-' + SCopeLoom.format_tag(scope_loom.tag)
 
         # Regulons (regulon assignment matrices)
-        regulons = pd.DataFrame(self.row_attrs['Regulons'], index=self.row_attrs['Gene'])
-        regulons.columns = regulons.columns + '-' + self.tag
+        regulons = pd.DataFrame(self.get_regulons(), index=self.row_attrs['Gene'])
+        regulons.columns = regulons.columns + '-' + SCopeLoom.format_tag(self.tag)
 
-        scope_loom_regulons = pd.DataFrame(scope_loom.row_attrs['Regulons'], index=scope_loom.row_attrs['Gene'])
-        scope_loom_regulons.columns = scope_loom_regulons.columns + '-' + scope_loom.tag
+        scope_loom_regulons = pd.DataFrame(scope_loom.get_regulons(), index=scope_loom.row_attrs['Gene'])
+        scope_loom_regulons.columns = scope_loom_regulons.columns + '-' + SCopeLoom.format_tag(scope_loom.tag)
 
         # If multi-runs SCENIC
         # Rename Regulons Gene Occurrences
         if is_multi_runs_mode:
-            regulon_gene_occurrences = pd.DataFrame(self.row_attrs['RegulonGeneOccurrences'], index=self.row_attrs['Gene'])
-            regulon_gene_occurrences.columns = regulon_gene_occurrences.columns + '-' + self.tag
+            regulon_gene_occurrences = pd.DataFrame(self.get_regulon_gene_occurrences(), index=self.row_attrs['Gene'])
+            regulon_gene_occurrences.columns = regulon_gene_occurrences.columns + '-' + SCopeLoom.format_tag(self.tag)
 
-            scope_loom_regulon_gene_occurrences = pd.DataFrame(scope_loom.row_attrs['RegulonGeneOccurrences'], index=scope_loom.row_attrs['Gene'])
-            scope_loom_regulon_gene_occurrences.columns = scope_loom_regulon_gene_occurrences.columns + '-' + scope_loom.tag
+            scope_loom_regulon_gene_occurrences = pd.DataFrame(scope_loom.get_regulon_gene_occurrences(), index=scope_loom.row_attrs['Gene'])
+            scope_loom_regulon_gene_occurrences.columns = scope_loom_regulon_gene_occurrences.columns + '-' + SCopeLoom.format_tag(scope_loom.tag)
 
         # If multi-runs SCENIC
         # Rename Regulons Gene Weights
         if is_multi_runs_mode:
-            regulon_gene_weights = pd.DataFrame(self.row_attrs['RegulonGeneWeights'], index=self.row_attrs['Gene'])
-            regulon_gene_weights.columns = regulon_gene_weights.columns + '-' + self.tag
+            regulon_gene_weights = pd.DataFrame(self.get_regulon_gene_weights(), index=self.row_attrs['Gene'])
+            regulon_gene_weights.columns = regulon_gene_weights.columns + '-' + SCopeLoom.format_tag(self.tag)
 
-            scope_loom_regulon_gene_weights = pd.DataFrame(scope_loom.row_attrs['RegulonGeneWeights'], index=scope_loom.row_attrs['Gene'])
-            scope_loom_regulon_gene_weights.columns = scope_loom_regulon_gene_weights.columns + '-' + scope_loom.tag
+            scope_loom_regulon_gene_weights = pd.DataFrame(scope_loom.get_regulon_gene_weights(), index=scope_loom.row_attrs['Gene'])
+            scope_loom_regulon_gene_weights.columns = scope_loom_regulon_gene_weights.columns + '-' + SCopeLoom.format_tag(scope_loom.tag)
 
         # Combine meta data regulons
         # Rename regulons in the thresholds object, motif
         rt = self.global_attrs["MetaData"]["regulonThresholds"]
         for _, x in enumerate(rt):
-            tmp = x.get('regulon') + '-' + self.tag
+            tmp = x.get('regulon') + '-' + SCopeLoom.format_tag(self.tag)
             x.update({'regulon': tmp})
 
         # Rename regulons in the thresholds object, track
         scope_loom_rt = scope_loom.global_attrs["MetaData"]["regulonThresholds"]
         for _, x in enumerate(scope_loom_rt):
-            tmp = x.get('regulon') + '-' + scope_loom.tag
+            tmp = x.get('regulon') + '-' + SCopeLoom.format_tag(scope_loom.tag)
             x.update({'regulon': tmp})
             # blank out the "motifData" field for track-based regulons:
             x.update({'mofitData': 'NA.png'})
