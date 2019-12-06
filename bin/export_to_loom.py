@@ -362,7 +362,7 @@ class SCopeLoom:
         return {next(iter(x)): x.get(next(iter(x))) for x in regulons_auc_col_attrs_update}
 
     def scopify_loom_ra_regulon_data(self):
-        regulons_row_attrs = list(filter(lambda row_attrs_key: 'Regulons' in row_attrs_key, self.row_attrs.keys()))
+        regulons_row_attrs = list(filter(lambda row_attrs_key: 'Regulon' in row_attrs_key, self.row_attrs.keys()))
 
         def fix(row_attrs_key):
             regulons = pd.DataFrame(self.row_attrs[row_attrs_key], index=self.row_attrs['Gene'])
@@ -661,7 +661,7 @@ class SCopeLoom:
         ##########
         # SCENIC #
         ##########
-        if any('Regulons' in s for s in self.row_attrs.keys()):
+        if any('Regulon' in s for s in self.row_attrs.keys()):
             self.row_attrs.update(self.scopify_loom_ra_regulon_data())
         if any('RegulonsAUC' in s for s in self.col_attrs.keys()):
             self.col_attrs.update(self.scopify_loom_ca_regulon_data())
