@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
 
-import os
-from optparse import OptionParser
-
+import argparse
 import loompy as lp
 import numpy as np
-
+import os
 import scanpy as sc
 
-parser = OptionParser(
-    usage="usage: %prog [options] h5ad_file_path",
-    version="%prog 1.0"
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    type=argparse.FileType('r'),
+    help='Input h5ad file.'
 )
-(options, args) = parser.parse_args()
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 try:
-    adata = sc.read_h5ad(filename=FILE_PATH_IN)
+    adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
