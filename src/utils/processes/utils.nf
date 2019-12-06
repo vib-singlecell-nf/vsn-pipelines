@@ -57,8 +57,9 @@ process SC__FILE_CONVERTER {
 	}
 	"""
 	${binDir}sc_file_converter.py \
-	--input-format $processParams.iff \
-	--output-format $processParams.off ${f} "${sampleId}.SC__FILE_CONVERTER.${processParams.off}"
+		${(processParams.containsKey('tagCellWithSampleId')) ? '--sample-id ' + sampleId : ''} \
+		--input-format $processParams.iff \
+		--output-format $processParams.off ${f} "${sampleId}.SC__FILE_CONVERTER.${processParams.off}"
 	"""
 
 }

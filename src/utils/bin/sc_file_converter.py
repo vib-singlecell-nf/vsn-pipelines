@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import re
 import scanpy as sc
 
 in_formats = [
@@ -34,6 +35,13 @@ parser.add_argument(
     dest="input_format",
     default="",
     help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(in_formats))
+)
+
+parser.add_argument(
+    "-s", "--sample-id",
+    type=str,
+    dest="sample_id",
+    action='store'
 )
 
 parser.add_argument(
@@ -77,6 +85,9 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
         var_names='gene_symbols',  # use gene symbols for the variable names (variables-axis index)
         cache=False
     )
+    # Add the sample ID as suffix
+    if "sample_id" in args:
+        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
