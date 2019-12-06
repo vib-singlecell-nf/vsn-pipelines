@@ -1,38 +1,49 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
-from optparse import OptionParser
-
 import scanpy as sc
 
-parser = OptionParser(
-    usage="usage: %prog [options] h5ad_file_path",
-    version="%prog 1.0"
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    type=argparse.FileType('r'),
+    help='Input h5ad file.'
 )
-parser.add_option(
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+parser.add_argument(
     "-x", "--method",
     action="store",
     dest="method",
     default="linear_regression",
     help="Normalize the data. Choose one of : regress_out"
 )
-parser.add_option(
+
+parser.add_argument(
     "-r", "--variable-to-regress-out",
     action="append",
     dest="vars_to_regress_out",
     default=None,
     help="Variable to regress out. To regress multiple variables, add that many -v arguments. Used when running 'regress_out"
 )
-(options, args) = parser.parse_args()
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 # I/O
 # Expects h5ad file
 try:
-    adata = sc.read_h5ad(filename=FILE_PATH_IN)
+    adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
@@ -40,9 +51,9 @@ except IOError:
 # Adjust the data
 #
 
-if options.method == 'linear_regression':
+if args.method == 'linear_regression':
     # regress out variables (e.g.: total counts per cell and the percentage of mitochondrial genes expressed)
-    sc.pp.regress_out(adata, options.vars_to_regress_out)
+    sc.pp.regress_out(adata, args.vars_to_regress_out)
 else:
     raise Exception("Method does not exist.")
 

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
-from optparse import OptionParser
-
 import scanpy as sc
 
 in_formats = [
@@ -15,32 +14,43 @@ out_formats = [
     'h5ad'
 ]
 
+parser = argparse.ArgumentParser(description='')
 
-parser = OptionParser(
-    usage="usage: %prog [options] datapath",
-    version="%prog 1.0"
+parser.add_argument(
+    "input",
+    type=str,
+    help='Input h5ad file.'
 )
-parser.add_option(
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+parser.add_argument(
     "-i", "--input-format",
     action="store",
     dest="input_format",
     default="",
     help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(in_formats))
 )
-parser.add_option(
+
+parser.add_argument(
     "-o", "--output-format",
     action="store",  # optional because action defaults to "store"
     dest="output_format",
     default="",
     help="Output format which the file should be converted to. Choose one of: {}.".format(', '.join(out_formats))
 )
-(options, args) = parser.parse_args()
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
-INPUT_FORMAT = options.input_format
-OUTPUT_FORMAT = options.output_format
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
+INPUT_FORMAT = args.input_format
+OUTPUT_FORMAT = args.output_format
 
 if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
     # Sanity checks

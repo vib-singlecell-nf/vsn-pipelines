@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
-from optparse import OptionParser
 import pandas as pd
 
 strand_options = {
@@ -10,27 +10,41 @@ strand_options = {
     "reverse": 3
 }
 
-parser = OptionParser(usage="usage: %prog [options] h5ad_file_paths",
-                      version="%prog 1.0")
-parser.add_option("-s", "--stranded",
-                  action="store",
-                  dest="stranded",
-                  default="no",
-                  help=f"Stranded nature of the library. Choose one of: {', '.join(strand_options.keys())}")
-parser.add_option("-o", "--output",
-                  action="store",
-                  dest="output",
-                  default=None,
-                  help="Output file name.")
-(options, args) = parser.parse_args()
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    nargs='+',
+    type=argparse.FileType('r'),
+    help='Input h5ad file.'
+)
+
+parser.add_argument(
+    "-s", "--stranded",
+    action="store",
+    dest="stranded",
+    default="no",
+    help=f"Stranded nature of the library. Choose one of: {', '.join(strand_options.keys())}"
+)
+
+parser.add_argument(
+    "-o", "--output",
+    action="store",
+    dest="output",
+    default=None,
+    help="Output file name."
+)
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_OUT_BASENAME = os.path.splitext(options.output)[0]
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output)[0]
 
 # I/O
 files = []
 
-for FILE_PATH_IN in args:
+for FILE_PATH_IN in args.input:
+    FILE_PATH_IN = FILE_PATH_IN.name
     if not os.path.isfile(FILE_PATH_IN):
         raise Exception(f"Could not find file {FILE_PATH_IN}.")
     if not FILE_PATH_IN.endswith('ReadsPerGene.out.tab'):
@@ -49,7 +63,7 @@ for FILE_PATH_IN in args:
 try:
     all_counts = pd.DataFrame()
     for counts, cell_name in files:
-        all_counts.loc[:, cell_name] = counts[strand_options[options.stranded]].astype(int)
+        all_counts.loc[:, cell_name] = counts[strand_options[args.stranded]].astype(int)
 except IOError:
     raise Exception("Concatenation failed.")
 

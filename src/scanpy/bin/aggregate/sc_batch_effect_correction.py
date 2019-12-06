@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
-import os
-from optparse import OptionParser
-
+import argparse
 import numpy as np
-
+import os
 import scanpy as sc
 
 print('''Correct the data from batch effects. Choose one of:
@@ -16,109 +14,125 @@ print('''Correct the data from batch effects. Choose one of:
     Details at: see https://icb-scanpy.readthedocs-hosted.com/en/stable/external/scanpy.external.pp.mnn_correct.html
 ''')
 
-parser = OptionParser(
-    usage="usage: %prog [options] h5ad_file_path",
-    version="%prog 1.0"
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    nargs='+',
+    type=argparse.FileType('r'),
+    help='Input h5ad files.'
 )
-parser.add_option(
+
+parser.add_argument(
     "-x", "--method",
-    type="string",
+    type=str,
     action="store",
     dest="method",
     default="bbknn",
     help="Correct the data from batch effects. Choose one of: bkknn, mnn_correct."
 )
-parser.add_option(
+
+parser.add_argument(
     "-o", "--output-file",
-    type="string",
+    type=str,
     action="store",
     dest="output_file",
     default='',
     help="Output file name."
 )
-parser.add_option(
+
+parser.add_argument(
     "-b", "--batch-key",
-    type="string",
+    type=str,
     action="store",
     dest="batch_key",
     default='batch',
     help="[bbknn, mnn_correct], adata.obs column name discriminating between your batches."
 )
-parser.add_option(
+
+parser.add_argument(
     "-K", "--key",
-    type="string",
+    type=str,
     action="store",
     dest="key",
     default='batch',
     help="[combat], adata.obs column name discriminating between your batches."
 )
-parser.add_option(
+
+parser.add_argument(
     "-c", "--n-pcs",
-    type="int",
+    type=int,
     action="store",
     dest="n_pcs",
     default=50,
     help="[bbknn]. How many principal components to use in the analysis."
 )
-parser.add_option(
+
+parser.add_argument(
     "-k", "--k",
-    type="int",
+    type=int,
     action="store",
     dest="k",
     default=20,
     help="[mnn_correct]. Number of mutual nearest neighbors."
 )
-parser.add_option(
+
+parser.add_argument(
     "-i", "--var-index",
-    type="string",
+    type=str,
     action="store",
     dest="var_index",
     default=None,
     help="[mnn_correct]. The index (list of str) of vars (genes). Necessary when using only a subset of vars to perform MNN correction, and should be supplied with var_subset."
 )
-parser.add_option(
+
+parser.add_argument(
     "-s", "--var-subset",
     action="store",
     dest="var_subset",
     default=None,
     help="[mnn_correct]. The subset of vars (list of str) to be used when performing MNN correction. Typically, a list of highly variable genes (HVGs). When set to None, uses all vars."
 )
-parser.add_option(
+
+parser.add_argument(
     "-j", "--n-jobs",
-    type="int",
+    type=int,
     action="store",
     dest="n_jobs",
     default=None,
     help="[bbknn, mnn_correct], The number of jobs. When set to None, automatically uses the number of cores."
 )
-parser.add_option(
+
+parser.add_argument(
     "-t", "--trim",
-    type="int",
+    type=int,
     action="store",
     dest="trim",
     default=None,
     help="[bbknn], Trim the neighbours of each cell to these many top connectivities. May help with population independence and improve the tidiness of clustering."
 )
-parser.add_option(
+
+parser.add_argument(
     "-n", "--neighbors-within-batch",
-    type="int",
+    type=int,
     action="store",
     dest="neighbors_within_batch",
     default=3,
     help="[bbknn], How many top neighbours to report for each batch; total number of neighbours will be this number times the number of batches."
 )
 
-(options, args) = parser.parse_args()
+args = parser.parse_args()
 
 # Define the arguments properly
-DATA_FILE_PATH_BASENAME = os.path.splitext(options.output_file)[0]
+DATA_FILE_PATH_BASENAME = os.path.splitext(args.output_file)[0]
 
 # I/O
 # Expects h5ad file
 # Get all input files into a list
 adatas = []
-for FILE_PATH_IN in args:
+for FILE_PATH_IN in args.input:
     try:
+        FILE_PATH_IN = FILE_PATH_IN.name
         adata = sc.read_h5ad(filename=FILE_PATH_IN)
         adatas.append(adata)
     except IOError:
@@ -134,11 +148,11 @@ for ADATA in adatas:
 # Aggregate the data
 #
 
-if options.method == 'combat':
+if args.method == 'combat':
     sc.pp.combat(
         adatas[0],
-        key=options.key)
-elif options.method == 'bbknn':
+        key=args.key)
+elif args.method == 'bbknn':
     # Expects:
     # - the PCA to have been computed and stored in adata.obsm['X_pca']
     if 'X_pca' not in adata.obsm.keys():
@@ -146,11 +160,11 @@ elif options.method == 'bbknn':
     # Run BBKNN
     sc.external.pp.bbknn(
         adatas[0],
-        batch_key=options.batch_key,
-        n_pcs=options.n_pcs,
-        neighbors_within_batch=options.neighbors_within_batch,
-        trim=options.trim)
-elif options.method == 'mnn':
+        batch_key=args.batch_key,
+        n_pcs=args.n_pcs,
+        neighbors_within_batch=args.neighbors_within_batch,
+        trim=args.trim)
+elif args.method == 'mnn':
     # Run MNN_CORRECT (mnnpy)
     # GitHub: https://github.com/chriscainx/mnnpy/tree/master
     # Open issue: https://github.com/chriscainx/mnnpy/issues/24
@@ -160,11 +174,11 @@ elif options.method == 'mnn':
     # [mnn_correct] Subset only HVG otherwise "ValueError: Lengths must match to compare"
     corrected = mnn_correct(
         *list(map(lambda adata: adata[:, adata.var.index.isin(hvgs)], adatas)),
-        var_index=options.var_index,
-        var_subset=hvgs if options.var_subset is None else options.var_subset,
-        batch_key=options.batch_key,
-        k=options.k,
-        n_jobs=options.n_jobs)
+        var_index=args.var_index,
+        var_subset=hvgs if args.var_subset is None else args.var_subset,
+        batch_key=args.batch_key,
+        k=args.k,
+        n_jobs=args.n_jobs)
     adata = corrected[0]
     # Run MNN_CORRECT (mnnpy)
     # Open GitHub issue: https://github.com/theislab/scanpy/issues/757
