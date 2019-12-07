@@ -39,8 +39,10 @@ include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + par
 //  Define the workflow 
 
 workflow BEC_BBKNN {
+
     get:
         data
+
     main:
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
         CLUSTER_IDENTIFICATION( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
@@ -56,10 +58,12 @@ workflow BEC_BBKNN {
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report"
         )
+
     emit:
         scopeloom
         cluster_report = CLUSTER_IDENTIFICATION.out.report
         bbknn_report
+
 }
 
 // Uncomment to test

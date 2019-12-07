@@ -13,19 +13,20 @@ process SC__SCANPY__MARKER_GENES {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
   
   	input:
-    tuple val(sampleId), path(f)
+    	tuple val(sampleId), path(f)
   
   	output:
-    tuple val(sampleId), path("${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}")
+    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}")
   
   	script:
-	processParams = params.sc.scanpy.marker_genes
-    """
-    ${binDir}cluster/sc_marker_genes.py \
-         ${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
-         ${(processParams.containsKey('groupby')) ? '--groupby ' + processParams.groupby : ''} \
-         ${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
-         $f \
-         "${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}"
-    """
+    	processParams = params.sc.scanpy.marker_genes
+		"""
+		${binDir}cluster/sc_marker_genes.py \
+			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
+			${(processParams.containsKey('groupby')) ? '--groupby ' + processParams.groupby : ''} \
+			${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
+			$f \
+			"${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}"
+		"""
+
 }

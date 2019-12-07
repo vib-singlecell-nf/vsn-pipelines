@@ -7,18 +7,18 @@ process SC__DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), path(bam)
+        tuple val(sample), path(bam)
     
     output:
-	tuple val(sample), path("*.cell_readcounts.txt.gz")
+	    tuple val(sample), path("*.cell_readcounts.txt.gz")
     
     script:
-    processParams = params.sc.dropseqtools.bam_tag_histogram
-    """
-    BAMTagHistogram \
-        I=${bam} \
-        O=${sample}.cell_readcounts.txt.gz \
-        TAG=${processParams.tag}
-    """
+        processParams = params.sc.dropseqtools.bam_tag_histogram
+        """
+        BAMTagHistogram \
+            I=${bam} \
+            O=${sample}.cell_readcounts.txt.gz \
+            TAG=${processParams.tag}
+        """
 
 }

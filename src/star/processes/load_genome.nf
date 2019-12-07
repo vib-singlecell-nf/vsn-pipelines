@@ -5,17 +5,17 @@ process SC__STAR__LOAD_GENOME {
   	container params.sc.star.container
 
 	input:
-	file(starIndex)
+		file(starIndex)
 
 	output:
-	val starIndexLoaded 
+		val starIndexLoaded 
 
 	script:
-	starIndexLoaded = true
-	"""
-	STAR \
-		--genomeLoad LoadAndExit \
-		--genomeDir ${starIndex}
-	"""
+		starIndexLoaded = true
+		"""
+		STAR \
+			--genomeLoad LoadAndExit \
+			--genomeDir ${starIndex}
+		"""
 
 }

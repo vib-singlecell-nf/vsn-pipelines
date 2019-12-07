@@ -20,21 +20,21 @@ process AUCELL {
     maxForks processParams.maxForks
 
     input:
-    tuple val(sampleId), path(filteredLoom), path(regulons), val(runId)
-    val type
+        tuple val(sampleId), path(filteredLoom), path(regulons), val(runId)
+        val type
 
     output:
-    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}"), val(runId)
+        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}"), val(runId)
 
     script:
-    """
-    pyscenic aucell \
-        $filteredLoom \
-        $regulons \
-        -o "${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}" \
-        --cell_id_attribute ${toolParams.cell_id_attribute} \
-        --gene_attribute ${toolParams.gene_attribute} \
-        --num_workers ${toolParams.numWorkers}
-    """
+        """
+        pyscenic aucell \
+            $filteredLoom \
+            $regulons \
+            -o "${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}" \
+            --cell_id_attribute ${toolParams.cell_id_attribute} \
+            --gene_attribute ${toolParams.gene_attribute} \
+            --num_workers ${toolParams.numWorkers}
+        """
 
 }

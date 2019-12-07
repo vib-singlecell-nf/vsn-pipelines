@@ -20,27 +20,27 @@ process CISTARGET {
     maxForks processParams.maxForks
     
     input:
-    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
-    file featherDB
-    file annotation
-    val type
+        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
+        file featherDB
+        file annotation
+        val type
 
     output:
-    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"}"), val(runId)
+        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"}"), val(runId)
 
     script:
-    """
-    pyscenic ctx \
-        ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
-        ${featherDB} \
-        --annotations_fname ${annotation} \
-        --expression_mtx_fname ${filteredLoom} \
-        --cell_id_attribute ${toolParams.cell_id_attribute} \
-        --gene_attribute ${toolParams.gene_attribute} \
-        --mode "dask_multiprocessing" \
-        --output ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"} \
-        --num_workers ${toolParams.numWorkers} \
-    """
+        """
+        pyscenic ctx \
+            ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
+            ${featherDB} \
+            --annotations_fname ${annotation} \
+            --expression_mtx_fname ${filteredLoom} \
+            --cell_id_attribute ${toolParams.cell_id_attribute} \
+            --gene_attribute ${toolParams.gene_attribute} \
+            --mode "dask_multiprocessing" \
+            --output ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"} \
+            --num_workers ${toolParams.numWorkers} \
+        """
 
 }
 
@@ -64,4 +64,3 @@ process CISTARGET {
         --min_genes MIN_GENES
         --expression_mtx_fname EXPRESSION_MTX_FNAME
 */
-

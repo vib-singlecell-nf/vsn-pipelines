@@ -14,17 +14,17 @@ process SC__H5AD_TO_LOOM {
 	publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), path(f)
-	
+		tuple val(sampleId), path(f)
+
 	output:
-	tuple val(sampleId), path("${sampleId}.SC__H5AD_TO_LOOM.loom")
-	
+		tuple val(sampleId), path("${sampleId}.SC__H5AD_TO_LOOM.loom")
+
 	script:
-	"""
-	${binDir}h5ad_to_loom.py \
-		$f \
-		"${sampleId}.SC__H5AD_TO_LOOM.loom"
-	"""
+		"""
+		${binDir}h5ad_to_loom.py \
+			$f \
+			"${sampleId}.SC__H5AD_TO_LOOM.loom"
+		"""
 
 }
 
@@ -35,16 +35,16 @@ process SC__H5AD_TO_FILTERED_LOOM {
 	publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), path(f)
-	
+		tuple val(sampleId), path(f)
+
 	output:
-	tuple val(sampleId), path("${sampleId}.filtered.loom")
-	
+		tuple val(sampleId), path("${sampleId}.filtered.loom")
+
 	script:
-	"""
-	${binDir}h5ad_to_filtered_loom.py \
-		$f \
-		"${sampleId}.filtered.loom"
-	"""
+		"""
+		${binDir}h5ad_to_filtered_loom.py \
+			$f \
+			"${sampleId}.filtered.loom"
+		"""
 
 }

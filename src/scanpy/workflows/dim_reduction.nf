@@ -14,8 +14,10 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 //////////////////////////////////////////////////////
 
 workflow DIM_REDUCTION {
+
     get:
         data
+
     main:
         SC__SCANPY__DIM_REDUCTION__PCA( data )
         SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__PCA.out )
@@ -25,8 +27,9 @@ workflow DIM_REDUCTION {
             file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
             "SC_dimensionality_reduction_report"
         )
+
     emit:
         dimred
         report
-}
 
+}

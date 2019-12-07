@@ -29,4 +29,3 @@ workflow mnncorrect {
         filteredloom
         scopeloom
 }
-

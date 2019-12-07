@@ -13,8 +13,10 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 //////////////////////////////////////////////////////
 
 workflow CLUSTER_IDENTIFICATION {
+
     get:
         data
+
     main:
         SC__SCANPY__CLUSTERING( data )
         report = GENERATE_REPORT(
@@ -23,7 +25,9 @@ workflow CLUSTER_IDENTIFICATION {
             "SC_clustering_report"
         )
         marker_genes = SC__SCANPY__MARKER_GENES( SC__SCANPY__CLUSTERING.out )
+
     emit:
         marker_genes
         report
+
 }

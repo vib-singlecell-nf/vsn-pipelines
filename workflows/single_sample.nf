@@ -68,5 +68,6 @@ workflow single_sample {
     emit:
         filteredloom
         scopeloom
+
 }
 
