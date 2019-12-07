@@ -32,8 +32,10 @@ include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params)
 //  Define the workflow 
 
 workflow QC_FILTER {
+
     get:
         data
+
     main:
         data = SC__FILE_CONVERTER( data )
         if(params.sc.cell_filter) {
@@ -57,7 +59,9 @@ workflow QC_FILTER {
             file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
             'SC_QC_filtering_report'
         )
+
     emit:
         filtered
         report
+
 }

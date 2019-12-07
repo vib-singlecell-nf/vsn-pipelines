@@ -20,8 +20,10 @@ include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(param
 //  Define the workflow 
 
 workflow BEC_MNN_CORRECT {
+
     get:
         data
+
     main:
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
         SC__SCANPY__DIM_REDUCTION__PCA( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
@@ -29,8 +31,10 @@ workflow BEC_MNN_CORRECT {
         SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__UMAP.out )
         CLUSTER_IDENTIFICATION( SC__SCANPY__DIM_REDUCTION__TSNE.out )
         SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
+
     emit:
         SC__H5AD_TO_LOOM.out
+
 }
 
 // Uncomment to test
