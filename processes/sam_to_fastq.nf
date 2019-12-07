@@ -7,19 +7,19 @@ process PICARD__BAM_TO_FASTQ {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), path(bam)
-    file(tmpDir)
+        tuple val(sample), path(bam)
+        file(tmpDir)
 
     output:
-    tuple val(sample), path('*.unaligned_tagged_polyA_filtered.fastq'), emit: fastq
+        tuple val(sample), path('*.unaligned_tagged_polyA_filtered.fastq'), emit: fastq
 
     script:
-    """
-    java -Djava.io.tmpdir=$tmpDir -jar \
-        /picard.jar \
-            SamToFastq \
-                INPUT=${bam} \
-                FASTQ=${sample}.unaligned_tagged_polyA_filtered.fastq
-    """
+        """
+        java -Djava.io.tmpdir=$tmpDir -jar \
+            /picard.jar \
+                SamToFastq \
+                    INPUT=${bam} \
+                    FASTQ=${sample}.unaligned_tagged_polyA_filtered.fastq
+        """
 
 }
