@@ -3,9 +3,11 @@ nextflow.preview.dsl=2
 include EDIRECT__SRAID_TO_SAMPLENAME from '../processes/sra_fastq_urls.nf'
 
 workflow SRA_FASTQ_URLS {
+
     get:
         sraProjectId
         sampleNamesToRetrieve
+
     main:
         Channel
             .fromSRA(sraProjectId)
@@ -16,6 +18,8 @@ workflow SRA_FASTQ_URLS {
             .join(sraIDs)
             .map { it -> tuple(it[0],it[1],"ftp://ftp.sra.ebi.ac.uk/" + it[2])} 
             .view()
+
     emit:
         sraFastqUrls
+
 }
