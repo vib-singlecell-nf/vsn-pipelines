@@ -7,18 +7,18 @@ process SC__DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), path(bam)
+        tuple val(sample), path(bam)
 
     output:
-    tuple val(sample), path('*.unaligned_tagged_filtered.bam'), emit: bam
+        tuple val(sample), path('*.unaligned_tagged_filtered.bam'), emit: bam
 
     script:
-    processParams = params.sc.dropseqtools.filter_unaligned_tagged_bam
-    """
-    FilterBAM \
-        TAG_REJECT=${processParams.tagReject} \
-        INPUT=${bam} \
-        OUTPUT=${sample}.unaligned_tagged_filtered.bam
-    """
+        processParams = params.sc.dropseqtools.filter_unaligned_tagged_bam
+        """
+        FilterBAM \
+            TAG_REJECT=${processParams.tagReject} \
+            INPUT=${bam} \
+            OUTPUT=${sample}.unaligned_tagged_filtered.bam
+        """
 
 }

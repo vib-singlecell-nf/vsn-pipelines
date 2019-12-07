@@ -7,14 +7,14 @@ process GZIP {
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sample), path(f)
+        tuple val(sample), path(f)
 
     output:
-    tuple val(sample), path("*.unaligned_tagged_polyA_filtered.fastq.gz"), emit: fastq_gz
+        tuple val(sample), path("*.unaligned_tagged_polyA_filtered.fastq.gz"), emit: fastq_gz
 
     script:
-    """
-    gzip --force ${f}
-    """
+        """
+        gzip --force ${f}
+        """
 
 }
