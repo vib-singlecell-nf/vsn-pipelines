@@ -13,24 +13,25 @@ process SC__SCANPY__DIM_REDUCTION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), path(f)
-	
+		tuple val(sampleId), path(f)
+
 	output:
-	tuple val(sampleId), path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}")
-	
+		tuple val(sampleId), path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}")
+
 	script:
-	processParams = params.sc.scanpy.dim_reduction.get(params.method)
-	method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
-	"""
-	${binDir}dim_reduction/sc_dim_reduction.py \
-		--method ${processParams.dimReductionMethod} \
-		${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
-		${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
-		${(processParams.containsKey('nComps')) ? '--n-comps ' + processParams.nComps : ''} \
-		${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
-		${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
-		${(processParams.containsKey('useFastTsne') && !processParams.useFastTsne) ? '' : '--use-fast-tsne'} \
-		$f \
-		"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}"
-"""
+		processParams = params.sc.scanpy.dim_reduction.get(params.method)
+		method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
+		"""
+		${binDir}dim_reduction/sc_dim_reduction.py \
+			--method ${processParams.dimReductionMethod} \
+			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
+			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
+			${(processParams.containsKey('nComps')) ? '--n-comps ' + processParams.nComps : ''} \
+			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
+			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
+			${(processParams.containsKey('useFastTsne') && !processParams.useFastTsne) ? '' : '--use-fast-tsne'} \
+			$f \
+			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}"
+		"""
+
 }

@@ -14,15 +14,15 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
     maxForks params.sratoolkit.downloadFastqs.maxForks
 
     input:
-    tuple val(sraId), val(sampleId)
+        tuple val(sraId), val(sampleId)
     
     output:
-    tuple val(sraId), file("${sraId}*.fastq.gz")
+        tuple val(sraId), file("${sraId}*.fastq.gz")
     
     script:
-    """
-    fasterq-dump -S -v -p -e ${params.sratoolkit.downloadFastqs.threads} -O . ${sraId}
-    pigz -p ${params.sratoolkit.downloadFastqs.threads} *.fastq
-    """
+        """
+        fasterq-dump -S -v -p -e ${params.sratoolkit.downloadFastqs.threads} -O . ${sraId}
+        pigz -p ${params.sratoolkit.downloadFastqs.threads} *.fastq
+        """
 
 }

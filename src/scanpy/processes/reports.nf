@@ -11,19 +11,19 @@ process SC__SCANPY__GENERATE_REPORT {
   	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 
 	input:
-	file ipynb
-	tuple val(sampleId), path(adata)
-	val(reportTitle)
-	
+		file ipynb
+		tuple val(sampleId), path(adata)
+		val(reportTitle)
+
 	output:
-	tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
-	
+		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
+
 	script:
-	"""
-	papermill ${ipynb} \
-		${sampleId}.${reportTitle}.ipynb \
-		-p FILE $adata
-    """
+		"""
+		papermill ${ipynb} \
+			${sampleId}.${reportTitle}.ipynb \
+			-p FILE $adata
+		"""
 
 }
 
@@ -35,19 +35,20 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 
   	input:
-	file(ipynb)
-	tuple val(sampleId), file(data1), file(data2)
-    val reportTitle
-  
+		file(ipynb)
+		tuple val(sampleId), file(data1), file(data2)
+		val reportTitle
+
   	output:
-    tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
-  
+    	tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
+
   	script:
-    """
-    papermill ${ipynb} \
-        ${sampleId}.${reportTitle}.ipynb \
-        -p FILE1 $data1 -p FILE2 $data2
-    """
+		"""
+		papermill ${ipynb} \
+			${sampleId}.${reportTitle}.ipynb \
+			-p FILE1 $data1 -p FILE2 $data2
+		"""
+
 }
 
 process SC__SCANPY__REPORT_TO_HTML {
@@ -59,15 +60,15 @@ process SC__SCANPY__REPORT_TO_HTML {
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), path(ipynb)
-	
+		tuple val(sampleId), path(ipynb)
+
 	output:
-	file("*.html")
-	
+		file("*.html")
+
 	script:
-	"""
-	jupyter nbconvert ${ipynb} --to html
-	"""
+		"""
+		jupyter nbconvert ${ipynb} --to html
+		"""
 
 }
 
@@ -80,15 +81,15 @@ process SC__SCANPY__MERGE_REPORTS {
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), path(ipynbs)
-	val(reportTitle)
+		tuple val(sampleId), path(ipynbs)
+		val(reportTitle)
 
 	output:
-	tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
-	
+		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
+
 	script:
-	"""
-	nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.ipynb"
-	"""
+		"""
+		nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.ipynb"
+		"""
 
 }

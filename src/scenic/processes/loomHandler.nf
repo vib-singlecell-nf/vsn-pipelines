@@ -14,14 +14,14 @@ process PUBLISH_LOOM {
     publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true, saveAs: { filename -> toolParams.scenicScopeOutputLoom }
 
     input:
-    tuple val(sampleId), path(f)
+        tuple val(sampleId), path(f)
 
     output:
-    tuple val(sampleId), path(f)
+        tuple val(sampleId), path(f)
 
     script:
-    """
-    """
+        """
+        """
 
 }
 
@@ -32,18 +32,18 @@ process VISUALIZE {
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=2gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sampleId), path(inputLoom)
+        tuple val(sampleId), path(inputLoom)
 
     output:
-    tuple val(sampleId), path("scenic_visualize.loom")
+        tuple val(sampleId), path("scenic_visualize.loom")
 
     script:
-    """
-    ${binDir}add_visualization.py \
-        --loom_input ${inputLoom} \
-        --loom_output scenic_visualize.loom \
-        --num_workers ${toolParams.numWorkers}
-    """
+        """
+        ${binDir}add_visualization.py \
+            --loom_input ${inputLoom} \
+            --loom_output scenic_visualize.loom \
+            --num_workers ${toolParams.numWorkers}
+        """
 
 }
 
@@ -55,19 +55,19 @@ process MERGE_MOTIF_TRACK_LOOMS {
     publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true
 
     input:
-    tuple val(sampleId), path(motifLoom), path(trackLoom)
+        tuple val(sampleId), path(motifLoom), path(trackLoom)
 
     output:
-    tuple val(sampleId), path(toolParams.scenicOutputLoom)
+        tuple val(sampleId), path(toolParams.scenicOutputLoom)
 
     script:
-    toolParams = params.sc.scenic
-    """
-    ${binDir}merge_motif_track_loom.py \
-        --loom_motif ${motifLoom} \
-        --loom_track ${trackLoom} \
-        --loom_output ${toolParams.scenicOutputLoom}
-    """
+        toolParams = params.sc.scenic
+        """
+        ${binDir}merge_motif_track_loom.py \
+            --loom_motif ${motifLoom} \
+            --loom_track ${trackLoom} \
+            --loom_output ${toolParams.scenicOutputLoom}
+        """
 
 }
 
@@ -81,18 +81,18 @@ process APPEND_SCENIC_LOOM {
     publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
     input:
-    tuple val(sampleId), path(scopeLoom), path(scenicLoom)
+        tuple val(sampleId), path(scopeLoom), path(scenicLoom)
 
     output:
-    tuple val(sampleId), path("${sampleId}.${toolParams.scenicScopeOutputLoom}")
+        tuple val(sampleId), path("${sampleId}.${toolParams.scenicScopeOutputLoom}")
 
     script:
-    toolParams = params.sc.scenic
-    """
-    ${binDir}append_results_to_existing_loom.py \
-        --loom_scope ${scopeLoom} \
-        --loom_scenic ${scenicLoom} \
-        --loom_output ${sampleId}.${toolParams.scenicScopeOutputLoom}
-    """
+        toolParams = params.sc.scenic
+        """
+        ${binDir}append_results_to_existing_loom.py \
+            --loom_scope ${scopeLoom} \
+            --loom_scenic ${scenicLoom} \
+            --loom_output ${sampleId}.${toolParams.scenicScopeOutputLoom}
+        """
 
 }

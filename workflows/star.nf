@@ -17,6 +17,7 @@ include getChannel as getSingleEndChannel from '../src/channels/singleend.nf' pa
  * Run the workflow for each 10xGenomics CellRanger output folders specified.
  */ 
 workflow star {
+
     main:
         SC__STAR__LOAD_GENOME( file(params.sc.star.map_count.index) )
         SC__STAR__MAP_COUNT( 
@@ -29,7 +30,8 @@ workflow star {
             SC__STAR__MAP_COUNT.out.isDone.collect()
         )
         SC__STAR_CONCATENATOR( SC__STAR__MAP_COUNT.out.counts.map { it[1] }.collect() )
+
     emit:
         SC__STAR_CONCATENATOR.out
-}
 
+}

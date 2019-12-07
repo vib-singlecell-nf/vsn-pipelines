@@ -14,8 +14,10 @@ process SC__PREPARE_OBS_FILTER {
 
     input:
         tuple val(sampleId), path(f), val(filterConfig)
+
     output:
         tuple val(sampleId), path(f), path("${sampleId}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
+
     script:
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
@@ -38,19 +40,19 @@ process SC__APPLY_OBS_FILTER {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sampleId), path(f), path(filters)
-    
+        tuple val(sampleId), path(f), path(filters)
+
     output:
-    tuple val(sampleId), path("${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}")
-    
+        tuple val(sampleId), path("${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}")
+
     script:
-    processParams = params.sc.cell_filter
-    filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
-    """
-    ${binDir}sc_h5ad_apply_obs_filter.py \
-        $f \
-        --output "${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}" \
-        $filtersAsArguments
-    """
+        processParams = params.sc.cell_filter
+        filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
+        """
+        ${binDir}sc_h5ad_apply_obs_filter.py \
+            $f \
+            --output "${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}" \
+            $filtersAsArguments
+        """
 
 }

@@ -13,20 +13,20 @@ process SC__SCANPY__ADJUSTMENT {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-	tuple val(sampleId), path(f)
+		tuple val(sampleId), path(f)
 
 	output:
-	tuple val(sampleId), path("${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}")
+		tuple val(sampleId), path("${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}")
 
 	script:
-	processParams = params.sc.scanpy.data_adjustment
-	normalizationVariablesToRegressOutAsArguments = processParams.normalizationVariablesToRegressOut.collect({ '--variable-to-regress-out' + ' ' + it }).join(' ')
-	"""
-	${binDir}adjust/sc_adjustment.py \
-		${(processParams.containsKey('adjustmentMethod')) ? '--method ' + processParams.adjustmentMethod : ''} \
-		${(processParams.containsKey('normalizationVariablesToRegressOut')) ? normalizationVariablesToRegressOutAsArguments : ''} \
-		$f \
-		"${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}" 
-	"""
+		processParams = params.sc.scanpy.data_adjustment
+		normalizationVariablesToRegressOutAsArguments = processParams.normalizationVariablesToRegressOut.collect({ '--variable-to-regress-out' + ' ' + it }).join(' ')
+		"""
+		${binDir}adjust/sc_adjustment.py \
+			${(processParams.containsKey('adjustmentMethod')) ? '--method ' + processParams.adjustmentMethod : ''} \
+			${(processParams.containsKey('normalizationVariablesToRegressOut')) ? normalizationVariablesToRegressOutAsArguments : ''} \
+			$f \
+			"${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}" 
+		"""
 
 }

@@ -43,7 +43,7 @@ workflow bbknn_base {
 
     get:
         data
-    
+
     main:
         QC_FILTER( data ) // Remove concat 
         SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
@@ -69,6 +69,7 @@ workflow bbknn_base {
     emit:
         filteredloom
         scopeloom = BEC_BBKNN.out.scopeloom
+
 }
 
 workflow bbknn_standalone {
@@ -76,9 +77,10 @@ workflow bbknn_standalone {
     main:
         data = getTenXChannel( params.global.tenx_folder ).view()
         bbknn_base( data )
+
     emit:
-        bbknn_base.out.filteredloom
-        bbknn_base.out.scopeloom
+        filteredloom = bbknn_base.out.filteredloom
+        scopeloom = bbknn_base.out.scopeloom
 
 }
 
@@ -86,8 +88,10 @@ workflow bbknn {
 
     get:
         data
+
     main:
         bbknn_base( data )
+
     emit:
         bbknn_base.out.filteredloom
         bbknn_base.out.scopeloom

@@ -14,8 +14,10 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 //////////////////////////////////////////////////////
 
 workflow HVG_SELECTION {
+
     get:
         data
+
     main:
         SC__SCANPY__FEATURE_SELECTION( data )
         scaled = SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
@@ -24,8 +26,9 @@ workflow HVG_SELECTION {
             file(workflow.projectDir + params.sc.scanpy.feature_selection.report_ipynb),
             "SC_HVG_report"
         )
+
     emit:
         scaled
         report
-}
 
+}

@@ -13,22 +13,22 @@ process SC__SCANPY__FEATURE_SELECTION {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   	input:
-    tuple val(sampleId), path(f)
-  
-  	output:
-    tuple val(sampleId), path("${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}")
-  
-  	script:
-	processParams = params.sc.scanpy.feature_selection
-    """
-    ${binDir}feature_selection/sc_select_variable_genes.py \
-        --method ${processParams.featureSelectionMethod} \
-        ${(processParams.containsKey('featureSelectionMinMean')) ? '--min-mean ' + processParams.featureSelectionMinMean : ''} \
-        ${(processParams.containsKey('featureSelectionMaxMean')) ? '--max-mean ' + processParams.featureSelectionMaxMean : ''} \
-        ${(processParams.containsKey('featureSelectionMinDisp')) ? '--min-disp ' + processParams.featureSelectionMinDisp : ''} \
-        ${(processParams.containsKey('featureSelectionMaxDisp')) ? '--max-disp ' + processParams.featureSelectionMaxDisp : ''} \
-        $f \
-        "${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}"
-    """
-}
+    	tuple val(sampleId), path(f)
 
+  	output:
+    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}")
+
+  	script:
+		processParams = params.sc.scanpy.feature_selection
+		"""
+		${binDir}feature_selection/sc_select_variable_genes.py \
+			--method ${processParams.featureSelectionMethod} \
+			${(processParams.containsKey('featureSelectionMinMean')) ? '--min-mean ' + processParams.featureSelectionMinMean : ''} \
+			${(processParams.containsKey('featureSelectionMaxMean')) ? '--max-mean ' + processParams.featureSelectionMaxMean : ''} \
+			${(processParams.containsKey('featureSelectionMinDisp')) ? '--min-disp ' + processParams.featureSelectionMinDisp : ''} \
+			${(processParams.containsKey('featureSelectionMaxDisp')) ? '--max-disp ' + processParams.featureSelectionMaxDisp : ''} \
+			$f \
+			"${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}"
+		"""
+
+}
