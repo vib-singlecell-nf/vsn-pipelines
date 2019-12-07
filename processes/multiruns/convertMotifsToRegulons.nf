@@ -21,17 +21,18 @@ process CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS {
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-    tuple val(sampleId), path(multiRunsAggrMotifEnrichmentTable), path(multiRunsAggrRegulonsFolder)
-    val type
+        tuple val(sampleId), path(multiRunsAggrMotifEnrichmentTable), path(multiRunsAggrRegulonsFolder)
+        val type
 
     output:
-    tuple val(sampleId), path("multi_runs_regulons_${type}.pkl.gz")
+        tuple val(sampleId), path("multi_runs_regulons_${type}.pkl.gz")
 
-    """
-    ${binDir}convert_multi_runs_features_to_regulons.py \
-        $multiRunsAggrMotifEnrichmentTable \
-        $multiRunsAggrRegulonsFolder \
-        -o "multi_runs_regulons_${type}.pkl.gz"
-    """
+    script:
+        """
+        ${binDir}convert_multi_runs_features_to_regulons.py \
+            $multiRunsAggrMotifEnrichmentTable \
+            $multiRunsAggrRegulonsFolder \
+            -o "multi_runs_regulons_${type}.pkl.gz"
+        """
 
 }

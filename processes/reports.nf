@@ -20,19 +20,19 @@ process GENERATE_REPORT {
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
 
 	input:
-	file ipynb
-	tuple val(sampleId), path(loom)
-	val reportTitle
+		file ipynb
+		tuple val(sampleId), path(loom)
+		val reportTitle
 
 	output:
-	tuple val(sampleId), path("${reportTitle}.ipynb")
-	
+		tuple val(sampleId), path("${reportTitle}.ipynb")
+
 	script:
-	"""
-	papermill ${ipynb} \
-		${reportTitle}.ipynb \
-		-p FILE $loom
-	"""
+		"""
+		papermill ${ipynb} \
+			${reportTitle}.ipynb \
+			-p FILE $loom
+		"""
 
 }
 
@@ -43,14 +43,14 @@ process REPORT_TO_HTML {
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
 
 	input:
-	tuple val(sampleId), path(ipynb)
+		tuple val(sampleId), path(ipynb)
 
 	output:
-	tuple val(sampleId), path("*.html")
-	
+		tuple val(sampleId), path("*.html")
+
 	script:
-	"""
-	jupyter nbconvert ${ipynb} --to html
-	"""
+		"""
+		jupyter nbconvert ${ipynb} --to html
+		"""
 
 }

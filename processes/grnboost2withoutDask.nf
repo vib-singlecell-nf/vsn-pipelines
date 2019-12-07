@@ -20,22 +20,22 @@ process GRNBOOST2_WITHOUT_DASK {
     maxForks processParams.maxForks
 
     input:
-    tuple val(sampleId), path(filteredLoom), val(runId)
-    file tfs
+        tuple val(sampleId), path(filteredLoom), val(runId)
+        file tfs
 
     output:
-    tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
+        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
 
     script:
-    """
-    ${binDir}grnboost2_without_dask.py \
-        $filteredLoom \
-        $tfs \
-        --output ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
-        --num_workers ${toolParams.numWorkers} \
-        --cell_id_attribute ${toolParams.cell_id_attribute} \
-        --gene_attribute ${toolParams.gene_attribute}
-    """
+        """
+        ${binDir}grnboost2_without_dask.py \
+            $filteredLoom \
+            $tfs \
+            --output ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
+            --num_workers ${toolParams.numWorkers} \
+            --cell_id_attribute ${toolParams.cell_id_attribute} \
+            --gene_attribute ${toolParams.gene_attribute}
+        """
 
 }
 
