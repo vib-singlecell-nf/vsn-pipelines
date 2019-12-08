@@ -9,91 +9,105 @@ import gzip
 import time
 import utils
 import export_to_loom
+import warnings
+import os
 
-parser_grn = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
+parser = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
 
-parser_grn.add_argument(
+parser.add_argument(
     'expression_mtx_fname',
     type=argparse.FileType('r'),
     help='The name of the file that contains the expression matrix for the single cell experiment.'
          ' Two file formats are supported: csv (rows=cells x columns=genes) or loom (rows=genes x columns=cells).'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     'aggregated_regulons_fname',
     type=argparse.FileType('r'),
     help='The name of the file (.pkl.gz aka compressed pickle format) that contains the regulons resulting from the aggregated motif enrichment table.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     'auc_mtx_fname',
     type=argparse.FileType('r'),
     help='The name of the file that contains the AUCell matrix.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '-o', '--output',
     type=argparse.FileType('w'),
     default=sys.stdout,
     help='Output file/stream, i.e. a table of TF-target genes (CSV).'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--min-genes-regulon',
     type=int,
     default=5,
     dest="min_genes_regulon",
     help='The threshold used for filtering the regulons based on the number of targets (default: {}).'.format(5)
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--min-regulon-gene-occurrence',
     type=int,
     default=5,
     dest="min_regulon_gene_occurrence",
     help='The threshold used for filtering the genes bases on their occurrence (default: {}).'.format(5)
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--cell-id-attribute',
     type=str,
     default='CellID',
     dest="cell_id_attribute",
     help='The name of the column attribute that specifies the identifiers of the cells in the loom file.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--gene-attribute',
     type=str,
     default='Gene',
     dest="gene_attribute",
     help='The name of the row attribute that specifies the gene symbols in the loom file.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--title',
     type=str,
     dest="title",
     help='The title for this loom file. If None than the basename of the filename is used as the title.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--nomenclature',
     type=str,
     dest="nomenclature",
     help='The name of the genome.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--scope-tree-level-1',
     type=str,
     dest="scope_tree_level_1",
     help='The name of the first level of the SCope tree.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--scope-tree-level-2',
     type=str,
     dest="scope_tree_level_2",
     help='The name of the second level of the SCope tree.'
 )
-parser_grn.add_argument(
+
+parser.add_argument(
     '--scope-tree-level-3',
     type=str,
     dest="scope_tree_level_3",
     help='The name of the third level of the SCope tree.'
 )
 
-args = parser_grn.parse_args()
+args = parser.parse_args()
 
 print(f"Extracting the matrix form the loom...", flush=True)
 start = time.time()
@@ -116,6 +130,15 @@ start = time.time()
 auc_mtx = pd.read_csv(args.auc_mtx_fname.name, sep='\t', header=0, index_col=0)
 auc_mtx.columns.name = "Regulon"
 print(f"... took {time.time() - start} seconds to run.", flush=True)
+
+# Check whether the cell index between AUC matrix and expression matrix are the same
+if len(auc_mtx.index.difference(ex_matrix_df.index)) > 0:
+    warnings.warn("Difference detected in the cell indexes between the AUCell matrix and the expression matrix. Subsetting cells from AUC matrix...", Warning)
+    auc_mtx = auc_mtx[auc_mtx.index.isin(ex_matrix_df.index)]
+
+# Filter regulons based on the ones used in AUCell matrix
+# In case of a lot of regulons (>800), this is required to avoid header limitation set by h5py
+regulons = list(filter(lambda x: x.name in auc_mtx.columns, regulons))
 
 # Create loom
 print(f"Exporting to loom...", flush=True)

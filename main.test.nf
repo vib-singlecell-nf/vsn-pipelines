@@ -1,5 +1,7 @@
 //
 // Tests
+// CURRENTLY DEPRECATED 
+// TODO: NEEDS TO BE UPDATED USING NEW API
 //  
 
 // Test 1: GRNBOOST2WITHOUTDASK (from processes/)
@@ -65,20 +67,26 @@ runs = Channel.from( 1..params.sc.scenic.numRuns )
 
 // Make the test workflow 
 workflow test_GRNBOOST2WITHOUTDASK {
+
     get:
         loom
+
     main:
         tfs = file(params.sc.scenic.grn.TFs)
         GRNBOOST2WITHOUTDASK( runs, loom, tfs )
+
     emit:
         GRNBOOST2WITHOUTDASK.out
+
 }
 
 // Make the test workflow 
 workflow test_CISTARGET {
+
     get:
         filteredloom
         grn
+
     main:
         // channel for SCENIC databases resources:
         motifDB = Channel
@@ -95,32 +103,40 @@ workflow test_CISTARGET {
             .collect() // use all files together in the ctx command
         trackANN = file(params.sc.scenic.cistarget.trkANN)
         ctx_trk = CISTARGET__TRACK( runs, filteredloom, grn, trackDB, trackANN, 'trk' )
+
     emit:
         ctx_mtf
         ctx_trk
+
 }
 
 // Make the test workflow 
 workflow test_AUCELL {
+
     get:
         filteredloom
         ctx_mtf
         ctx_trk
+
     main:
         /* AUCell, motif regulons */
         auc_mtf = AUCELL__MOTIF( runs, filteredloom, ctx_mtf, 'mtf' )
 
         /* AUCell, track regulons */
         auc_trk = AUCELL__TRACK( runs, filteredloom, ctx_trk, 'trk' )
+
     emit:
         auc_mtf
         auc_trk
+
 }
 
 // Make the test workflow 
 workflow test_SINGLE_RUN_BY_ID {
+
     get:
         runId
+
     main:
         filteredloom = file( params.sc.scenic.filteredloom )
         tfs = file(params.sc.scenic.grn.TFs)
@@ -134,28 +150,35 @@ workflow test_SINGLE_RUN_BY_ID {
         ctx_mtf = CISTARGET__MOTIF( run, filteredloom, grn, motifDB, motifANN, 'mtf' )
         /* AUCell, motif regulons */
         auc_mtf = AUCELL__MOTIF( run, filteredloom, ctx_mtf, 'mtf' )
+
     emit:
         auc_mtf
+
 }
 
 // Make the test workflow 
 workflow test_AUCELL_FROM_FOLDER {
+
     get:
         filteredloom
         regulons_folder_mtf
         regulons_folder_trk
+
     main:
         /* Aggregate motif regulons from multiple runs */
         regulons_auc_mtf = AUCELL_FROM_FOLDER__MOTIF( filteredloom, regulons_folder_mtf, 'mtf' )
 
         /* Aggregate track regulons from multiple runs */
         regulons_auc_trk = AUCELL_FROM_FOLDER__TRACK( filteredloom, regulons_folder_trk, 'trk' )
+
     emit:
         regulons_auc_mtf
         regulons_auc_trk
+
 }
 
 workflow {
+
     main:
         switch(params.test) {
             case "SC__SCENIC_SINGLE_RUN_BY_ID":
@@ -249,4 +272,5 @@ workflow {
                 throw new Exception("The test parameters should be specified.")
             break;
         }
+
 }
