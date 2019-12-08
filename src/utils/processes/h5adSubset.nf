@@ -10,42 +10,49 @@ process SC__PREPARE_OBS_FILTER {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(id), file(f), val(filterConfig)
+        tuple val(sampleId), path(f), val(filterConfig)
+
     output:
-        tuple val(id), file(f), file("${id}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
+        tuple val(sampleId), path(f), path("${sampleId}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
+
     script:
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_prepare_obs_filter.py \
-            --sample-id ${id} \
+            --sample-id ${sampleId} \
             --sample-column-name ${filterConfig.sampleColumnName} \
             --barcode-column-name ${filterConfig.barcodeColumnName} \
             --filter-column-name ${filterConfig.filterColumnName} \
             ${valuesToKeepFromFilterColumnAsArguments} \
             ${filterConfig.cellMetaDataFilePath} \
-            "${id}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt"
+            "${sampleId}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt"
         """
+
 }
 
 process SC__APPLY_OBS_FILTER {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(id), file(f), file(filters)
+        tuple val(sampleId), path(f), path(filters)
+
     output:
-        tuple val(id), file("${id}.SC__APPLY_OBS_FILTER.${params.sc.cell_filter.off}")
+        tuple val(sampleId), path("${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}")
+
     script:
+        processParams = params.sc.cell_filter
         filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_apply_obs_filter.py \
             $f \
-            --output "${id}.SC__APPLY_OBS_FILTER.${params.sc.cell_filter.off}" \
+            --output "${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}" \
             $filtersAsArguments
         """
+
 }

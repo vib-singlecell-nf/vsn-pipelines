@@ -27,7 +27,7 @@ include APPEND_SCENIC_LOOM                                        from './proces
 include VISUALIZE                                                 from './processes/loomHandler'     params(params)
 
 // reporting:
-include './processes/reports.nf' params(params + params.global)
+include './processes/reports.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -44,9 +44,11 @@ if(params.sc.scenic.containsKey("numRuns")) {
 }
 
 workflow SCENIC {
+
     get:
         // Expects (sampleId, loom)
         filteredLoom
+
     main:
         /* GRN */
         filteredLoom.view()
@@ -118,15 +120,19 @@ workflow SCENIC {
             }
         }
         PUBLISH_LOOM(out)
+
     emit:
         out
+
 }
 
 
 workflow SCENIC_append {
+
     get:
         filteredLoom
         scopeLoom
+
     main:
         scenicLoom = SCENIC( filteredLoom )
         APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
@@ -136,13 +142,17 @@ workflow SCENIC_append {
             "SCENIC_report"
         )
         REPORT_TO_HTML(report_notebook)
+
     emit:
         APPEND_SCENIC_LOOM.out
+
 }
 
 
 // Uncomment to test
 workflow {
+
     main:
-        SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
+        SCENIC( Channel.of( tuple("foobar", path(params.sc.scenic.filteredLoom)) ) )
+
 }

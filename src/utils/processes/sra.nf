@@ -18,13 +18,13 @@ process GET_SRA_DB {
     clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     output:
-    file("SRAmetadb.sqlite")
-    
+        file("SRAmetadb.sqlite")
+
     script:
-    """
-    pysradb metadb \
-        --out-dir "."
-    """
+        """
+        pysradb metadb \
+            --out-dir "."
+        """
 
 }
 
@@ -35,26 +35,26 @@ process SRA_TO_METADATA {
     clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
-    tuple val(sraId), val(sampleFilters)
-    file(sraDb)
-    
+        tuple val(sraId), val(sampleFilters)
+        file(sraDb)
+
     output:
-    file "${sraId}_metadata.tsv"
-    
+        file "${sraId}_metadata.tsv"
+
     script:
-    if(sraDb.name != 'NO_FILE') {
-        sraDbAsArgument = "--sra-db ${sraDb}"
-    } else {
-        sraDbAsArgument = (processParams.containsKey('sraDb') && processParams.sraDb != '') ? '--sra-db ' + processParams.sraDb : ''
-    }
-    def sampleFiltersAsArguments = sampleFilters.collect({ '--sample-filter' + ' ' + it }).join(' ')
-    """
-    ${binDir}sra_to_metadata.py \
-        ${sraId} \
-        ${sraDbAsArgument} \
-        ${sampleFiltersAsArguments} \
-        --output "${sraId}_metadata.tsv"
-    """
+        if(sraDb.name != 'NO_FILE') {
+            sraDbAsArgument = "--sra-db ${sraDb}"
+        } else {
+            sraDbAsArgument = (processParams.containsKey('sraDb') && processParams.sraDb != '') ? '--sra-db ' + processParams.sraDb : ''
+        }
+        def sampleFiltersAsArguments = sampleFilters.collect({ '--sample-filter' + ' ' + it }).join(' ')
+        """
+        ${binDir}sra_to_metadata.py \
+            ${sraId} \
+            ${sraDbAsArgument} \
+            ${sampleFiltersAsArguments} \
+            --output "${sraId}_metadata.tsv"
+        """
 
 }
 
@@ -74,21 +74,21 @@ process NORMALIZE_SRA_FASTQS {
     clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
 
     input:
-    tuple val(sampleId), file(fastqs)
-    
+        tuple val(sampleId), file(fastqs)
+
     output:
-    tuple val(sampleId), path("*.fastq.gz")
-    
+        tuple val(sampleId), path("*.fastq.gz")
+
     script:
-    def normalizedFastqs = fastqs
-        .collect {
-            fastq -> normalizeSRAFastQ(fastq, sampleId)
-        }
-    def cmd = ''
-    for(int i = 0; i < normalizedFastqs.size(); i++)
-        cmd += "ln -s ${normalizedFastqs[i][0]} ${normalizedFastqs[i][1]}; " 
-    """
-    $cmd
-    """
+        def normalizedFastqs = fastqs
+            .collect {
+                fastq -> normalizeSRAFastQ(fastq, sampleId)
+            }
+        def cmd = ''
+        for(int i = 0; i < normalizedFastqs.size(); i++)
+            cmd += "ln -s ${normalizedFastqs[i][0]} ${normalizedFastqs[i][1]}; " 
+        """
+        $cmd
+        """
 
 }

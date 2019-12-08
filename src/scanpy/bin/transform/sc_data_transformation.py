@@ -1,38 +1,50 @@
-#!/usr/bin/env python
-import os
-from optparse import OptionParser
+#!/usr/bin/env python3
 
+import argparse
+import os
 import scanpy as sc
 
-parser = OptionParser(
-    usage="usage: %prog [options] h5ad_file_path",
-    version="%prog 1.0"
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    type=argparse.FileType('r'),
+    help='Input h5ad file.'
 )
-parser.add_option(
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+parser.add_argument(
     "-x", "--method",
+    type=str,
     action="store",
     dest="method",
     default="log1p",
     help="Transform the data."
 )
-(options, args) = parser.parse_args()
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 # I/O
 # Expects h5ad file
 try:
-    adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except:
+    adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
+except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 #
 # Transform the distribution of the data
 #
 
-if options.method == "log1p":
+if args.method == "log1p":
     # log transform the data.
     sc.pp.log1p(adata)
 else:
