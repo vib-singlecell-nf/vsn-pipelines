@@ -96,24 +96,52 @@ The **single_sample** workflow will process 10x data,taking in 10x-structured da
 The standard analysis steps are run: filtering, normalization, log-transformation, HVG selection, dimensionality reduction, clustering, and loom file generation.
 The output is a loom file with the results embedded.
 
+<details>
+    <summary>Click here to see the DAG of the workflow</summary>
+
+![Single-sample Workflow](./assets/images/single_sample.svg)
+
+</details>
+
 ### `single_sample_scenic`
 ![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/single_sample_scenic/badge.svg)
 
 Runs the `single_sample` workflow above, then runs the SCENIC workflow on the output, generating a comprehensive loom file with the combined results.
 This could be very resource intensive, depending on the dataset.
 
+<details>
+    <summary>Click here to see the DAG of the workflow</summary>
+
+![Single-sample SCENIC Workflow](./assets/images/single_sample_scenic.svg)
+
+</details>
+
 ### `scenic`
 ![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/scenic/badge.svg)
 
 Runs the SCENIC workflow alone, generating a loom file with only the SCENIC results.
 
+<details>
+    <summary>Click here to see the DAG of the workflow</summary>
+
+![SCENIC Workflow](./assets/images/scenic.svg)
+
+</details>
+
+### `scenic_multiruns`
+Runs the SCENIC workflow multiple times (set by `params.sc.scenic.numRuns`), generating a loom file with the aggregated results from the multiple SCENIC runs.
+
+<details>
+    <summary>Click here to see the DAG of the workflow</summary>
+
+![SCENIC Multi-runs Workflow](./assets/images/scenic_multiruns.svg)
+
+</details>
+
 ### `nemesh`
 Runs the Nemesh pipeline (Drop-seq) on a single sample or multiple samples separately.
 
 Source: http://mccarrolllab.org/wp-content/uploads/2016/03/Drop-seqAlignmentCookbookv1.2Jan2016.pdf
-
-### `scenic_multiruns`
-Runs the SCENIC workflow multiple times (set by `params.sc.scenic.numRuns`), generating a loom file with the aggregated results from the multiple SCENIC runs.
 
 ## Multiple Datasets
 Pipelines to aggregate multiple datasets together.
@@ -126,10 +154,23 @@ The output is a loom file with the results embedded.
 
 Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 
+<details>
+    <summary>Click here to see the DAG of the workflow</summary>
+
+![BBKNN Workflow](./assets/images/bbknn.svg)
+
+</details>
+
 ### `bbknn_scenic`
 Runs the `bbknn` workflow above, then runs the SCENIC workflow on the output, generating a comprehensive loom file with the combined results.
 This could be very resource intensive, depending on the dataset.
 
+<details>
+    <summary>Click here to see the DAG of the workflow</summary>
+
+![BBKNN SCENIC Workflow](./assets/images/bbknn_scenic.svg)
+
+</details>
 
 ## Information on using 10xGenomics datasets
 
@@ -215,11 +256,13 @@ include SC__CELLRANGER__MKFASTQ from './processes/mkfastq'  params(params)
 include SC__CELLRANGER__COUNT   from './processes/count'    params(params)
 
 workflow CELLRANGER {
+
     main:
         SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), path(params.sc.cellranger.mkfastq.runFolder))
         SC__CELLRANGER__COUNT(file(params.sc.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
     emit:
         SC__CELLRANGER__COUNT.out
+
 }
 
 ```
@@ -237,9 +280,11 @@ include BEC_BBKNN from './src/scanpy/bec_bbknn.nf' params(params)
 include SCENIC from './src/scenic/main.nf' params(params)
 
 workflow {
+
     CELLRANGER()
     BEC_BBKNN( CELLRANGER.out )
     SCENIC( BEC_BBKNN.out )
+
 }
 ```
 
