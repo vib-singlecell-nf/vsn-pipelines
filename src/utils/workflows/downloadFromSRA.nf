@@ -34,9 +34,11 @@ if(!utilsParams.containsKey("sra_metadata"))
 workflowParams = params.utils.sra_metadata
 
 workflow DOWNLOAD_FROM_SRA {
+
     get:
         // Expects (sraProjectId, sampleFilters)
         sra
+
     main:
         db = file('NO_FILE')
         sraDbFile = workflowParams.sraDb != '' ? file(workflowParams.sraDb): file(workflowParams.sraDbOutDir + "/SRAmetadb.sqlite")
@@ -73,8 +75,10 @@ workflow DOWNLOAD_FROM_SRA {
             run -> tuple(run[2], run[1])
         }
         out = NORMALIZE_SRA_FASTQS( data )
+
     emit:
         out
+
 }
 
 // workflow test {

@@ -1,48 +1,60 @@
-#!/usr/bin/env python
-import os
-from optparse import OptionParser
+#!/usr/bin/env python3
 
+import argparse
+import os
 import scanpy as sc
 
-parser = OptionParser(
-    usage="usage: %prog [options] h5ad_file_path",
-    version="%prog 1.0"
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    type=argparse.FileType('r'),
+    help='Input h5ad file.'
 )
-parser.add_option(
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+parser.add_argument(
     "-x", "--method",
-    type="string",
+    type=str,
     action="store",
     dest="method",
     default="zscore_scale",
     help="Scale the data. Choose one of : zscore_scale"
 )
-parser.add_option(
+
+parser.add_argument(
     "-M", "--max-sd",
-    type="float",
+    type=float,
     action="store",
     dest="max_sd",
     default=-1,
     help="Clip values greater than maximum number of standard deviation."
 )
-(options, args) = parser.parse_args()
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
-SCALE__MAX_SD = options.max_sd if options.max_sd > 0 else None
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
+SCALE__MAX_SD = args.max_sd if args.max_sd > 0 else None
 
 # I/O
 # Expects h5ad file
 try:
-    adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except:
+    adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
+except IOError:
     raise Exception("Can only handle .h5ad files.")
 
 #
 # Transform the distribution of the data
 #
 
-if options.method == "zscore_scale":
+if args.method == "zscore_scale":
     # scale each gene to unit variance, clip values exceeding SD max_sd.
     sc.pp.scale(adata, max_value=SCALE__MAX_SD)
 else:

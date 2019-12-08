@@ -12,19 +12,19 @@ process SC__CELLRANGER__PREPARE_FOLDER {
     // publishDir "${params.outdir}/data", mode: 'link', overwrite: true
 
     input:
-    tuple val(sampleId), val(fastqs)
-    
+        tuple val(sampleId), val(fastqs)
+
     output:
-    tuple val(sampleId), path("${sampleId}_s*")
-    
+        tuple val(sampleId), path("${sampleId}_s*")
+
     script:
-    def cmd = ''
-    for(int i = 0; i < fastqs.size(); i++) {
-        cmd += "mkdir ${sampleId}_s${i+1}; "
-        cmd += "ln -s ${fastqs[i].join(' ')} ${sampleId}_s${i+1}; "
-    }
-    """
-    $cmd
-    """
+        def cmd = ''
+        for(int i = 0; i < fastqs.size(); i++) {
+            cmd += "mkdir ${sampleId}_s${i+1}; "
+            cmd += "ln -s ${fastqs[i].join(' ')} ${sampleId}_s${i+1}; "
+        }
+        """
+        $cmd
+        """
 
 }

@@ -12,29 +12,40 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
+include SC__FILE_CONVERTER from './processes/utils' params(params)
+
 // Uncomment to test
 include getChannel as getTenXChannel from '../channels/tenx.nf'
 
 // Make the test workflow 
 workflow test_SC__FILE_CONVERTER {
+
     get:
         data
+
     main:
         SC__FILE_CONVERTER( data )
+
     emit:
         SC__FILE_CONVERTER.out
+
 }
 
 workflow test_SC__FILE_CONCATENATOR {
+
     get:
         data
+
     main:
         SC__FILE_CONCATENATOR( ( data ).collect() )
+
     emit:
         SC__FILE_CONCATENATOR.out
+
 }
 
 workflow {
+
     main:
         switch(params.test) {
             case "SC__FILE_CONVERTER":
@@ -92,4 +103,5 @@ workflow {
                 throw new Exception("The test parameters should be specified.")
             break;
         }
+
 }
