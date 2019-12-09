@@ -1,17 +1,27 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import argparse
 import os
-import warnings
-from optparse import OptionParser
-
 import scanpy as sc
+import warnings
 
-parser = OptionParser(
-    usage="usage: %prog [options] h5ad_file_path",
-    version="%prog 1.0"
+parser = argparse.ArgumentParser(description='')
+
+parser.add_argument(
+    "input",
+    type=argparse.FileType('r'),
+    help='Input h5ad file.'
 )
-parser.add_option(
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+parser.add_argument(
     "-x", "--method",
-    type="string",
+    type=str,
     action="store",
     dest="method",
     default="wilcoxon",
@@ -19,34 +29,34 @@ parser.add_option(
          " 't-test' uses t-test,  'logreg' uses logistic regression. See [Ntranos18], here and here, for why this is"
          " meaningful."
 )
-parser.add_option(
+parser.add_argument(
     "-g", "--groupby",
-    type="string",
+    type=str,
     action="store",
     dest="groupby",
     default="louvain",
     help="The key of the observations grouping to consider."
 )
-parser.add_option(
+parser.add_argument(
     "-n", "--ngenes",
-    type="int",
+    type=int,
     action="store",
     dest="ngenes",
     default=0,
     help="The number of genes that appear in the returned tables. Value of 0 will report all genes."
 )
 
-(options, args) = parser.parse_args()
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 # I/O
 # Expects h5ad file
 try:
-    adata = sc.read_h5ad(filename=FILE_PATH_IN)
-except:
+    adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
+except IOError:
     raise Exception("Can only handle .h5ad files.")
 
 if 'raw' not in dir(adata):
@@ -54,7 +64,7 @@ if 'raw' not in dir(adata):
         "There is no raw attribute in your anndata object. Differential analysis will be performed on the main (possibly normalised) matrix."
     )
 
-if options.ngenes == 0:
+if args.ngenes == 0:
     try:
         ngenes = adata.raw.shape[1]
     except AttributeError:
@@ -63,6 +73,6 @@ if options.ngenes == 0:
             "There is no raw attribute in your anndata object. Using the shape of the main matrix as the number of genes to report."
         )
 
-sc.tl.rank_genes_groups(adata, groupby=options.groupby, method=options.method, n_genes=ngenes)
+sc.tl.rank_genes_groups(adata, groupby=args.groupby, method=args.method, n_genes=ngenes)
 
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

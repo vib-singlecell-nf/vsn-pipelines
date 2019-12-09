@@ -17,23 +17,25 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // utils:
-include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params.sc.file_converter + params.global + params)
+include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params)
 include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
 include SC__ANNOTATE_BY_CELL_METADATA from '../../utils/processes/h5adAnnotate' params(params)
 include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
 
 // scanpy:
-include '../processes/filter.nf' params(params.sc.scanpy.filter + params.global + params)
+include '../processes/filter.nf' params(params)
 
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params.sc.scanpy.filter + params)
+include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
 
 workflow QC_FILTER {
+
     get:
         data
+
     main:
         data = SC__FILE_CONVERTER( data )
         if(params.sc.cell_filter) {
@@ -57,7 +59,9 @@ workflow QC_FILTER {
             file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
             'SC_QC_filtering_report'
         )
+
     emit:
         filtered
         report
+
 }
