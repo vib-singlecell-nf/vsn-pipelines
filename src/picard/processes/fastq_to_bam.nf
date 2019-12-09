@@ -3,14 +3,16 @@ nextflow.preview.dsl=2
 process PICARD__FASTQ_TO_BAM {
 
     container params.picard.container
-    publishDir "${params.outdir}/01.clean", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=24:00:00 -A ${params.qsubaccount}"
+    publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
+    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
         file(reads)
         file(tmpDir)
+    
     output:
-        tuple val(sample), file('*.unaligned.bam'), emit: bam
+        tuple val(sample), path('*.unaligned.bam'), emit: bam
+    
     script:
         sample = reads[0].toString() - ~/(_R1)?(\.clean)?(\.fq)?(\.fastq)?(\.gz)?$/
         """
@@ -22,4 +24,5 @@ process PICARD__FASTQ_TO_BAM {
                     O=${sample}.unaligned.bam \
                     SAMPLE_NAME=${sample}
         """
+
 }

@@ -13,21 +13,23 @@ process SC__ANNOTATE_BY_CELL_METADATA {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(id), file(f)
+        tuple val(sampleId), path(f)
+
     output:
-        tuple val(id), file("${id}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+        tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+
     script:
-        annotationColumnNamesAsArguments = params.sc.cell_annotate.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
+        processParams = params.sc.cell_annotate
+        annotationColumnNamesAsArguments = processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
-            --sample-id ${id} \
-            --sample-column-name ${params.sc.cell_annotate.sampleColumnName} \
-            --index-column-name ${params.sc.cell_annotate.indexColumnName} \
+            --index-column-name ${processParams.indexColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
-            ${params.sc.cell_annotate.cellMetaDataFilePath} \
-            --output "${id}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
+            ${processParams.cellMetaDataFilePath} \
+            --output "${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
         """
+
 }
 
 process SC__ANNOTATE_BY_SAMPLE_METADATA() {
@@ -37,15 +39,19 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(id), file(f)
+        tuple val(sampleId), path(f)
+
     output:
-        tuple val(id), file("${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.sc.sample_annotate.off}")
+        tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
+
     script:
+        processParams = params.sc.sample_annotate
         """
         ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
-            ${(params.sc.sample_annotate.containsKey('type')) ? '--type ' + params.sc.sample_annotate.type : ''} \
-            ${(params.sc.sample_annotate.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + params.sc.sample_annotate.metaDataFilePath : ''} \
+            ${(processParams.containsKey('type')) ? '--type ' + processParams.type : ''} \
+            ${(processParams.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + processParams.metaDataFilePath : ''} \
             $f \
-            "${id}.SC__ANNOTATE_BY_SAMPLE_METADATA.${params.sc.sample_annotate.off}"
-    """
+            "${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}"
+        """
+
 }

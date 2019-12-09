@@ -7,8 +7,10 @@ def extractSample(path) {
 }
 
 workflow getChannel {
+
     get:
         glob
+
     main:
         // Check whether multiple globs are provided
         if(glob.contains(',')) {
@@ -17,8 +19,10 @@ workflow getChannel {
         channel = Channel
             .fromPath(glob, type: 'dir', checkIfExists: true)
             .map {
-                path -> tuple(extractSample( "${path}" ), file("${path}"))
+                filePath -> tuple(extractSample( "${filePath}" ), file("${filePath}"))
             }
+
     emit:
         channel
+
 }
