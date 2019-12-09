@@ -24,13 +24,13 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include '../processes/batch_effect_correct.nf' params(params.sc.scanpy.batch_effect_correct + params.global + params)
+include '../processes/batch_effect_correct.nf' params(params)
 
-include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params.sc.scanpy.clustering + params.global + params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params.sc.scanpy.dim_reduction.umap + params.global + params)
-include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params + params.global)
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params.global + params)
-include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params + params.global)
+include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params)
+include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
+include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
+include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
+include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params)
 
 // reporting:
 include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + params.global)
@@ -39,8 +39,10 @@ include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + par
 //  Define the workflow 
 
 workflow BEC_BBKNN {
+
     get:
         data
+
     main:
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
         CLUSTER_IDENTIFICATION( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
@@ -56,10 +58,12 @@ workflow BEC_BBKNN {
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report"
         )
+
     emit:
         scopeloom
         cluster_report = CLUSTER_IDENTIFICATION.out.report
         bbknn_report
+
 }
 
 // Uncomment to test
