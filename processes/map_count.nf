@@ -16,7 +16,8 @@ process SC__STAR__MAP_COUNT {
 		tuple val(sample), path("*.STAR_Aligned.sortedByCoord.out.bam"), emit: bam
 
 	script:
-		processParams = params.sc.star.map_count
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star.map_count)
+		processParams = sampleParams.local
 		success = true
 		"""
 		STAR \

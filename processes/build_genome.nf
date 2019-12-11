@@ -13,7 +13,8 @@ process SC__STAR__BUILD_INDEX {
         file("STAR_index")
 
     script:
-        processParams = params.sc.star.build_genome
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star.build_genome)
+		processParams = sampleParams.local
         """
         mkdir STAR_index
         STAR \
