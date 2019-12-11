@@ -14,7 +14,8 @@ process SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
         tuple file('*.adapter_trimming_report.txt'), emit: report
 
     script:
-        processParams = params.sc.dropseqtools.trim_smart_unaligned_tagged_filtered_bam
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.trim_smart_unaligned_tagged_filtered_bam)
+		processParams = sampleParams.local
         """
         TrimStartingSequence \
             INPUT=${bam} \

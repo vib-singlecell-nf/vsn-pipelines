@@ -17,7 +17,8 @@ process FASTP__CLEAN_AND_FASTQC {
         tuple file('*_fastp.{json,html}'), emit: report
     
     script:
-        processParams = params.fastp
+        def sampleParams = params.parseConfig(sampleId, params.global, params.fastp)
+		processParams = sampleParams.local
         """
         fastp --thread ${processParams.thread} \
             -i ${reads[0]} \
