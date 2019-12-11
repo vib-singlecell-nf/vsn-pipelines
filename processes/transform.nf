@@ -19,7 +19,8 @@ process SC__SCANPY__NORMALIZATION {
 		tuple val(sampleId), path("${sampleId}.SC__SCANPY__NORMALIZATION.${processParams.off}")
 
 	script:
-		processParams = params.sc.scanpy.normalization
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.normalization)
+		processParams = sampleParams.local
 		"""
 		${binDir}transform/sc_normalization.py \
 			${(processParams.containsKey('normalizationMethod')) ? '--method ' + processParams.normalizationMethod : ''} \
@@ -43,7 +44,8 @@ process SC__SCANPY__DATA_TRANSFORMATION {
 		tuple val(sampleId), path("${sampleId}.SC__SCANPY__DATA_TRANSFORMATION.${processParams.off}")
 	
 	script:
-		processParams = params.sc.scanpy.data_transformation
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.data_transformation)
+		processParams = sampleParams.local
 		"""
 		${binDir}transform/sc_data_transformation.py \
 			${(processParams.containsKey('dataTransformationMethod')) ? '--method ' + processParams.dataTransformationMethod : ''} \
@@ -66,7 +68,8 @@ process SC__SCANPY__FEATURE_SCALING {
 		tuple val(sampleId), path("${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
 	
 	script:
-		processParams = params.sc.scanpy.feature_scaling
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.feature_scaling)
+		processParams = sampleParams.local
 		"""
 		${binDir}transform/sc_feature_scaling.py \
 			${(processParams.containsKey('featureScalingMthod')) ? '--method ' + processParams.featureScalingMthod : ''} \
