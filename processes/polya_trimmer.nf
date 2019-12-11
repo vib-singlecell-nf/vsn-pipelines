@@ -14,7 +14,8 @@ process SC__DROP_SEQ_TOOLS__TRIM_POLYA_UNALIGNED_TAGGED_TRIMMED_SMART {
     tuple file('*.polyA_trimming_report.txt'), emit: report
 
     script:
-    processParams = params.sc.dropseqtools.trim_polya_unaligned_tagged_trimmed_smart
+    def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.trim_polya_unaligned_tagged_trimmed_smart)
+		processParams = sampleParams.local
     """
     PolyATrimmer \
         INPUT=${bam} \
