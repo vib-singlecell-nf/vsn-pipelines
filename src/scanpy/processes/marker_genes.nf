@@ -19,7 +19,8 @@ process SC__SCANPY__MARKER_GENES {
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}")
   
   	script:
-    	processParams = params.sc.scanpy.marker_genes
+    	def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.marker_genes)
+		processParams = sampleParams.local
 		"""
 		${binDir}cluster/sc_marker_genes.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \

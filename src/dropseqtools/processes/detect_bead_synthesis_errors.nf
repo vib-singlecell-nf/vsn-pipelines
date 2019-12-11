@@ -15,7 +15,8 @@ process SC__DROP_SEQ_TOOLS__DETECT_REPAIR_BARCODE_SYNTHESIS_ERRORS {
 		// tuple file("*.synthesis_stats.summary.txt"), emit: statsSummary
 
 	script:
-		processParams = params.sc.dropseqtools.detect_repair_barcode_synthesis_errors
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.detect_repair_barcode_synthesis_errors)
+		processParams = sampleParams.local
 		"""
 		DetectBeadSynthesisErrors \
 			I=${bam} \
