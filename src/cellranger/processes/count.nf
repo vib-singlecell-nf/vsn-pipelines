@@ -3,10 +3,10 @@ nextflow.preview.dsl=2
 process SC__CELLRANGER__COUNT {
 
 	label params.sc.cellranger.labels.processExecutor
-    cache 'deep'
-    container params.sc.cellranger.container
-    publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${params.sc.cellranger.count.ppn} -l pmem=${params.sc.cellranger.count.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+	cache 'deep'
+	container params.sc.cellranger.container
+	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	clusterOptions "-l nodes=1:ppn=${params.sc.cellranger.count.ppn} -l pmem=${params.sc.cellranger.count.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 	maxForks = params.sc.cellranger.count.maxForks
 
   	input:
@@ -17,25 +17,27 @@ process SC__CELLRANGER__COUNT {
     	tuple val(sampleId), file("${sampleId}/outs")
 
   	script:
+	  	def sampleParams = params.parseConfig(sampleId, params.global, params.sc.cellranger.count)
+		processParams = sampleParams.local
 		"""
 		cellranger count \
 			--id=${sampleId} \
 			--sample=${sampleId} \
 			--fastqs=${fastqs.join(",")} \
 			--transcriptome=${transcriptome} \
-			${(params.sc.cellranger.count.containsKey('libraries')) ? '--libraries ' + params.sc.cellranger.count.libraries: ''} \
-			${(params.sc.cellranger.count.containsKey('featureRef')) ? '--feature-ref ' + params.sc.cellranger.count.featureRef: ''} \
-			${(params.sc.cellranger.count.containsKey('expectCells')) ? '--expect-cells ' + params.sc.cellranger.count.expectCells: ''} \
-			${(params.sc.cellranger.count.containsKey('forceCells')) ? '--force-cells ' + params.sc.cellranger.count.forceCells: ''} \
-			${(params.sc.cellranger.count.containsKey('nosecondary')) ? '--nosecondary ' + params.sc.cellranger.count.nosecondary: ''} \
-			${(params.sc.cellranger.count.containsKey('noLibraries')) ? '--no-libraries ' + params.sc.cellranger.count.noLibraries: ''} \
-			${(params.sc.cellranger.count.containsKey('chemistry')) ? '--chemistry ' + params.sc.cellranger.count.chemistry: ''} \
-			${(params.sc.cellranger.count.containsKey('r1Length')) ? '--r1-length ' + params.sc.cellranger.count.r1Length: ''} \
-			${(params.sc.cellranger.count.containsKey('r2Length')) ? '--r2-length ' + params.sc.cellranger.count.r2Length: ''} \
-			${(params.sc.cellranger.count.containsKey('lanes')) ? '--lanes ' + params.sc.cellranger.count.lanes: ''} \
-			${(params.sc.cellranger.count.containsKey('localCores')) ? '--localcores ' + params.sc.cellranger.count.localCores: ''} \
-			${(params.sc.cellranger.count.containsKey('localMem')) ? '--localmem ' + params.sc.cellranger.count.localMem: ''} \
-			${(params.sc.cellranger.count.containsKey('indicies')) ? '--indicies ' + params.sc.cellranger.count.indicies: ''} 
+			${(processParams.containsKey('libraries')) ? '--libraries ' + processParams.libraries: ''} \
+			${(processParams.containsKey('featureRef')) ? '--feature-ref ' + processParams.featureRef: ''} \
+			${(processParams.containsKey('expectCells')) ? '--expect-cells ' + processParams.expectCells: ''} \
+			${(processParams.containsKey('forceCells')) ? '--force-cells ' + processParams.forceCells: ''} \
+			${(processParams.containsKey('nosecondary')) ? '--nosecondary ' + processParams.nosecondary: ''} \
+			${(processParams.containsKey('noLibraries')) ? '--no-libraries ' + processParams.noLibraries: ''} \
+			${(processParams.containsKey('chemistry')) ? '--chemistry ' + processParams.chemistry: ''} \
+			${(processParams.containsKey('r1Length')) ? '--r1-length ' + processParams.r1Length: ''} \
+			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
+			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
+			${(processParams.containsKey('localCores')) ? '--localcores ' + processParams.localCores: ''} \
+			${(processParams.containsKey('localMem')) ? '--localmem ' + processParams.localMem: ''} \
+			${(processParams.containsKey('indicies')) ? '--indicies ' + processParams.indicies: ''} 
 		"""
 
 }
