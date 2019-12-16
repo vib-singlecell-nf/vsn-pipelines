@@ -77,6 +77,15 @@ workflow {
                     SC__ANNOTATE_BY_CELL_METADATA( FILTER_BY_CELL_METADATA.out )
                 }
             break;
+            case "GET_METADATA_FROM_SRA":
+                // Imports
+                include getChannel as getSRAChannel from './../channels/sra' params(params)
+                include SRA_TO_METADATA from './processes/sra' params(params)
+                // Run
+                sra = getSRAChannel( params.data.sra )
+                db = file(params.utils.sra_metadata.sraDbOutDir + "/SRAmetadb.sqlite")
+                SRA_TO_METADATA( sra, db )
+            break;
             case "DOWNLOAD_FROM_SRA":
                 // Imports
                 include DOWNLOAD_FROM_SRA from './workflows/downloadFromSRA' params(params)
