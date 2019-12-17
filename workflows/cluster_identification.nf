@@ -15,6 +15,7 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 workflow CLUSTER_IDENTIFICATION {
 
     get:
+        normalizedTransformedData
         data
 
     main:
@@ -24,7 +25,9 @@ workflow CLUSTER_IDENTIFICATION {
             file(workflow.projectDir + params.sc.scanpy.clustering.report_ipynb),
             "SC_clustering_report"
         )
-        marker_genes = SC__SCANPY__MARKER_GENES( SC__SCANPY__CLUSTERING.out )
+        marker_genes = SC__SCANPY__MARKER_GENES(
+            normalizedTransformedData.join(SC__SCANPY__CLUSTERING.out)
+        )
 
     emit:
         marker_genes

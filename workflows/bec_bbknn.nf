@@ -1,9 +1,3 @@
-//
-// Version: 0.1.0
-// Test: passed
-// Command: 
-//  nextflow run src/singlecelltxbenchmark/pipelines/bec__bbknn -profile singularity --tenx_folder data/01.count/**/filtered_feature_bc_matrix --project_name tiny
-//
 /*
  * BEC__BBKNN workflow 
  * Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
@@ -28,7 +22,6 @@ include '../processes/batch_effect_correct.nf' params(params)
 
 include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params)
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
 include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
 include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params)
 
@@ -50,7 +43,6 @@ workflow BEC_BBKNN {
         SC__PUBLISH_H5AD( SC__SCANPY__DIM_REDUCTION__UMAP.out,
             params.global.project_name+".BEC_BBKNN.output"
         )
-        scopeloom = SC__H5AD_TO_LOOM(SC__SCANPY__DIM_REDUCTION__UMAP.out )
         // Not using t-SNE as it does not use the neighbour graph (which BBKNN alters) when constructing its dimensionality reduction
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
             data,
@@ -60,7 +52,7 @@ workflow BEC_BBKNN {
         )
 
     emit:
-        scopeloom
+        data = SC__SCANPY__DIM_REDUCTION__UMAP.out
         cluster_report = CLUSTER_IDENTIFICATION.out.report
         bbknn_report
 
