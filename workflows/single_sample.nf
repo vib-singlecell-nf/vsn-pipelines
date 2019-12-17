@@ -42,18 +42,28 @@ include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' par
 
 workflow single_sample {
     
+    // run the pipeline
     data = getTenXChannel( params.global.tenx_folder )
     QC_FILTER( data )
-    filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
     NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     DIM_REDUCTION( HVG_SELECTION.out.scaled )
-    CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
-    scopeloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
+    CLUSTER_IDENTIFICATION(
+        NORMALIZE_TRANSFORM.out,
+        DIM_REDUCTION.out.dimred 
+    )
+
+    // conversion
+    //// convert h5ad to X (here we choose: loom format)
+    filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
+    scopeloom = SC__H5AD_TO_LOOM(
+        QC_FILTER.out.filtered.join(CLUSTER_IDENTIFICATION.out.marker_genes)
+    )
     SC__PUBLISH_H5AD( 
         CLUSTER_IDENTIFICATION.out.marker_genes,
         params.global.project_name+".single_sample.output"
     )
+
     // reporting:
     SC__SCANPY__MERGE_REPORTS(
         QC_FILTER.out.report.mix(
@@ -70,4 +80,3 @@ workflow single_sample {
         scopeloom
 
 }
-

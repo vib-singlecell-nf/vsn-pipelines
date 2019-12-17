@@ -48,7 +48,7 @@ workflow single_sample_star {
         CLUSTER_IDENTIFICATION.out.marker_genes,
         "single_sample.output"
     )
-    filteredloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
+    scopeloom = SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
     
 }
 

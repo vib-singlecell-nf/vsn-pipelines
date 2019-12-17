@@ -13,6 +13,12 @@ import zlib
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
+    "raw_filtered_data",
+    type=argparse.FileType('r'),
+    help='Input h5ad file containing the raw filtered data.'
+)
+
+parser.add_argument(
     "input",
     type=argparse.FileType('r'),
     help='Input h5ad file.'
@@ -55,6 +61,7 @@ def dfToNamedMatrix(df):
 
 
 try:
+    raw_filtered_adata = sc.read_h5ad(filename=args.raw_filtered_data.name)
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
@@ -199,7 +206,7 @@ attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('
 
 lp.create(
     filename=f"{FILE_PATH_OUT_BASENAME}.loom",
-    layers=(adata.raw.X).T,
+    layers=(raw_filtered_adata.X).T,
     row_attrs=row_attrs,
     col_attrs=col_attrs,
     file_attrs=attrs
