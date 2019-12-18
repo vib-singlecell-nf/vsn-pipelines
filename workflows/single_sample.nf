@@ -57,9 +57,9 @@ workflow single_sample {
     //// convert h5ad to X (here we choose: loom format)
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
     scopeloom = FILE_CONVERTER(
-        QC_FILTER.out.filtered,
         CLUSTER_IDENTIFICATION.out.marker_genes,
-        'loom'
+        'loom',
+        QC_FILTER.out.filtered
     )
     SC__PUBLISH_H5AD( 
         CLUSTER_IDENTIFICATION.out.marker_genes,

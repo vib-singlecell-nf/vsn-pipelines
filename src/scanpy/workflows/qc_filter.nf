@@ -18,6 +18,7 @@ nextflow.preview.dsl=2
 
 // utils:
 include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params)
+include FILE_CONVERTER from '../../utils/workflows/fileConverter.nf' params(params)
 include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
 include SC__ANNOTATE_BY_CELL_METADATA from '../../utils/processes/h5adAnnotate' params(params)
 include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
@@ -37,7 +38,11 @@ workflow QC_FILTER {
         data
 
     main:
-        data = SC__FILE_CONVERTER( data )
+        data = FILE_CONVERTER(
+            data,
+            'h5ad',
+            Channel.empty()
+        )
         if(params.sc.cell_filter) {
             data = FILTER_BY_CELL_METADATA( data )
         }
