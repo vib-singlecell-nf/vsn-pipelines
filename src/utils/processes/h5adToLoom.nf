@@ -14,7 +14,10 @@ process SC__H5AD_TO_LOOM {
 	publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
 
 	input:
-		tuple val(sampleId), path(f)
+		// Expects:
+		// - rawFilteredData to be h5ad file containing the raw filtered (gene + cell filtered) data
+		// - data to be the h5ad file containing the final results to be stored in the loom
+		tuple val(sampleId), path(rawFilteredData), path(data)
 
 	output:
 		tuple val(sampleId), path("${sampleId}.SC__H5AD_TO_LOOM.loom")
@@ -22,7 +25,8 @@ process SC__H5AD_TO_LOOM {
 	script:
 		"""
 		${binDir}h5ad_to_loom.py \
-			$f \
+			$rawFilteredData \
+			$data \
 			"${sampleId}.SC__H5AD_TO_LOOM.loom"
 		"""
 

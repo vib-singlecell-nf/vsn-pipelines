@@ -146,3 +146,27 @@ process SC__PUBLISH_H5AD {
 		"""
 
 }
+
+process COMPRESS_HDF5() {
+
+	container "aertslab/sctx-hdf5:1.10.5-r2"
+	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+	publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
+
+	input:
+		tuple val(id), path(f)
+
+	output:
+		tuple val(id), path("${id}.COMPRESS_HDF5.${f.extension}")
+
+	shell:
+		"""
+		GZIP_COMPRESSION_LEVEL=6
+		h5repack \
+		   -v \
+		   -f GZIP=\${GZIP_COMPRESSION_LEVEL} \
+		   $f \
+		   "${id}.COMPRESS_HDF5.${f.extension}"
+		"""
+
+}
