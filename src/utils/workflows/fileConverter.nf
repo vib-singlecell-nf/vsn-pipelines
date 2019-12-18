@@ -21,12 +21,12 @@ outputFormatsAllowed = ['loom']
 workflow FILE_CONVERTER {
 
     get:
-        // Expects (sampleId, rawFilteredData)
-        rawFilteredData
         // Expects (sampleId, data)
         data
         // Expects (sampleId, outputFormat)
         outputFormat
+        // Expects (sampleId, rawFilteredData)
+        rawFilteredData
 
     main:
         data.view()
@@ -37,7 +37,7 @@ workflow FILE_CONVERTER {
             .set { convert }
 
         convert.h5adToLoom.view { 
-            "Converting ${it[1].baseName} to ${it[1].baseName}.loom (w/ additional compression)..." 
+            "Converting ${it[1].baseName}.h5ad to ${it[1].baseName}.loom (w/ additional compression)..." 
         }
         SC__H5AD_TO_LOOM(
             rawFilteredData.join(convert.h5adToLoom).ifEmpty('Channel empty: no h5ad files were converted to the loom format.').view()

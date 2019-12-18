@@ -29,8 +29,8 @@ include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params)
-include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
+include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 include SC__PUBLISH_H5AD from '../src/utils/processes/utils.nf' params(params)
 
 // data channel to start from 10x data:
@@ -57,9 +57,9 @@ workflow single_sample {
     //// convert h5ad to X (here we choose: loom format)
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
     scopeloom = FILE_CONVERTER(
-        QC_FILTER.out.filtered,
         CLUSTER_IDENTIFICATION.out.marker_genes,
-        'loom'
+        'loom',
+        QC_FILTER.out.filtered,
     )
     SC__PUBLISH_H5AD( 
         CLUSTER_IDENTIFICATION.out.marker_genes,
