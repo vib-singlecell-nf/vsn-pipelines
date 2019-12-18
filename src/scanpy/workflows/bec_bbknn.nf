@@ -34,11 +34,15 @@ include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + par
 workflow BEC_BBKNN {
 
     get:
+        normalizedTransformedData
         data
 
     main:
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
-        CLUSTER_IDENTIFICATION( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
+        CLUSTER_IDENTIFICATION(
+            normalizedTransformedData,
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out 
+        )
         SC__SCANPY__DIM_REDUCTION__UMAP( CLUSTER_IDENTIFICATION.out.marker_genes )
         SC__PUBLISH_H5AD( SC__SCANPY__DIM_REDUCTION__UMAP.out,
             params.global.project_name+".BEC_BBKNN.output"
