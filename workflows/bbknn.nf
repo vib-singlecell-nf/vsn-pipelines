@@ -1,9 +1,3 @@
-//
-// Version:
-// Test:
-// Command: 
-// 
-//
 /*
  * Remote run test
  * Source:
@@ -29,6 +23,7 @@ include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(par
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
+include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
 include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 
 // data channel to start from 10x data:
@@ -45,17 +40,25 @@ workflow bbknn_base {
         data
 
     main:
+        // run the pipeline
         QC_FILTER( data ) // Remove concat 
         SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
         NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
 
-        // include all pre-merge dim reductions. These will be replaced in the bbknn step
+        //// include all pre-merge dim reductions. These will be replaced in the bbknn step
         DIM_REDUCTION( HVG_SELECTION.out.scaled )
         CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
-        BEC_BBKNN( CLUSTER_IDENTIFICATION.out.marker_genes )
+        BEC_BBKNN(
+            SC__FILE_CONCATENATOR.out.join(CLUSTER_IDENTIFICATION.out.marker_genes)
+        )
 
+        // conversion
+        //// convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
+        scopeloom = SC__H5AD_TO_LOOM(
+            QC_FILTER.out.filteredloom.join(BEC_BBKNN.out.data)
+        )
 
         // collect the reports:
         ipynbs = HVG_SELECTION.out.report
@@ -68,7 +71,7 @@ workflow bbknn_base {
 
     emit:
         filteredloom
-        scopeloom = BEC_BBKNN.out.scopeloom
+        scopeloom
 
 }
 

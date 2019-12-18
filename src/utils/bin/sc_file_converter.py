@@ -41,6 +41,7 @@ parser.add_argument(
     "-s", "--sample-id",
     type=str,
     dest="sample_id",
+    default=None,
     action='store'
 )
 
@@ -85,8 +86,8 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
         var_names='gene_symbols',  # use gene symbols for the variable names (variables-axis index)
         cache=False
     )
-    # Add the sample ID as suffix
-    if "sample_id" in args:
+    # If is sample_id is given, add the sample ID as suffix
+    if args.sample_id is not None:
         adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
