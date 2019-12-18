@@ -93,8 +93,7 @@ process SC__FILE_CONCATENATOR() {
 		tuple val(params.global.project_name), path("${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}")
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_concatenator)
-		processParams = sampleParams.local
+		processParams = params.sc.file_concatenator
 		"""
 		${binDir}sc_file_concatenator.py \
 			--file-format $processParams.off \
