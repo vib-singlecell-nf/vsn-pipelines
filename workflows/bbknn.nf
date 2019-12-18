@@ -23,7 +23,7 @@ include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(par
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
+include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 
 // data channel to start from 10x data:
@@ -48,16 +48,22 @@ workflow bbknn_base {
 
         //// include all pre-merge dim reductions. These will be replaced in the bbknn step
         DIM_REDUCTION( HVG_SELECTION.out.scaled )
-        CLUSTER_IDENTIFICATION( DIM_REDUCTION.out.dimred )
+        CLUSTER_IDENTIFICATION( 
+            NORMALIZE_TRANSFORM.out,
+            DIM_REDUCTION.out.dimred 
+        )
         BEC_BBKNN(
-            SC__FILE_CONCATENATOR.out.join(CLUSTER_IDENTIFICATION.out.marker_genes)
+            NORMALIZE_TRANSFORM.out,
+            CLUSTER_IDENTIFICATION.out.marker_genes
         )
 
         // conversion
         //// convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-        scopeloom = SC__H5AD_TO_LOOM(
-            QC_FILTER.out.filteredloom.join(BEC_BBKNN.out.data)
+        scopeloom = FILE_CONVERTER(
+            BEC_BBKNN.out.data,
+            'loom',
+            SC__FILE_CONCATENATOR.out
         )
 
         // collect the reports:
