@@ -93,6 +93,10 @@ signatures = utils.read_signatures_from_tsv_dir(
     weight_threshold=args.min_regulon_gene_occurrence,
     min_genes=args.min_genes
 )
+
+if len(signatures) == 0:
+    raise Exception(f"No signature passing filtering. Please consider to adapt 'min_genes_regulon = {args.min_genes_regulon}' and 'min_regulon_gene_occurrence = {args.min_regulon_gene_occurrence}' (see params.sc.scenic.aucell). Make sure these settings are smaller than numRuns (params.sc.scenic).")
+
 auc_threshold = args.auc_threshold
 
 if args.percentile_threshold is not None:
