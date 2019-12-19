@@ -24,7 +24,7 @@ include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' par
 workflow single_sample {
     
     // run the pipeline
-    data = getTenXChannel( params.global.tenx_folder )
+    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path )
     QC_FILTER( data )
     NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )

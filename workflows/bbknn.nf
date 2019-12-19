@@ -71,7 +71,7 @@ workflow bbknn_base {
 workflow bbknn_standalone {
 
     main:
-        data = getTenXChannel( params.global.tenx_folder ).view()
+        data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path ).view()
         bbknn_base( data )
 
     emit:
