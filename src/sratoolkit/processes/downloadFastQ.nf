@@ -8,6 +8,8 @@ if(!params.containsKey("test")) {
 
 process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
 
+    errorStrategy 'retry'
+    maxRetries 3
     container params.sratoolkit.container
     publishDir "${params.global.outdir}/data", mode: 'symlink'
     clusterOptions "-l nodes=1:ppn=20 -l walltime=24:00:00 -A ${params.qsubaccount}"
