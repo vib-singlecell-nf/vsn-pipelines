@@ -10,7 +10,7 @@ include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(par
 include SC__SCANPY__ADJUSTMENT from '../src/scanpy/processes/adjust.nf' params(params)
 include BEC_MNN_CORRECT from '../src/scanpy/workflows/bec_mnn_correct.nf' params(params)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
+include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
@@ -23,15 +23,20 @@ workflow mnncorrect {
     SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-    BEC_MNN_CORRECT( HVG_SELECTION.out.scaled )
+    BEC_MNN_CORRECT(
+        NORMALIZE_TRANSFORM.out,
+        HVG_SELECTION.out.scaled
+    )
     // SC__SCANPY__ADJUSTMENT( HVG_SELECTION.out.scaled )
 
     // conversion
     //// convert h5ad to X (here we choose: loom format)
-    scopeloom = SC__H5AD_TO_LOOM(
-        QC_FILTER.out.filteredloom.join(BEC_MNN_CORRECT.out.marker_genes)
-    )
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
+    scopeloom = FILE_CONVERTER(
+        BEC_MNN_CORRECT.out.data,
+        'loom',
+        SC__FILE_CONCATENATOR.out,
+    )
 
     emit:
         filteredloom

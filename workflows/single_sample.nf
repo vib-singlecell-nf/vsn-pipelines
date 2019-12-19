@@ -1,23 +1,4 @@
-//
-// Version:
-// Test:
-// Command: 
-// 
-//
-/*
- * Remote run test
- * Source:
- * 
- * Steps considered: 
-
- */ 
-import static groovy.json.JsonOutput.*
-
 nextflow.preview.dsl=2
-
-// print all parameters:
-// println(prettyPrint(toJson( params )))
-
 
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
@@ -59,8 +40,10 @@ workflow single_sample {
     scopeloom = FILE_CONVERTER(
         CLUSTER_IDENTIFICATION.out.marker_genes,
         'loom',
-        QC_FILTER.out.filtered,
+        QC_FILTER.out.filtered
     )
+
+    // publishing
     SC__PUBLISH_H5AD( 
         CLUSTER_IDENTIFICATION.out.marker_genes,
         params.global.project_name+".single_sample.output"
