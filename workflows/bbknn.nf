@@ -1,17 +1,4 @@
-/*
- * Remote run test
- * Source:
- * 
- * Steps considered: 
-
- */ 
-import static groovy.json.JsonOutput.*
-
 nextflow.preview.dsl=2
-
-// print all parameters:
-// println(prettyPrint(toJson( params )))
-
 
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
