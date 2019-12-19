@@ -21,6 +21,7 @@ include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
 workflow BEC_MNN_CORRECT {
 
     get:
+        normalizedTransformedData
         data
 
     main:
@@ -28,7 +29,10 @@ workflow BEC_MNN_CORRECT {
         SC__SCANPY__DIM_REDUCTION__PCA( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
         SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__PCA.out )
         SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__UMAP.out )
-        CLUSTER_IDENTIFICATION( SC__SCANPY__DIM_REDUCTION__TSNE.out )
+        CLUSTER_IDENTIFICATION(
+            normalizedTransformedData,
+            SC__SCANPY__DIM_REDUCTION__TSNE.out
+        )
 
     emit:
         data = CLUSTER_IDENTIFICATION.out.marker_genes
