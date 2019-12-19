@@ -61,9 +61,3 @@ workflow BEC_BBKNN {
         bbknn_report
 
 }
-
-// Uncomment to test
-// workflow {
-//     main:
-//         bbknn( getTenXChannel( params.tenx_folder ) )
-// }
