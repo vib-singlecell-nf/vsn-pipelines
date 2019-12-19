@@ -18,7 +18,7 @@ include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(param
 workflow mnncorrect {
 
     // run the pipeline
-    data = getTenXChannel( params.global.tenx_folder ).view()
+    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path ).view()
     QC_FILTER( data ) // Remove concat
     SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
