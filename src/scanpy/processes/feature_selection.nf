@@ -19,7 +19,8 @@ process SC__SCANPY__FEATURE_SELECTION {
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}")
 
   	script:
-		processParams = params.sc.scanpy.feature_selection
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.feature_selection)
+		processParams = sampleParams.local
 		"""
 		${binDir}feature_selection/sc_select_variable_genes.py \
 			--method ${processParams.featureSelectionMethod} \

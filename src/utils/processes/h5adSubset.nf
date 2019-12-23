@@ -46,7 +46,8 @@ process SC__APPLY_OBS_FILTER {
         tuple val(sampleId), path("${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}")
 
     script:
-        processParams = params.sc.cell_filter
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.cell_filter)
+		processParams = sampleParams.local
         filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_apply_obs_filter.py \

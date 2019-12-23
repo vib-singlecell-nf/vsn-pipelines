@@ -22,7 +22,8 @@ process SC__FILE_CONVERTER {
 		tuple val(sampleId), path("${sampleId}.SC__FILE_CONVERTER.${processParams.off}")
 
 	script:
-		processParams = params.sc.file_converter
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+		processParams = sampleParams.local
 		switch(processParams.iff) {
 		
 			case "10x_mtx":
@@ -115,7 +116,8 @@ process SC__STAR_CONCATENATOR() {
 		tuple val(sampleId), path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
 	script:
-		processParams = params.sc.star_concatenator
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star_concatenator)
+		processParams = sampleParams.local
 		id = params.global.project_name
 		"""
 		${binDir}sc_star_concatenator.py \

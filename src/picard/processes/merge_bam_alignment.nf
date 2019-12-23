@@ -17,7 +17,8 @@ process PICARD__MERGE_BAM_ALIGNMENT {
         tuple val(sample), path("*.merged.bam")
 
     script:
-        processParams = params.picard.merge_bam_alignment
+        def sampleParams = params.parseConfig(sampleId, params.global, params.picard.merge_bam_alignment)
+		processParams = sampleParams.local
         """
         java -Djava.io.tmpdir=$tmpDir -jar \
             /picard.jar \
