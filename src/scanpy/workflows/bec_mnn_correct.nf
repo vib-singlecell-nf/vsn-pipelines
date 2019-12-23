@@ -38,9 +38,3 @@ workflow BEC_MNN_CORRECT {
         data = CLUSTER_IDENTIFICATION.out.marker_genes
 
 }
-
-// Uncomment to test
-// workflow {
-//     main:
-//         bbknn( getTenXChannel( params.tenx_folder ) )
-// }
