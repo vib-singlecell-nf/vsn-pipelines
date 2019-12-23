@@ -10,11 +10,10 @@ nextflow.preview.dsl=2
 
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
-include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params + [method: "pca"])
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__TSNE from '../processes/dim_reduction.nf' params(params + [method: "tsne"])
-include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
+include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -22,6 +21,7 @@ include SC__H5AD_TO_LOOM from '../../utils/processes/h5adToLoom.nf' params(param
 workflow BEC_MNN_CORRECT {
 
     get:
+        normalizedTransformedData
         data
 
     main:
@@ -29,16 +29,12 @@ workflow BEC_MNN_CORRECT {
         SC__SCANPY__DIM_REDUCTION__PCA( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
         SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__PCA.out )
         SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__UMAP.out )
-        CLUSTER_IDENTIFICATION( SC__SCANPY__DIM_REDUCTION__TSNE.out )
-        SC__H5AD_TO_LOOM( CLUSTER_IDENTIFICATION.out.marker_genes )
+        CLUSTER_IDENTIFICATION(
+            normalizedTransformedData,
+            SC__SCANPY__DIM_REDUCTION__TSNE.out
+        )
 
     emit:
-        SC__H5AD_TO_LOOM.out
+        data = CLUSTER_IDENTIFICATION.out.marker_genes
 
 }
-
-// Uncomment to test
-// workflow {
-//     main:
-//         bbknn( getTenXChannel( params.tenx_folder ) )
-// }
