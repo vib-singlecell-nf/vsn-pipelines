@@ -18,13 +18,18 @@ include SC__PUBLISH_H5AD from '../src/utils/processes/utils.nf' params(params)
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
 
 // reporting:
+include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../src/utils/processes/reports.nf' params(params)
 include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params)
 include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params)
 
 workflow single_sample {
     
     // run the pipeline
-    data = getTenXChannel( params.global.tenx_folder )
+    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path )
+    samples = data.map { it -> it[0] }
+    UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
+        file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
+    )
     QC_FILTER( data )
     NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
@@ -52,6 +57,7 @@ workflow single_sample {
     // reporting:
     SC__SCANPY__MERGE_REPORTS(
         QC_FILTER.out.report.mix(
+            samples.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out),
             HVG_SELECTION.out.report,
             DIM_REDUCTION.out.report,
             CLUSTER_IDENTIFICATION.out.report
