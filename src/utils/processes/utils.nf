@@ -22,7 +22,8 @@ process SC__FILE_CONVERTER {
 		tuple val(sampleId), path("${sampleId}.SC__FILE_CONVERTER.${processParams.off}")
 
 	script:
-		processParams = params.sc.file_converter
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+		processParams = sampleParams.local
 		switch(processParams.iff) {
 		
 			case "10x_mtx":
@@ -115,7 +116,8 @@ process SC__STAR_CONCATENATOR() {
 		tuple val(sampleId), path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
 	script:
-		processParams = params.sc.star_concatenator
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star_concatenator)
+		processParams = sampleParams.local
 		id = params.global.project_name
 		"""
 		${binDir}sc_star_concatenator.py \
@@ -140,6 +142,30 @@ process SC__PUBLISH_H5AD {
 	script:
 		"""
 		ln -s ${fIn} "${sampleId}.${fOutSuffix}.h5ad"
+		"""
+
+}
+
+process COMPRESS_HDF5() {
+
+	container "aertslab/sctx-hdf5:1.10.5-r2"
+	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+	publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true
+
+	input:
+		tuple val(id), path(f)
+
+	output:
+		tuple val(id), path("${id}.COMPRESS_HDF5.${f.extension}")
+
+	shell:
+		"""
+		GZIP_COMPRESSION_LEVEL=6
+		h5repack \
+		   -v \
+		   -f GZIP=\${GZIP_COMPRESSION_LEVEL} \
+		   $f \
+		   "${id}.COMPRESS_HDF5.${f.extension}"
 		"""
 
 }

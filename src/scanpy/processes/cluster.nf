@@ -19,7 +19,8 @@ process SC__SCANPY__CLUSTERING {
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}")
 
   	script:
-		processParams = params.sc.scanpy.clustering
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.clustering)
+		processParams = sampleParams.local
 		"""
 		${binDir}cluster/sc_clustering.py \
 			${(processParams.containsKey('clusteringMethod')) ? '--method ' + processParams.clusteringMethod : ''} \

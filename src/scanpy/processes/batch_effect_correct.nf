@@ -19,7 +19,8 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")
 
 	script:
-		processParams = params.sc.scanpy.batch_effect_correct
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.batch_effect_correct)
+		processParams = sampleParams.local
 		"""
 		${binDir}aggregate/sc_batch_effect_correction.py \
 			${(processParams.containsKey('batchEffectCorrectionMethod')) ? '--method ' + processParams.batchEffectCorrectionMethod : ''} \

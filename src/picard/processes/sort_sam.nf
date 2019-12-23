@@ -14,7 +14,8 @@ process PICARD__SORT_SAM {
         tuple val(sample), path("*.STAR_aligned_sorted.bam")
     
     script:
-        processParams = params.picard.sort_sam
+        def sampleParams = params.parseConfig(sampleId, params.global, params.picard.sort_sam)
+		processParams = sampleParams.local
         """
         java -Djava.io.tmpdir=$tmpDir -jar \
             /picard.jar \

@@ -18,7 +18,8 @@ process SC__SCANPY__COMPUTE_QC_STATS {
         tuple val(sampleId), path("${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
 
 	script:
-        processParams = params.sc.scanpy.filter
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+		processParams = sampleParams.local
         """
         ${binDir}filter/sc_cell_gene_filtering.py \
             compute \
@@ -48,7 +49,8 @@ process SC__SCANPY__GENE_FILTER {
         tuple val(sampleId), path("${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off}")
 
 	script:
-        processParams = params.sc.scanpy.filter
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+		processParams = sampleParams.local
         """
         ${binDir}filter/sc_cell_gene_filtering.py \
             genefilter \
@@ -73,7 +75,8 @@ process SC__SCANPY__CELL_FILTER {
         tuple val(sampleId), path("${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off}")
     
 	script:
-        processParams = params.sc.scanpy.filter
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+		processParams = sampleParams.local
         """
         ${binDir}filter/sc_cell_gene_filtering.py \
             cellfilter \

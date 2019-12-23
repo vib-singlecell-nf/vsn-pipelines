@@ -19,7 +19,8 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
 
     script:
-        processParams = params.sc.cell_annotate
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.cell_annotate)
+		processParams = sampleParams.local
         annotationColumnNamesAsArguments = processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
@@ -45,7 +46,8 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
         tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
 
     script:
-        processParams = params.sc.sample_annotate
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.sample_annotate)
+		processParams = sampleParams.local
         """
         ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
             ${(processParams.containsKey('type')) ? '--type ' + processParams.type : ''} \

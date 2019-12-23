@@ -13,6 +13,12 @@ import zlib
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
+    "raw_filtered_data",
+    type=argparse.FileType('r'),
+    help='Input h5ad file containing the raw filtered data.'
+)
+
+parser.add_argument(
     "input",
     type=argparse.FileType('r'),
     help='Input h5ad file.'
@@ -25,19 +31,31 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-x", "--method",
-    action="store",
-    dest="method",
-    default="linear_regression",
-    help="Normalize the data. Choose one of : regress_out"
+    '--nomenclature',
+    type=str,
+    dest="nomenclature",
+    help='The name of the genome.'
 )
+
 parser.add_argument(
-    "-r", "--variable-to-regress-out",
-    action="append",
-    dest="vars_to_regress_out",
-    default=None,
-    help="Variable to regress out. To regress multiple variables, add that many -v arguments."
-         " Used when running 'regress_out'."
+    '--scope-tree-level-1',
+    type=str,
+    dest="scope_tree_level_1",
+    help='The name of the first level of the SCope tree.'
+)
+
+parser.add_argument(
+    '--scope-tree-level-2',
+    type=str,
+    dest="scope_tree_level_2",
+    help='The name of the second level of the SCope tree.'
+)
+
+parser.add_argument(
+    '--scope-tree-level-3',
+    type=str,
+    dest="scope_tree_level_3",
+    help='The name of the third level of the SCope tree.'
 )
 
 args = parser.parse_args()
@@ -55,6 +73,7 @@ def dfToNamedMatrix(df):
 
 
 try:
+    raw_filtered_adata = sc.read_h5ad(filename=args.raw_filtered_data.name)
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
@@ -196,10 +215,14 @@ row_attrs = {
 attrs = {"MetaData": json.dumps(metaJson)}
 
 attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+attrs["Genome"] = '' if args.nomenclature is None else args.nomenclature
+attrs["SCopeTreeL1"] = 'Unknown' if args.scope_tree_level_1 is None else args.scope_tree_level_1
+attrs["SCopeTreeL2"] = '' if args.scope_tree_level_2 is None else args.scope_tree_level_2
+attrs["SCopeTreeL3"] = '' if args.scope_tree_level_3 is None else args.scope_tree_level_3
 
 lp.create(
     filename=f"{FILE_PATH_OUT_BASENAME}.loom",
-    layers=(adata.raw.X).T,
+    layers=(raw_filtered_adata.X).T,
     row_attrs=row_attrs,
     col_attrs=col_attrs,
     file_attrs=attrs
