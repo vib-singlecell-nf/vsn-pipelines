@@ -13,7 +13,8 @@ process SC__DROP_SEQ_TOOLS__FILTER_UNALIGNED_TAGGED_BAM {
         tuple val(sample), path('*.unaligned_tagged_filtered.bam'), emit: bam
 
     script:
-        processParams = params.sc.dropseqtools.filter_unaligned_tagged_bam
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.filter_unaligned_tagged_bam)
+		processParams = sampleParams.local
         """
         FilterBAM \
             TAG_REJECT=${processParams.tagReject} \
