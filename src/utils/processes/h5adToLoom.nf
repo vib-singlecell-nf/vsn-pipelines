@@ -27,6 +27,10 @@ process SC__H5AD_TO_LOOM {
 		${binDir}h5ad_to_loom.py \
 			$rawFilteredData \
 			$data \
+			${(params.sc.containsKey('scope') && params.sc.scope.genome.length() > 0) ? '--nomenclature ' + params.sc.scope.genome : ''} \
+			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_1.length() > 0 ) ? '--scope-tree-level-1 ' + params.sc.scope.tree.level_1 : ''} \
+			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_2.length() > 0 ) ? '--scope-tree-level-2 ' + params.sc.scope.tree.level_2 : ''} \
+			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_3.length() > 0 ) ? '--scope-tree-level-3 ' + params.sc.scope.tree.level_3 : ''} \
 			"${sampleId}.SC__H5AD_TO_LOOM.loom"
 		"""
 

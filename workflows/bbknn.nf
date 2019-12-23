@@ -17,6 +17,7 @@ include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
 
 // reporting:
+include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../src/utils/processes/reports.nf' params(params)
 include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params + params.global)
 include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
 
@@ -53,13 +54,22 @@ workflow bbknn_base {
             SC__FILE_CONCATENATOR.out
         )
 
+        project = BEC_BBKNN.out.data.map { it -> it[0] }
+        UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
+            file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
+        )
+
         // collect the reports:
-        ipynbs = HVG_SELECTION.out.report
+        ipynbs = project.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out)
+            .join(HVG_SELECTION.out.report)
             .join(BEC_BBKNN.out.cluster_report)
             .join(BEC_BBKNN.out.bbknn_report)
             .map{ tuple( it[0], it.drop(1) ) }
         // reporting:
-        SC__SCANPY__MERGE_REPORTS(ipynbs, "merged_report")
+        SC__SCANPY__MERGE_REPORTS(
+            ipynbs,
+            "merged_report"
+        )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
     emit:
@@ -71,7 +81,7 @@ workflow bbknn_base {
 workflow bbknn_standalone {
 
     main:
-        data = getTenXChannel( params.global.tenx_folder ).view()
+        data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path ).view()
         bbknn_base( data )
 
     emit:
