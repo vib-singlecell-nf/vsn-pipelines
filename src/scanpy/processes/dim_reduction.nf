@@ -19,7 +19,8 @@ process SC__SCANPY__DIM_REDUCTION {
 		tuple val(sampleId), path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}")
 
 	script:
-		processParams = params.sc.scanpy.dim_reduction.get(params.method)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.dim_reduction.get(params.method))
+		processParams = sampleParams.local
 		method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
 		"""
 		${binDir}dim_reduction/sc_dim_reduction.py \

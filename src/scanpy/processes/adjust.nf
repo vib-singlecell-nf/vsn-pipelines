@@ -19,7 +19,8 @@ process SC__SCANPY__ADJUSTMENT {
 		tuple val(sampleId), path("${sampleId}.SC__SCANPY__ADJUSTMENT.${params.off}")
 
 	script:
-		processParams = params.sc.scanpy.data_adjustment
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.data_adjustment)
+		processParams = sampleParams.local
 		normalizationVariablesToRegressOutAsArguments = processParams.normalizationVariablesToRegressOut.collect({ '--variable-to-regress-out' + ' ' + it }).join(' ')
 		"""
 		${binDir}adjust/sc_adjustment.py \

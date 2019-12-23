@@ -1,12 +1,3 @@
-//
-// Tests
-//  All the tests have to be run from the root of the project
-
-// Test 1: SC__FILE_CONVERTER (from processes/)
-// Command: 
-//  nextflow -C nextflow_tiny.test.config,src/utils/conf/test.config run src/utils/main.test.nf --test SC__FILE_CONVERTER
-//
-
 nextflow.preview.dsl=2
 
 ///////////////////////////////////////////
@@ -50,17 +41,17 @@ workflow {
         switch(params.test) {
             case "SC__FILE_CONVERTER":
                 include SC__FILE_CONVERTER from './processes/utils' params(params)
-                test_SC__FILE_CONVERTER( getTenXChannel( params.global.tenx_folder ) )
+                test_SC__FILE_CONVERTER( getTenXChannel( params.data.tenx.cellranger_outs_dir_path ) )
             break;
             case "SC__FILE_CONCATENATOR":
-                test_SC__FILE_CONCATENATOR( getTenXChannel( params.global.tenx_folder ) )
+                test_SC__FILE_CONCATENATOR( getTenXChannel( params.data.tenx.cellranger_outs_dir_path ) )
             break;
             case "FILTER_BY_CELL_METADATA":
                 // Imports
                 include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
                 // Run 
                 if(params.sc.cell_filter) {
-                    data = getTenXChannel( params.global.tenx_folder )
+                    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path )
                     SC__FILE_CONVERTER( data )    
                     FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
                 }
@@ -71,11 +62,20 @@ workflow {
                 include SC__ANNOTATE_BY_CELL_METADATA from './processes/h5adAnnotate' params(params)
                 // Run 
                 if(params.sc.cell_filter && params.sc.cell_annotate) {
-                    data = getTenXChannel( params.global.tenx_folder )
+                    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path )
                     SC__FILE_CONVERTER( data )
                     FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
                     SC__ANNOTATE_BY_CELL_METADATA( FILTER_BY_CELL_METADATA.out )
                 }
+            break;
+            case "GET_METADATA_FROM_SRA":
+                // Imports
+                include getChannel as getSRAChannel from './../channels/sra' params(params)
+                include SRA_TO_METADATA from './processes/sra' params(params)
+                // Run
+                sra = getSRAChannel( params.data.sra )
+                db = file(params.utils.sra_metadata.sraDbOutDir + "/SRAmetadb.sqlite")
+                SRA_TO_METADATA( sra, db )
             break;
             case "DOWNLOAD_FROM_SRA":
                 // Imports

@@ -13,7 +13,8 @@ process SC__DROP_SEQ_TOOLS__BAM_TAG_HISTOGRAM {
 	    tuple val(sample), path("*.cell_readcounts.txt.gz")
     
     script:
-        processParams = params.sc.dropseqtools.bam_tag_histogram
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.bam_tag_histogram)
+		processParams = sampleParams.local
         """
         BAMTagHistogram \
             I=${bam} \
