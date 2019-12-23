@@ -4,14 +4,14 @@ toolParams = params.sc.cellranger
 
 process SC__CELLRANGER__COUNT {
 
-	label toolParams.labels.processExecutor
-	cache 'deep'
-	container toolParams.container
-	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
-	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
-	maxForks = toolParams.count.maxForks
+	  label toolParams.labels.processExecutor
+	  cache 'deep'
+	  container toolParams.container
+	  publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	  clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+	  maxForks = toolParams.count.maxForks
 
-  	input:
+    input:
 		file(transcriptome)
 		tuple val(sampleId), file(fastqs)
 
@@ -20,7 +20,7 @@ process SC__CELLRANGER__COUNT {
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
-		processParams = sampleParams.local
+		  processParams = sampleParams.local
 		"""
 		cellranger count \
 			--id=${sampleId} \

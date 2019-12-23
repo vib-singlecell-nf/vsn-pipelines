@@ -13,7 +13,8 @@ process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE {
 		tuple file('*.unaligned_tagged_Cellular.bam_summary.txt'), emit: report
 
 	script:
-		processParams = params.sc.dropseqtools.tag_unaligned_bam_with_cellbarcode
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.tag_unaligned_bam_with_cellbarcode)
+		processParams = sampleParams.local
 		"""
 		TagBamWithReadSequenceExtended \
 			INPUT=${bam} \
@@ -42,7 +43,8 @@ process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR {
 		tuple file('*.unaligned_tagged_Molecular.bam_summary.txt'), emit: report
 
 	script:
-		processParams = params.sc.dropseqtools.tag_unaligned_bam_with_cellmolecular
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.dropseqtools.tag_unaligned_bam_with_cellmolecular)
+		processParams = sampleParams.local
 		"""
 		source $DWMAX/documents/aertslab/scripts/src_dwmax/bash-utils/utils.sh
 		software load drop-seq_tools/1.12
