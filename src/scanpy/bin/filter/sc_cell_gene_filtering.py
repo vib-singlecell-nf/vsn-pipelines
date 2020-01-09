@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import argparse
@@ -7,11 +7,13 @@ import scanpy as sc
 
 
 def add_IO_arguments(parser):
-    parser.add_argument("input",
+    parser.add_argument(
+        "input",
         type=argparse.FileType('r'),
         help='The path to the anndata file.'
     )
-    parser.add_argument("output",
+    parser.add_argument(
+        "output",
         type=argparse.FileType('w'),
         help='The path to the anndata output file.',
     )
@@ -97,18 +99,18 @@ def compute_qc_stats(adata, args):
     #
     # Write filtering value into adata.uns
     #
-    adata.uns['sc']={
-            'scanpy': {
-                'filter': {
-                    'cellFilterMinNCounts': args.min_n_counts,
-                    'cellFilterMaxNCounts': args.max_n_counts,
-                    'cellFilterMinNGenes': args.min_n_genes,
-                    'cellFilterMaxNGenes': args.max_n_genes,
-                    'cellFilterMaxPercentMito': args.max_percent_mito,
-                    'geneFilterMinNCells': args.min_number_cells,
-                }
+    adata.uns['sc'] = {
+        'scanpy': {
+            'filter': {
+                'cellFilterMinNCounts': args.min_n_counts,
+                'cellFilterMaxNCounts': args.max_n_counts,
+                'cellFilterMinNGenes': args.min_n_genes,
+                'cellFilterMaxNGenes': args.max_n_genes,
+                'cellFilterMaxPercentMito': args.max_percent_mito,
+                'geneFilterMinNCells': args.min_number_cells,
             }
         }
+    }
     return adata
 
 
@@ -149,7 +151,7 @@ def read_data(args):
     # Expects h5ad file
     try:
         adata = sc.read_h5ad(filename=args.input.name)
-    except:
+    except IOError:
         raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(args.input)[0]))
     return adata
 
@@ -161,23 +163,28 @@ def output_data(adata, FILE_PATH_OUT_BASENAME):
 ################################################################################
 ################################################################################
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compute and filter on QC metrics from anndata object.")
     subparsers = parser.add_subparsers()
-    #add_IO_arguments(parser)
+    # add_IO_arguments(parser)
 
     ##################################################
     # cell parser
-    parser_cellfilter = subparsers.add_parser('cellfilter',
-            help='Apply cell-level filters.')
+    parser_cellfilter = subparsers.add_parser(
+        'cellfilter',
+        help='Apply cell-level filters.'
+    )
     add_IO_arguments(parser_cellfilter)
     add_cell_filters(parser_cellfilter)
     parser_cellfilter.set_defaults(func=cell_filter)
 
     ##################################################
     # gene parser
-    parser_genefilter = subparsers.add_parser('genefilter',
-            help='Apply gene-level filters.')
+    parser_genefilter = subparsers.add_parser(
+        'genefilter',
+        help='Apply gene-level filters.'
+    )
     add_IO_arguments(parser_genefilter)
     add_gene_filters(parser_genefilter)
     parser_genefilter.set_defaults(func=gene_filter)
@@ -188,14 +195,14 @@ if __name__ == "__main__":
     add_IO_arguments(parent_parser)
     add_cell_filters(parent_parser)
     add_gene_filters(parent_parser)
-    parser_compute = subparsers.add_parser('compute',
-            parents=[parent_parser],
-            help='Compute cell- and gene-level statistics without applying filters.'
+    parser_compute = subparsers.add_parser(
+        'compute',
+        parents=[parent_parser],
+        help='Compute cell- and gene-level statistics without applying filters.'
     )
     parser_compute.set_defaults(func=compute_qc_stats)
 
     args = parser.parse_args()
-
 
     if not hasattr(args, 'func'):
         parser.print_help()
@@ -207,4 +214,3 @@ if __name__ == "__main__":
         # output
         FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
         output_data(adata, FILE_PATH_OUT_BASENAME)
-

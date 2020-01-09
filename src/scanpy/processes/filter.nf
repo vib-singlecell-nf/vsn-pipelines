@@ -1,33 +1,38 @@
 nextflow.preview.dsl=2
 
 if(!params.containsKey("test")) {
-  binDir = "${workflow.projectDir}/src/scanpy/bin/"
+  	binDir = "${workflow.projectDir}/src/scanpy/bin/"
 } else {
-  binDir = ""
+  	binDir = ""
 }
 
 process SC__SCANPY__COMPUTE_QC_STATS {
 
-  container params.sc.scanpy.container
-  clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  	container params.sc.scanpy.container
+  	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
-  input:
-    tuple val(id), file(f)
-  output:
-    tuple val(id), file("${id}.SC__SCANPY__COMPUTE_QC_STATS.${params.off}")
-  script:
-    """
-    ${binDir}filter/sc_cell_gene_filtering.py \
-      compute \
-      $f \
-      ${id}.SC__SCANPY__COMPUTE_QC_STATS.${params.off} \
-      ${(params.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + params.cellFilterMinNCounts : ''} \
-      ${(params.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + params.cellFilterMaxNCounts : ''} \
-      ${(params.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + params.cellFilterMinNGenes : ''} \
-      ${(params.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + params.cellFilterMaxNGenes : ''} \
-      ${(params.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + params.cellFilterMaxPercentMito : ''} \
-      ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''}
-    """
+  	input:
+        tuple val(sampleId), path(f)
+
+	output:
+        tuple val(sampleId), path("${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
+
+	script:
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+		processParams = sampleParams.local
+        """
+        ${binDir}filter/sc_cell_gene_filtering.py \
+            compute \
+            $f \
+            ${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off} \
+            ${(processParams.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
+            ${(processParams.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
+            ${(processParams.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
+            ${(processParams.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + processParams.cellFilterMaxNGenes : ''} \
+            ${(processParams.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + processParams.cellFilterMaxPercentMito : ''} \
+            ${(processParams.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
+        """
+
 }
 
 
@@ -35,20 +40,25 @@ process SC__SCANPY__GENE_FILTER {
 
     container params.sc.scanpy.container
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-        tuple val(id), file(f)
-    output:
-        tuple val(id), file("${id}.SC__SCANPY__GENE_FILTER.${params.off}")
-    script:
-    """
-    ${binDir}filter/sc_cell_gene_filtering.py \
-        genefilter \
-        $f \
-        ${id}.SC__SCANPY__GENE_FILTER.${params.off} \
-        ${(params.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + params.geneFilterMinNCells : ''}
-    """
+        tuple val(sampleId), path(f)
+
+	output:
+        tuple val(sampleId), path("${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off}")
+
+	script:
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+		processParams = sampleParams.local
+        """
+        ${binDir}filter/sc_cell_gene_filtering.py \
+            genefilter \
+            $f \
+            ${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off} \
+            ${(processParams.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
+        """
+
 }
 
 
@@ -56,22 +66,27 @@ process SC__SCANPY__CELL_FILTER {
 
     container params.sc.scanpy.container
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-        tuple val(id), file(f)
-    output:
-        tuple val(id), file("${id}.SC__SCANPY__CELL_FILTER.${params.off}")
-    script:
-    """
-    ${binDir}filter/sc_cell_gene_filtering.py \
-        cellfilter \
-        $f \
-        ${id}.SC__SCANPY__CELL_FILTER.${params.off} \
-        ${(params.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + params.cellFilterMinNCounts : ''} \
-        ${(params.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + params.cellFilterMaxNCounts : ''} \
-        ${(params.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + params.cellFilterMinNGenes : ''} \
-        ${(params.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + params.cellFilterMaxNGenes : ''} \
-        ${(params.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + params.cellFilterMaxPercentMito : ''}
-    """
+        tuple val(sampleId), path(f)
+
+	output:
+        tuple val(sampleId), path("${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off}")
+    
+	script:
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+		processParams = sampleParams.local
+        """
+        ${binDir}filter/sc_cell_gene_filtering.py \
+            cellfilter \
+            $f \
+            ${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off} \
+            ${(processParams.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
+            ${(processParams.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
+            ${(processParams.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
+            ${(processParams.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + processParams.cellFilterMaxNGenes : ''} \
+            ${(processParams.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + processParams.cellFilterMaxPercentMito : ''}
+        """
+
 }

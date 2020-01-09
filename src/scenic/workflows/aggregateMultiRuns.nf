@@ -26,11 +26,13 @@ include SAVE_MULTI_RUNS_TO_LOOM as SAVE_TO_LOOM from './../processes/multiruns/s
 //  Define the workflow 
 
 workflow AGGREGATE_MULTI_RUNS_TO_LOOM {
+
     get:
         filteredLoom
         ctx
         auc
         type
+
     main:
         /* Aggregate features (motifs or tracks) from multiple runs */
         ctxAggrFeatures = AGGR_FEATURES(
@@ -67,6 +69,8 @@ workflow AGGREGATE_MULTI_RUNS_TO_LOOM {
             filteredLoom.join(aggrRegulons).join(regulonAuc),
             type
         )
+
     emit:
         scenic_loom
+
 }
