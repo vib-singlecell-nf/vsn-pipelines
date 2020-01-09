@@ -120,4 +120,3 @@ if __name__ == '__main__':
     end_time = time.time()
     print('Done in {} seconds.'.format(end_time - start_time), file=sys.stderr)
     adj.to_csv(args.output, index=False, sep="\t")
-

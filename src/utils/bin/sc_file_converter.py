@@ -1,7 +1,8 @@
-#!/usr/bin/env python
-import os
-from optparse import OptionParser
+#!/usr/bin/env python3
 
+import argparse
+import os
+import re
 import scanpy as sc
 
 in_formats = [
@@ -14,32 +15,51 @@ out_formats = [
     'h5ad'
 ]
 
+parser = argparse.ArgumentParser(description='')
 
-parser = OptionParser(
-    usage="usage: %prog [options] datapath",
-    version="%prog 1.0"
+parser.add_argument(
+    "input",
+    type=str,
+    help='Input h5ad file.'
 )
-parser.add_option(
+
+parser.add_argument(
+    "output",
+    type=argparse.FileType('w'),
+    help='Output h5ad file.'
+)
+
+parser.add_argument(
     "-i", "--input-format",
     action="store",
     dest="input_format",
     default="",
     help="Input format of the file to be converted. Choose one of: {}.".format(', '.join(in_formats))
 )
-parser.add_option(
+
+parser.add_argument(
+    "-s", "--sample-id",
+    type=str,
+    dest="sample_id",
+    default=None,
+    action='store'
+)
+
+parser.add_argument(
     "-o", "--output-format",
     action="store",  # optional because action defaults to "store"
     dest="output_format",
     default="",
     help="Output format which the file should be converted to. Choose one of: {}.".format(', '.join(out_formats))
 )
-(options, args) = parser.parse_args()
+
+args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args[0]
-FILE_PATH_OUT_BASENAME = os.path.splitext(args[1])[0]
-INPUT_FORMAT = options.input_format
-OUTPUT_FORMAT = options.output_format
+FILE_PATH_IN = args.input
+FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
+INPUT_FORMAT = args.input_format
+OUTPUT_FORMAT = args.output_format
 
 if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
     # Sanity checks
@@ -51,8 +71,9 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
         )
     if not os.path.exists(FILE_PATH_IN):
         raise Exception("The given directory {} does not exist.".format(FILE_PATH_IN))
-    if not (not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx"))
-            or not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx.gz"))):
+    if not (
+        not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx")) or not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx.gz"))
+    ):
         raise Exception(
             "The given directory {} is not a proper 10xGenomics CellRanger folder. No .mtx[.gz] file found.".format(
                 FILE_PATH_IN
@@ -65,15 +86,18 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
         var_names='gene_symbols',  # use gene symbols for the variable names (variables-axis index)
         cache=False
     )
+    # If is sample_id is given, add the sample ID as suffix
+    if args.sample_id is not None:
+        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
 elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
-    
+
     if INPUT_FORMAT == 'tsv':
-        delim='\t'
+        delim = '\t'
     elif INPUT_FORMAT == 'csv':
-        delim=','
+        delim = ','
 
     adata = sc.read_csv(
         FILE_PATH_IN,

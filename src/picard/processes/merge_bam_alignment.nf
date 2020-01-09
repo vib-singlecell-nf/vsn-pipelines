@@ -3,18 +3,22 @@ nextflow.preview.dsl=2
 process PICARD__MERGE_BAM_ALIGNMENT {
 
     container params.picard.container
-    publishDir "${params.outdir}/02.map", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.threads} -l walltime=24:00:00 -A ${params.qsubaccount}"
+    publishDir "${params.global.outdir}/02.map", mode: 'symlink'
+    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(sample), file(unmappedBam)
-        tuple val(sample), file(mappedBam)
+        tuple val(sample), path(unmappedBam)
+        tuple val(sample), path(mappedBam)
         file(genome)
         file(dict)
         file(tmpDir)
+
     output:
-        tuple val(sample), file("*.merged.bam")
+        tuple val(sample), path("*.merged.bam")
+
     script:
+        def sampleParams = params.parseConfig(sampleId, params.global, params.picard.merge_bam_alignment)
+		processParams = sampleParams.local
         """
         java -Djava.io.tmpdir=$tmpDir -jar \
             /picard.jar \
@@ -23,7 +27,8 @@ process PICARD__MERGE_BAM_ALIGNMENT {
                     UNMAPPED_BAM=${unmappedBam} \
                     ALIGNED_BAM=${mappedBam} \
                     OUTPUT=${sample}.merged.bam \
-                    INCLUDE_SECONDARY_ALIGNMENTS=${params.picard.merge_bam_alignment.includeSecondaryAlignments} \
-                    PAIRED_RUN=${params.picard.merge_bam_alignment.pairedRun}
-        """    
+                    INCLUDE_SECONDARY_ALIGNMENTS=${processParams.includeSecondaryAlignments} \
+                    PAIRED_RUN=${processParams.pairedRun}
+        """
+
 }
