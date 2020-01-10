@@ -59,6 +59,27 @@ workflow scenic {
 }
 
 
+// runs mkfastq, then CellRanger count:
+workflow cellranger {
+
+    include CELLRANGER from './src/cellranger/main.nf' params(params)
+    CELLRANGER(
+        file(params.sc.cellranger.mkfastq.csv),
+        file(params.sc.cellranger.mkfastq.runFolder),
+        file(params.sc.cellranger.count.transcriptome)
+    )
+
+}
+
+
+// runs mkfastq, CellRanger count, then single_sample:
+workflow single_sample_cellranger {
+
+    cellranger | single_sample
+
+}
+
+
 workflow star {
 
     include star as STAR from './workflows/star' params(params)
@@ -99,3 +120,4 @@ workflow sra_cellranger_bbknn {
     BBKNN( SC__CELLRANGER__COUNT.out )
 
 }
+

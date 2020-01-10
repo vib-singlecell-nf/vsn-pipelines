@@ -14,12 +14,36 @@ include SC__CELLRANGER__COUNT   from './processes/count'    params(params)
 /*
  * Run the workflow for each 10xGenomics CellRanger output folders specified.
  */ 
+
+workflow MKFASTQ {
+
+    take:
+        mkfastq_csv
+        runFolder
+    main:
+        SC__CELLRANGER__MKFASTQ(mkfastq_csv, runFolder)
+        SC__CELLRANGER__MKFASTQ.out.view()
+        fastqs = SC__CELLRANGER__MKFASTQ.out.map {
+            fastqDirPath -> (full, parentDir, sampleId) = (fastqDirPath =~ /(.+)\/(.+)_fastqOut/)[0]
+            return tuple(sampleId, fastqDirPath)
+        }
+    emit:
+        fastqs
+
+}
+
+
 workflow CELLRANGER {
 
+    take:
+        mkfastq_csv
+        runFolder
+        transcriptome
     main:
-        SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), path(params.sc.cellranger.mkfastq.runFolder))
-        SC__CELLRANGER__COUNT(file(params.sc.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
+        fastqs = MKFASTQ(mkfastq_csv, runFolder)
+        SC__CELLRANGER__COUNT(transcriptome, fastqs)
     emit:
         SC__CELLRANGER__COUNT.out
 
 }
+
