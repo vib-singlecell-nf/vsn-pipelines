@@ -138,6 +138,13 @@ Runs the SCENIC workflow multiple times (set by `params.sc.scenic.numRuns`), gen
 
 </details>
 
+### `cellranger`
+Runs the cellranger workflow (`makefastq`, then `count`).
+Input parameters are specified within the config file:
+* `params.sc.cellranger.mkfastq.csv`: path to the CSV samplesheet
+* `params.sc.cellranger.mkfastq.runFolder`: path of Illumina BCL run folder
+* `params.sc.cellranger.count.transcriptome`: path to the Cell Ranger compatible transcriptome reference
+
 ### `nemesh`
 Runs the Nemesh pipeline (Drop-seq) on a single sample or multiple samples separately.
 
