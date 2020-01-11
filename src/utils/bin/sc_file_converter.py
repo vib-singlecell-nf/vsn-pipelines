@@ -6,7 +6,8 @@ import re
 import scanpy as sc
 
 in_formats = [
-    '10x_mtx',
+    '10x_cellranger_mex',
+    '10x_cellranger_h5',
     'tsv',
     'csv'
 ]
@@ -61,26 +62,31 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 INPUT_FORMAT = args.input_format
 OUTPUT_FORMAT = args.output_format
 
-if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
+
+def check_10x_cellranger_mex_path(path):
     # Sanity checks
-    if not os.path.isdir(FILE_PATH_IN):
+    if not os.path.isdir(path):
         raise Exception(
-            "Expecting a directory with an .mtx file when converting from 10x_mtx. {} does not seem to be one.".format(
-                FILE_PATH_IN
+            "Expecting a directory with an .mtx file when converting from 10x_cellranger_mex. {} does not seem to be one.".format(
+                path
             )
         )
-    if not os.path.exists(FILE_PATH_IN):
-        raise Exception("The given directory {} does not exist.".format(FILE_PATH_IN))
+    if not os.path.exists(path):
+        raise Exception("The given directory {} does not exist.".format(path))
     if not (
-        not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx")) or not os.path.exists(os.path.join(FILE_PATH_IN, "matrix.mtx.gz"))
+        not os.path.exists(os.path.join(path, "matrix.mtx")) or not os.path.exists(os.path.join(path, "matrix.mtx.gz"))
     ):
         raise Exception(
             "The given directory {} is not a proper 10xGenomics CellRanger folder. No .mtx[.gz] file found.".format(
-                FILE_PATH_IN
+                path
             )
         )
+
+
+if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
+    check_10x_cellranger_mex_path(path=FILE_PATH_IN)
     # Convert
-    print("Reading 10x data...")
+    print("Reading 10x data from MEX format...")
     adata = sc.read_10x_mtx(
         FILE_PATH_IN,  # the directory with the `.mtx` file
         var_names='gene_symbols',  # use gene symbols for the variable names (variables-axis index)
@@ -92,8 +98,21 @@ if INPUT_FORMAT == '10x_mtx' and OUTPUT_FORMAT == 'h5ad':
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
-elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
+elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
+    if not os.path.exists(FILE_PATH_IN):
+        raise Exception("The given file {} does not exist.".format(FILE_PATH_IN))
+    # Convert
+    print("Reading 10x data from HDF5 format...")
+    adata = sc.read_10x_h5(
+        FILE_PATH_IN
+    )
+    # If is sample_id is given, add the sample ID as suffix
+    if args.sample_id is not None:
+        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+    print("Writing 10x data to h5ad...")
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
+elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
     if INPUT_FORMAT == 'tsv':
         delim = '\t'
     elif INPUT_FORMAT == 'csv':
@@ -105,7 +124,6 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
         first_column_names=True
     ).T
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
-
 
 else:
     raise Exception(
