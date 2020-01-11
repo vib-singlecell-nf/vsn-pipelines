@@ -8,7 +8,7 @@ The profile `utils_cell_annotate` should be added when generating the main confi
 params {
     sc {
         cell_annotate {
-            iff = '10x_mtx'
+            iff = '10x_cellranger_mex'
             off = 'h5ad'
             cellMetaDataFilePath = ''
             indexColumnName = ''
