@@ -1,0 +1,30 @@
+[submodule "src/cellranger"]
+	path = src/cellranger
+	url = https://github.com/vib-singlecell-nf/cellranger.git
+[submodule "src/dropletutils"]
+	path = src/dropletutils
+	url = https://github.com/vib-singlecell-nf/dropletutils.git
+[submodule "src/dropseqtools"]
+	path = src/dropseqtools
+	url = https://github.com/vib-singlecell-nf/dropseqtools.git
+[submodule "src/edirect"]
+	path = src/edirect
+	url = https://github.com/vib-singlecell-nf/edirect.git
+[submodule "src/fastp"]
+	path = src/fastp
+	url = https://github.com/vib-singlecell-nf/fastp.git
+[submodule "src/picard"]
+	path = src/picard
+	url = https://github.com/vib-singlecell-nf/picard.git
+[submodule "src/scanpy"]
+	path = src/scanpy
+	url = https://github.com/vib-singlecell-nf/scanpy.git
+[submodule "src/scenic"]
+	path = src/scenic
+	url = https://github.com/vib-singlecell-nf/scenic.git
+[submodule "src/sratoolkit"]
+	path = src/sratoolkit
+	url = https://github.com/vib-singlecell-nf/sratoolkit.git
+[submodule "src/star"]
+	path = src/star
+	url = https://github.com/vib-singlecell-nf/star.git
