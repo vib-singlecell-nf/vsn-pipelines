@@ -1,4 +1,4 @@
-# SingleCellTxBenchmark
+# vib-singlecell-nf
 
 [![Nextflow](https://img.shields.io/badge/nextflow-19.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
@@ -25,7 +25,7 @@ This will take only **~3min** to run.
 2. Next, a config file needs to be generated.
 In your working directory, run `nextflow config ...` with the appropriate profiles:
 ```bash
-nextflow config aertslab/SingleCellTxBenchmark \
+nextflow config vib-singlecell-nf/vib-singlecell-nf \
     -profile tenx,singularity,single_sample > single_sample.config
 ```
 Now, edit `single_sample.config`.
@@ -36,7 +36,7 @@ In particular, `params.data.tenx.cellranger_outs_dir_path` should point to the `
 3. The pipeline can be run using the config file just generated (`-C ...`), and specifying the `single_sample` workflow as an entrypoint:
 ```bash
 nextflow -C single_sample.config \
-   run aertslab/SingleCellTxBenchmark \
+   run vib-singlecell-nf/vib-singlecell-nf \
       -entry single_sample
 ```
 
@@ -58,11 +58,11 @@ The intended usage for this pipeline is for the code to be run directly from Git
 This results in a separation of the Nextflow code and the results stored in the working directory.
 For example:
 ```bash
-nextflow run aertslab/SingleCellTxBenchmark \
+nextflow run vib-singlecell-nf/vib-singlecell-nf \
     -profile singularity,single_sample \
     -entry single_sample
 ```
-This picks up `aertslab/SingleCellTxBenchmark/main.nf` and runs the workflow defined by the `-entry` setting (here, `single_sample`), using the built-in configs, which are merged from each tool used (defined in the `single_sample` profile).
+This picks up `vib-singlecell-nf/vib-singlecell-nf/main.nf` and runs the workflow defined by the `-entry` setting (here, `single_sample`), using the built-in configs, which are merged from each tool used (defined in the `single_sample` profile).
 Specifying `nextflow run -latest ...` will download the latest commit prior to execution, or the `-r ...` option can be used to specify a specific commit or branch.
 However, in nearly all cases it will be necessary to run the pipeline with a customized config file.
 
@@ -76,13 +76,13 @@ For example, to run the `single_sample` workflow in a new working directory usin
 ```bash
 mkdir single_sample_test && cd single_sample_test
 
-nextflow config aertslab/SingleCellTxBenchmark \
+nextflow config vib-singlecell-nf/vib-singlecell-nf \
     -profile tenx,singularity,single_sample > single_sample.config
 ```
 2. Now run the workflow using the new config file (using `-C` to use **only** this file), specifying the proper workflow as the entry point:
 ```bash
 nextflow -C single_sample.config \
-   run aertslab/SingleCellTxBenchmark \
+   run vib-singlecell-nf/vib-singlecell-nf \
       -entry single_sample
 ```
 
@@ -90,7 +90,7 @@ nextflow -C single_sample.config \
 Pipelines to run a single sample or multiple samples separately.
 
 ### `single_sample`
-![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/single_sample/badge.svg)
+![](https://github.com/vib-singlecell-nf/vib-singlecell-nf/workflows/single_sample/badge.svg)
 
 The **single_sample** workflow will process 10x data,taking in 10x-structured data, and metadata file.
 The standard analysis steps are run: filtering, normalization, log-transformation, HVG selection, dimensionality reduction, clustering, and loom file generation.
@@ -104,7 +104,7 @@ The output is a loom file with the results embedded.
 </details>
 
 ### `single_sample_scenic`
-![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/single_sample_scenic/badge.svg)
+![](https://github.com/vib-singlecell-nf/vib-singlecell-nf/workflows/single_sample_scenic/badge.svg)
 
 Runs the `single_sample` workflow above, then runs the SCENIC workflow on the output, generating a comprehensive loom file with the combined results.
 This could be very resource intensive, depending on the dataset.
@@ -117,7 +117,7 @@ This could be very resource intensive, depending on the dataset.
 </details>
 
 ### `scenic`
-![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/scenic/badge.svg)
+![](https://github.com/vib-singlecell-nf/vib-singlecell-nf/workflows/scenic/badge.svg)
 
 Runs the SCENIC workflow alone, generating a loom file with only the SCENIC results.
 
@@ -154,7 +154,7 @@ Source: http://mccarrolllab.org/wp-content/uploads/2016/03/Drop-seqAlignmentCook
 Pipelines to aggregate multiple datasets together.
 
 ### `bbknn`
-![](https://github.com/aertslab/SingleCellTxBenchmark/workflows/bbknn/badge.svg)
+![](https://github.com/vib-singlecell-nf/vib-singlecell-nf/workflows/bbknn/badge.svg)
 
 Runs the BBKNN pipeline (sample-specific filtering, merging of individual samples, normalization, log-transformation, HVG selection, PCA analysis, then the batch-effect correction steps: BBKNN, clustering, dimensionality reduction (UMAP only)).
 The output is a loom file with the results embedded.
@@ -256,7 +256,7 @@ src/
 
 ## Workflows
 
-Workflows (chains of nf processes) are defined in the module root folder (e.g. [src/Scanpy/bec_bbknn.nf](https://github.com/aertslab/SingleCellTxBenchmark/blob/module_refactor/src/scanpy/bec_bbknn.nf))
+Workflows (chains of nf processes) are defined in the module root folder (e.g. [src/Scanpy/bec_bbknn.nf](https://github.com/vib-singlecell-nf/vib-singlecell-nf/blob/module_refactor/src/scanpy/bec_bbknn.nf))
 Workflows import multiple processes and define the workflow by name:
 ```groovy
 include SC__CELLRANGER__MKFASTQ from './processes/mkfastq'  params(params)
@@ -280,7 +280,7 @@ Entire **sub-workflows** can also be imported in other workflows with one comman
 include CELLRANGER from '../cellranger/main.nf' params(params)
 ```
 
-This leads to the ability to easily define **high-level workflows** in the master nf file: `aertslab/SingleCellTxBenchmark/main.nf`:
+This leads to the ability to easily define **high-level workflows** in the master nf file: `vib-singlecell-nf/vib-singlecell-nf/main.nf`:
 ```groovy
 include CELLRANGER from './src/cellranger/main.nf' params(params)
 include BEC_BBKNN from './src/scanpy/bec_bbknn.nf' params(params)
@@ -307,7 +307,7 @@ The parameter structure internally (post-merge) is:
 ```groovy
 params {
     global {
-        baseFilePath = "/opt/SingleCellTxBenchmark"
+        baseFilePath = "/opt/vib-singlecell-nf"
         project_name = "MCF7"
         ...
     }
