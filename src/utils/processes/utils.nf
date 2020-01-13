@@ -29,6 +29,7 @@ def detectCellRangerVersionData(cellRangerV2Data, cellRangerV3Data) {
 
 process SC__FILE_CONVERTER {
 
+    echo true
 	cache 'deep'
 	container params.sc.scanpy.container
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
