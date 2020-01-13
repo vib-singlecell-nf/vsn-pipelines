@@ -10,7 +10,7 @@
 
 ```{bash}
 nextflow config \
-   -profile scenic,qsub,singularity aertslab/SingleCellTxBenchmark \
+   -profile scenic,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
    > nextflow.config
 ```
 
@@ -20,7 +20,7 @@ nextflow config \
 
 ```{bash}
 nextflow config \
-   -profile scenic_multiruns,qsub,singularity aertslab/SingleCellTxBenchmark \
+   -profile scenic_multiruns,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
    > nextflow.config
 ```
 
@@ -45,7 +45,7 @@ Additionally, you can update the other paraemeters for the different steps.
 
 ```{bash}
 nextflow -C nextflow.config run \
-   aertslab/SingleCellTxBenchmark \
+   vib-singlecell-nf/vib-singlecell-nf \
       -entry scenic \
       -with-report report.html \
       -with-trace
