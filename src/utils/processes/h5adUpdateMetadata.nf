@@ -28,7 +28,7 @@ process SC__UTILS__UPDATE_FEATURE_METADATA_INDEX {
             --index-column-name ${processParams.indexColumnName} \
             --join-key ${processParams.joinKey} \
             $f \
-            --output "${sampleId}.SC__UTILS__UPDATE_FEATURE_METADATA_INDEX.h5ad"
+            "${sampleId}.SC__UTILS__UPDATE_FEATURE_METADATA_INDEX.h5ad"
         """
 
 }
