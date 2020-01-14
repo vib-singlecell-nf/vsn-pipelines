@@ -99,6 +99,17 @@ workflow {
                 SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() ).view()
                 SC__CELLRANGER__COUNT( file("/ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/resources/refs/flybase/r6.16/cellranger/2.0.0/flybase_r6.16"), SC__CELLRANGER__PREPARE_FOLDER.out )
             break;
+            case "UPDATE_FEATURE_NOMENCLATURE":
+                // Imports
+                include SC__UTILS__EXTRACT_FEATURE_METADATA from './processes/h5adExtractMetadata' params(params)
+                include FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL from './../flybaser/processes/convertNomenclature' params(params)
+                include SC__UTILS__UPDATE_FEATURE_METADATA_INDEX from './processes/h5adUpdateMetadata' params(params)
+                // Run
+                test = Channel.of(tuple('FCA4_Male_Adult_Head1', '/ddn1/vol1/staging/leuven/stg_00002/lcb/lcb_projects/fca/analysis/20200110__head_adult__9602f660-33be-11ea-b78b-0dac43a2c3c3/out/data/intermediate/FCA4_Male_Adult_Head1.SC__FILE_CONVERTER.h5ad'))
+                SC__UTILS__EXTRACT_FEATURE_METADATA( test )
+                FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL( SC__UTILS__EXTRACT_FEATURE_METADATA.out )
+                SC__UTILS__UPDATE_FEATURE_METADATA_INDEX( test.join(FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL.out) )
+            break;
             default:
                 throw new Exception("The test parameters should be specified.")
             break;
