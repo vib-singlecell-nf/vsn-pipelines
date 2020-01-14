@@ -18,6 +18,7 @@ nextflow.preview.dsl=2
 
 // utils:
 include SC__FILE_CONVERTER from '../../utils/processes/utils.nf' params(params)
+include UPDATE_FEATURE_NOMENCLATURE from '../../utils/workflows/updateFeatureNomenclature.nf' params(params)
 include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
 include SC__ANNOTATE_BY_CELL_METADATA from '../../utils/processes/h5adAnnotate' params(params)
 include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
@@ -38,6 +39,9 @@ workflow QC_FILTER {
 
     main:
         data = SC__FILE_CONVERTER( data )
+        if(params.utils.update_feature_metadata_index) {
+            data = UPDATE_FEATURE_NOMENCLATURE( data )
+        }
         if(params.sc.cell_filter) {
             data = FILTER_BY_CELL_METADATA( data )
         }
