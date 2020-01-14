@@ -27,7 +27,7 @@ process SC__UTILS__EXTRACT_FEATURE_METADATA {
             --axis feature \
             ${columnNamesAsArguments} \
             $f \
-            --output "${sampleId}.SC__UTILS__EXTRACT_FEATURE_METADATA.tsv"
+            "${sampleId}.SC__UTILS__EXTRACT_FEATURE_METADATA.tsv"
         """
 
 }
