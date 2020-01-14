@@ -3,14 +3,15 @@ nextflow.preview.dsl=2
 if(!params.containsKey("test")) {
     binDir = "${workflow.projectDir}/src/flybaser/bin/"
 } else {
-    binDir = "/ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/aertslab/GitHub/SingleCellTxBenchmark/src/flybaser/bin/"
+    binDir = ""
 }
 
 process FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL {
     
     container params.flybaser.container
-    publishDir "intermediate/data", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
     clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    maxForks 1
 
     input:
         tuple val(sampleId), path(f)
