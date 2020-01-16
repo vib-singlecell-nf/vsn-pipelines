@@ -33,7 +33,7 @@ include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + par
 
 workflow BEC_BBKNN {
 
-    get:
+    take:
         normalizedTransformedData
         data
 

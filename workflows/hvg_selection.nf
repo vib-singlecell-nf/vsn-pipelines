@@ -15,7 +15,7 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 
 workflow HVG_SELECTION {
 
-    get:
+    take:
         data
 
     main:

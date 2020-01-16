@@ -11,16 +11,16 @@ include PCACV__FIND_OPTIMAL_NPCS from './../../pcacv/processes/runPCACV' params(
 
 workflow DIM_REDUCTION_PCA {
 
-    get:
+    take:
         data
 
     main:
         if(params.pcacv) {
-            PCACV__FIND_OPTIMAL_NPCS( data ).view()
-            out = SC__SCANPY__DIM_REDUCTION__PCA( data.join(PCACV__FIND_OPTIMAL_NPCS.out[0]) )//.optimalNumberPC)
+            PCACV__FIND_OPTIMAL_NPCS( data )
+            out = SC__SCANPY__DIM_REDUCTION__PCA( data.join(PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC) )
         } else {
             data = data.map {
-                tuple -> tuple(tuple[0], tuple[1], null)
+                item -> tuple(item[0], item[1], null)
             }
             out = SC__SCANPY__DIM_REDUCTION__PCA( data )
         }

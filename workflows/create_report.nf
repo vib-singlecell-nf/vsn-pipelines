@@ -23,7 +23,7 @@ include '../processes/reports.nf' params(params)
 
 workflow GENERATE_DUAL_INPUT_REPORT {
 
-    get:
+    take:
         data1  // anndata
         data2 // anndata
         ipynb
@@ -44,7 +44,7 @@ workflow GENERATE_DUAL_INPUT_REPORT {
 
 workflow GENERATE_REPORT {
 
-    get:
+    take:
         data // anndata
         ipynb
         report_title

@@ -14,7 +14,7 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 
 workflow CLUSTER_IDENTIFICATION {
 
-    get:
+    take:
         normalizedTransformedData
         data
 

@@ -11,7 +11,7 @@ include SC__SCANPY__NORMALIZATION from '../processes/transform.nf' params(params
 
 workflow NORMALIZE_TRANSFORM {
 
-    get:
+    take:
         filtered
 
     main:

@@ -16,7 +16,7 @@ include GENERATE_REPORT from './create_report.nf' params(params)
 
 workflow DIM_REDUCTION {
 
-    get:
+    take:
         data
 
     main:

@@ -20,7 +20,7 @@ include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
 
 workflow BEC_MNN_CORRECT {
 
-    get:
+    take:
         normalizedTransformedData
         data
 

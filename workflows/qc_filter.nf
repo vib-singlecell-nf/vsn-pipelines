@@ -34,7 +34,7 @@ include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params)
 
 workflow QC_FILTER {
 
-    get:
+    take:
         data
 
     main:
