@@ -22,7 +22,7 @@ include SC__APPLY_OBS_FILTER from './../processes/h5adSubset' params(params)
 
 workflow FILTER_BY_CELL_METADATA {
 
-    get:
+    take:
         // Expects (sampleId, h5ad)
         data
 

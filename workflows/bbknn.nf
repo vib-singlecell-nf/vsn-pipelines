@@ -24,7 +24,7 @@ include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' par
 
 workflow bbknn_base {
 
-    get:
+    take:
         data
 
     main:
@@ -92,7 +92,7 @@ workflow bbknn_standalone {
 
 workflow bbknn {
 
-    get:
+    take:
         data
 
     main:
