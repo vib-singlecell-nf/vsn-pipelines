@@ -52,7 +52,7 @@ parser.add_argument(
     action="store",
     dest="n_neighbors",
     default=15,
-    help="[Louvain], The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation."
+    help="[UMAP], The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation."
 )
 
 parser.add_argument(
@@ -60,8 +60,8 @@ parser.add_argument(
     type=int,
     action="store",
     dest="n_pcs",
-    default=30,
-    help="[Louvain], Use this many PCs."
+    default=None,
+    help="[UMAP, t-SNE], Use this many PCs. If n_pcs==0 use .X if use_rep is None."
 )
 
 parser.add_argument(
@@ -111,6 +111,7 @@ elif args.method == "UMAP":
     # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
     if "neighbors" not in adata.uns.keys():
         warnings.warn("The neighborhood graph of observations has not been computed. Computing...")
+        # If n_pcs is None and X_pca has been computed, X_pca with max computed pcs will be used
         sc.pp.neighbors(
             adata=adata,
             n_neighbors=args.n_neighbors,
@@ -119,7 +120,13 @@ elif args.method == "UMAP":
     sc.tl.umap(adata)
 elif args.method == "t-SNE":
     # Run t-SNE
-    sc.tl.tsne(adata=adata, n_jobs=args.n_jobs, use_fast_tsne=args.use_fast_tsne)
+    # If n_pcs is None and X_pca has been computed, X_pca with max computed pcs will be used
+    sc.tl.tsne(
+        adata=adata,
+        n_jobs=args.n_jobs,
+        use_fast_tsne=args.use_fast_tsne,
+        n_pcs=args.n_pcs
+    )
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(args.method))
 
