@@ -68,7 +68,7 @@ runs = Channel.from( 1..params.sc.scenic.numRuns )
 // Make the test workflow 
 workflow test_GRNBOOST2WITHOUTDASK {
 
-    get:
+    take:
         loom
 
     main:
@@ -83,7 +83,7 @@ workflow test_GRNBOOST2WITHOUTDASK {
 // Make the test workflow 
 workflow test_CISTARGET {
 
-    get:
+    take:
         filteredloom
         grn
 
@@ -113,7 +113,7 @@ workflow test_CISTARGET {
 // Make the test workflow 
 workflow test_AUCELL {
 
-    get:
+    take:
         filteredloom
         ctx_mtf
         ctx_trk
@@ -134,7 +134,7 @@ workflow test_AUCELL {
 // Make the test workflow 
 workflow test_SINGLE_RUN_BY_ID {
 
-    get:
+    take:
         runId
 
     main:
@@ -159,7 +159,7 @@ workflow test_SINGLE_RUN_BY_ID {
 // Make the test workflow 
 workflow test_AUCELL_FROM_FOLDER {
 
-    get:
+    take:
         filteredloom
         regulons_folder_mtf
         regulons_folder_trk

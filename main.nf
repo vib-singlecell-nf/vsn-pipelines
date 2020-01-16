@@ -45,7 +45,7 @@ if(params.sc.scenic.containsKey("numRuns")) {
 
 workflow SCENIC {
 
-    get:
+    take:
         // Expects (sampleId, loom)
         filteredLoom
 
@@ -129,7 +129,7 @@ workflow SCENIC {
 
 workflow SCENIC_append {
 
-    get:
+    take:
         filteredLoom
         scopeLoom
 

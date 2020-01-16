@@ -27,7 +27,7 @@ include SAVE_MULTI_RUNS_TO_LOOM as SAVE_TO_LOOM from './../processes/multiruns/s
 
 workflow AGGREGATE_MULTI_RUNS_TO_LOOM {
 
-    get:
+    take:
         filteredLoom
         ctx
         auc
