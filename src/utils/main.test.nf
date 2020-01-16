@@ -11,7 +11,7 @@ include getChannel as getTenXChannel from '../channels/tenx.nf'
 // Make the test workflow 
 workflow test_SC__FILE_CONVERTER {
 
-    get:
+    take:
         data
 
     main:
@@ -24,7 +24,7 @@ workflow test_SC__FILE_CONVERTER {
 
 workflow test_SC__FILE_CONCATENATOR {
 
-    get:
+    take:
         data
 
     main:

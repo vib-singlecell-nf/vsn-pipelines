@@ -19,7 +19,7 @@ include SC__UTILS__UPDATE_FEATURE_METADATA_INDEX from './../processes/h5adUpdate
 
 workflow UPDATE_FEATURE_NOMENCLATURE {
 
-    get:
+    take:
         // Expects (sampleId, data)
         data
 

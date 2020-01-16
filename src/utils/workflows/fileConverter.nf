@@ -20,7 +20,7 @@ outputFormatsAllowed = ['loom']
 
 workflow FILE_CONVERTER {
 
-    get:
+    take:
         // Expects (sampleId, data)
         data
         // Expects (sampleId, outputFormat)
