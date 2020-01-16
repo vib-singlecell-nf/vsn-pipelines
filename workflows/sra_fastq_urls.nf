@@ -4,7 +4,7 @@ include EDIRECT__SRAID_TO_SAMPLENAME from '../processes/sra_fastq_urls.nf'
 
 workflow SRA_FASTQ_URLS {
 
-    get:
+    take:
         sraProjectId
         sampleNamesToRetrieve
 
