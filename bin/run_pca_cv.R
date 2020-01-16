@@ -10,19 +10,89 @@ print("##################################################")
 # e.g.: Rscript /ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/aertslab/scripts/src_dwmax/ngs_digest/bin/scrna_seq/dim_reduction_pca_cv.R -i 10x_REW_Seurat_v3_Integrate_MaxFeatures.Rds -a "@assays\$integrated@scale.data"
 
 library("optparse")
-parser <- OptionParser(prog = "dim_reduction_pca_cv.R", description = "Perform PCA through cross-validation to find the optimal number of principal components.")
-parser <- add_option(parser, c("-i", "--input-file"), action="store", default = NULL, help="Input file [default]")
-parser <- add_option(parser, c("-a", "--accessor"), action = "store", default = NULL, help="Character defining the path to access the data matrix in S4 object.")
-parser <- add_option(parser, c("-k", "--k-fold"), action="store", default = 10, help="Set value k for the k-fold cross-validation. [default %default]")
-parser <- add_option(parser, c("-f", "--from-n-pc"), action="store", default = 2, help="Number of principal components to start with. [default %default]")
-parser <- add_option(parser, c("-t", "--to-n-pc"), action="store", default = 150, help="Number of principal components to compute [default %default]")
-parser <- add_option(parser, c("-b", "--by-n-pc"), action="store", default = 5, help="Number of principal components to increment by. [default %default]")
-parser <- add_option(parser, c("-m", "--max-iters"), action="store", default = 200, help="Maximum number of iteration. [default %default]")
-parser <- add_option(parser, c("-s", "--seed"), action="store", default = 617, help="Seed. [default %default]")
-parser <- add_option(parser, c("-c", "--n-cores"), action="store", default = 1, help="Number of cores to use. [default %default]")
-parser <- add_option(parser, c("-d", "--default-svd"), action="store", default = FALSE, help="Perform SVD instead of approximate PCA. [default %default]")
-parser <- add_option(parser, c("-v", "--verbose"), action="store", default = TRUE, help="Print some informational messages. [default %default]")
-parser <- add_option(parser, c("-o", "--output-prefix"), action="store", default = "dim_reduction_pca_cv_out_table.tsv", help="Prefix path to save output files (table of the PCA CV, PCA PRESS plot, optimal number of PCs). [default %default]")
+parser <- OptionParser(
+  prog = "dim_reduction_pca_cv.R",
+  description = "Perform PCA through cross-validation to find the optimal number of principal components."
+)
+parser <- add_option(
+  parser,
+  c("-i", "--input-file"),
+  action = "store",
+  default = NULL,
+  help = "Input file [default]"
+)
+parser <- add_option(
+  parser,
+  c("-a", "--accessor"),
+  action = "store",
+  default = NULL,
+  help = "Character defining the path to access the data matrix in S4 object."
+)
+parser <- add_option(
+  parser,
+  c("-k", "--k-fold"),
+  action = "store",
+  default = 10,
+  help="Set value k for the k-fold cross-validation. [default %default]"
+)
+parser <- add_option(
+  parser,
+  c("-f", "--from-n-pc"),
+  action = "store",
+  default = 2,
+  help="Number of principal components to start with. [default %default]"
+)
+parser <- add_option(
+  parser, c("-t", "--to-n-pc"),
+  action = "store",
+  default = 150,
+  help = "Number of principal components to compute [default %default]"
+)
+parser <- add_option(
+  parser, 
+  c("-b", "--by-n-pc"),
+  action = "store",
+  default = 5,
+  help="Number of principal components to increment by. [default %default]"
+)
+parser <- add_option(
+  parser,
+  c("-m", "--max-iters"), action="store", default = 500, help="Maximum number of iteration. [default %default]")
+parser <- add_option(
+  parser, 
+  c("-s", "--seed"), 
+  action = "store", 
+  default = 617,
+  help="Seed. [default %default]"
+)
+parser <- add_option(
+  parser,
+  c("-c", "--n-cores"),
+  action = "store",
+  default = 1,
+  help="Number of cores to use. [default %default]"
+)
+parser <- add_option(
+  parser,
+  c("-d", "--default-svd"),
+  action = "store",
+  default = FALSE,
+  help="Perform SVD instead of approximate PCA. [default %default]"
+)
+parser <- add_option(
+  parser,
+  c("-v", "--verbose"),
+  action = "store",
+  default = TRUE,
+  help="Print some informational messages. [default %default]"
+)
+parser <- add_option(
+  parser,
+  c("-o", "--output-prefix"),
+  action = "store",
+  default = "foo",
+  help="Prefix path to save output files (table of the PCA CV, PCA PRESS plot, optimal number of PCs). [default %default]"
+)
 
 args <- parse_args(parser)
 

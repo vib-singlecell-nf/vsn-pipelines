@@ -16,7 +16,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
         tuple val(sampleId), path(f)
 
     output:
-        tuple val(sampleId), stdout
+        tuple val(sampleId), stdout, emit: optimalNumberPC
         tuple val(sampleId), path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*")
 
     script:
@@ -36,7 +36,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
 			${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
             --output-prefix "${sampleId}.PCACV__FIND_OPTIMAL_NPCS" \
-            2> .command.err 1> .command.out
+            > .command.log 2>&1
         cat "${sampleId}.PCACV__FIND_OPTIMAL_NPCS.OPTIMAL_NPCS.txt"
         """
 
