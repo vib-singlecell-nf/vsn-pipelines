@@ -25,19 +25,19 @@ process SC__SCANPY__DIM_REDUCTION {
 		// Check if nComps is both dynamically and if statically set
 		if(nComps && processParams.containsKey('nComps'))
 			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically and dynamically set. Choose one.")
-		_nComps = processParams.containsKey('nComps') ? processParams.nComps: ''
+		nCompsAsArgument = processParams.containsKey('nComps') ? '--n-comps ' + processParams.nComps: ''
 		if(nComps)
-			_nComps = nComps
+			nCompsAsArgument = '--n-comps ' + nComps.replaceAll("\n","")
 		
 		"""
 		${binDir}dim_reduction/sc_dim_reduction.py \
 			--method ${processParams.dimReductionMethod} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
-			--n-comps ${_nComps} \
+			${nCompsAsArgument} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
-			${(processParams.containsKey('useFastTsne') && !processParams.useFastTsne) ? '' : '--use-fast-tsne'} \
+			${(processParams.containsKey('useFastTsne') && processParams.useFastTsne) ? '--use-fast-tsne' : ''} \
 			$f \
 			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${processParams.off}"
 		"""
