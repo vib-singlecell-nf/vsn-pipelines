@@ -1,6 +1,6 @@
 # vib-singlecell-nf
 
-[![Nextflow](https://img.shields.io/badge/nextflow-19.10.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-19.12.0-brightgreen.svg)](https://www.nextflow.io/)
 
 A repository of pipelines for single-cell data in Nextflow DSL2.
 
@@ -204,6 +204,16 @@ cellranger_outs_dir_path = "/home/data/cellranger/Sample*/outs/"
 will recursively find all 10x samples in that directory.
 
 # Advanced
+
+## Select the optimal number of principal components
+
+When generating the config using `nextflow config` (see above), add the `pcacv` profile.
+
+Remarks:
+- Make sure `nComps` config parameter (under `dim_reduction` > `pca`) is not set.
+- If `nPcs` is not set for t-SNE or UMAP config entries, then all the PCs from the PCA will be used in the computation.
+
+Currently, only the Scanpy related pipelines have this feature implemented.
 
 ## Cell-based metadata annotation
 
