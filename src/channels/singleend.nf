@@ -9,7 +9,7 @@ def extractSample(path) {
 
 workflow getChannel {
 
-    get:
+    take:
         glob
 
     main:

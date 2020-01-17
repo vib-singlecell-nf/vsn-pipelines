@@ -1,6 +1,6 @@
 # vib-singlecell-nf
 
-[![Nextflow](https://img.shields.io/badge/nextflow-19.10.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-19.12.0-brightgreen.svg)](https://www.nextflow.io/)
 
 A repository of pipelines for single-cell data in Nextflow DSL2.
 
@@ -203,13 +203,69 @@ cellranger_outs_dir_path = "/home/data/cellranger/Sample*/outs/"
 ```
 will recursively find all 10x samples in that directory.
 
-# Repository structure
+# Advanced
 
-## Root
+## Select the optimal number of principal components
+
+When generating the config using `nextflow config` (see above), add the `pcacv` profile.
+
+Remarks:
+- Make sure `nComps` config parameter (under `dim_reduction` > `pca`) is not set.
+- If `nPcs` is not set for t-SNE or UMAP config entries, then all the PCs from the PCA will be used in the computation.
+
+Currently, only the Scanpy related pipelines have this feature implemented.
+
+## Cell-based metadata annotation
+
+If you have (pre-computed) cell-based metadata and you'd like to add them as annotations, please read [cell-based metadata annotation](https://github.com/vib-singlecell-nf/vib-singlecell-nf/tree/develop/src/utils#cell-based-metadata-annotation).
+
+## Sample-based metadata annotation
+
+If you have sample-based metadata and you'd like to annotate the cells with these annotations, please read [sample-based metadata annotation](https://github.com/vib-singlecell-nf/vib-singlecell-nf/tree/develop/src/utils#sample-based-metadata-annotation).
+
+## Multi-sample parameters
+
+It's possible to define custom parameters for the different samples. It's as easy as defining a hashmap in groovy or a dictionary-like structure in Python.
+You'll just have to repeat the following structure for the parameters which you want to enable the multi-sample feature for:
+
+```
+params {
+    sc {
+        scanpy {
+         container = 'aertslab/sctx-scanpy:0.5.0'
+         filter {
+            report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
+            // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter
+            cellFilterMinNGenes = [
+                '1k_pbmc_v2_chemistry': 600,
+                '1k_pbmc_v3_chemistry': 800
+            ]
+            // cellFilterMaxNGenes will be set to 4000 for all the samples
+            cellFilterMaxNGenes = 4000
+            // Here we again enable the multi-sample feature for the cellFilterMaxPercentMito parameter
+            cellFilterMaxPercentMito = [
+                '1k_pbmc_v2_chemistry': 0.15,
+                '1k_pbmc_v3_chemistry': 0.05
+            ]
+            // geneFilterMinNCells will be set to 3 for all the samples
+            geneFilterMinNCells = 3
+            iff = '10x_mtx'
+            off = 'h5ad'
+            outdir = 'out'
+         }
+    }
+}
+```
+
+# Development
+
+## Repository structure
+
+### Root
 The repository root contains a `main.nf` and associated `nextflow.config`.
 The root `main.nf` imports and calls sub-workflows defined in the modules.
 
-## Modules
+### Modules
 A "module" consists of a folder labeled with the tool name (Scanpy, SCENIC, utils, etc.), with subfolders for
 * `bin/` (scripts passed into the container)
 * `processes/` (where Nextflow processes are defined)
@@ -254,7 +310,7 @@ src/
         └── utils.nf
 ```
 
-## Workflows
+### Workflows
 
 Workflows (chains of nf processes) are defined in the module root folder (e.g. [src/Scanpy/bec_bbknn.nf](https://github.com/vib-singlecell-nf/vib-singlecell-nf/blob/module_refactor/src/scanpy/bec_bbknn.nf))
 Workflows import multiple processes and define the workflow by name:
@@ -274,7 +330,7 @@ workflow CELLRANGER {
 
 ```
 
-### Workflow imports
+#### Workflow imports
 Entire **sub-workflows** can also be imported in other workflows with one command (inheriting all of the process imports from the workflow definition):
 ```groovy
 include CELLRANGER from '../cellranger/main.nf' params(params)
@@ -296,7 +352,7 @@ workflow {
 ```
 
 
-## Parameters structure
+### Parameters structure
 Parameters are stored in a separate config file per workflow, plus the main `nextflow.config`. 
 These parameters are merged when starting the run using e.g.:
 ```groovy
@@ -361,8 +417,6 @@ params {
 }
 
 ```
-
-# Development
 
 ## Module testing
 
