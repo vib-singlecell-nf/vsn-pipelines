@@ -35,7 +35,7 @@ workflowParams = params.utils.sra_metadata
 
 workflow DOWNLOAD_FROM_SRA {
 
-    get:
+    take:
         // Expects (sraProjectId, sampleFilters)
         sra
 

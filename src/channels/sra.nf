@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 workflow getChannel {
 
-    get:
+    take:
         // Expects sra Map [[id: "id1", samples: ["glob1", ...]], ...]
         sra
 
