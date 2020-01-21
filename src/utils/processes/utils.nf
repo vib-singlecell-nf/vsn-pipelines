@@ -85,7 +85,8 @@ process SC__FILE_CONVERTER {
 		else
 			"""
 			${binDir}sc_file_converter.py \
-				${(processParams.containsKey('tagCellWithSampleId')) ? '--sample-id ' + sampleId : ''} \
+				--sample-id "${sampleId}" \
+				${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id' : ''} \
 				--input-format $processParams.iff \
 				--output-format $processParams.off \
 				${f} \
