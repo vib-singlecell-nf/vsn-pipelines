@@ -160,18 +160,18 @@ process SC__STAR_CONCATENATOR() {
 process SC__PUBLISH_H5AD {
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true, saveAs: { filename -> "${tag}.${fOutSuffix}.h5ad" }
+	
 
     input:
-		tuple val(sampleId), path(fIn)
+		tuple val(tag), path(f)
 		val(fOutSuffix)
 
     output:
-    	tuple val(sampleId), path("${sampleId}.${fOutSuffix}.h5ad")
+    	tuple val(tag), path(f)
 
 	script:
 		"""
-		ln -s ${fIn} "${sampleId}.${fOutSuffix}.h5ad"
 		"""
 
 }
