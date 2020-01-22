@@ -44,8 +44,9 @@ workflow BEC_BBKNN {
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out 
         )
         SC__SCANPY__DIM_REDUCTION__UMAP( CLUSTER_IDENTIFICATION.out.marker_genes )
-        SC__PUBLISH_H5AD( SC__SCANPY__DIM_REDUCTION__UMAP.out,
-            params.global.project_name+".BEC_BBKNN.output"
+        SC__PUBLISH_H5AD( 
+            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+            "BEC_BBKNN.output"
         )
         // Not using t-SNE as it does not use the neighbour graph (which BBKNN alters) when constructing its dimensionality reduction
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(

@@ -1,5 +1,7 @@
 nextflow.preview.dsl=2
 
+import static groovy.json.JsonOutput.*
+
 /* general reporting function: 
 takes a template ipynb and adata as input,
 outputs ipynb named by the value in ${reportTitle}
@@ -19,10 +21,14 @@ process SC__SCANPY__GENERATE_REPORT {
 		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 
 	script:
+		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
 		"""
 		papermill ${ipynb} \
+		    --report-mode \
 			${sampleId}.${reportTitle}.ipynb \
-			-p FILE $adata
+			-p FILE $adata \
+			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
+			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
 		"""
 
 }
@@ -43,10 +49,14 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
     	tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
 
   	script:
+	  	def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
 		"""
 		papermill ${ipynb} \
+		    --report-mode \
 			${sampleId}.${reportTitle}.ipynb \
-			-p FILE1 $data1 -p FILE2 $data2
+			-p FILE1 $data1 -p FILE2 $data2 \
+			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
+			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
 		"""
 
 }

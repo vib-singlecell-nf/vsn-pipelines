@@ -15,7 +15,7 @@ workflow DIM_REDUCTION_PCA {
         data
 
     main:
-        if(params.pcacv) {
+        if(params.containsKey("pcacv")) {
             PCACV__FIND_OPTIMAL_NPCS( data )
             out = SC__SCANPY__DIM_REDUCTION__PCA( data.join(PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC) )
         } else {
