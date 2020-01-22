@@ -53,30 +53,45 @@ process SC__FILE_CONVERTER {
 				cellranger_outs_v3_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix/")
 				f = detectCellRangerVersionData(cellranger_outs_v2_mex, cellranger_outs_v3_mex)
 			break;
+
 			case "10x_cellranger_h5":
 				// Check if output was generated with CellRanger v2 or v3
 				cellranger_outs_v2_h5 = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_gene_bc_matrices.h5")
 				cellranger_outs_v3_h5 = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix.h5")
 				f = detectCellRangerVersionData(cellranger_outs_v2_h5, cellranger_outs_v3_h5)
 			break;
+
 			case "csv":
+				// Nothing to be done here
 			break;
-			
+
 			case "tsv":
+				// Nothing to be done here
+			break;
+
+			case "h5ad":
+				// Nothing to be done here
 			break;
 			
 			default:
-			throw new Exception("The given input format ${processParams.iff} is not recognized.")
+				throw new Exception("The given input format ${processParams.iff} is not recognized.")
 			break;
 		}
-		"""
-		${binDir}sc_file_converter.py \
-			${(processParams.containsKey('tagCellWithSampleId')) ? '--sample-id ' + sampleId : ''} \
-			--input-format $processParams.iff \
-			--output-format $processParams.off \
-			${f} \
-			"${sampleId}.SC__FILE_CONVERTER.${processParams.off}"
-		"""
+
+		if(processParams.iff == "h5ad")
+			"""
+			cp ${f} "${sampleId}.SC__FILE_CONVERTER.h5ad"
+			"""
+		else
+			"""
+			${binDir}sc_file_converter.py \
+				--sample-id "${sampleId}" \
+				${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id' : ''} \
+				--input-format $processParams.iff \
+				--output-format $processParams.off \
+				${f} \
+				"${sampleId}.SC__FILE_CONVERTER.${processParams.off}"
+			"""
 
 }
 
@@ -145,18 +160,18 @@ process SC__STAR_CONCATENATOR() {
 process SC__PUBLISH_H5AD {
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true, saveAs: { filename -> "${tag}.${fOutSuffix}.h5ad" }
+	
 
     input:
-		tuple val(sampleId), path(fIn)
+		tuple val(tag), path(f)
 		val(fOutSuffix)
 
     output:
-    	tuple val(sampleId), path("${sampleId}.${fOutSuffix}.h5ad")
+    	tuple val(tag), path(f)
 
 	script:
 		"""
-		ln -s ${fIn} "${sampleId}.${fOutSuffix}.h5ad"
 		"""
 
 }

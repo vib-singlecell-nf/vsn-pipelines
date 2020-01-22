@@ -288,7 +288,43 @@ cellranger_outs_dir_path = "/home/data/cellranger/Sample*/outs/"
 ```
 will recursively find all 10x samples in that directory.
 
-# Advanced
+# Docs
+
+## Define input data
+
+Depending on the type of data you run the pipeline with, one or more appropriate profiles should be set when running `nextflow config`.
+
+### Cell Ranger (10xGenomics)
+```
+-profiles tenx
+```
+In the generated .config file, make sur the `cellranger_outs_dir_path` parameter is set with the paths to the Cell Ranger `outs` folders:
+```
+[...]
+tenx {
+    cellranger_outs_dir_path = "data/10x/1k_pbmc/1k_pbmc_*/outs/"
+}
+[...]
+```
+- The `cellranger_outs_dir_path` parameter accepts glob patterns and also comma separated paths.
+
+### H5AD (Scanpy)
+```
+-profiles h5ad
+```
+
+In the generated .config file, make sur the `file_paths` parameter is set with the paths to the `.h5ad` files:
+```
+[...]
+h5ad {
+    file_paths = "data/1k_pbmc_v*_chemistry_SUFFIX.SC__FILE_CONVERTER.h5ad"
+    suffix = "_SUFFIX.SC__FILE_CONVERTER.h5ad"
+}
+[...]
+```
+- The `suffix` parameter is used to infer the sample name from the file paths.
+- The `file_paths` accepts glob patterns and also comma separated paths.
+Make sure that `sc.file_converter.iff` is set to `h5ad`.
 
 ## Select the optimal number of principal components
 

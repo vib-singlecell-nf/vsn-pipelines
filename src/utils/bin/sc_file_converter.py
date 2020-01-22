@@ -47,6 +47,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-t", "--tag-cell-with-sample-id",
+    action="store_true",
+    dest="tag_cell_with_sample_id",
+    default=False,
+    help="Tag each cell with the given sample_id."
+)
+
+
+parser.add_argument(
     "-o", "--output-format",
     action="store",  # optional because action defaults to "store"
     dest="output_format",
@@ -83,6 +92,12 @@ def check_10x_cellranger_mex_path(path):
         )
 
 
+def add_sample_id(adata, args):
+    # Annotate the file with the sample ID
+    adata.obs["sample_id"] = args.sample_id
+    return adata
+
+
 if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     check_10x_cellranger_mex_path(path=FILE_PATH_IN)
     # Convert
@@ -92,8 +107,12 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
         var_names='gene_symbols',  # use gene symbols for the variable names (variables-axis index)
         cache=False
     )
-    # If is sample_id is given, add the sample ID as suffix
-    if args.sample_id is not None:
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    if args.tag_cell_with_sample_id:
         adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
@@ -106,8 +125,12 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     adata = sc.read_10x_h5(
         FILE_PATH_IN
     )
-    # If is sample_id is given, add the sample ID as suffix
-    if args.sample_id is not None:
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    if args.tag_cell_with_sample_id:
         adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))

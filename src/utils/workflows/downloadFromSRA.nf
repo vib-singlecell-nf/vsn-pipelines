@@ -40,20 +40,25 @@ workflow DOWNLOAD_FROM_SRA {
         sra
 
     main:
-        db = file('NO_FILE')
-        sraDbFile = workflowParams.sraDb != '' ? file(workflowParams.sraDb): file(workflowParams.sraDbOutDir + "/SRAmetadb.sqlite")
-        if(sraDbFile.exists() 
-            && sraDbFile.canRead()
-            && !workflowParams.sraDbForceDownload) {
-            println("Local SRA database detected ${sraDbFile}!")
-            db = sraDbFile
-        } else {
-            if(workflowParams.sraDbForceDownload
-                || workflowParams.sraDb == '') {
-                println("Downloading SRA database to ${sraDbFile}...")
-                db = GET_SRA_DB()
-                println("Done!")
+        if(workflowParams.mode == 'db') {
+            sraDbFile = workflowParams.sraDb != '' ? file(workflowParams.sraDb): file(workflowParams.sraDbOutDir + "/SRAmetadb.sqlite")
+            if(sraDbFile.exists() 
+                && sraDbFile.canRead()
+                && !workflowParams.sraDbForceDownload) {
+                println("Local SRA database detected ${sraDbFile}!")
+                db = sraDbFile
+            } else {
+                if(workflowParams.sraDbForceDownload
+                    || workflowParams.sraDb == '') {
+                    println("Downloading SRA database to ${sraDbFile}...")
+                    db = GET_SRA_DB()
+                    println("Done!")
+                }
             }
+        } else if(workflowParams.mode == 'web') {
+            db = file('NO_FILE')
+        } else {
+            throw new Exception("The "+ workflowParams.mode +" mode does not exist. Choose one of: web, db.")
         }
         // Get metadata for the given SRA Project ID and keep only the samples that passes the given sampleFilters
         metadata = SRA_TO_METADATA( 
@@ -63,7 +68,8 @@ workflow DOWNLOAD_FROM_SRA {
             header:true,
             sep: '\t'
         ).map {
-            row -> tuple(row.run_accession, row.sample_name)
+            // Replace all special characters by underscores
+            row -> tuple(row.run_accession, row.sample_name.replaceAll("[, ]", "_"))
         }
         // Download and compress all the SRA runs defined in the metadata
         data = DOWNLOAD_FASTQS_FROM_SRA_ACC_ID( 
