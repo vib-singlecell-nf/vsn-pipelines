@@ -99,7 +99,7 @@ workflow bbknn {
         bbknn_base( data )
 
     emit:
-        bbknn_base.out.filteredloom
-        bbknn_base.out.scopeloom
+        filteredloom = bbknn_base.out.filteredloom
+        scopeloom = bbknn_base.out.scopeloom
 
 }
