@@ -57,30 +57,30 @@ workflow SCENIC {
         tfs = file(params.sc.scenic.grn.tfs)
         grn = GRNBOOST2_WITHOUT_DASK( filteredLoom.combine(runs), tfs )
 
-        // /* cisTarget motif analysis */
-        // // channel for SCENIC databases resources:
-        // motifDB = Channel
-        //     .fromPath( params.sc.scenic.cistarget.mtfDB )
-        //     .collect() // use all files together in the ctx command
-        // motifANN = file(params.sc.scenic.cistarget.mtfANN)
-        // ctx_mtf = CISTARGET__MOTIF( grn, motifDB, motifANN, 'mtf' )
+        /* cisTarget motif analysis */
+        // channel for SCENIC databases resources:
+        motifsDb = Channel
+            .fromPath( params.sc.scenic.cistarget.motifsDb )
+            .collect() // use all files together in the ctx command
+        motifsAnnotation = file(params.sc.scenic.cistarget.motifsAnnotation)
+        ctx_mtf = CISTARGET__MOTIF( grn, motifsDb, motifsAnnotation, 'mtf' )
 
-        // /* cisTarget track analysis */
-        // if(params.sc.scenic.cistarget.trkDB) {
-        //     trackDB = Channel
-        //         .fromPath( params.sc.scenic.cistarget.trkDB )
-        //         .collect() // use all files together in the ctx command
-        //     trackANN = file(params.sc.scenic.cistarget.trkANN)
-        //     ctx_trk = CISTARGET__TRACK( grn, trackDB, trackANN, 'trk' )
-        // }
+        /* cisTarget track analysis */
+        if(params.sc.scenic.cistarget.tracksDb) {
+            tracksDb = Channel
+                .fromPath( params.sc.scenic.cistarget.tracksDb )
+                .collect() // use all files together in the ctx command
+            tracksAnnotation = file(params.sc.scenic.cistarget.tracksAnnotation)
+            ctx_trk = CISTARGET__TRACK( grn, tracksDb, tracksAnnotation, 'trk' )
+        }
 
-        // /* AUCell, motif regulons */
-        // auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
+        /* AUCell, motif regulons */
+        auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
 
-        // if(params.sc.scenic.cistarget.trkDB) {
-        //     /* AUCell, track regulons */
-        //     auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
-        // }
+        if(params.sc.scenic.cistarget.trackDb) {
+            /* AUCell, track regulons */
+            auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
+        }
 
         // // multi-runs aggregation:
         // if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
@@ -93,7 +93,7 @@ workflow SCENIC {
         //         auc_mtf,
         //         'mtf'
         //     )
-        //     if(params.sc.scenic.cistarget.trkDB) {
+        //     if(params.sc.scenic.cistarget.trackDb) {
         //         scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
         //             filteredLoom,
         //             ctx_trk,
@@ -108,7 +108,7 @@ workflow SCENIC {
         //         out = VISUALIZE(scenic_loom_mtf)
         //     }
         // } else {
-        //     if(params.sc.scenic.cistarget.trkDB) {
+        //     if(params.sc.scenic.cistarget.trackDb) {
         //         out = VISUALIZE(
         //             MERGE_MOTIF_TRACK_LOOMS(
         //                 auc_mtf
