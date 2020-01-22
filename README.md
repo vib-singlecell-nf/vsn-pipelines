@@ -10,17 +10,17 @@
 
 ```{bash}
 nextflow config \
-   -profile scenic,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
+   -profile scenic,qsub,singularity vib-singlecell-nf/vsn-pipelines \
    > nextflow.config
 ```
 
 - Multi-runs SCENIC
 
-*Note*: The `qsub` profile if you are not running the pipeline on a cluster.
+*Note*: Omit the `qsub` profile if you are not running the pipeline on a cluster.
 
 ```{bash}
 nextflow config \
-   -profile scenic_multiruns,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
+   -profile scenic_multiruns,qsub,singularity vib-singlecell-nf/vsn-pipelines \
    > nextflow.config
 ```
 
@@ -45,7 +45,7 @@ Additionally, you can update the other paraemeters for the different steps.
 
 ```{bash}
 nextflow -C nextflow.config run \
-   vib-singlecell-nf/vib-singlecell-nf \
+   vib-singlecell-nf/vsn-pipelines \
       -entry scenic \
       -with-report report.html \
       -with-trace
@@ -62,3 +62,4 @@ Here is the DAG summarizing the multi-runs SCENIC workflow:
 ```{bash}
 nextflow -C conf/test.config,conf/test_multi_runs.config run main.nf --test
 ```
+
