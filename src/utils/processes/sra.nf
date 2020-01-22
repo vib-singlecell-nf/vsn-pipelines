@@ -42,12 +42,20 @@ process SRA_TO_METADATA {
         file "${sraId}_metadata.tsv"
 
     script:
-        if(sraDb.name != 'NO_FILE') {
-            sraDbAsArgument = "--sra-db ${sraDb}"
+        if(processParams.mode == 'db') {
+            if(sraDb.name != 'NO_FILE') {
+                sraDbAsArgument = "--sra-db ${sraDb}"
+            } else {
+                if(!processParams.containsKey('sraDb') || processParams.sraDb == '')
+                    throw new Exception("The db modue requires sraDb to be specified")
+                sraDbAsArgument = '--sra-db ' + processParams.sraDb
+            }
+        } else if(processParams.mode == 'web') {
+            sraDbAsArgument = ''
         } else {
-            sraDbAsArgument = (processParams.containsKey('sraDb') && processParams.sraDb != '') ? '--sra-db ' + processParams.sraDb : ''
+            throw new Exception("The "+ processParams.mode +" mode does not exist. Choose one of: web, db.")
         }
-        def sampleFiltersAsArguments = sampleFilters.collect({ '--sample-filter' + ' ' + it }).join(' ')
+        def sampleFiltersAsArguments = sampleFilters.collect({ '--sample-filter' + ' "' + it + '"'}).join(' ')
         """
         ${binDir}sra_to_metadata.py \
             ${sraId} \

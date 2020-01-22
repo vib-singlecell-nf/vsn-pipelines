@@ -76,7 +76,7 @@ args = parser.parse_args()
 # Get the metadata
 #
 
-if "sra_db" in args:
+if args.sra_db is not None:
     db = SRAdb(args.sra_db.name)
     print(f"Using local SRA SQLite database to query...")
 else:
@@ -84,7 +84,7 @@ else:
     db = SRAweb()
 
 metadata = db.sra_metadata(
-    acc=args.sra_project_id,
+    args.sra_project_id,
     detailed=True,
     expand_sample_attributes=True,
     sample_attribute=True
@@ -99,7 +99,7 @@ metadata = pd.concat(
     [
         metadata,
         metadata["experiment_title"].str.extract(
-            r'^(.*): ([a-zA-Z0-9_-]*); (.*); (.*)$', expand=True
+            r'^(.*): ([a-zA-Z0-9\s,_-]*); (.*); (.*)$', expand=True
         ).rename(
             columns={
                 0: 'geo_accession',
