@@ -11,6 +11,8 @@
 
  */ 
 nextflow.preview.dsl=2
+include './../utils/processes/config'
+resolveParams(params, true)
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
@@ -52,77 +54,77 @@ workflow SCENIC {
     main:
         /* GRN */
         filteredLoom.view()
-        tfs = file(params.sc.scenic.grn.TFs)
+        tfs = file(params.sc.scenic.grn.tfs)
         grn = GRNBOOST2_WITHOUT_DASK( filteredLoom.combine(runs), tfs )
 
-        /* cisTarget motif analysis */
-        // channel for SCENIC databases resources:
-        motifDB = Channel
-            .fromPath( params.sc.scenic.cistarget.mtfDB )
-            .collect() // use all files together in the ctx command
-        motifANN = file(params.sc.scenic.cistarget.mtfANN)
-        ctx_mtf = CISTARGET__MOTIF( grn, motifDB, motifANN, 'mtf' )
+        // /* cisTarget motif analysis */
+        // // channel for SCENIC databases resources:
+        // motifDB = Channel
+        //     .fromPath( params.sc.scenic.cistarget.mtfDB )
+        //     .collect() // use all files together in the ctx command
+        // motifANN = file(params.sc.scenic.cistarget.mtfANN)
+        // ctx_mtf = CISTARGET__MOTIF( grn, motifDB, motifANN, 'mtf' )
 
-        /* cisTarget track analysis */
-        if(params.sc.scenic.cistarget.trkDB) {
-            trackDB = Channel
-                .fromPath( params.sc.scenic.cistarget.trkDB )
-                .collect() // use all files together in the ctx command
-            trackANN = file(params.sc.scenic.cistarget.trkANN)
-            ctx_trk = CISTARGET__TRACK( grn, trackDB, trackANN, 'trk' )
-        }
+        // /* cisTarget track analysis */
+        // if(params.sc.scenic.cistarget.trkDB) {
+        //     trackDB = Channel
+        //         .fromPath( params.sc.scenic.cistarget.trkDB )
+        //         .collect() // use all files together in the ctx command
+        //     trackANN = file(params.sc.scenic.cistarget.trkANN)
+        //     ctx_trk = CISTARGET__TRACK( grn, trackDB, trackANN, 'trk' )
+        // }
 
-        /* AUCell, motif regulons */
-        auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
+        // /* AUCell, motif regulons */
+        // auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
 
-        if(params.sc.scenic.cistarget.trkDB) {
-            /* AUCell, track regulons */
-            auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
-        }
+        // if(params.sc.scenic.cistarget.trkDB) {
+        //     /* AUCell, track regulons */
+        //     auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
+        // }
 
-        // multi-runs aggregation:
-        if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
-            if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
-                throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
+        // // multi-runs aggregation:
+        // if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
+        //     if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
+        //         throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
             
-            scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
-                filteredLoom,
-                ctx_mtf,
-                auc_mtf,
-                'mtf'
-            )
-            if(params.sc.scenic.cistarget.trkDB) {
-                scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
-                    filteredLoom,
-                    ctx_trk,
-                    auc_trk,
-                    'trk'
-                )
-                MERGE_MOTIF_TRACK_LOOMS(
-                    scenic_loom_mtf.join(scenic_loom_trk)
-                )
-                out = VISUALIZE(MERGE_MOTIF_TRACK_LOOMS.out)
-            } else {
-                out = VISUALIZE(scenic_loom_mtf)
-            }
-        } else {
-            if(params.sc.scenic.cistarget.trkDB) {
-                out = VISUALIZE(
-                    MERGE_MOTIF_TRACK_LOOMS(
-                        auc_mtf
-                            .map { it -> tuple(it[0], it[2]) }
-                            .join(auc_trk.map { it -> tuple(it[0], it[2]) })
-                    ))
-            } else {
-                out = VISUALIZE(
-                    auc_mtf.map { it -> tuple(it[0], it[2]) }
-                )
-            }
-        }
-        PUBLISH_LOOM(out)
+        //     scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
+        //         filteredLoom,
+        //         ctx_mtf,
+        //         auc_mtf,
+        //         'mtf'
+        //     )
+        //     if(params.sc.scenic.cistarget.trkDB) {
+        //         scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
+        //             filteredLoom,
+        //             ctx_trk,
+        //             auc_trk,
+        //             'trk'
+        //         )
+        //         MERGE_MOTIF_TRACK_LOOMS(
+        //             scenic_loom_mtf.join(scenic_loom_trk)
+        //         )
+        //         out = VISUALIZE(MERGE_MOTIF_TRACK_LOOMS.out)
+        //     } else {
+        //         out = VISUALIZE(scenic_loom_mtf)
+        //     }
+        // } else {
+        //     if(params.sc.scenic.cistarget.trkDB) {
+        //         out = VISUALIZE(
+        //             MERGE_MOTIF_TRACK_LOOMS(
+        //                 auc_mtf
+        //                     .map { it -> tuple(it[0], it[2]) }
+        //                     .join(auc_trk.map { it -> tuple(it[0], it[2]) })
+        //             ))
+        //     } else {
+        //         out = VISUALIZE(
+        //             auc_mtf.map { it -> tuple(it[0], it[2]) }
+        //         )
+        //     }
+        // }
+        // PUBLISH_LOOM(out)
 
-    emit:
-        out
+    // emit:
+    //     out
 
 }
 
@@ -153,6 +155,8 @@ workflow SCENIC_append {
 workflow {
 
     main:
-        SCENIC( Channel.of( tuple("foobar", path(params.sc.scenic.filteredLoom)) ) )
+        if(!("filteredLoom" in params.sc.scenic))
+            throw new Exception("The given filteredLoom required parameter does not exist in the params.sc.scenic scope.")
+        SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
 
 }
