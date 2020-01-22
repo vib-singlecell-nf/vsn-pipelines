@@ -12,7 +12,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN python3 -m pip install ipykernel && \
     pip install --no-cache-dir papermill && \
-    pip install --no-cache-dir pysradb
+    pip install --no-cache-dir pysradb==0.9.9
 
 FROM python:3.6.8-slim-stretch AS build-image
 RUN apt-get -y update && \

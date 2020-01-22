@@ -3,7 +3,6 @@ nextflow.preview.dsl=2
 def extractSample(path) {
     pattern = /(.+)\/(.+)_R[1-2](.*)\.fastq(\.gz)?/
     (full, parentDir, id, whateverSuffix, compressionExtension) = (path =~ pattern)[0]
-
     return id
 }
 
@@ -20,7 +19,7 @@ workflow getChannel {
         channel = Channel
             .fromPath(glob, checkIfExists: true)
             .map {
-                path -> tuple(extractSample( "${path}" ), path("${path}"))
+                path -> tuple(extractSample( "${path}" ), file("${path}"))
             }
 
     emit:
