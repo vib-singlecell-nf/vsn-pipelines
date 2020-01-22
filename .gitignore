@@ -24,3 +24,5 @@ work/
 out/
 tests/
 debug/
+*.swp
+*.swo
