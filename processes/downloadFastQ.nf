@@ -23,6 +23,7 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
     
     script:
         """
+        prefetch -v -p 1 ${sraId}
         fasterq-dump -S -v -p -e ${params.sratoolkit.downloadFastqs.threads} -O . ${sraId}
         pigz -p ${params.sratoolkit.downloadFastqs.threads} *.fastq
         """
