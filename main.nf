@@ -33,7 +33,7 @@ workflow bbknn_scenic {
 // run single_sample, output a scope loom file
 workflow single_sample {
 
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    include single_sample_standalone as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     SINGLE_SAMPLE()
 
 }
@@ -43,7 +43,7 @@ workflow single_sample {
 workflow single_sample_scenic {
 
     include SCENIC_append from './src/scenic/main.nf' params(params)
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    include single_sample_standalone as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     SINGLE_SAMPLE()
     SCENIC_append( SINGLE_SAMPLE.out.filteredloom, SINGLE_SAMPLE.out.scopeloom )
 
@@ -75,7 +75,19 @@ workflow cellranger {
 // runs mkfastq, CellRanger count, then single_sample:
 workflow single_sample_cellranger {
 
-    cellranger | single_sample
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    cellranger | SINGLE_SAMPLE
+
+}
+
+workflow h5ad_single_sample {
+
+    include getChannel as getH5ADChannel from './src/channels/h5ad' params(params)
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    data = getH5ADChannel( 
+        params.data.h5ad.file_paths,
+        params.data.h5ad.suffix
+    ).view() | SINGLE_SAMPLE
 
 }
 

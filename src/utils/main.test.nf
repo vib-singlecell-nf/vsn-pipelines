@@ -77,6 +77,14 @@ workflow {
                 db = file(params.utils.sra_metadata.sraDbOutDir + "/SRAmetadb.sqlite")
                 SRA_TO_METADATA( sra, db )
             break;
+            case "GET_METADATA_FROM_SRA_WEB":
+                // Imports
+                include getChannel as getSRAChannel from './../channels/sra' params(params)
+                include SRA_TO_METADATA from './processes/sra' params(params)
+                // Run
+                sra = getSRAChannel( params.data.sra )
+                SRA_TO_METADATA( sra, file('NO_FILE') )
+            break;
             case "DOWNLOAD_FROM_SRA":
                 // Imports
                 include DOWNLOAD_FROM_SRA from './workflows/downloadFromSRA' params(params)
@@ -84,7 +92,7 @@ workflow {
                 include SC__CELLRANGER__COUNT   from './../cellranger/processes/count'    params(params)
                 // Run 
                 DOWNLOAD_FROM_SRA(
-                    tuple('SRP125768', ["w1118_15d_*"]) //["DGRP-551_*d_r*","w1118_*d_r*"]
+                    tuple('SRP162698', ["10x, sample 1", "10x, sample 2"])
                 )
             break;
             case "DOWNLOAD_FROM_SRA_AND_RUN_CELLRANGER":
