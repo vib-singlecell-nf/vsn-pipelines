@@ -20,11 +20,10 @@ workflow DIM_REDUCTION {
         data
 
     main:
-        DIM_REDUCTION_PCA( data )
-        // SC__SCANPY__DIM_REDUCTION__PCA( data )
-        // SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__PCA.out )
-        SC__SCANPY__DIM_REDUCTION__TSNE( DIM_REDUCTION_PCA.out )
-        dimred = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
+        dimred_pca = DIM_REDUCTION_PCA( data )
+        dimred_pca_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( DIM_REDUCTION_PCA.out )
+        dimred_pca_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
+
         report = GENERATE_REPORT(
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
             file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
@@ -32,7 +31,8 @@ workflow DIM_REDUCTION {
         )
 
     emit:
-        dimred
+        dimred_pca_tsne
+        dimred_pca_tsne_umap
         report
 
 }
