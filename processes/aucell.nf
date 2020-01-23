@@ -11,7 +11,7 @@ processParams = params.sc.scenic.aucell
 
 process AUCELL {
 
-    // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
+    // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (degfault)
     label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
@@ -24,17 +24,18 @@ process AUCELL {
         val type
 
     output:
-        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}"), val(runId)
+        tuple val(sampleId), path(filteredLoom), path("${outputFileName}"), val(runId)
 
     script:
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"
         """
         pyscenic aucell \
             $filteredLoom \
             $regulons \
-            -o "${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"}" \
+            -o "${outputFileName}" \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
             --gene_attribute ${toolParams.gene_attribute} \
-            --num_workers ${toolParams.numWorkers}
+            --num_workers ${processParams.numWorkers}
         """
 
 }
