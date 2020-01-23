@@ -35,10 +35,11 @@ workflow BEC_BBKNN {
 
     take:
         normalizedTransformedData
-        data
+        dimReductionData
+        clusterIdentifiedWithoutBatchEffectCorrection
 
     main:
-        SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
+        SC__SCANPY__BATCH_EFFECT_CORRECTION( dimReductionData )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out 
@@ -48,9 +49,11 @@ workflow BEC_BBKNN {
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
             "BEC_BBKNN.output"
         )
-        // Not using t-SNE as it does not use the neighbour graph (which BBKNN alters) when constructing its dimensionality reduction
+        // This will generate a dual report with results from
+        // - CLUSTER_IDENTIFICATION without batch effect correction
+        // - CLUSTER_IDENTIFICATION with batch effect correction
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
-            data,
+            clusterIdentifiedWithoutBatchEffectCorrection,
             SC__PUBLISH_H5AD.out,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report"
