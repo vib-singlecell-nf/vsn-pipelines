@@ -15,6 +15,17 @@ include './../utils/processes/config'
 resolveParams(params, true)
 
 //////////////////////////////////////////////////////
+//  Sanity checks
+if(!params.global.containsKey("genome_assembly"))
+    throw new Exception("params.global.genome_assembly is required. Choose of the profiles: dm6, hg38.")
+
+if(params.global.genome_assembly == '')
+    throw new Exception("params.global.genome_assembly cannot be empty. Choose of the profiles: dm6, hg38.")
+
+if(!(params.global.genome_assembly in ['dm6','hg38']))
+    throw new Exception("The given genome assembly "+ params.global.genome_assembly + " is not implemented. Choose of the profiles: dm6, hg38.")
+
+//////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 include GRNBOOST2_WITHOUT_DASK                                    from './processes/grnboost2withoutDask'  params(params)
 include CISTARGET as CISTARGET__MOTIF                             from './processes/cistarget'             params(params)
