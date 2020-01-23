@@ -15,7 +15,7 @@ process GRNBOOST2_WITHOUT_DASK {
     label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
-    publishDir "${toolParams.scenicoutdir}/${sampleId}/grnboost2withoutDask/${toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    publishDir "${toolParams.scenicoutdir}/${sampleId}/grnboost2withoutDask/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks processParams.maxForks
 
@@ -24,15 +24,16 @@ process GRNBOOST2_WITHOUT_DASK {
         file tfs
 
     output:
-        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
+        tuple val(sampleId), file(filteredLoom), file("${outputFileName}"), val(runId)
 
     script:
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"
         """
         ${binDir}grnboost2_without_dask.py \
             $filteredLoom \
             $tfs \
-            --output ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
-            --num_workers ${toolParams.numWorkers} \
+            --output ${outputFileName} \
+            --num_workers ${processParams.numWorkers} \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
             --gene_attribute ${toolParams.gene_attribute}
         """
