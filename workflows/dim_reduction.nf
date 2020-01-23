@@ -20,8 +20,8 @@ workflow DIM_REDUCTION {
         data
 
     main:
-        DIM_REDUCTION_PCA( data )
-        dimred_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( DIM_REDUCTION_PCA.out )
+        dimred_pca = DIM_REDUCTION_PCA( data )
+        dimred_pca_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( DIM_REDUCTION_PCA.out )
         dimred_pca_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
 
         report = GENERATE_REPORT(
