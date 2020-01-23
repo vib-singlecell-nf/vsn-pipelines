@@ -24,7 +24,7 @@ tar -xzvf pbmc_1k_v3_filtered_feature_bc_matrix.tar.gz -C data/10x/1k_pbmc/1k_pb
 
 Download the small meta data to annotate the samples:
 ```
-wget https://raw.githubusercontent.com/aertslab/SingleCellTxBenchmark/master/data/10x/1k_pbmc/metadata.tsv -O data/10x/1k_pbmc/metadata.tsv
+wget https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/data/10x/1k_pbmc/metadata.tsv -O data/10x/1k_pbmc/metadata.tsv
 ```
 
 If these links appear not work, you can always download them from https://support.10xgenomics.com/single-cell-gene-expression/datasets.
