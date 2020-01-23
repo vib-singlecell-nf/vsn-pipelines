@@ -15,31 +15,33 @@ process CISTARGET {
     label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
-    publishDir "${toolParams.scenicoutdir}/${sampleId}/cistarget/${toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    publishDir "${toolParams.scenicoutdir}/${sampleId}/cistarget/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks processParams.maxForks
     
     input:
-        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"}"), val(runId)
+        tuple val(sampleId), path(filteredLoom), path(f), val(runId)
         file featherDB
         file annotation
         val type
 
     output:
-        tuple val(sampleId), path(filteredLoom), path("${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"}"), val(runId)
+        tuple val(sampleId), path(filteredLoom), path("${outputFileName}"), val(runId)
+        
 
     script:
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
         """
         pyscenic ctx \
-            ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"} \
+            ${f} \
             ${featherDB} \
             --annotations_fname ${annotation} \
             --expression_mtx_fname ${filteredLoom} \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
             --gene_attribute ${toolParams.gene_attribute} \
             --mode "dask_multiprocessing" \
-            --output ${toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"} \
-            --num_workers ${toolParams.numWorkers} \
+            --output ${outputFileName} \
+            --num_workers ${processParams.numWorkers} \
         """
 
 }
