@@ -16,14 +16,17 @@ resolveParams(params, true)
 
 //////////////////////////////////////////////////////
 //  Sanity checks
-if(!params.global.containsKey("genome_assembly"))
-    throw new Exception("params.global.genome_assembly is required. Choose of the profiles: dm6, hg38.")
+if(!params.global.containsKey("genome"))
+    throw new Exception("params.global.genome is required.")
 
-if(params.global.genome_assembly == '')
-    throw new Exception("params.global.genome_assembly cannot be empty. Choose of the profiles: dm6, hg38.")
+if(!params.global.genome.containsKey("assembly"))
+    throw new Exception("params.global.genome.assembly is required. Choose of the profiles: dm6, hg38.")
 
-if(!(params.global.genome_assembly in ['dm6','hg38']))
-    throw new Exception("The given genome assembly "+ params.global.genome_assembly + " is not implemented. Choose of the profiles: dm6, hg38.")
+if(params.global.genome.assembly == '')
+    throw new Exception("params.global.genome.assembly cannot be empty. Choose of the profiles: dm6, hg38.")
+
+if(!(params.global.genome.assembly in ['dm6','hg38']))
+    throw new Exception("The given genome assembly "+ params.global.genome.assembly + " is not implemented. Choose of the profiles: dm6, hg38.")
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
