@@ -16,7 +16,7 @@ nextflow config \
 
 - Multi-runs SCENIC
 
-*Note*: The `qsub` profile if you are not running the pipeline on a cluster.
+*Note*: Omit the `qsub` profile if you are not running the pipeline on a cluster.
 
 ```{bash}
 nextflow config \
@@ -45,7 +45,7 @@ Additionally, you can update the other paraemeters for the different steps.
 
 ```{bash}
 nextflow -C nextflow.config run \
-   vib-singlecell-nf/vib-singlecell-nf \
+   vib-singlecell-nf/vsn-pipelines \
       -entry scenic \
       -with-report report.html \
       -with-trace
