@@ -15,7 +15,7 @@ process AUCELL {
     label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
-    publishDir "${toolParams.scenicoutdir}/${sampleId}/aucell/${toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    publishDir "${toolParams.scenicoutdir}/${sampleId}/aucell/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks processParams.maxForks
 

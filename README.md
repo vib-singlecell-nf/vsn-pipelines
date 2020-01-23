@@ -10,7 +10,7 @@
 
 ```{bash}
 nextflow config \
-   -profile scenic,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
+   -profile hg38,scenic,scenic_use_cistarget_motifs,scenic_use_cistarget_tracks,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
    > nextflow.config
 ```
 
@@ -20,7 +20,7 @@ nextflow config \
 
 ```{bash}
 nextflow config \
-   -profile scenic_multiruns,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
+   -profile hg38,scenic_multiruns,scenic_use_cistarget_motifs,scenic_use_cistarget_tracks,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
    > nextflow.config
 ```
 
@@ -30,11 +30,11 @@ Make sure the following parameters are correctly set:
 - `params.global.project_name`
 - `params.global.qsubaccount` if running on a cluster (SGE cluster)
 - `params.sc.scenic.filteredLoom`
-- `params.sc.scenic.grn.TFs`
-- `params.sc.scenic.cistarget.mtfDB`
-- `params.sc.scenic.cistarget.mtfANN`
-- `params.sc.scenic.cistarget.trkDB` if commented, track-based cisTarget won't run
-- `params.sc.scenic.cistarget.trkDB` if commented, track-based cisTarget won't run
+- `params.sc.scenic.grn.tfs`
+- `params.sc.scenic.cistarget.motifsDb`
+- `params.sc.scenic.cistarget.motifAnnotation`
+- `params.sc.scenic.cistarget.tracksDb` if commented, track-based cisTarget won't run
+- `params.sc.scenic.cistarget.tracksAnnotation` if commented, track-based cisTarget won't run
 - `params.sc.scenic.numRuns` if running SCENIC in multi-runs mode
 - `singularity.runOptions` Specify the paths to mount
 - `params.sc.scope.tree`
@@ -60,5 +60,8 @@ Here is the DAG summarizing the multi-runs SCENIC workflow:
 ## Testing the pipeline
 
 ```{bash}
-nextflow -C conf/test.config,conf/test_multi_runs.config run main.nf --test
+nextflow config \
+   -profile scenic,scenic_test,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
+   > nextflow.config
+nextflow -C nextflow.config run main.nf --test
 ```
