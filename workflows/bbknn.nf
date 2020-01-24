@@ -33,16 +33,20 @@ workflow bbknn_base {
         SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
         NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-
-        //// include all pre-merge dim reductions. These will be replaced in the bbknn step
         DIM_REDUCTION( HVG_SELECTION.out.scaled )
-        CLUSTER_IDENTIFICATION( 
+
+        //// Perform the clustering step w/o batch effect correction (for comparison matter)
+        clusterIdentifiedWithoutBatchEffectCorrection = CLUSTER_IDENTIFICATION( 
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred 
+            DIM_REDUCTION.out.dimred_pca_tsne_umap
         )
+
+        //// Perform the batch effect correction
         BEC_BBKNN(
             NORMALIZE_TRANSFORM.out,
-            CLUSTER_IDENTIFICATION.out.marker_genes
+            //// include only PCA and t-SNE pre-merge dim reductions. Omit UMAP for clarity since it will have to be overwritten by BEC_BBKNN
+            DIM_REDUCTION.out.dimred_pca_tsne,
+            clusterIdentifiedWithoutBatchEffectCorrection.marker_genes
         )
 
         // conversion
