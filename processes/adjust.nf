@@ -1,10 +1,6 @@
 nextflow.preview.dsl=2
 
-if(!params.containsKey("test")) {
-  binDir = "${workflow.projectDir}/src/scanpy/bin/"
-} else {
-  binDir = ""
-}
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
 
 process SC__SCANPY__ADJUSTMENT {
 
