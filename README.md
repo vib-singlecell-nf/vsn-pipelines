@@ -36,7 +36,7 @@ This will take only **~3min** to run.
 
 2. Next, update to the latest pipeline version:
 ```bash
-nextflow pull vib-singlecell-nf/vsn-pipeline
+nextflow pull vib-singlecell-nf/vsn-pipelines
 ```
 
 3. Next, generate a config file using the standard settings for the test data,
@@ -121,7 +121,7 @@ The tool-specific parameters, as well as Docker/Singularity profiles, are includ
 
 1. First, update to the latest pipeline version (this will update the nextflow cache of the repository, typically located in `~/.nextflow/assets/vib-singlecell-nf/`):
 ```bash
-nextflow pull vib-singlecell-nf/vsn-pipeline
+nextflow pull vib-singlecell-nf/vsn-pipelines
 ```
 
 2. Next, a config file needs to be generated.
@@ -288,7 +288,37 @@ cellranger_outs_dir_path = "/home/data/cellranger/Sample*/outs/"
 ```
 will recursively find all 10x samples in that directory.
 
-# Docs
+# Case Studies
+
+## Hung R et al., 2019 - A cell atlas of the adult Drosophila midgut
+
+Some links related to the case study:
+- GEO: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE120537
+- Paper: https://www.pnas.org/content/117/3/1514.abstract
+
+### Analysis of 10x Samples
+
+The following command was used to generate the config:
+```
+nextflow config \
+   ~/vib-singlecell-nf \
+   -profile singularity,sra,cellranger,pcacv,bbknn,scenic \
+   > nextflow.config
+```
+
+The generated config is available in `examples/hungr_2019/10x_bbknn_scenic.config`.
+
+To start the pipeline, run the following command:
+```
+nextflow \
+   -C nextflow.config \
+   run ~/vib-singlecell-nf \
+      -entry sra_cellranger_bbknn_scenic
+```
+
+The resulting loom file is available here: `examples/hungr_2019/10x_bbknn_scenic.loom` and is ready to be explored in [SCope](http://scope.aertslab.org/).
+
+# Documentation
 
 ## Define input data
 

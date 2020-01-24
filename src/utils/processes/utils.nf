@@ -1,12 +1,7 @@
 nextflow.preview.dsl=2
 
 import java.nio.file.Paths
-
-if(!params.containsKey("test")) {
-	binDir = "${workflow.projectDir}/src/utils/bin/"
-} else {
-	binDir = ""
-}
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
 
 def detectCellRangerVersionData(cellRangerV2Data, cellRangerV3Data) {
 	if(cellRangerV2Data.isDirectory()) {
