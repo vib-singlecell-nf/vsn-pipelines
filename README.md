@@ -36,7 +36,7 @@ This will take only **~3min** to run.
 
 2. Next, update to the latest pipeline version:
 ```bash
-nextflow pull vib-singlecell-nf/vsn-pipeline
+nextflow pull vib-singlecell-nf/vsn-pipelines
 ```
 
 3. Next, generate a config file using the standard settings for the test data,
@@ -121,7 +121,7 @@ The tool-specific parameters, as well as Docker/Singularity profiles, are includ
 
 1. First, update to the latest pipeline version (this will update the nextflow cache of the repository, typically located in `~/.nextflow/assets/vib-singlecell-nf/`):
 ```bash
-nextflow pull vib-singlecell-nf/vsn-pipeline
+nextflow pull vib-singlecell-nf/vsn-pipelines
 ```
 
 2. Next, a config file needs to be generated.
