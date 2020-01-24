@@ -96,49 +96,49 @@ workflow SCENIC {
             auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
         }
 
-        // // multi-runs aggregation:
-        // if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
-        //     if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
-        //         throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
+        // multi-runs aggregation:
+        if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
+            if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
+                throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
             
-        //     scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
-        //         filteredLoom,
-        //         ctx_mtf,
-        //         auc_mtf,
-        //         'mtf'
-        //     )
-        //     if(params.sc.scenic.cistarget.trackDb) {
-        //         scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
-        //             filteredLoom,
-        //             ctx_trk,
-        //             auc_trk,
-        //             'trk'
-        //         )
-        //         MERGE_MOTIF_TRACK_LOOMS(
-        //             scenic_loom_mtf.join(scenic_loom_trk)
-        //         )
-        //         out = VISUALIZE(MERGE_MOTIF_TRACK_LOOMS.out)
-        //     } else {
-        //         out = VISUALIZE(scenic_loom_mtf)
-        //     }
-        // } else {
-        //     if(params.sc.scenic.cistarget.trackDb) {
-        //         out = VISUALIZE(
-        //             MERGE_MOTIF_TRACK_LOOMS(
-        //                 auc_mtf
-        //                     .map { it -> tuple(it[0], it[2]) }
-        //                     .join(auc_trk.map { it -> tuple(it[0], it[2]) })
-        //             ))
-        //     } else {
-        //         out = VISUALIZE(
-        //             auc_mtf.map { it -> tuple(it[0], it[2]) }
-        //         )
-        //     }
-        // }
-        // PUBLISH_LOOM(out)
+            scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
+                filteredLoom,
+                ctx_mtf,
+                auc_mtf,
+                'mtf'
+            )
+            if(params.sc.scenic.cistarget.trackDb) {
+                scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
+                    filteredLoom,
+                    ctx_trk,
+                    auc_trk,
+                    'trk'
+                )
+                MERGE_MOTIF_TRACK_LOOMS(
+                    scenic_loom_mtf.join(scenic_loom_trk)
+                )
+                out = VISUALIZE(MERGE_MOTIF_TRACK_LOOMS.out)
+            } else {
+                out = VISUALIZE(scenic_loom_mtf)
+            }
+        } else {
+            if(params.sc.scenic.cistarget.trackDb) {
+                out = VISUALIZE(
+                    MERGE_MOTIF_TRACK_LOOMS(
+                        auc_mtf
+                            .map { it -> tuple(it[0], it[2]) }
+                            .join(auc_trk.map { it -> tuple(it[0], it[2]) })
+                    ))
+            } else {
+                out = VISUALIZE(
+                    auc_mtf.map { it -> tuple(it[0], it[2]) }
+                )
+            }
+        }
+        PUBLISH_LOOM(out)
 
-    // emit:
-    //     out
+    emit:
+        out
 
 }
 
