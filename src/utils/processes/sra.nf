@@ -3,11 +3,7 @@ nextflow.preview.dsl=2
 import java.nio.file.Files
 import java.nio.file.Paths
 
-if(!params.containsKey("test")) {
-    binDir = "${workflow.projectDir}/src/utils/bin/"
-} else {
-    binDir = ""
-}
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
 
 processParams = params.utils.sra_metadata
 
