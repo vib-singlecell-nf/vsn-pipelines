@@ -116,20 +116,36 @@ workflow nemesh {
 
 workflow sra_cellranger_bbknn {
 
-    include getChannel as getSRAChannel from './src/channels/sra' params(params)
-    include DOWNLOAD_FROM_SRA from './src/utils/workflows/downloadFromSRA' params(params)
-    include SC__CELLRANGER__PREPARE_FOLDER from './src/cellranger/processes/utils.nf'
-    include SC__CELLRANGER__COUNT from './src/cellranger/processes/count' params(params)
-    include bbknn as BBKNN from './workflows/bbknn' params(params)
-    
-    // Run 
-    DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) ).view()
-    SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() ).view()
-    SC__CELLRANGER__COUNT(
-        file(params.sc.cellranger.count.transcriptome),
-        SC__CELLRANGER__PREPARE_FOLDER.out
+    main: 
+        include getChannel as getSRAChannel from './src/channels/sra' params(params)
+        include DOWNLOAD_FROM_SRA from './src/utils/workflows/downloadFromSRA' params(params)
+        include SC__CELLRANGER__PREPARE_FOLDER from './src/cellranger/processes/utils.nf' params(params)
+        include SC__CELLRANGER__COUNT from './src/cellranger/processes/count' params(params)
+        include bbknn as BBKNN from './workflows/bbknn' params(params)
+        
+        // Run 
+        DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) ).view()
+        SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() ).view()
+        SC__CELLRANGER__COUNT(
+            file(params.sc.cellranger.count.transcriptome),
+            SC__CELLRANGER__PREPARE_FOLDER.out
+        )
+        BBKNN( SC__CELLRANGER__COUNT.out )
+
+    emit:
+        filteredLoom = BBKNN.out.filteredloom
+        scopeLoom = BBKNN.out.scopeloom
+
+}
+
+workflow sra_cellranger_bbknn_scenic {
+
+    include SCENIC_append from './src/scenic/main.nf' params(params)
+    sra_cellranger_bbknn()
+    SCENIC_append(
+        sra_cellranger_bbknn.out.filteredLoom,
+        sra_cellranger_bbknn.out.scopeLoom
     )
-    BBKNN( SC__CELLRANGER__COUNT.out )
 
 }
 

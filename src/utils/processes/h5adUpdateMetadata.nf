@@ -1,10 +1,6 @@
 nextflow.preview.dsl=2
 
-if(!params.containsKey("test")) {
-    binDir = "${workflow.projectDir}/src/utils/bin/"
-} else {
-    binDir = ""
-}
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
 
 process SC__UTILS__UPDATE_FEATURE_METADATA_INDEX {
 

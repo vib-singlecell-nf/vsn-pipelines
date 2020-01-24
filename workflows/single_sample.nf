@@ -39,7 +39,7 @@ workflow single_sample_base {
         DIM_REDUCTION( HVG_SELECTION.out.scaled )
         CLUSTER_IDENTIFICATION(
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred 
+            DIM_REDUCTION.out.dimred_pca_tsne_umap
         )
 
         // conversion
