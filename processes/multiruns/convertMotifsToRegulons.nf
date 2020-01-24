@@ -1,10 +1,6 @@
 nextflow.preview.dsl=2
 
-if(!params.containsKey("test")) {
-	binDir = "${workflow.projectDir}/src/scenic/bin/"
-} else {
-	binDir = ""
-}
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
 toolParams = params.sc.scenic
 processParams = params.sc.scenic.motifs_to_regulons
