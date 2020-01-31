@@ -343,7 +343,7 @@ tenx {
 -profiles h5ad
 ```
 
-In the generated .config file, make sur the `file_paths` parameter is set with the paths to the `.h5ad` files:
+In the generated .config file, make sure the `file_paths` parameter is set with the paths to the `.h5ad` files:
 ```
 [...]
 h5ad {
@@ -352,9 +352,11 @@ h5ad {
 }
 [...]
 ```
-- The `suffix` parameter is used to infer the sample name from the file paths.
+- The `suffix` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 - The `file_paths` accepts glob patterns and also comma separated paths.
 Make sure that `sc.file_converter.iff` is set to `h5ad`.
+
+Currently H5AD input is only implemented in the `h5ad_single_sample` entry point.
 
 ## Select the optimal number of principal components
 
