@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 import static groovy.json.JsonOutput.*
 
 /* 
- * STATIC VERSION OF SCANPY CLUSTERING
+ * STATIC VERSION GENERATE REPORT
  * 
  * General reporting function: 
  * takes a template ipynb and adata as input,
@@ -37,13 +37,13 @@ process SC__SCANPY__GENERATE_REPORT {
 }
 
 /* 
- * DYNAMIC VERSION OF SCANPY CLUSTERING
+ * DYNAMIC VERSION OF SCANPY CLUSTERING GENERATE REPORT
  * 
  * General reporting function: 
  * takes a template ipynb and adata as input,
  * outputs ipynb named by the value in ${reportTitle}
  */
-process SC__SCANPY__MULTI_GENERATE_REPORT {
+process SC__SCANPY__MULTI_CLUSTERING_GENERATE_REPORT {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -51,7 +51,11 @@ process SC__SCANPY__MULTI_GENERATE_REPORT {
 
 	input:
 		file ipynb
-		tuple val(sampleId), path(adata), val(method), val(resolution)
+		tuple \
+			val(sampleId), \
+			path(adata), \
+			val(method), \
+			val(resolution)
 		val(reportTitle)
 
 	output:

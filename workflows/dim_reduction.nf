@@ -25,9 +25,9 @@ workflow DIM_REDUCTION {
         dimred_pca_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
 
         report = GENERATE_REPORT(
+            "DIMENSIONALITY_REDUCTION",
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
             file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
-            "SC_dimensionality_reduction_report",
             false
         )
 

@@ -40,7 +40,11 @@ process SC__SCANPY__MULTI_CLUSTERING {
   	publishDir "${params.global.outdir}/data/intermediate/clustering/${method == "NULL" ? "default": method.toLowerCase()}/${resolution == "NULL" ? "res_": resolution}", mode: 'symlink', overwrite: true
 
   	input:
-    	tuple val(sampleId), path(f), val(method), val(resolution)
+    	tuple \
+			val(sampleId), \
+			path(f), \
+			val(method), \
+			val(resolution)
 
   	output:
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__MULTI_CLUSTERING.${processParams.off}"), val(method), val(resolution)

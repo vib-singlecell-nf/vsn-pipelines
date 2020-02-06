@@ -27,13 +27,13 @@ workflow GENERATE_DUAL_INPUT_REPORT {
         data1  // anndata
         data2 // anndata
         ipynb
-        report_title
+        reportTitle
 
     main:
         report_notebook = SC__SCANPY__GENERATE_DUAL_INPUT_REPORT(
             ipynb,
             data1.join(data2),
-            report_title
+            reportTitle
         )
         SC__SCANPY__REPORT_TO_HTML(report_notebook)
 
@@ -45,25 +45,33 @@ workflow GENERATE_DUAL_INPUT_REPORT {
 workflow GENERATE_REPORT {
 
     take:
+        pipelineStep
         data // anndata
         ipynb
-        report_title
-        isMultiArgs
+        isMultiArgsMode
 
     main:
-        if(isMultiArgs) {
-            report_notebook = SC__SCANPY__MULTI_GENERATE_REPORT(
-                ipynb,
-                // expects (sample_id, adata, ...arguments)
-                data,
-                report_title
-            )
+        def reportTitle = "SC_Scanpy_" + pipelineStep.toLowerCase() + "_report"
+        if(isMultiArgsMode) {
+            switch(pipelineStep) {
+                case "CLUSTERING":
+                    report_notebook = SC__SCANPY__MULTI_CLUSTERING_GENERATE_REPORT(
+                        ipynb,
+                        // expects (sample_id, adata, ...arguments)
+                        data,
+                        reportTitle
+                    )
+                    break;
+                default: 
+                    throw new Exception("Invalid pipeline step")
+                    break; 
+            }
         } else {
             report_notebook = SC__SCANPY__GENERATE_REPORT(
                 ipynb,
                 // expects (sample_id, adata)
                 data,
-                report_title
+                reportTitle
             )
         }
         SC__SCANPY__REPORT_TO_HTML(report_notebook)
