@@ -1,7 +1,7 @@
 # Contributing
 
 When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or any other method (i.e. [Gitter](https://gitter.im/vib-singlecell-nf/community)) with the owners of this repository before making a change. 
+[email](mailto:vib.singlecell.nf@gmail.com), or any other method (i.e. [Gitter](https://gitter.im/vib-singlecell-nf/community)) with the owners of this repository before making a change. 
 
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
@@ -21,4 +21,3 @@ this Pull Request would represent. The versioning scheme we use is [SemVer](http
 4. Ensure that all current and new tests pass successfully.
 5. The Pull Request can be merged once you have the sign-off of two other developers, and must 
 be merged by one of the lead developers.
-
