@@ -48,17 +48,27 @@ workflow GENERATE_REPORT {
         data // anndata
         ipynb
         report_title
+        isMultiArgs
 
     main:
-        report_notebook = SC__SCANPY__GENERATE_REPORT(
-            ipynb,
-            data,
-            report_title
-        )
+        if(isMultiArgs) {
+            report_notebook = SC__SCANPY__MULTI_GENERATE_REPORT(
+                ipynb,
+                // expects (sample_id, adata, ...arguments)
+                data,
+                report_title
+            )
+        } else {
+            report_notebook = SC__SCANPY__GENERATE_REPORT(
+                ipynb,
+                // expects (sample_id, adata)
+                data,
+                report_title
+            )
+        }
         SC__SCANPY__REPORT_TO_HTML(report_notebook)
 
     emit:
         report_notebook
 
 }
-

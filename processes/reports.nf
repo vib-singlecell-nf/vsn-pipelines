@@ -2,10 +2,13 @@ nextflow.preview.dsl=2
 
 import static groovy.json.JsonOutput.*
 
-/* general reporting function: 
-takes a template ipynb and adata as input,
-outputs ipynb named by the value in ${reportTitle}
-*/
+/* 
+ * STATIC VERSION OF SCANPY CLUSTERING
+ * 
+ * General reporting function: 
+ * takes a template ipynb and adata as input,
+ * outputs ipynb named by the value in ${reportTitle}
+ */
 process SC__SCANPY__GENERATE_REPORT {
 
   	container params.sc.scanpy.container
@@ -15,6 +18,40 @@ process SC__SCANPY__GENERATE_REPORT {
 	input:
 		file ipynb
 		tuple val(sampleId), path(adata)
+		val(reportTitle)
+
+	output:
+		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
+
+	script:
+		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
+		"""
+		papermill ${ipynb} \
+		    --report-mode \
+			${sampleId}.${reportTitle}.ipynb \
+			-p FILE $adata \
+			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
+			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
+		"""
+
+}
+
+/* 
+ * DYNAMIC VERSION OF SCANPY CLUSTERING
+ * 
+ * General reporting function: 
+ * takes a template ipynb and adata as input,
+ * outputs ipynb named by the value in ${reportTitle}
+ */
+process SC__SCANPY__MULTI_GENERATE_REPORT {
+
+  	container params.sc.scanpy.container
+  	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+  	publishDir "${params.global.outdir}/notebooks/intermediate/clustering/${method == "NULL" ? "default": method.toLowerCase()}/${resolution == "NULL" ? "res_": resolution}", mode: 'symlink', overwrite: true
+
+	input:
+		file ipynb
+		tuple val(sampleId), path(adata), val(method), val(resolution)
 		val(reportTitle)
 
 	output:

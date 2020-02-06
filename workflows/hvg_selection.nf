@@ -24,7 +24,8 @@ workflow HVG_SELECTION {
         report = GENERATE_REPORT(
             SC__SCANPY__FEATURE_SCALING.out,
             file(workflow.projectDir + params.sc.scanpy.feature_selection.report_ipynb),
-            "SC_HVG_report"
+            "SC_HVG_report",
+            false
         )
 
     emit:

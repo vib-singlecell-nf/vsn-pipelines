@@ -27,7 +27,8 @@ workflow DIM_REDUCTION {
         report = GENERATE_REPORT(
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
             file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
-            "SC_dimensionality_reduction_report"
+            "SC_dimensionality_reduction_report",
+            false
         )
 
     emit:
