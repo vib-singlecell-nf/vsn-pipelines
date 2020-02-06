@@ -1,6 +1,6 @@
 # VSN-Pipelines
 
-[![Nextflow](https://img.shields.io/badge/nextflow-19.12.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-19.12.0-brightgreen.svg)](https://www.nextflow.io/) [![Gitter](https://badges.gitter.im/vib-singlecell-nf/community.svg)](https://gitter.im/vib-singlecell-nf/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 A repository of pipelines for single-cell data in Nextflow DSL2.
 
