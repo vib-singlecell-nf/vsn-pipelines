@@ -4,7 +4,10 @@ import argparse
 import os
 import scanpy as sc
 
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(
+    description='',
+    formatter_class=argparse.RawTextHelpFormatter
+)
 
 parser.add_argument(
     "input",
@@ -23,8 +26,13 @@ parser.add_argument(
     type=str,
     action="store",
     dest="method",
-    default="Louvain",
-    help="Cluster cells using the Louvain algorithm [Blondel et al. (2008)] in the implementation of [Traag (2017)]."
+    default="louvain",
+    choices=['louvain', 'leiden'],
+    help="""
+         Cluster cells using one of the following algorithms:
+         - the Louvain algorithm [Blondel et al. (2008)] in the implementation of [Traag (2017)].
+         - the Leiden algorithm [Traag18], an improved version of the Louvain algorithm [Blondel08]. It has been proposed for single-cell analysis by [Levine15].
+         """
 )
 
 parser.add_argument(
@@ -33,27 +41,10 @@ parser.add_argument(
     action="store",
     dest="resolution",
     default=1.0,
-    help="[louvain], For the default flavor ('vtraag'), you can provide a resolution (higher resolution means finding"
-         " more and smaller clusters) (Default: 1.0)."
-)
-
-parser.add_argument(
-    "-n", "--n-neighbors",
-    type=int,
-    action="store",
-    dest="n_neighbors",
-    default=15,
-    help="[Louvain], The size of local neighborhood (in terms of number of neighboring data points) used for manifold"
-         " approximation."
-)
-
-parser.add_argument(
-    "-p", "--n-pcs",
-    type=int,
-    action="store",
-    dest="n_pcs",
-    default=30,
-    help="[Louvain], Use this many PCs."
+    help="""
+         louvain: For the default flavor ('vtraag'), you can provide a resolution (higher resolution means finding more and smaller clusters
+         leiden: A parameter value controlling the coarseness of the clustering. Higher values lead to more clusters. Set to None if overriding partition_type to one that doesn’t accept a resolution_parameter.
+         """
 )
 
 args = parser.parse_args()
@@ -69,21 +60,37 @@ try:
 except IOError:
     raise Exception("Can only handle .h5ad files.")
 
-#
-# Transform the distribution of the data
-#
 
-if args.method == "Louvain":
-    # Run Louvain clustering
+def check_neighborhood_graph_exists(adata):
     if "neighbors" not in adata.uns.keys():
         raise Exception(
             "The neighborhood graph of observations has not been computed. Please do so before running {} clustering".format(
                 args.method)
         )
-        # sc.pp.neighbors(adata, n_pcs=args.n_pcs, n_neighbors=args.n_neighbors)
-    sc.tl.louvain(adata, resolution=args.resolution)
+
+#
+# Clustering the data
+#
+
+
+if args.method.lower() == "louvain":
+    # Run Louvain clustering
+    # Source: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.tl.louvain.html
+    check_neighborhood_graph_exists(adata=adata)
+    sc.tl.louvain(
+        adata,
+        resolution=args.resolution
+    )
+elif args.method.lower() == "leiden":
+    # Run Leiden clustering
+    # Source: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.tl.leiden.html
+    check_neighborhood_graph_exists(adata=adata)
+    sc.tl.leiden(
+        adata,
+        resolution=args.resolution
+    )
 else:
-    raise Exception("The dimensionality reduction method {} does not exist.".format(args.method))
+    raise Exception("The given clustering algorithm {} does not exist or is not implemeted.".format(args.method))
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
