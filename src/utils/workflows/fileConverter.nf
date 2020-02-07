@@ -21,7 +21,7 @@ outputFormatsAllowed = ['loom']
 workflow FILE_CONVERTER {
 
     take:
-        // Expects (sampleId, data)
+        // Expects (sampleId, data[])
         data
         // Expects (sampleId, outputFormat)
         outputFormat
@@ -31,16 +31,20 @@ workflow FILE_CONVERTER {
     main:
         data.view()
             .branch {
-                h5adToLoom: it[1].extension.toLowerCase() == 'h5ad' && outputFormat.toLowerCase() == 'loom'
-                none: !inputFormatsAllowed.contains(it[1].extension.toLowerCase()) || !outputFormatsAllowed.contains(outputFormat.toLowerCase())
+                h5adToLoom: it[1][0].extension.toLowerCase() == 'h5ad' && outputFormat.toLowerCase() == 'loom'
+                none: !inputFormatsAllowed.contains(it[1][0].extension.toLowerCase()) || !outputFormatsAllowed.contains(outputFormat.toLowerCase())
             }
             .set { convert }
 
-        convert.h5adToLoom.view { 
-            "Converting ${it[1].baseName}.h5ad to ${it[1].baseName}.loom (w/ additional compression)..." 
+        convert.h5adToLoom.view {
+            if(it[1].size() > 1) {
+                "Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom (w/ additional compression)..."
+            } else {
+                "Converting ${it[1].baseName}.h5ad to ${it[1].baseName}.loom (w/ additional compression)..."
+            }
         }
         SC__H5AD_TO_LOOM(
-            rawFilteredData.join(convert.h5adToLoom).ifEmpty('Channel empty: no h5ad files were converted to the loom format.').view()
+            rawFilteredData.combine(convert.h5adToLoom, by: 0).ifEmpty('Channel empty: no h5ad files were converted to the loom format.').view()
         )
         out = COMPRESS_HDF5(
             SC__H5AD_TO_LOOM.out

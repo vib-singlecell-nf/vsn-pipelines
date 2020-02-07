@@ -13,15 +13,16 @@ import zlib
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
-    "raw_filtered_data",
+    "input",
     type=argparse.FileType('r'),
-    help='Input h5ad file containing the raw filtered data.'
+    nargs='+',
+    help='Input h5ad file.'
 )
 
 parser.add_argument(
-    "input",
+    "raw_filtered_data",
     type=argparse.FileType('r'),
-    help='Input h5ad file.'
+    help='Input h5ad file containing the raw filtered data.'
 )
 
 parser.add_argument(
@@ -61,7 +62,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Define the arguments properly
-FILE_PATH_IN = args.input
+FILE_PATHS_IN = args.input
 FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 
@@ -72,11 +73,30 @@ def df_to_named_matrix(df):
     return arr
 
 
+def read_h5ad(file_path, backed='r'):
+    return sc.read_h5ad(filename=file_path, backed=backed)
+
+# Loading
+# - the raw filtered H5AD
+# - the first of H5AD input files
+# - all H5AD input files
+#
+# From the first H5AD input file one will get:
+# - Annotations and metrics
+# - Embeddings
+# Assumption:
+# - All H5AD input files differ only by their clustering and cluster markers
+
+
+adatas = []
+
 try:
-    raw_filtered_adata = sc.read_h5ad(filename=args.raw_filtered_data.name)
-    adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
+    raw_filtered_adata = read_h5ad(file_path=args.raw_filtered_data.name, backed=None)
+    adata = read_h5ad(file_path=FILE_PATHS_IN[0].name)
+    for adata_idx in range(0, len(FILE_PATHS_IN)):
+        adatas = adatas + [read_h5ad(file_path=FILE_PATHS_IN[adata_idx].name)]
 except IOError:
-    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
+    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATHS_IN[0])[0]))
 
 #####################
 # Global Attributes #
@@ -108,7 +128,8 @@ attrs_metadata["annotations"] = []
 
 # Populate
 for column_attr_key in adata.obs.keys():
-    if type(adata.obs[column_attr_key].dtype) == pd.core.dtypes.dtypes.CategoricalDtype:
+    # Don't store the clustering as annotation
+    if type(adata.obs[column_attr_key].dtype) == pd.core.dtypes.dtypes.CategoricalDtype and column_attr_key != adata.uns["rank_genes_groups"]["params"]["groupby"]:
         attrs_metadata["annotations"].append(
             {
                 "name": column_attr_key,
@@ -180,21 +201,24 @@ col_attrs = {**col_attrs, **col_attrs_embeddings}
 
 # CLUSTERINGS
 
-clustering_id = 0
-
-clustering_algorithm = adata.uns["rank_genes_groups"]["params"]["groupby"]
-clustering_resolution = adata.uns[clustering_algorithm]["params"]["resolution"]
-cluster_marker_method = adata.uns['rank_genes_groups']["params"]["method"]
-
-num_clusters = int(max(adata.obs[clustering_algorithm])) + 1
-
 clusterings = pd.DataFrame(
     index=adata.raw.obs_names
 )
-clusterings[str(clustering_id)] = adata.obs['leiden'].values.astype(np.int64)
+attrs_metadata["clusterings"] = []
 
-attrs_metadata["clusterings"] = [
-    {
+for adata_idx in range(0, len(FILE_PATHS_IN)):
+
+    clustering_id = adata_idx
+    clustering_algorithm = adatas[adata_idx].uns["rank_genes_groups"]["params"]["groupby"]
+    clustering_resolution = adatas[adata_idx].uns[clustering_algorithm]["params"]["resolution"]
+    cluster_marker_method = adatas[adata_idx].uns['rank_genes_groups']["params"]["method"]
+    num_clusters = int(max(adatas[adata_idx].obs[clustering_algorithm])) + 1
+
+    # Data
+    clusterings[str(clustering_id)] = adatas[adata_idx].obs[clustering_algorithm].values.astype(np.int64)
+
+    # Metadata
+    attrs_metadata["clusterings"] = attrs_metadata["clusterings"] + [{
         "id": clustering_id,
         "group": clustering_algorithm.capitalize(),
         "name": f"{clustering_algorithm.capitalize()} resolution {clustering_resolution}",
@@ -210,15 +234,20 @@ attrs_metadata["clusterings"] = [
                 "description": f"Adjusted P-Value from {cluster_marker_method.capitalize()} test"
             }
         ]
-    }
-]
+    }]
 
-for i in range(num_clusters):
-    cluster = {}
-    cluster['id'] = i
-    cluster['description'] = f'Unannotated Cluster {i}'
-    attrs_metadata['clusterings'][clustering_id]['clusters'].append(cluster)
+    for i in range(0, num_clusters):
+        cluster = {}
+        cluster['id'] = i
+        cluster['description'] = f'Unannotated Cluster {i}'
+        attrs_metadata['clusterings'][clustering_id]['clusters'].append(cluster)
 
+# Update column attribute Dict
+col_attrs_clusterings = {
+    "ClusterID": clusterings["0"].values,  # Pick the first one as default clustering (this is purely arbitrary)
+    "Clusterings": df_to_named_matrix(clusterings)
+}
+col_attrs = {**col_attrs, **col_attrs_clusterings}
 
 ##################
 # Row Attributes #
@@ -230,57 +259,59 @@ row_attrs = {
 
 # CLUSTER MARKERS
 
-# Initialize
-cluster_markers = pd.DataFrame(
-    index=adata.raw.var.index,
-    columns=[str(x) for x in np.arange(num_clusters)]
-).fillna(0, inplace=False)
-cluster_markers_avg_logfc = pd.DataFrame(
-    index=adata.raw.var.index,
-    columns=[str(x) for x in np.arange(num_clusters)]
-).fillna(0, inplace=False)
-cluster_markers_pval = pd.DataFrame(
-    index=adata.raw.var.index,
-    columns=[str(x) for x in np.arange(num_clusters)]
-).fillna(0, inplace=False)
+for adata_idx in range(0, len(FILE_PATHS_IN)):
+    clustering_id = attrs_metadata['clusterings'][adata_idx]["id"]
 
-# Populate
-for i in range(num_clusters):
-    i = str(i)
-    num_genes = len(adata.uns['rank_genes_groups']['pvals_adj'][i])
-    sig_genes_mask = adata.uns['rank_genes_groups']['pvals_adj'][i] < 0.05
-    deg_genes_mask = np.logical_and(
-        np.logical_or(
-            adata.uns['rank_genes_groups']['logfoldchanges'][i] >= 1.5,
-            adata.uns['rank_genes_groups']['logfoldchanges'][i] <= -1.5
-        ),
-        np.isfinite(
-            adata.uns['rank_genes_groups']['logfoldchanges'][i]
+    # Initialize
+    cluster_markers = pd.DataFrame(
+        index=adatas[adata_idx].raw.var.index,
+        columns=[str(x) for x in np.arange(num_clusters)]
+    ).fillna(0, inplace=False)
+    cluster_markers_avg_logfc = pd.DataFrame(
+        index=adatas[adata_idx].raw.var.index,
+        columns=[str(x) for x in np.arange(num_clusters)]
+    ).fillna(0, inplace=False)
+    cluster_markers_pval = pd.DataFrame(
+        index=adatas[adata_idx].raw.var.index,
+        columns=[str(x) for x in np.arange(num_clusters)]
+    ).fillna(0, inplace=False)
+
+    # Populate
+    for i in range(0, num_clusters):
+        i = str(i)
+        num_genes = len(adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i])
+        sig_genes_mask = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i] < 0.05
+        deg_genes_mask = np.logical_and(
+            np.logical_or(
+                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] >= 1.5,
+                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] <= -1.5
+            ),
+            np.isfinite(
+                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i]
+            )
         )
-    )
-    sig_and_deg_genes_mask = np.logical_and(
-        sig_genes_mask,
-        deg_genes_mask
-    )
-    gene_names = adata.uns['rank_genes_groups']['names'][i][sig_and_deg_genes_mask]
-    cluster_markers.loc[gene_names, i] = 1
-    cluster_markers_avg_logfc.loc[gene_names, i] = np.around(
-        adata.uns['rank_genes_groups']['logfoldchanges'][i][sig_and_deg_genes_mask],
-        decimals=6
-    )
-    cluster_markers_pval.loc[gene_names, i] = np.around(
-        adata.uns['rank_genes_groups']['pvals_adj'][i][sig_and_deg_genes_mask],
-        decimals=6
-    )
+        sig_and_deg_genes_mask = np.logical_and(
+            sig_genes_mask,
+            deg_genes_mask
+        )
+        gene_names = adatas[adata_idx].uns['rank_genes_groups']['names'][i][sig_and_deg_genes_mask]
+        cluster_markers.loc[gene_names, i] = 1
+        cluster_markers_avg_logfc.loc[gene_names, i] = np.around(
+            adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i][sig_and_deg_genes_mask],
+            decimals=6
+        )
+        cluster_markers_pval.loc[gene_names, i] = np.around(
+            adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i][sig_and_deg_genes_mask],
+            decimals=6
+        )
 
-
-# Update row attribute Dict
-row_attrs_cluster_markers = {
-    f"ClusterMarkers_{clustering_id}": df_to_named_matrix(cluster_markers),
-    f"ClusterMarkers_{clustering_id}_avg_logFC": df_to_named_matrix(cluster_markers_avg_logfc),
-    f"ClusterMarkers_{clustering_id}_pval": df_to_named_matrix(cluster_markers_pval)
-}
-row_attrs = {**row_attrs, **row_attrs_cluster_markers}
+    # Update row attribute Dict
+    row_attrs_cluster_markers = {
+        f"ClusterMarkers_{str(clustering_id)}": df_to_named_matrix(cluster_markers),
+        f"ClusterMarkers_{str(clustering_id)}_avg_logFC": df_to_named_matrix(cluster_markers_avg_logfc),
+        f"ClusterMarkers_{str(clustering_id)}_pval": df_to_named_matrix(cluster_markers_pval)
+    }
+    row_attrs = {**row_attrs, **row_attrs_cluster_markers}
 
 # Update global attribute Dict
 attrs["MetaData"] = json.dumps(attrs_metadata)
