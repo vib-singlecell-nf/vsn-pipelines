@@ -59,14 +59,17 @@ process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
 		val(reportTitle)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
+		tuple val(sampleId), path("${sampleId}.${reportTitle}.${uuid}.ipynb")
 
 	script:
 		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
+		// File output needs to be tagged with a unique identitifer because of:
+		// - https://github.com/nextflow-io/nextflow/issues/470
+		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
-			${sampleId}.${reportTitle}.ipynb \
+			${sampleId}.${reportTitle}.${uuid}.ipynb \
 			-p FILE $adata \
 			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
 			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'

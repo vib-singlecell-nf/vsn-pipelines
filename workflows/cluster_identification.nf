@@ -32,14 +32,25 @@ workflow CLUSTER_IDENTIFICATION {
         // To run multiple clustering, we need at least 1 argument that is a list
         if(method instanceof List
             || resolution instanceof List) {
-            // Set 
+            // Set benchnark mode flag
             isBenchmarkMode = true
+            Channel.from('.').view {
+                """
+------------------------------------------------------------------
+\u001B[32m Benchmarking SC__SCANPY__CLUSTERING step... \u001B[0m
+\u001B[32m Parameters benchmarked: \u001B[0m
+\u001B[32m - method: \u001B[0m \u001B[33m     ${method instanceof List} \u001B[0m
+\u001B[32m   - values: \u001B[0m \u001B[33m   ${method} \u001B[0m
+\u001B[32m - resolution: \u001B[0m \u001B[33m ${resolution instanceof List} \u001B[0m
+\u001B[32m   - values: \u001B[0m \u001B[33m   ${resolution} \u001B[0m
+------------------------------------------------------------------
+                """
+            }
             // Prepare arguments stream
             $method = Channel.from(method)
             $resolution = Channel.from(resolution)
             $args = $method
                 .combine($resolution)
-                .view()
             // Run
             out = SC__SCANPY__BENCHMARK_CLUSTERING( 
                 data.combine( $args )
