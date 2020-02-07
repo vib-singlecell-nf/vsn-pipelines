@@ -4,7 +4,7 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__MULTI_CLUSTERING from '../processes/cluster.nf' params(params)
+include SC__SCANPY__BENCHMARK_CLUSTERING from '../processes/cluster.nf' params(params)
 include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params)
 include '../processes/marker_genes.nf' params(params)
 
@@ -22,7 +22,7 @@ workflow CLUSTER_IDENTIFICATION {
     main:
         // Define a boolean set to true if the pipeline is running in multi-argument mode
         // This avoids to duplicated code in reports.nf to do the sanity checks (see below)
-        def isMultiArgs = false
+        def isBenchmarkMode = false
 
         // Properly define the arguments and handle if not present in config
         def scp = params.sc.scanpy.clustering
@@ -33,7 +33,7 @@ workflow CLUSTER_IDENTIFICATION {
         if(method instanceof List
             || resolution instanceof List) {
             // Set 
-            isMultiArgs = true
+            isBenchmarkMode = true
             // Prepare arguments stream
             $method = Channel.from(method)
             $resolution = Channel.from(resolution)
@@ -41,7 +41,7 @@ workflow CLUSTER_IDENTIFICATION {
                 .combine($resolution)
                 .view()
             // Run
-            out = SC__SCANPY__MULTI_CLUSTERING( 
+            out = SC__SCANPY__BENCHMARK_CLUSTERING( 
                 data.combine( $args )
             )
         } else {
@@ -53,11 +53,11 @@ workflow CLUSTER_IDENTIFICATION {
             "CLUSTERING",
             out,
             file(workflow.projectDir + params.sc.scanpy.clustering.report_ipynb),
-            isMultiArgs
+            isBenchmarkMode
         )
         // Find marker genes for each of clustering
-        if(isMultiArgs) {
-            marker_genes = SC__SCANPY__MULTI_MARKER_GENES(
+        if(isBenchmarkMode) {
+            marker_genes = SC__SCANPY__BENCHMARK_MARKER_GENES(
                 normalizedTransformedData.combine(out, by: 0)
             )
         } else {

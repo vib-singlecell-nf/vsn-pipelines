@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
 
 /**
- * STATIC VERSION OF SCANPY CLUSTERING
+ * DEFAULT VERSION OF SCANPY CLUSTERING
  */
 process SC__SCANPY__CLUSTERING {
 
@@ -31,9 +31,9 @@ process SC__SCANPY__CLUSTERING {
 }
 
 /**
- * DYNAMIC VERSION OF SCANPY CLUSTERING
+ * BENCHMARK VERSION OF SCANPY CLUSTERING
  */
-process SC__SCANPY__MULTI_CLUSTERING {
+process SC__SCANPY__BENCHMARK_CLUSTERING {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -47,7 +47,7 @@ process SC__SCANPY__MULTI_CLUSTERING {
 			val(resolution)
 
   	output:
-    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__MULTI_CLUSTERING.${processParams.off}"), val(method), val(resolution)
+    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"), val(method), val(resolution)
 
   	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.clustering)
@@ -57,7 +57,7 @@ process SC__SCANPY__MULTI_CLUSTERING {
 			${method != "NULL" ? '--method ' + method : ''} \
 			${resolution != "NULL" ? '--resolution ' + resolution : ''} \
 			$f \
-			"${sampleId}.SC__SCANPY__MULTI_CLUSTERING.${processParams.off}"
+			"${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"
 		"""
 
 }

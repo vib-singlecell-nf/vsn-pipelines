@@ -48,14 +48,14 @@ workflow GENERATE_REPORT {
         pipelineStep
         data // anndata
         ipynb
-        isMultiArgsMode
+        isBenchmarkModeMode
 
     main:
         def reportTitle = "SC_Scanpy_" + pipelineStep.toLowerCase() + "_report"
-        if(isMultiArgsMode) {
+        if(isBenchmarkModeMode) {
             switch(pipelineStep) {
                 case "CLUSTERING":
-                    report_notebook = SC__SCANPY__MULTI_CLUSTERING_GENERATE_REPORT(
+                    report_notebook = SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT(
                         ipynb,
                         // expects (sample_id, adata, ...arguments)
                         data,
