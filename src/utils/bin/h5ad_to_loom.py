@@ -27,7 +27,7 @@ parser.add_argument(
 parser.add_argument(
     "output",
     type=argparse.FileType('w'),
-    help='Output h5ad file.'
+    help='Output .loom file.'
 )
 
 parser.add_argument(
@@ -65,7 +65,7 @@ FILE_PATH_IN = args.input
 FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 
-def dfToNamedMatrix(df):
+def df_to_named_matrix(df):
     arr_ip = [tuple(i) for i in df.as_matrix()]
     dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
     arr = np.array(arr_ip, dtype=dtyp)
@@ -78,147 +78,217 @@ try:
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
-ClusterMarkers_0 = pd.DataFrame(
-    index=adata.raw.var.index,
-    columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)]
+#####################
+# Global Attributes #
+#####################
+
+# Initialize
+
+attrs = {}
+attrs_metadata = {}
+
+attrs["Genome"] = '' if args.nomenclature is None else args.nomenclature
+attrs["SCopeTreeL1"] = 'Unknown' if args.scope_tree_level_1 is None else args.scope_tree_level_1
+attrs["SCopeTreeL2"] = '' if args.scope_tree_level_2 is None else args.scope_tree_level_2
+attrs["SCopeTreeL3"] = '' if args.scope_tree_level_3 is None else args.scope_tree_level_3
+
+
+#####################
+# Column Attributes #
+#####################
+
+col_attrs = {
+    "CellID": np.array(adata.obs.index)
+}
+
+# ANNOTATIONS & METRICS
+
+attrs_metadata["metrics"] = []
+attrs_metadata["annotations"] = []
+
+# Populate
+for column_attr_key in adata.obs.keys():
+    if type(adata.obs[column_attr_key].dtype) == pd.core.dtypes.dtypes.CategoricalDtype:
+        attrs_metadata["annotations"].append(
+            {
+                "name": column_attr_key,
+                "values": list(set(adata.obs[column_attr_key].values))
+            }
+        )
+    else:
+        attrs_metadata["metrics"].append(
+            {
+                "name": column_attr_key
+            }
+        )
+    col_attrs[column_attr_key] = np.array(adata.obs[column_attr_key].values)
+
+# EMBEDDINGS
+
+default_embedding = pd.DataFrame(
+    index=adata.raw.obs_names
+)
+embeddings_x = pd.DataFrame(
+    index=adata.raw.obs_names
+)
+embeddings_y = pd.DataFrame(
+    index=adata.raw.obs_names
 )
 
-ClusterMarkers_0_avg_logFC = pd.DataFrame(
-    index=adata.raw.var.index,
-    columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)]
-)
+default_embedding["_X"] = adata.obsm['X_umap'][:, 0]
+default_embedding["_Y"] = adata.obsm['X_umap'][:, 1]
 
-ClusterMarkers_0_pval = pd.DataFrame(
-    index=adata.raw.var.index,
-    columns=[str(x) for x in range(max(set([int(x) for x in adata.obs['louvain']])) + 1)]
-)
+embeddings_x["-1"] = adata.obsm['X_umap'][:, 0]
+embeddings_y["-1"] = adata.obsm['X_umap'][:, 1]
 
-ClusterMarkers_0.fillna(0, inplace=True)
-ClusterMarkers_0_avg_logFC.fillna(0, inplace=True)
-ClusterMarkers_0_pval.fillna(0, inplace=True)
-
-for i in range(max(set([int(x) for x in adata.obs['louvain']])) + 1):
-    i = str(i)
-    tot_genes = len(adata.uns['rank_genes_groups']['pvals_adj'][i])
-    sigGenes = adata.uns['rank_genes_groups']['pvals_adj'][i] < 0.05
-    deGenes = np.logical_and(np.logical_or(adata.uns['rank_genes_groups']['logfoldchanges'][i] >= 1.5,
-                                           adata.uns['rank_genes_groups']['logfoldchanges'][i] <= -1.5),
-                             np.isfinite(adata.uns['rank_genes_groups']['logfoldchanges'][i]))
-    sigAndDE = np.logical_and(sigGenes, deGenes)
-    names = adata.uns['rank_genes_groups']['names'][i][sigAndDE]
-    ClusterMarkers_0.loc[names, i] = 1
-    ClusterMarkers_0_avg_logFC.loc[names, i] = np.around(adata.uns['rank_genes_groups']['logfoldchanges'][i][sigAndDE],
-                                                         decimals=6)
-    ClusterMarkers_0_pval.loc[names, i] = np.around(adata.uns['rank_genes_groups']['pvals_adj'][i][sigAndDE],
-                                                    decimals=6)
-
-metaJson = {}
-metaJson["metrics"] = []
-metaJson["annotations"] = []
-
-main_dr = pd.DataFrame(adata.obsm['X_umap'], columns=['_X', '_Y'])
-
-metaJson['embeddings'] = [
+attrs_metadata['embeddings'] = [
     {
         "id": -1,
         "name": f"HVG UMAP"
     }
 ]
 
-Embeddings_X = pd.DataFrame()
-Embeddings_Y = pd.DataFrame()
-
-embeddings_id = 1
-
 if 'X_tsne' in adata.obsm.keys():
-    Embeddings_X[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_tsne'])[0]
-    Embeddings_Y[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_tsne'])[1]
-    metaJson['embeddings'].append(
+    embedding_id = embeddings_x.shape[1] - 1
+    embeddings_x[str(embedding_id)] = adata.obsm['X_tsne'][:, 0]
+    embeddings_y[str(embedding_id)] = adata.obsm['X_tsne'][:, 1]
+    attrs_metadata['embeddings'].append(
         {
-            "id": embeddings_id,
+            "id": embedding_id,
             "name": f"HVG t-SNE"
         }
     )
-    embeddings_id += 1
 
-Embeddings_X[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_pca'])[0]
-Embeddings_Y[str(embeddings_id)] = pd.DataFrame(adata.obsm['X_pca'])[1]
-metaJson['embeddings'].append(
-    {
-        "id": embeddings_id,
-        "name": f"HVG PC1/PC2"
-    }
+if 'X_pca' in adata.obsm.keys():
+    embedding_id = embeddings_x.shape[1] - 1
+    embeddings_x[str(embedding_id)] = adata.obsm['X_pca'][:, 0]
+    embeddings_y[str(embedding_id)] = adata.obsm['X_pca'][:, 1]
+    attrs_metadata['embeddings'].append(
+        {
+            "id": embedding_id,
+            "name": f"HVG PC1/PC2"
+        }
+    )
+
+# Update column attribute Dict
+col_attrs_embeddings = {
+    "Embedding": df_to_named_matrix(default_embedding),
+    "Embeddings_X": df_to_named_matrix(embeddings_x),
+    "Embeddings_Y": df_to_named_matrix(embeddings_y)
+}
+col_attrs = {**col_attrs, **col_attrs_embeddings}
+
+# CLUSTERINGS
+
+clustering_id = 0
+
+clustering_algorithm = adata.uns["rank_genes_groups"]["params"]["groupby"]
+clustering_resolution = adata.uns[clustering_algorithm]["params"]["resolution"]
+cluster_marker_method = adata.uns['rank_genes_groups']["params"]["method"]
+
+num_clusters = int(max(adata.obs[clustering_algorithm])) + 1
+
+clusterings = pd.DataFrame(
+    index=adata.raw.obs_names
 )
+clusterings[str(clustering_id)] = adata.obs['leiden'].values.astype(np.int64)
 
-metaJson["clusterings"] = [
+attrs_metadata["clusterings"] = [
     {
-        "id": 0,
-        "group": "Louvain",
-        "name": "Louvain default resolution",
+        "id": clustering_id,
+        "group": clustering_algorithm.capitalize(),
+        "name": f"{clustering_algorithm.capitalize()} resolution {clustering_resolution}",
         "clusters": [],
         "clusterMarkerMetrics": [
             {
                 "accessor": "avg_logFC",
                 "name": "Avg. logFC",
-                "description": "Average log fold change from Wilcox test"
+                "description": f"Average log fold change from {cluster_marker_method.capitalize()} test"
             }, {
                 "accessor": "pval",
                 "name": "Adjusted P-Value",
-                "description": "Adjusted P-Value from Wilcox test"
+                "description": f"Adjusted P-Value from {cluster_marker_method.capitalize()} test"
             }
         ]
     }
 ]
 
-for i in range(max(set([int(x) for x in adata.obs['louvain']])) + 1):
-    clustDict = {}
-    clustDict['id'] = i
-    clustDict['description'] = f'Unannotated Cluster {i}'
-    metaJson['clusterings'][0]['clusters'].append(clustDict)
+for i in range(num_clusters):
+    cluster = {}
+    cluster['id'] = i
+    cluster['description'] = f'Unannotated Cluster {i}'
+    attrs_metadata['clusterings'][clustering_id]['clusters'].append(cluster)
 
-clusterings = pd.DataFrame()
 
-clusterings["0"] = adata.obs['louvain'].values.astype(np.int64)
-
-col_attrs = {
-    "CellID": np.array(adata.obs.index),
-    "Embedding": dfToNamedMatrix(main_dr),
-    "Embeddings_X": dfToNamedMatrix(Embeddings_X),
-    "Embeddings_Y": dfToNamedMatrix(Embeddings_Y),
-    "Clusterings": dfToNamedMatrix(clusterings),
-    "ClusterID": np.array(adata.obs['louvain'].values)
-}
-
-for col in adata.obs.keys():
-    if type(adata.obs[col].dtype) == pd.core.dtypes.dtypes.CategoricalDtype:
-        metaJson["annotations"].append(
-            {
-                "name": col,
-                "values": list(set(adata.obs[col].values))
-            }
-        )
-    else:
-        metaJson["metrics"].append(
-            {
-                "name": col
-            }
-        )
-    col_attrs[col] = np.array(adata.obs[col].values)
+##################
+# Row Attributes #
+##################
 
 row_attrs = {
-    "Gene": np.array(adata.raw.var.index),
-    "ClusterMarkers_0": dfToNamedMatrix(ClusterMarkers_0),
-    "ClusterMarkers_0_avg_logFC": dfToNamedMatrix(ClusterMarkers_0_avg_logFC),
-    "ClusterMarkers_0_pval": dfToNamedMatrix(ClusterMarkers_0_pval)
+    "Gene": np.array(adata.raw.var.index)
 }
 
-attrs = {"MetaData": json.dumps(metaJson)}
+# CLUSTER MARKERS
 
-attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
-attrs["Genome"] = '' if args.nomenclature is None else args.nomenclature
-attrs["SCopeTreeL1"] = 'Unknown' if args.scope_tree_level_1 is None else args.scope_tree_level_1
-attrs["SCopeTreeL2"] = '' if args.scope_tree_level_2 is None else args.scope_tree_level_2
-attrs["SCopeTreeL3"] = '' if args.scope_tree_level_3 is None else args.scope_tree_level_3
+# Initialize
+cluster_markers = pd.DataFrame(
+    index=adata.raw.var.index,
+    columns=[str(x) for x in np.arange(num_clusters)]
+).fillna(0, inplace=False)
+cluster_markers_avg_logfc = pd.DataFrame(
+    index=adata.raw.var.index,
+    columns=[str(x) for x in np.arange(num_clusters)]
+).fillna(0, inplace=False)
+cluster_markers_pval = pd.DataFrame(
+    index=adata.raw.var.index,
+    columns=[str(x) for x in np.arange(num_clusters)]
+).fillna(0, inplace=False)
+
+# Populate
+for i in range(num_clusters):
+    i = str(i)
+    num_genes = len(adata.uns['rank_genes_groups']['pvals_adj'][i])
+    sig_genes_mask = adata.uns['rank_genes_groups']['pvals_adj'][i] < 0.05
+    deg_genes_mask = np.logical_and(
+        np.logical_or(
+            adata.uns['rank_genes_groups']['logfoldchanges'][i] >= 1.5,
+            adata.uns['rank_genes_groups']['logfoldchanges'][i] <= -1.5
+        ),
+        np.isfinite(
+            adata.uns['rank_genes_groups']['logfoldchanges'][i]
+        )
+    )
+    sig_and_deg_genes_mask = np.logical_and(
+        sig_genes_mask,
+        deg_genes_mask
+    )
+    gene_names = adata.uns['rank_genes_groups']['names'][i][sig_and_deg_genes_mask]
+    cluster_markers.loc[gene_names, i] = 1
+    cluster_markers_avg_logfc.loc[gene_names, i] = np.around(
+        adata.uns['rank_genes_groups']['logfoldchanges'][i][sig_and_deg_genes_mask],
+        decimals=6
+    )
+    cluster_markers_pval.loc[gene_names, i] = np.around(
+        adata.uns['rank_genes_groups']['pvals_adj'][i][sig_and_deg_genes_mask],
+        decimals=6
+    )
+
+
+# Update row attribute Dict
+row_attrs_cluster_markers = {
+    f"ClusterMarkers_{clustering_id}": df_to_named_matrix(cluster_markers),
+    f"ClusterMarkers_{clustering_id}_avg_logFC": df_to_named_matrix(cluster_markers_avg_logfc),
+    f"ClusterMarkers_{clustering_id}_pval": df_to_named_matrix(cluster_markers_pval)
+}
+row_attrs = {**row_attrs, **row_attrs_cluster_markers}
+
+# Update global attribute Dict
+attrs["MetaData"] = json.dumps(attrs_metadata)
+# attrs['MetaData'] = base64.b64encode(zlib.compress(json.dumps(metaJson).encode('ascii'))).decode('ascii')
+
+##################
+# Build the Loom #
+##################
 
 lp.create(
     filename=f"{FILE_PATH_OUT_BASENAME}.loom",
