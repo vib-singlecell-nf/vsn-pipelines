@@ -212,7 +212,7 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
     clustering_algorithm = adatas[adata_idx].uns["rank_genes_groups"]["params"]["groupby"]
     clustering_resolution = adatas[adata_idx].uns[clustering_algorithm]["params"]["resolution"]
     cluster_marker_method = adatas[adata_idx].uns['rank_genes_groups']["params"]["method"]
-    num_clusters = int(max(adatas[adata_idx].obs[clustering_algorithm])) + 1
+    num_clusters = len(np.unique(adatas[adata_idx].obs[clustering_algorithm]))
 
     # Data
     clusterings[str(clustering_id)] = adatas[adata_idx].obs[clustering_algorithm].values.astype(np.int64)
@@ -261,6 +261,7 @@ row_attrs = {
 
 for adata_idx in range(0, len(FILE_PATHS_IN)):
     clustering_id = attrs_metadata['clusterings'][adata_idx]["id"]
+    num_clusters = len(attrs_metadata['clusterings'][adata_idx]["clusters"])
 
     # Initialize
     cluster_markers = pd.DataFrame(
