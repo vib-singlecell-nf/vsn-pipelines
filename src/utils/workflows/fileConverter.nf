@@ -38,9 +38,19 @@ workflow FILE_CONVERTER {
 
         convert.h5adToLoom.view {
             if(it[1].size() > 1) {
-                "Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom (w/ additional compression)..."
+                """
+------------------------------------------------------------------
+Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom 
+(w/ additional compression)...
+------------------------------------------------------------------
+                """
             } else {
-                "Converting ${it[1].baseName}.h5ad to ${it[1].baseName}.loom (w/ additional compression)..."
+"""
+------------------------------------------------------------------
+Converting ${it[1].baseName}.h5ad to ${it[1].baseName}.loom
+(w/ additional compression)...
+------------------------------------------------------------------
+"""
             }
         }
         SC__H5AD_TO_LOOM(
@@ -50,7 +60,12 @@ workflow FILE_CONVERTER {
             SC__H5AD_TO_LOOM.out
         )
         convert.none.view { 
-            "Aborting conversion of ${it[1]} to ${it[1].baseName}.loom (not implemented)" 
+"""
+------------------------------------------------------------------
+Aborting conversion of ${it[1]} to ${it[1].baseName}.loom 
+(not implemented)
+------------------------------------------------------------------
+"""
         }
 
     emit:
