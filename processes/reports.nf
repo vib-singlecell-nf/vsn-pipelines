@@ -136,17 +136,18 @@ process SC__SCANPY__MERGE_REPORTS {
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
 	input:
-		tuple val(sampleId), path(ipynbs)
+		tuple \
+			val(sampleId), \
+			path(ipynbs)
 		val(reportTitle)
-		val(isBenchmarkMode)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.${isBenchmarkMode ? uuid + "." : ""}${reportTitle}.ipynb")
+		tuple val(sampleId), path("${sampleId}.${uuid}${reportTitle}.ipynb")
 
 	script:
 		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""
-		nbmerge ${ipynbs} -o "${sampleId}.${isBenchmarkMode ? uuid + "." : ""}${reportTitle}.ipynb"
+		nbmerge ${ipynbs} -o "${sampleId}.${uuid}${reportTitle}.ipynb"
 		"""
 
 }
