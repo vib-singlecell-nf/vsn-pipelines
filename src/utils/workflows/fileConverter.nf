@@ -51,7 +51,7 @@ Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom
 """
 ------------------------------------------------------------------
 \u001B[32m
-Converting ${it[1].baseName}.h5ad to ${it[1].baseName}.loom
+Converting ${it[1][0].baseName}.h5ad to ${it[1][0].baseName}.loom
 (w/ additional compression)...
 \u001B[0m
 ------------------------------------------------------------------

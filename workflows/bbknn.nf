@@ -81,8 +81,7 @@ workflow bbknn_base {
         // reporting:
         SC__SCANPY__MERGE_REPORTS(
             ipynbs,
-            "merged_report",
-            true
+            "merged_report"
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
