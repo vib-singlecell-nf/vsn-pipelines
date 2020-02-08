@@ -11,10 +11,13 @@ process SC__H5AD_TO_LOOM {
 		// Expects:
 		// - rawFilteredData to be h5ad file containing the raw filtered (gene + cell filtered) data
 		// - data to be one or more h5ad files containing the final results to be stored in the loom
-		tuple val(sampleId), path(rawFilteredData), file(data)
+		tuple val(sampleId), \
+			path(rawFilteredData), \
+			file(data)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.SC__H5AD_TO_LOOM.loom")
+		tuple val(sampleId), \
+		path("${sampleId}.SC__H5AD_TO_LOOM.loom")
 
 	script:
 		"""
