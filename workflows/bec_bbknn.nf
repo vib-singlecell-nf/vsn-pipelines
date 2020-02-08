@@ -17,13 +17,15 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 
+include '../../utils/processes/utils.nf' params(params)
+
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
 
-include SC__SCANPY__CLUSTERING from '../processes/cluster.nf' params(params)
+include '../processes/cluster.nf' params(params)
+include '../processes/dim_reduction.nf' params(params)
 include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
-include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
-include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params)
+include './cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
 
 // reporting:
 include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + params.global)
@@ -36,25 +38,55 @@ workflow BEC_BBKNN {
     take:
         normalizedTransformedData
         dimReductionData
-        clusterIdentifiedWithoutBatchEffectCorrection
+        // Expects (sampleId, anndata)
+        clusterIdentificationPreBatchEffectCorrection
 
     main:
-        SC__SCANPY__BATCH_EFFECT_CORRECTION( dimReductionData )
+        SC__SCANPY__BATCH_EFFECT_CORRECTION( 
+            dimReductionData.map { 
+                it -> tuple(it[0], it[1], it[2]) 
+            } 
+        )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
-            SC__SCANPY__BATCH_EFFECT_CORRECTION.out 
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
+            "Post Batch Effect Correction (BBKNN)"
         )
-        SC__SCANPY__DIM_REDUCTION__UMAP( CLUSTER_IDENTIFICATION.out.marker_genes )
+        SC__SCANPY__DIM_REDUCTION__UMAP( 
+            CLUSTER_IDENTIFICATION.out.marker_genes.view().map{
+                it -> tuple(
+                    it[0], // sampleId
+                    it[1], // data
+                    !clusteringParams.isBenchmarkMode() ? null : it[2..(it.size()-1)], // set runtime process parameters as inert
+                    null //*(SC__SCANPY__DIM_REDUCTION_PARAMS().asTuple()) // set next runtime process parameters 
+                )
+            }
+        )
+
         SC__PUBLISH_H5AD( 
-            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1]) },
             "BEC_BBKNN.output"
         )
+
         // This will generate a dual report with results from
-        // - CLUSTER_IDENTIFICATION without batch effect correction
-        // - CLUSTER_IDENTIFICATION with batch effect correction
+        // - CLUSTER_IDENTIFICATION pre batch effect correction
+        // - CLUSTER_IDENTIFICATION post batch effect correction
+        if(clusteringParams.isBenchmarkMode()) {
+            becDualDataPrePost = clusterIdentificationPreBatchEffectCorrection.concat(
+                SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], *it[2]) } // get back the parameters stored as inertParameters
+            ).map {
+                it -> tuple(it[2..(it.size()-1)], it[0], it[1])
+            }.groupTuple(
+                by: [0, clusteringParams.numParamsBenchmarked()-1]
+            ).map { 
+                it -> tuple(it[1], *it[2]) 
+            }
+        } else {
+            becDualDataPrePost = clusterIdentificationPreBatchEffectCorrection.join(SC__PUBLISH_H5AD.out)
+        }
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
-            clusterIdentifiedWithoutBatchEffectCorrection,
-            SC__PUBLISH_H5AD.out,
+            becDualDataPrePost,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report"
         )

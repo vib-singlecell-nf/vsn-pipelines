@@ -31,7 +31,8 @@ workflow BEC_MNN_CORRECT {
         SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__UMAP.out )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
-            SC__SCANPY__DIM_REDUCTION__TSNE.out
+            SC__SCANPY__DIM_REDUCTION__TSNE.out,
+            "Post Batch Effect Correction (MNN CORRECT)"
         )
 
     emit:
