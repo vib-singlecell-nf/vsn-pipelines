@@ -55,7 +55,7 @@ workflow bbknn_base {
         //// convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
         scopeloom = FILE_CONVERTER(
-            BEC_BBKNN.out.data,
+            BEC_BBKNN.out.data.groupTuple(),
             'loom',
             SC__FILE_CONCATENATOR.out
         )
