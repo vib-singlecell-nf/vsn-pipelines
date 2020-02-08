@@ -9,7 +9,10 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
   	input:
-    	tuple val(sampleId), path(f)
+    	tuple \
+			val(sampleId), \
+			path(f), \
+			val(inertParams)
 
   	output:
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")

@@ -24,15 +24,14 @@ include '../processes/reports.nf' params(params)
 workflow GENERATE_DUAL_INPUT_REPORT {
 
     take:
-        data1  // anndata
-        data2 // anndata
+        data  // Expects (sampleIdd, anndata1, anndata2)
         ipynb
         reportTitle
 
     main:
         report_notebook = SC__SCANPY__GENERATE_DUAL_INPUT_REPORT(
             ipynb,
-            data1.join(data2),
+            data,
             reportTitle
         )
         SC__SCANPY__REPORT_TO_HTML(report_notebook)

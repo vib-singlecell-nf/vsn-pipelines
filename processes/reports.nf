@@ -90,14 +90,15 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 		val reportTitle
 
   	output:
-    	tuple val(sampleId), file("${sampleId}.${reportTitle}.ipynb")
+    	tuple val(sampleId), file("${sampleId}.${reportTitle}.${uuid}.ipynb")
 
   	script:
 	  	def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
+		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
-			${sampleId}.${reportTitle}.ipynb \
+			${sampleId}.${reportTitle}.${uuid}.ipynb \
 			-p FILE1 $data1 -p FILE2 $data2 \
 			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
 			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
@@ -131,19 +132,21 @@ process SC__SCANPY__MERGE_REPORTS {
 	container params.sc.scanpy.container
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
-	// copy final "merged_report" to notbooks root:
+	// copy final "merged_report" to notebooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
 
 	input:
 		tuple val(sampleId), path(ipynbs)
 		val(reportTitle)
+		val(isBenchmarkMode)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
+		tuple val(sampleId), path("${sampleId}.${isBenchmarkMode ? uuid + "." : ""}${reportTitle}.ipynb")
 
 	script:
+		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""
-		nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.ipynb"
+		nbmerge ${ipynbs} -o "${sampleId}.${isBenchmarkMode ? uuid + "." : ""}${reportTitle}.ipynb"
 		"""
 
 }

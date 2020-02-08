@@ -57,7 +57,11 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
 			val(clusteringResolution)
   
   	output:
-    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BENCHMARK_MARKER_GENES.${uuid}.${processParams.off}")
+    	tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__SCANPY__BENCHMARK_MARKER_GENES.${uuid}.${processParams.off}"), \
+			val(clusteringMethod), \
+			val(clusteringResolution)
   
   	script:
     	def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.marker_genes)
