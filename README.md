@@ -410,6 +410,24 @@ params {
 }
 ```
 
+## Parameter benchmarking
+
+The latest version only implements this feature for the following pipelines:
+
+- `single_sample`
+- `bbknn`
+
+Since `v0.9.0`, it is possible to benchmark several combinations of parameters. The current version (`v0.9.0`) of the VSN-Pipelines allows to benchmark the following parameters:
+- `params.sc.scanpy.clustering`
+  - `method`
+```
+clusteringMethods = ['louvain','leiden']
+```
+  - `resolution`
+```
+resolutions = [0.4, 0.8]
+```
+
 # Development
 
 ## Repository structure
