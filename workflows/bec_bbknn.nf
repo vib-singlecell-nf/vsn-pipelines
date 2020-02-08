@@ -47,6 +47,7 @@ workflow BEC_BBKNN {
                 it -> tuple(it[0], it[1], it[2]) 
             } 
         )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
@@ -57,21 +58,20 @@ workflow BEC_BBKNN {
                 it -> tuple(
                     it[0], // sampleId
                     it[1], // data
-                    it[2..(it.size()-1)], // set runtime process parameters as inert
+                    !clusteringParams.isBenchmarkMode() ? null : it[2..(it.size()-1)], // set runtime process parameters as inert
                     null //*(SC__SCANPY__DIM_REDUCTION_PARAMS().asTuple()) // set next runtime process parameters 
                 )
             }
         )
 
         SC__PUBLISH_H5AD( 
-            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1]) },
             "BEC_BBKNN.output"
         )
 
         // This will generate a dual report with results from
         // - CLUSTER_IDENTIFICATION pre batch effect correction
         // - CLUSTER_IDENTIFICATION post batch effect correction
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         if(clusteringParams.isBenchmarkMode()) {
             becDualDataPrePost = clusterIdentificationPreBatchEffectCorrection.concat(
                 SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], *it[2]) } // get back the parameters stored as inertParameters

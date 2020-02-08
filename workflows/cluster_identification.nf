@@ -35,7 +35,7 @@ workflow CLUSTER_IDENTIFICATION {
             )
         } else {
             // Run
-            out = SC__SCANPY__CLUSTERING( data )
+            out = SC__SCANPY__CLUSTERING( data.map { it -> tuple(it[0], it[1]) } )
         }
 
         // Generate the report

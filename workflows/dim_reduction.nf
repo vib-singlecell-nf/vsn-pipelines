@@ -30,7 +30,7 @@ workflow DIM_REDUCTION {
 
         report = GENERATE_REPORT(
             "DIMENSIONALITY_REDUCTION",
-            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1]) },
             file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
             false
         )
