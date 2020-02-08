@@ -74,11 +74,11 @@ workflow BEC_BBKNN {
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         if(clusteringParams.isBenchmarkMode()) {
             becDualDataPrePost = clusterIdentificationPreBatchEffectCorrection.concat(
-                SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], *it[2]) }
-            ).map { 
-                it -> tuple(it[2..(it.size()-1)], it[0], it[1]) 
+                SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], *it[2]) } // get back the parameters stored as inertParameters
+            ).map {
+                it -> tuple(it[2..(it.size()-1)], it[0], it[1])
             }.groupTuple(
-                by: [0,1]
+                by: [0, clusteringParams.numParamsBenchmarked()-1]
             ).map { 
                 it -> tuple(it[1], *it[2]) 
             }

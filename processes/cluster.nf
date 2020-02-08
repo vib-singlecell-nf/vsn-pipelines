@@ -33,6 +33,15 @@ class SC__SCANPY__CLUSTERING_PARAMS {
         }
 	}
 
+	int numParamsBenchmarked() {
+		def paramsBenchmarked = [ 
+			clusteringMethods instanceof List,
+			resolutions instanceof List
+		]
+		def sum = { result, i -> result + (i ? 1 : 0) }
+		return paramsBenchmarked.inject(0, sum)
+	}
+
 	// Define a function to check if the current process is running in benchmark mode
 	boolean isBenchmarkMode() {
 		return (clusteringMethods instanceof List
