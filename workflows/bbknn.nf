@@ -8,7 +8,8 @@ include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(para
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
-include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global)
+// CLUSTER_IDENTIFICATION
+include '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global) // Don't only import a specific process (the function needs also to be imported)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
@@ -36,9 +37,10 @@ workflow bbknn_base {
         DIM_REDUCTION( HVG_SELECTION.out.scaled )
 
         //// Perform the clustering step w/o batch effect correction (for comparison matter)
-        clusterIdentifiedWithoutBatchEffectCorrection = CLUSTER_IDENTIFICATION( 
+        clusterIdentificationPreBatchEffectCorrection = CLUSTER_IDENTIFICATION( 
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred_pca_tsne_umap
+            DIM_REDUCTION.out.dimred_pca_tsne_umap,
+            "Pre Batch Effect Correction"
         )
 
         //// Perform the batch effect correction
@@ -46,14 +48,14 @@ workflow bbknn_base {
             NORMALIZE_TRANSFORM.out,
             //// include only PCA and t-SNE pre-merge dim reductions. Omit UMAP for clarity since it will have to be overwritten by BEC_BBKNN
             DIM_REDUCTION.out.dimred_pca_tsne,
-            clusterIdentifiedWithoutBatchEffectCorrection.marker_genes
+            clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
 
-        // conversion
+        // // conversion
         //// convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
         scopeloom = FILE_CONVERTER(
-            BEC_BBKNN.out.data,
+            BEC_BBKNN.out.data.groupTuple(),
             'loom',
             SC__FILE_CONCATENATOR.out
         )
@@ -64,11 +66,18 @@ workflow bbknn_base {
         )
 
         // collect the reports:
-        ipynbs = project.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out)
-            .join(HVG_SELECTION.out.report)
-            .join(BEC_BBKNN.out.cluster_report)
-            .join(BEC_BBKNN.out.bbknn_report)
-            .map{ tuple( it[0], it.drop(1) ) }
+        ipynbs = project.combine(
+            UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out
+        ).join(
+            HVG_SELECTION.out.report
+        ).join(
+            BEC_BBKNN.out.cluster_report
+        ).combine(
+            BEC_BBKNN.out.bbknn_report,
+            by: 0
+        ).map{ 
+            tuple( it[0], it.drop(1) ) 
+        }.view()
         // reporting:
         SC__SCANPY__MERGE_REPORTS(
             ipynbs,
