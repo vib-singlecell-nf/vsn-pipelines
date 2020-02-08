@@ -20,7 +20,7 @@ workflow DIM_REDUCTION_PCA {
             out = SC__SCANPY__DIM_REDUCTION__PCA( data.join(PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC) )
         } else {
             data = data.map {
-                item -> tuple(item[0], item[1], null)
+                item -> tuple(item[0], item[1], null, null)
             }
             out = SC__SCANPY__DIM_REDUCTION__PCA( data )
         }
