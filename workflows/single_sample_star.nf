@@ -35,7 +35,8 @@ workflow single_sample_star {
     DIM_REDUCTION( HVG_SELECTION.out.scaled )
     CLUSTER_IDENTIFICATION(
         NORMALIZE_TRANSFORM.out,
-        DIM_REDUCTION.out.dimred_pca_tsne_umap
+        DIM_REDUCTION.out.dimred_pca_tsne_umap,
+        "No Batch Effect Correction"
     )
 
     // conversion
