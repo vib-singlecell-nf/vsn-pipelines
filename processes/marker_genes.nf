@@ -66,7 +66,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
   	script:
     	def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.marker_genes)
 		processParams = sampleParams.local
-		// File output needs to be tagged with a unique identitifer because of:
+		// In benchmark mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
 		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""

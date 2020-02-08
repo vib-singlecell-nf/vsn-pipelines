@@ -63,7 +63,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
 
 	script:
 		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-		// File output needs to be tagged with a unique identitifer because of:
+		// In benchmark mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
 		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""
