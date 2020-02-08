@@ -3,6 +3,10 @@ nextflow.preview.dsl=2
 import java.nio.file.Paths
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
 
+def clean(params) {
+   return params.findAll { !it.key.contains('-') }
+}
+
 def detectCellRangerVersionData(cellRangerV2Data, cellRangerV3Data) {
 	if(cellRangerV2Data.isDirectory()) {
 		if(cellRangerV2Data.exists()) {

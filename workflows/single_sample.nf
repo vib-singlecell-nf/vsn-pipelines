@@ -39,14 +39,17 @@ workflow single_sample_base {
         DIM_REDUCTION( HVG_SELECTION.out.scaled )
         CLUSTER_IDENTIFICATION(
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred_pca_tsne_umap
+            DIM_REDUCTION.out.dimred_pca_tsne_umap,
+            "No Batch Effect Correction"
         )
 
         // conversion
         //// convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
+
+        // In benchmark mode, this automatically merge all the results into the resulting loom
         scopeloom = FILE_CONVERTER(
-            CLUSTER_IDENTIFICATION.out.marker_genes,
+            CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
             'loom',
             QC_FILTER.out.filtered
         )
