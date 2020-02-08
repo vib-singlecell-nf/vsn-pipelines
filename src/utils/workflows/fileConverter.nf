@@ -31,8 +31,8 @@ workflow FILE_CONVERTER {
     main:
         data.view()
             .branch {
-                h5adToLoom: it[1][0].extension.toLowerCase() == 'h5ad' && outputFormat.toLowerCase() == 'loom'
-                none: !inputFormatsAllowed.contains(it[1][0].extension.toLowerCase()) || !outputFormatsAllowed.contains(outputFormat.toLowerCase())
+                h5adToLoom: (item = it[1] instanceof ArrayList ? it[1][0] : it[1]) && item.extension.toLowerCase() == 'h5ad' && outputFormat.toLowerCase() == 'loom'
+                none: (item = it[1] instanceof ArrayList ? it[1][0] : it[1]) && !inputFormatsAllowed.contains(item.extension.toLowerCase()) || !outputFormatsAllowed.contains(outputFormat.toLowerCase())
             }
             .set { convert }
 
