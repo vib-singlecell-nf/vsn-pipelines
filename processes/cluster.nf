@@ -5,17 +5,28 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" 
 import groovy.transform.TupleConstructor
 import groovyx.gpars.dataflow.DataflowBroadcast
 
+include '../../utils/processes/utils.nf'
+
 @TupleConstructor()
 class SC__SCANPY__CLUSTERING_PARAMS {
+
+	Script env = null;
+	LinkedHashMap configParams = null;
+	// Parameters definiton
 	String iff = null;
 	String off = null;
-	String clusteringMethod = null; ArrayList<String> clusteringMethods = null
-    Float resolution = null; ArrayList<Float> resolutions = null
 	String report_ipynb = null;
+	// Parameters benchmarkable
+	String clusteringMethod = null; ArrayList<String> clusteringMethods = null;
+    Float resolution = null; ArrayList<Float> resolutions = null;
 
-    // ArrayTuple get() {
-	//    return *tuple(method,resolution)
-    // }
+	void setEnv(env) {
+		this.env = env
+	}
+
+	void setConfigProcessParams(params) {
+		this.configProcessParams = params
+	}
 
 	void displayMessage(tag) {
 		Channel.from('').view {
@@ -33,6 +44,14 @@ class SC__SCANPY__CLUSTERING_PARAMS {
         }
 	}
 
+	String getMethodAsArgument(method) {
+		return !this.env.isParamNull(method) ? '--method ' + method : ''
+	}
+
+	String getResolutionAsArgument(resolution) {
+		return !this.env.isParamNull(resolution) ? '--resolution ' + resolution : ''
+	}
+
 	int numParamsBenchmarked() {
 		def paramsBenchmarked = [ 
 			clusteringMethods instanceof List,
@@ -40,6 +59,10 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		]
 		def sum = { result, i -> result + (i ? 1 : 0) }
 		return paramsBenchmarked.inject(0, sum)
+	}
+
+	int numParams() {
+		return 2 // Total number of parameters implemented for benchmarking
 	}
 
 	// Define a function to check if the current process is running in benchmark mode
@@ -56,6 +79,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		displayMessage(tag)
 		return $method.combine($resolution)
 	}
+
 }
 
 def SC__SCANPY__CLUSTERING_PARAMS(params) {
@@ -97,7 +121,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-  	publishDir "${params.global.outdir}/data/intermediate/clustering/${method == null ? "default": method.toLowerCase()}/${resolution == null ? "default" : "res_" + resolution}", mode: 'symlink', overwrite: true
+  	publishDir "${params.global.outdir}/data/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "default" : "res_" + resolution}", mode: 'symlink', overwrite: true
 
   	input:
     	tuple \
@@ -108,15 +132,22 @@ process SC__SCANPY__BENCHMARK_CLUSTERING {
 			val(resolution)
 
   	output:
-    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"), val(method), val(resolution)
+    	tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"), \
+			val(method), \
+			val(resolution)
 
   	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.clustering)
 		processParams = sampleParams.local
+		def _processParams = new SC__SCANPY__CLUSTERING_PARAMS()
+		_processParams.setEnv(this)
+		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}cluster/sc_clustering.py \
-			${method != null ? '--method ' + method : ''} \
-			${resolution != null ? '--resolution ' + resolution : ''} \
+			${_processParams.getMethodAsArgument(method)} \
+			${_processParams.getResolutionAsArgument(resolution)} \
 			$f \
 			"${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"
 		"""

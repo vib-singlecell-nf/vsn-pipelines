@@ -2,6 +2,8 @@ nextflow.preview.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
 
+include '../../utils/processes/utils.nf'
+
 /**
  * STATIC VERSION OF SCANPY MARKER GENES
  */
@@ -44,7 +46,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-  	publishDir "${params.global.outdir}/data/intermediate/markers/${clusteringMethod == "NULL" ? "default": clusteringMethod.toLowerCase()}/${clusteringResolution == "NULL" ? "res_": clusteringResolution}", mode: 'symlink', overwrite: true
+  	publishDir "${params.global.outdir}/data/intermediate/markers/${isParamNull(clusteringMethod) ? "default": clusteringMethod.toLowerCase()}/${isParamNull(clusteringResolution) ? "res_": clusteringResolution}", mode: 'symlink', overwrite: true
   
   	input:
 		// Expects 
@@ -72,7 +74,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
 		"""
 		${binDir}cluster/sc_marker_genes.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
-			${clusteringMethod != "NULL" ? '--groupby ' + clusteringMethod : ''} \
+			${!isParamNull(clusteringMethod) ? '--groupby ' + clusteringMethod : ''} \
 			${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
 			$normalizedTransformedData \
 			$clusteredData \

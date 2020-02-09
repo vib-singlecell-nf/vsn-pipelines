@@ -2,6 +2,8 @@ nextflow.preview.dsl=2
 
 import static groovy.json.JsonOutput.*
 
+include '../../utils/processes/utils.nf'
+
 /* 
  * STATIC VERSION GENERATE REPORT
  * 
@@ -47,7 +49,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-  	publishDir "${params.global.outdir}/notebooks/intermediate/clustering/${method == "NULL" ? "default": method.toLowerCase()}/${resolution == "NULL" ? "res_": resolution}", mode: 'symlink', overwrite: true
+  	publishDir "${params.global.outdir}/notebooks/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "res_": resolution}", mode: 'symlink', overwrite: true
 
 	input:
 		file ipynb

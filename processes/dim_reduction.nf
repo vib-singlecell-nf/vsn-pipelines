@@ -1,26 +1,74 @@
-import groovy.transform.TupleConstructor
-import nextflow.util.ArrayTuple
-
 nextflow.preview.dsl=2
+
+import groovy.transform.TupleConstructor
+import groovyx.gpars.dataflow.DataflowBroadcast
+import nextflow.util.ArrayTuple
+import nextflow.script.ScriptBinding
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
 
+include '../../utils/processes/utils.nf'
+
 @TupleConstructor()
 class SC__SCANPY__DIM_REDUCTION_PARAMS {
-    Integer nComps = null
 
-	static String setNComps(nComps, processParams) {
-		// Check if nComps is both dynamically and if statically set
-		if(nComps != null && processParams.containsKey('nComps'))
-			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically and dynamically set. Choose one.")
-		if(nComps)
-			return '--n-comps ' + nComps.replaceAll("\n","")
-		return processParams.containsKey('nComps') ? '--n-comps ' + processParams.nComps: ''
+	Script env = null;
+	LinkedHashMap configParams = null;
+	// Parameters definiton
+	String iff = null;
+	String off = null;
+	String dimReductionMethod = null;
+	// Parameters benchmarkable
+    Integer nComps = null;
+
+	void setEnv(env) {
+		this.env = env
 	}
 
-    ArrayTuple asTuple() {
+	void setConfigProcessParams(params) {
+		this.configProcessParams = params
+	}
+
+	void displayMessage(tag = null) {
+		Channel.from('').view {
+			"""
+------------------------------------------------------------------
+\u001B[32m Benchmarking SC__SCANPY__DIM_REDUCTION step... \u001B[0m
+\u001B[32m Tag: ${tag} \u001B[0m
+\u001B[32m Parameters tested: \u001B[0m
+\u001B[32m - nComps: \u001B[0m \u001B[33m     ${nComps instanceof List} \u001B[0m
+\u001B[32m   - values: \u001B[0m \u001B[33m   ${nComps} \u001B[0m
+------------------------------------------------------------------
+            """
+        }
+	}
+
+	String getNCompsAsArgument(nComps) {
+		// Check if nComps is both dynamically and if statically set
+		if(!this.env.isParamNull(nComps) && this.configParams.containsKey('nComps'))
+			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically and dynamically set. Choose one.")
+		if(!this.env.isParamNull(nComps))
+			return '--n-comps ' + nComps.replaceAll("\n","")
+		return this.configParams.containsKey('nComps') ? '--n-comps ' + this.configParams.nComps: ''
+	}
+
+	// Define a function to check if the current process is running in benchmark mode
+	boolean isBenchmarkMode() {
+		return (nComps instanceof List)
+	}
+
+	DataflowBroadcast $(tag = null) {
+		// Prepare argument stream
+		def $nComps = Channel.from(nComps == null ? "NULL" : nComps)
+		if(isBenchmarkMode()) 
+			displayMessage(tag)
+		return $nComps
+	}
+
+	ArrayTuple asTuple() {
 	   	return tuple(nComps)
     }
+
 }
 
 def SC__SCANPY__DIM_REDUCTION_PARAMS(params) {
@@ -34,7 +82,8 @@ process SC__SCANPY__DIM_REDUCTION {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-		tuple val(sampleId), \
+		tuple \
+			val(sampleId), \
 			path(data), \
 			val(inertParams), \
 			val(nComps)
@@ -51,13 +100,17 @@ process SC__SCANPY__DIM_REDUCTION {
 		// In benchmark mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
 		uuid = UUID.randomUUID().toString().substring(0,8)
-		method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
+		method = processParams.dimReductionMethod.toUpperCase()
+		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
+		def _processParams = new SC__SCANPY__DIM_REDUCTION_PARAMS()
+		_processParams.setEnv(this)
+		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}dim_reduction/sc_dim_reduction.py \
 			--method ${processParams.dimReductionMethod} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
-			${SC__SCANPY__DIM_REDUCTION_PARAMS.setNComps(nComps, processParams)} \
+			${_processParams.getNCompsAsArgument(nComps)} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
 			${(processParams.containsKey('useFastTsne') && processParams.useFastTsne) ? '--use-fast-tsne' : ''} \

@@ -47,21 +47,28 @@ workflow BEC_BBKNN {
                 it -> tuple(it[0], it[1], it[2]) 
             } 
         )
+
+        // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
             "Post Batch Effect Correction (BBKNN)"
         )
+
+        // Define the parameters for dimensionality reduction
+        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.sc.scanpy.dim_reduction.umap) )
+
         SC__SCANPY__DIM_REDUCTION__UMAP( 
-            CLUSTER_IDENTIFICATION.out.marker_genes.view().map{
+            CLUSTER_IDENTIFICATION.out.marker_genes.map {
                 it -> tuple(
                     it[0], // sampleId
                     it[1], // data
                     !clusteringParams.isBenchmarkMode() ? null : it[2..(it.size()-1)], // set runtime process parameters as inert
-                    null //*(SC__SCANPY__DIM_REDUCTION_PARAMS().asTuple()) // set next runtime process parameters 
                 )
-            }
+            }.combine(
+                dimRedParams.$()
+            )
         )
 
         SC__PUBLISH_H5AD( 
@@ -78,7 +85,7 @@ workflow BEC_BBKNN {
             ).map {
                 it -> tuple(it[2..(it.size()-1)], it[0], it[1])
             }.groupTuple(
-                by: [0, clusteringParams.numParamsBenchmarked()-1]
+                by: [0, clusteringParams.numParams()-1]
             ).map { 
                 it -> tuple(it[1], *it[2]) 
             }
