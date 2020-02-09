@@ -75,9 +75,9 @@ workflow bbknn_base {
         ).combine(
             BEC_BBKNN.out.bbknn_report,
             by: 0
-        ).map{ 
+        ).map { 
             tuple( it[0], it.drop(1) ) 
-        }.view()
+        }
         // reporting:
         SC__SCANPY__MERGE_REPORTS(
             ipynbs,
