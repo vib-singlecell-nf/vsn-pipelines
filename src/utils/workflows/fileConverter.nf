@@ -59,7 +59,7 @@ Converting ${it[1][0].baseName}.h5ad to ${it[1][0].baseName}.loom
             }
         }
         SC__H5AD_TO_LOOM(
-            rawFilteredData.combine(convert.h5adToLoom.map { it -> tuple(it[0], it[1]) }, by: 0).ifEmpty('Channel empty: no h5ad files were converted to the loom format.').view()
+            rawFilteredData.combine(convert.h5adToLoom.map { it -> tuple(it[0], it[1]) }, by: 0).ifEmpty('Channel empty: no h5ad files were converted to the loom format.')
         )
         out = COMPRESS_HDF5(
             SC__H5AD_TO_LOOM.out
