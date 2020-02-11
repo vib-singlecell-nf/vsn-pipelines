@@ -60,7 +60,8 @@ workflow QC_FILTER {
         report = GENERATE_DUAL_INPUT_REPORT(
             unfiltered.join(filtered), 
             file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
-            'SC_QC_filtering_report'
+            'SC_QC_filtering_report',
+            false
         )
 
     emit:

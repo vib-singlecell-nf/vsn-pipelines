@@ -93,7 +93,7 @@ process SC__SCANPY__DIM_REDUCTION {
 	output:
 		tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${uuid}.${processParams.off}"), \
+			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(inertParams) ? uuid + '.' : ''}${processParams.off}"), \
 			val(inertParams)
 
 	script:
@@ -101,8 +101,9 @@ process SC__SCANPY__DIM_REDUCTION {
 		processParams = sampleParams.local
 		// In benchmark mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
+		// Output file will only be tagged with UUID if in benchmark mode
 		uuid = UUID.randomUUID().toString().substring(0,8)
-		method = processParams.dimReductionMethod.toUpperCase()
+		method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
 		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__DIM_REDUCTION_PARAMS()
 		_processParams.setEnv(this)
@@ -117,7 +118,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
 			${(processParams.containsKey('useFastTsne') && processParams.useFastTsne) ? '--use-fast-tsne' : ''} \
 			$data \
-			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${uuid}.${processParams.off}"
+			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(inertParams) ? uuid + '.' : ''}${processParams.off}"
 		"""
 
 }

@@ -88,7 +88,8 @@ workflow BEC_BBKNN {
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
-            "SC_BEC_BBKNN_report"
+            "SC_BEC_BBKNN_report",
+            clusteringParams.isBenchmarkMode()
         )
 
     emit:

@@ -89,10 +89,11 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
   	input:
 		file(ipynb)
 		tuple val(sampleId), file(data1), file(data2)
-		val reportTitle
+		val(reportTitle)
+		val(isBenchmarkMode)
 
   	output:
-    	tuple val(sampleId), file("${sampleId}.${reportTitle}.${uuid}.ipynb")
+    	tuple val(sampleId), file("${sampleId}.${reportTitle}.${isBenchmarkMode ? uuid : ''}ipynb")
 
   	script:
 	  	def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
@@ -100,7 +101,7 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
-			${sampleId}.${reportTitle}.${uuid}.ipynb \
+			${sampleId}.${reportTitle}.${isBenchmarkMode ? uuid : ''}ipynb \
 			-p FILE1 $data1 -p FILE2 $data2 \
 			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
 			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
@@ -142,14 +143,15 @@ process SC__SCANPY__MERGE_REPORTS {
 			val(sampleId), \
 			path(ipynbs)
 		val(reportTitle)
+		val(isBenchmarkMode)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.${uuid}${reportTitle}.ipynb")
+		tuple val(sampleId), path("${sampleId}.${reportTitle}.${isBenchmarkMode ? uuid + '.' : ''}ipynb")
 
 	script:
 		uuid = UUID.randomUUID().toString().substring(0,8)
 		"""
-		nbmerge ${ipynbs} -o "${sampleId}.${uuid}${reportTitle}.ipynb"
+		nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.${isBenchmarkMode ? uuid + '.' : ''}ipynb"
 		"""
 
 }
