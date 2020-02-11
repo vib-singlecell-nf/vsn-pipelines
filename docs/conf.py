@@ -38,6 +38,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# Resolve issue with RTD build
+master_doc = 'index'
+
 
 # -- Options for HTML output -------------------------------------------------
 
