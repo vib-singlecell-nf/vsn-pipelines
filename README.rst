@@ -1,3 +1,6 @@
+VSN-Pipelines
+==============
+
 |Nextflow| |Gitter| |ReadTheDocs|
 
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/vsn-pipelines/badge/?version=latest
@@ -13,6 +16,8 @@
     :alt: Gitter
 
 A repository of pipelines for single-cell data in Nextflow DSL2.
+
+Full documentation available on `Read the Docs <https://vsn-pipelines.readthedocs.io/en/latest/>`_
 
 This main repo contains multiple workflows for analyzing single cell transcriptomics data, and depends on a number of tools, which are organized into submodules within the VIB-Singlecell-NF_ organization.
 Currently available workflows include:
