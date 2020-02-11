@@ -1,4 +1,8 @@
-|Nextflow| |Gitter|
+|Nextflow| |Gitter| |ReadTheDocs|
+
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/vsn-pipelines/badge/?version=latest
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 .. |Nextflow| image:: https://img.shields.io/badge/nextflow-19.12.0-brightgreen.svg
     :target: https://www.nextflow.io/
