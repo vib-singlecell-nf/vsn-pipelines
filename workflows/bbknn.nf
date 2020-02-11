@@ -3,12 +3,14 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
+include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
+
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 // CLUSTER_IDENTIFICATION
+include '../src/scanpy/processes/cluster.nf' params(params)
 include '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global) // Don't only import a specific process (the function needs also to be imported)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
@@ -79,9 +81,11 @@ workflow bbknn_base {
             tuple( it[0], it.drop(1) ) 
         }
         // reporting:
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         SC__SCANPY__MERGE_REPORTS(
             ipynbs,
-            "merged_report"
+            "merged_report",
+            clusteringParams.isBenchmarkMode()
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
