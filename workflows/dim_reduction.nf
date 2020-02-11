@@ -31,6 +31,7 @@ workflow DIM_REDUCTION {
         )
 
     emit:
+        dimred_pca = dimred_pca
         dimred_pca_tsne = DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne
         dimred_pca_tsne_umap = DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap
         report

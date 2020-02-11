@@ -87,14 +87,14 @@ process SC__SCANPY__DIM_REDUCTION {
 		tuple \
 			val(sampleId), \
 			path(data), \
-			val(inertParams), \
+			val(stashedParams), \
 			val(nComps)
 
 	output:
 		tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(inertParams) ? uuid + '.' : ''}${processParams.off}"), \
-			val(inertParams)
+			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"), \
+			val(stashedParams)
 
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.dim_reduction.get(params.method))
@@ -118,7 +118,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
 			${(processParams.containsKey('useFastTsne') && processParams.useFastTsne) ? '--use-fast-tsne' : ''} \
 			$data \
-			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(inertParams) ? uuid + '.' : ''}${processParams.off}"
+			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"
 		"""
 
 }
