@@ -26,3 +26,6 @@ tests/
 debug/
 *.swp
 *.swo
+_build
+_static
+_templates
