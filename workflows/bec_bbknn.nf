@@ -18,6 +18,7 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include '../../utils/processes/utils.nf' params(params)
+include '../../utils/workflows/utils.nf' params(params)
 
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
@@ -79,19 +80,11 @@ workflow BEC_BBKNN {
         // This will generate a dual report with results from
         // - CLUSTER_IDENTIFICATION pre batch effect correction
         // - CLUSTER_IDENTIFICATION post batch effect correction
-        if(clusteringParams.isBenchmarkMode()) {
-            becDualDataPrePost = clusterIdentificationPreBatchEffectCorrection.concat(
-                SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], *it[2]) } // get back the parameters stored as inertParameters
-            ).map {
-                it -> tuple(it[2..(it.size()-1)], it[0], it[1])
-            }.groupTuple(
-                by: [0, clusteringParams.numParams()-1]
-            ).map { 
-                it -> tuple(it[1], *it[2]) 
-            }
-        } else {
-            becDualDataPrePost = clusterIdentificationPreBatchEffectCorrection.join(SC__PUBLISH_H5AD.out)
-        }
+        becDualDataPrePost = COMBINE_BY_PARAMS(
+            clusterIdentificationPreBatchEffectCorrection,
+            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+            clusteringParams
+        )
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
