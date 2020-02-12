@@ -13,7 +13,6 @@ include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(par
 include '../src/scanpy/processes/cluster.nf' params(params)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
-include SC__PUBLISH_H5AD from '../src/utils/processes/utils.nf' params(params)
 
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
