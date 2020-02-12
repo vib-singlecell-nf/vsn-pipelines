@@ -1,8 +1,29 @@
 Features
 =========
 
+Change log fold change and FDR thresholds for markers stored in SCope loom
+--------------------------------------------------------------------------
+
+By default, log fold change and FDR thresholds are set to 0 and 0.05 respectively.
+If you want to change those thresholds applied on the markers genes, edit the ``nextflow.config`` with the following entries,
+
+.. code:: groovy
+
+    params {
+        sc {
+            scope {
+                markers {
+                    log_fc_threshold = 0.5
+                    fdr_fc_threshold = 0.01
+                }
+            }
+        }
+    }
+
+This filter will only be applied on the final loom file of the VSN-Pipelines. All the intermediate files prior to the loom file will still contain all of them the markers.
+
 Select the optimal number of principal components
-------------------------------------------------
+-------------------------------------------------
 
 When generating the config using ``nextflow config`` (see above), add the ``pcacv`` profile.
 
