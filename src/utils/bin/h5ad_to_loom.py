@@ -63,7 +63,7 @@ parser.add_argument(
     '--markers-log-fc-threshold',
     type=float,
     default=0,
-    dest="nomenclature",
+    dest="markers_log_fc_threshold",
     help='The name of the genome.'
 )
 
@@ -71,7 +71,7 @@ parser.add_argument(
     '--markers-fdr-threshold',
     type=float,
     default=0.05,
-    dest="nomenclature",
+    dest="markers_fdr_threshold",
     help='The name of the genome.'
 )
 
@@ -297,11 +297,11 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
     for i in range(0, num_clusters):
         i = str(i)
         num_genes = len(adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i])
-        sig_genes_mask = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i] < args.fdr_threshold
+        sig_genes_mask = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i] < args.markers_fdr_threshold
         deg_genes_mask = np.logical_and(
             np.logical_or(
-                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] >= args.logfc_threshold,
-                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] <= -args.logfc_threshold
+                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] >= args.markers_log_fc_threshold,
+                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] <= -args.markers_log_fc_threshold
             ),
             np.isfinite(
                 adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i]
