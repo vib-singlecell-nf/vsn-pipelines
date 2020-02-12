@@ -3,16 +3,16 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-//include CELLRANGER from '../src/cellranger/main.nf' params(params)
+include '../src/utils/processes/utils.nf' params(params)
+
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-// include SC__FILE_CONCATENATOR from '../src/utils/processes/utils.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
 include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params)
+include '../src/scanpy/processes/cluster.nf' params(params)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
-include SC__PUBLISH_H5AD from '../src/utils/processes/utils.nf' params(params)
 
 // data channel to start from 10x data:
 include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
@@ -61,6 +61,7 @@ workflow single_sample_base {
         )
 
         // reporting:
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         SC__SCANPY__MERGE_REPORTS(
             QC_FILTER.out.report.mix(
                 samples.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out),
@@ -68,7 +69,8 @@ workflow single_sample_base {
                 DIM_REDUCTION.out.report,
                 CLUSTER_IDENTIFICATION.out.report
             ).groupTuple(),
-            "merged_report"
+            "merged_report",
+            clusteringParams.isBenchmarkMode()
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 

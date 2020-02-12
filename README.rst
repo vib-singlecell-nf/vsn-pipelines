@@ -31,6 +31,7 @@ Currently available workflows include:
 
     - **BBKNN**
     - **mnnCorrect**
+    - **Harmony**
 
 * **GRN inference**:
 
