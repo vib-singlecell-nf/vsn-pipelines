@@ -34,3 +34,6 @@
 [submodule "src/pcacv"]
 	path = src/pcacv
 	url = https://github.com/vib-singlecell-nf/pcacv.git
+[submodule "src/harmony"]
+	path = src/harmony
+	url = https://github.com/vib-singlecell-nf/harmony.git

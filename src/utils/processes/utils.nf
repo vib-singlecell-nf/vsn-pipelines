@@ -172,10 +172,11 @@ process SC__PUBLISH_H5AD {
 		val(fOutSuffix)
 
     output:
-    	tuple val(tag), path(f)
+    	tuple val(tag), path("${tag}.${fOutSuffix}.h5ad")
 
 	script:
 		"""
+		ln -s $f "${tag}.${fOutSuffix}.h5ad"
 		"""
 
 }
