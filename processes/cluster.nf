@@ -127,7 +127,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING {
     	tuple \
 			val(sampleId), \
 			path(f), \
-			val(inertParams), \
+			val(stashedParams), \
 			val(method), \
 			val(resolution)
 

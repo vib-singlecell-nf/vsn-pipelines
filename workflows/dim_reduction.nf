@@ -21,23 +21,38 @@ workflow DIM_REDUCTION {
 
     main:
         dimred_pca = DIM_REDUCTION_PCA( data )
-        dimred_pca_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( DIM_REDUCTION_PCA.out.map {
-                item -> tuple(item[0], item[1], null, null)
-        })
-        dimred_pca_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out.map {
-                item -> tuple(item[0], item[1], null, null)
-        })
+        DIM_REDUCTION_TSNE_UMAP( dimred_pca )
 
         report = GENERATE_REPORT(
             "DIMENSIONALITY_REDUCTION",
-            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1]) },
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
             file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
             false
         )
 
     emit:
-        dimred_pca_tsne
-        dimred_pca_tsne_umap
+        dimred_pca = dimred_pca
+        dimred_pca_tsne = DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne
+        dimred_pca_tsne_umap = DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap
         report
+
+}
+
+workflow DIM_REDUCTION_TSNE_UMAP {
+
+    take:
+        data
+
+    main:
+        dimred_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( data.map {
+                item -> tuple(item[0], item[1], null, null)
+        })
+        dimred_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out.map {
+                item -> tuple(item[0], item[1], null, null)
+        })
+
+    emit:
+        dimred_tsne
+        dimred_tsne_umap
 
 }

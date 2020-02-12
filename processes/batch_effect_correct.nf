@@ -12,7 +12,7 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
     	tuple \
 			val(sampleId), \
 			path(f), \
-			val(inertParams)
+			val(stashedParams)
 
   	output:
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")

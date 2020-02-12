@@ -19,7 +19,7 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 	String off = null;
 	String dimReductionMethod = null;
 	// Parameters benchmarkable
-    Integer nComps = null;
+    Integer nComps = null; ArrayList<Integer> nCompss = null;
 
 	void setEnv(env) {
 		this.env = env
@@ -46,7 +46,7 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 	String getNCompsAsArgument(nComps) {
 		// Check if nComps is both dynamically and if statically set
 		if(!this.env.isParamNull(nComps) && this.configParams.containsKey('nComps'))
-			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically and dynamically set. Choose one.")
+			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically (" + nComps + ") and dynamically (" + this.configParams["nComps"] + ") set. Choose one.")
 		if(!this.env.isParamNull(nComps))
 			return '--n-comps ' + nComps.replaceAll("\n","")
 		return this.configParams.containsKey('nComps') ? '--n-comps ' + this.configParams.nComps: ''
@@ -59,9 +59,11 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 
 	DataflowBroadcast $(tag = null) {
 		// Prepare argument stream
-		def $nComps = Channel.from(nComps == null ? "NULL" : nComps)
-		if(isBenchmarkMode()) 
+		def $nComps = Channel.from("NULL")
+		if(isBenchmarkMode()) {
 			displayMessage(tag)
+			$nComps = Channel.from(nComps)
+		}
 		return $nComps
 	}
 
@@ -85,22 +87,23 @@ process SC__SCANPY__DIM_REDUCTION {
 		tuple \
 			val(sampleId), \
 			path(data), \
-			val(inertParams), \
+			val(stashedParams), \
 			val(nComps)
 
 	output:
 		tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${uuid}.${processParams.off}"), \
-			val(inertParams)
+			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"), \
+			val(stashedParams)
 
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.dim_reduction.get(params.method))
 		processParams = sampleParams.local
 		// In benchmark mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
+		// Output file will only be tagged with UUID if in benchmark mode
 		uuid = UUID.randomUUID().toString().substring(0,8)
-		method = processParams.dimReductionMethod.toUpperCase()
+		method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
 		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__DIM_REDUCTION_PARAMS()
 		_processParams.setEnv(this)
@@ -115,7 +118,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
 			${(processParams.containsKey('useFastTsne') && processParams.useFastTsne) ? '--use-fast-tsne' : ''} \
 			$data \
-			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${uuid}.${processParams.off}"
+			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"
 		"""
 
 }
