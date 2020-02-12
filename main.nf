@@ -19,6 +19,14 @@ workflow mnncorrect {
 
 }
 
+// run multi-sample with bbknn, output a scope loom file
+workflow harmony {
+
+    include harmony_standalone as HARMONY from './workflows/harmony' params(params)
+    HARMONY()
+
+}
+
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
 
