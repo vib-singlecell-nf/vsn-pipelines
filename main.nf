@@ -37,6 +37,16 @@ workflow bbknn_scenic {
 
 }
 
+// run multi-sample with harmony, then scenic from the filtered output:
+workflow harmony_scenic {
+
+    include harmony_standalone as HARMONY from './workflows/harmony' params(params)
+    include SCENIC_append from './src/scenic/main.nf' params(params)
+    HARMONY()
+    SCENIC_append( HARMONY.out.filteredloom, HARMONY.out.scopeloom )
+
+}
+
 
 // run single_sample, output a scope loom file
 workflow single_sample {
