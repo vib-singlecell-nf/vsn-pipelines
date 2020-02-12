@@ -29,3 +29,8 @@ debug/
 _build
 _static
 _templates
+docs/_sources
+*.doctree
+*.buildinfo
+*.js
+*.inv
