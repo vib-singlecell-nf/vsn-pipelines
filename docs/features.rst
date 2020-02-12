@@ -58,7 +58,7 @@ You'll just have to repeat the following structure for the parameters which you 
         }
     }
 
-Parameter benchmarking
+Parameter exploration
 ----------------------
 
 The latest version only implements this feature for the following pipelines:
@@ -66,7 +66,7 @@ The latest version only implements this feature for the following pipelines:
 - ``single_sample``
 - ``bbknn``
 
-Since ``v0.9.0``, it is possible to benchmark several combinations of parameters. The current version (``v0.9.0``) of the VSN-Pipelines allows to benchmark the following parameters:
+Since ``v0.9.0``, it is possible to explore several combinations of parameters. The current version (``v0.9.0``) of the VSN-Pipelines allows to explore the following parameters:
 
 - ``params.sc.scanpy.clustering``
 
