@@ -163,6 +163,19 @@ This could be very resource intensive, depending on the dataset.
 .. |BBKNN SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/bbknn_scenic.svg?sanitize=true
 
 
+**harmony** |harmony|
+-----------------
+
+.. |harmony| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/harmony/badge.svg
+
+Runs the ``harmony`` workflow (sample-specific filtering, merging of individual samples, normalization, log-transformation, HVG selection, PCA analysis, batch-effect correction (Harmony), clustering, dimensionality reduction (t-SNE and UMAP)).
+The output is a loom file with the results embedded.
+
+|Harmony Workflow|
+
+.. |Harmony Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/harmony.svg?sanitize=true
+
+
 Input Data Formats
 *******************
 
