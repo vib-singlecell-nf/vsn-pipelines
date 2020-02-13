@@ -101,16 +101,23 @@ This could be very resource intensive, depending on the dataset.
 .. |scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic/badge.svg
 
 Runs the ``scenic`` workflow alone, generating a loom file with only the SCENIC results.
+Currently, the required input is a loom file (set by `params.sc.scenic.filteredLoom`).
 
 |SCENIC Workflow|
 
 .. |SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/scenic.svg?sanitize=true
 
 
-**scenic_multiruns**
---------------------
+**scenic_multiruns** |scenic_multiruns| |single_sample_scenic_multiruns|
+------------------------------------------------------------------------
+
+.. |scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic_multiruns/badge.svg
+.. |single_sample_scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic_multiruns/badge.svg
 
 Runs the ``scenic`` workflow multiple times (set by ``params.sc.scenic.numRuns``), generating a loom file with the aggregated results from the multiple SCENIC runs.
+
+Note that this is not a complete entry-point itself, but a configuration option for the `scenic` module.
+Simply adding `-profile scenic_multiruns` during the config step will activate this analysis option for any of the standard entrypoints.
 
 |SCENIC Multi-runs Workflow|
 
