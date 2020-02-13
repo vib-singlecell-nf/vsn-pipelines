@@ -25,7 +25,7 @@ jobs:
     - name: Get sample data
       run: |
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_small.tar.gz
-        tar xvf sample_data.tar.gz
+        tar xvf sample_data_small.tar.gz
     - name: Run single_sample_scenic test
       run: |
         nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scenic,test__single_sample_scenic,docker -entry single_sample_scenic -ansi-log false
