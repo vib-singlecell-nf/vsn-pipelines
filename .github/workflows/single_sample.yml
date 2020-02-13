@@ -24,7 +24,7 @@ jobs:
         sudo mv nextflow /usr/local/bin/
     - name: Get sample data
       run: |
-        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
+        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
         tar xvf sample_data.tar.gz
     - name: Run single_sample test
       run: |
