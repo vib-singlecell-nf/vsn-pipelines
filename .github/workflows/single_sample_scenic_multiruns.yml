@@ -1,4 +1,4 @@
-name: harmony
+name: single_sample_scenic_multiruns
 
 on: 
   push:
@@ -24,12 +24,10 @@ jobs:
         sudo mv nextflow /usr/local/bin/
     - name: Get sample data
       run: |
-        mkdir testdata
-        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
-        tar xvf sample_data_tiny.tar.gz
-        cp -r sample_data testdata/sample1
-        mv sample_data testdata/sample2
-    - name: Run single_sample test
+        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_small.tar.gz
+        tar xvf sample_data_small.tar.gz
+    - name: Run single_sample_scenic test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile harmony,test__harmony,docker -entry harmony -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scenic,scenic_multiruns,test__single_sample_scenic_multiruns,docker -entry single_sample_scenic -ansi-log false
         cat .nextflow.log
+
