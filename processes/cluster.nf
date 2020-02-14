@@ -65,7 +65,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		return 2 // Total number of parameters implemented for benchmarking
 	}
 
-	// Define a function to check if the current process is running in benchmark mode
+	// Define a function to check if the current process is running in parameter exploration mode
 	boolean isBenchmarkMode() {
 		return (clusteringMethods instanceof List
 				|| resolutions instanceof List

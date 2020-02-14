@@ -64,9 +64,7 @@ except IOError:
 def check_neighborhood_graph_exists(adata):
     if "neighbors" not in adata.uns.keys():
         raise Exception(
-            "The neighborhood graph of observations has not been computed. Please do so before running {} clustering".format(
-                args.method)
-        )
+            "The neighborhood graph of observations has not been computed.")
 
 #
 # Clustering the data
