@@ -182,6 +182,18 @@ The output is a loom file with the results embedded.
 
 .. |Harmony Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/harmony.svg?sanitize=true
 
+**mnncorrect** |mnncorrect|
+-----------------
+
+.. |mnncorrect| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/mnncorrect/badge.svg
+
+Runs the ``mnncorrect`` workflow (sample-specific filtering, merging of individual samples, normalization, log-transformation, HVG selection, PCA analysis, batch-effect correction (mnnCorrect), clustering, dimensionality reduction (t-SNE and UMAP)).
+The output is a loom file with the results embedded.
+
+|mnnCorrect Workflow|
+
+.. |mnnCorrect Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/mnncorrect.svg?sanitize=true
+
 
 Input Data Formats
 *******************
