@@ -52,7 +52,7 @@ workflow bbknn_base {
         // Perform the batch effect correction
         BEC_BBKNN(
             NORMALIZE_TRANSFORM.out,
-            //// include only PCA and t-SNE pre-merge dim reductions. Omit UMAP for clarity since it will have to be overwritten by BEC_BBKNN
+            // Include only PCA and t-SNE pre-merge dim reductions. Omit UMAP for clarity since it will have to be overwritten by BEC_BBKNN
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne,
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
