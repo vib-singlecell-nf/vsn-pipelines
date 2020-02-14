@@ -4,7 +4,7 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__NEIGHBORHOOD_GRAPH from './../processes/neighborhood_graph' params(params)
+include SC__SCANPY__NEIGHBORHOOD_GRAPH from './../processes/neighborhood_graph.nf' params(params)
 
 //////////////////////////////////////////////////////
 
@@ -14,9 +14,9 @@ workflow NEIGHBORHOOD_GRAPH {
         data
 
     main:
-        SC__SCANPY__NEIGHBORHOOD_GRAPH( data )
+        out = SC__SCANPY__NEIGHBORHOOD_GRAPH( data )
 
     emit:
-        SC__SCANPY__NEIGHBORHOOD_GRAPH.out
+        out
 
 }
