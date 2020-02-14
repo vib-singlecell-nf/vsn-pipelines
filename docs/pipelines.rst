@@ -265,3 +265,49 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 Make sure that ``sc.file_converter.iff`` is set to ``h5ad``.
 
 Currently H5AD input is only implemented in the ``h5ad_single_sample`` entry point.
+
+TSV
+---
+::
+
+    -profiles tsv
+
+
+In the generated .config file, make sure the ``file_paths`` parameter is set with the paths to the ``.tsv`` files::
+
+    [...]
+    h5ad {
+        file_paths = "data/1k_pbmc_v*_chemistry_SUFFIX.SC__FILE_CONVERTER.tsv"
+        suffix = "_SUFFIX.SC__FILE_CONVERTER.tsv"
+    }
+    [...]
+
+- The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
+- The ``file_paths`` accepts glob patterns and also comma separated paths.
+
+Make sure that ``sc.file_converter.iff`` is set to ``tsv``.
+
+Currently H5AD input is only implemented in the ``tsv_single_sample`` entry point.
+
+CSV
+---
+::
+
+    -profiles csv
+
+
+In the generated .config file, make sure the ``file_paths`` parameter is set with the paths to the ``.csv`` files::
+
+    [...]
+    h5ad {
+        file_paths = "data/1k_pbmc_v*_chemistry_SUFFIX.SC__FILE_CONVERTER.csv"
+        suffix = "_SUFFIX.SC__FILE_CONVERTER.csv"
+    }
+    [...]
+
+- The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
+- The ``file_paths`` accepts glob patterns and also comma separated paths.
+
+Make sure that ``sc.file_converter.iff`` is set to ``csv``.
+
+Currently H5AD input is only implemented in the ``csv_single_sample`` entry point.
