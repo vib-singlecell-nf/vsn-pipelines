@@ -41,19 +41,15 @@ workflow FILE_CONVERTER {
             if(it[1].size() > 1) {
                 """
 ------------------------------------------------------------------
-\u001B[32m
-Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom 
-(w/ additional compression)...
-\u001B[0m
+\u001B[32m Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom 
+(w/ additional compression)...\u001B[0m
 ------------------------------------------------------------------
                 """
             } else {
 """
 ------------------------------------------------------------------
-\u001B[32m
-Converting ${it[1][0].baseName}.h5ad to ${it[1][0].baseName}.loom
-(w/ additional compression)...
-\u001B[0m
+\u001B[32m Converting ${it[1][0].baseName}.h5ad to ${it[1][0].baseName}.loom
+(w/ additional compression)...\u001B[0m
 ------------------------------------------------------------------
 """
             }
@@ -67,10 +63,8 @@ Converting ${it[1][0].baseName}.h5ad to ${it[1][0].baseName}.loom
         convert.none.view { 
 """
 ------------------------------------------------------------------
-\u001B[31m
-Aborting conversion of ${it[1]} to ${it[1].baseName}.loom 
-(not implemented)
-\u001B[0m
+\u001B[31m Aborting conversion of ${it[1]} to ${it[1].baseName}.loom 
+(not implemented) \u001B[0m
 ------------------------------------------------------------------
 """
         }
