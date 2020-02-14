@@ -11,9 +11,10 @@ nextflow.preview.dsl=2
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
 include DIM_REDUCTION_PCA from './dim_reduction_pca' params(params + [method: "pca"])
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__TSNE from '../processes/dim_reduction.nf' params(params + [method: "tsne"])
+include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
+include DIM_REDUCTION_TSNE_UMAP from './dim_reduction' params(params)
 include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
+
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -27,11 +28,11 @@ workflow BEC_MNN_CORRECT {
     main:
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data )
         DIM_REDUCTION_PCA( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
-        SC__SCANPY__DIM_REDUCTION__UMAP( DIM_REDUCTION_PCA.out )
-        SC__SCANPY__DIM_REDUCTION__TSNE( SC__SCANPY__DIM_REDUCTION__UMAP.out )
+        NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
+        DIM_REDUCTION_TSNE_UMAP( DIM_REDUCTION_PCA.out )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
-            SC__SCANPY__DIM_REDUCTION__TSNE.out,
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "Post Batch Effect Correction (MNN CORRECT)"
         )
 
