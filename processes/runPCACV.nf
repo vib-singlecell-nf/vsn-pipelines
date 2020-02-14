@@ -25,13 +25,13 @@ process PCACV__FIND_OPTIMAL_NPCS {
         """
         ${binDir}run_pca_cv.R \
             --input-file ${f} \
+            ${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
             ${(processParams.containsKey('accessor')) ? '--accessor "' + processParams.accessor.replace('$','\\$') + '"': ''} \
             ${(processParams.containsKey('kFold')) ? '--k-fold ' + processParams.libraries: ''} \
 			${(processParams.containsKey('fromNPC')) ? '--from-n-pc ' + processParams.fromNPC: ''} \
 			${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
 			${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
             ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.libraries: ''} \
-			${(processParams.containsKey('seed')) ? '--seed ' + processParams.fromNPC: ''} \
 			${(processParams.containsKey('nCores')) ? '--n-cores ' + processParams.nCores: ''} \
 			${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
