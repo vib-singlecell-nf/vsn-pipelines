@@ -131,15 +131,21 @@ RunPCACV <- function(
   to = 150,
   by = 5,
   maxit = 200,
-  seed = 617,
+  seed = NULL,
   n.cores = 1,
   verbose = T,
   default.svd = F) {
-  set.seed(seed)
+  # Required by irlba::irlba for reproducibility
+  if(!is.null(seed)) {
+    set.seed(seed)
+  } else {
+    warnings("No seed is set!")
+  }
   library(foreach)
   library(doMC)
   registerDoMC(cores = n.cores) 
   library(irlba)
+  
   if(default.svd) {
     print("Default SVD is using for estimating the number PCs.") 
   }
