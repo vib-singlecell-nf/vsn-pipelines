@@ -52,7 +52,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 		return this.configParams.containsKey('nComps') ? '--n-comps ' + this.configParams.nComps: ''
 	}
 
-	// Define a function to check if the current process is running in benchmark mode
+	// Define a function to check if the current process is running in parameter exploration mode
 	boolean isBenchmarkMode() {
 		return (nComps instanceof List)
 	}
@@ -94,9 +94,9 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 	script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
 		processParams = sampleParams.local
-        // In benchmark mode, file output needs to be tagged with a unique identitifer because of:
+        // In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
-		// Output file will only be tagged with UUID if in benchmark mode
+		// Output file will only be tagged with UUID if in parameter exploration mode
 		uuid = UUID.randomUUID().toString().substring(0,8)
 		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS()
