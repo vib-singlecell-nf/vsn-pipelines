@@ -270,7 +270,7 @@ col_attrs = {**col_attrs, **col_attrs_clusterings}
 ##################
 
 row_attrs = {
-    "Gene": np.array(adata.raw.var.index)
+    "Gene": np.array(raw_filtered_adata.var.index)
 }
 
 # CLUSTER MARKERS
@@ -281,15 +281,15 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
 
     # Initialize
     cluster_markers = pd.DataFrame(
-        index=adatas[adata_idx].raw.var.index,
+        index=raw_filtered_adata.var.index,
         columns=[str(x) for x in np.arange(num_clusters)]
     ).fillna(0, inplace=False)
     cluster_markers_avg_logfc = pd.DataFrame(
-        index=adatas[adata_idx].raw.var.index,
+        index=raw_filtered_adata.var.index,
         columns=[str(x) for x in np.arange(num_clusters)]
     ).fillna(0, inplace=False)
     cluster_markers_pval = pd.DataFrame(
-        index=adatas[adata_idx].raw.var.index,
+        index=raw_filtered_adata.var.index,
         columns=[str(x) for x in np.arange(num_clusters)]
     ).fillna(0, inplace=False)
 
@@ -312,12 +312,12 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
             deg_genes_mask
         )
         gene_names = adatas[adata_idx].uns['rank_genes_groups']['names'][i][sig_and_deg_genes_mask]
-        cluster_markers.loc[gene_names, i] = 1
-        cluster_markers_avg_logfc.loc[gene_names, i] = np.around(
+        cluster_markers.loc[np.in1d(cluster_markers.index, gene_names), i] = 1
+        cluster_markers_avg_logfc.loc[np.in1d(cluster_markers.index, gene_names), i] = np.around(
             adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i][sig_and_deg_genes_mask],
             decimals=6
         )
-        cluster_markers_pval.loc[gene_names, i] = np.around(
+        cluster_markers_pval.loc[np.in1d(cluster_markers.index, gene_names), i] = np.around(
             adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i][sig_and_deg_genes_mask],
             decimals=6
         )
