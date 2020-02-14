@@ -47,15 +47,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-n", "--n-neighbors",
-    type=int,
-    action="store",
-    dest="n_neighbors",
-    default=15,
-    help="[UMAP], The size of local neighborhood (in terms of number of neighboring data points) used for manifold approximation."
-)
-
-parser.add_argument(
     "-p", "--n-pcs",
     type=int,
     action="store",
@@ -110,13 +101,7 @@ elif args.method == "UMAP":
     # Notes:
     # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
     if "neighbors" not in adata.uns.keys():
-        warnings.warn("The neighborhood graph of observations has not been computed. Computing...")
-        # If n_pcs is None and X_pca has been computed, X_pca with max computed pcs will be used
-        sc.pp.neighbors(
-            adata=adata,
-            n_neighbors=args.n_neighbors,
-            n_pcs=args.n_pcs
-        )
+        raise Exception("The neighborhood graph of observations has not been computed. Computing...")
     sc.tl.umap(adata)
 elif args.method == "t-SNE":
     # Run t-SNE
