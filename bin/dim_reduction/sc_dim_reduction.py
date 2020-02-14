@@ -38,7 +38,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-s", "--svd-solver",
+    "-v", "--svd-solver",
     type=str,
     action="store",
     dest="svd_solver",
@@ -70,6 +70,15 @@ parser.add_argument(
     dest="use_fast_tsne",
     default=False,
     help="Use the MulticoreTSNE package by D. Ulyanov if it is installed."
+)
+
+parser.add_argument(
+    "-s", "--seed",
+    type=int,
+    action="store",
+    dest="seed",
+    default=0,
+    help="Use this integer seed for reproducibility."
 )
 
 args = parser.parse_args()

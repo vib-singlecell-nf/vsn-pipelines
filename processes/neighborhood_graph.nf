@@ -88,8 +88,9 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 	output:
         tuple \
             val(sampleId), \
-            path("${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off}") \
-            val(stashedParams)
+            path("${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off}"), \
+            val(stashedParams),
+			val(nComps)
 
 	script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
@@ -103,9 +104,10 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 		_processParams.setEnv(this)
 		_processParams.setConfigParams(processParams)
         """
-        ${binDir}cluster/sc_neighborhood_graph.py \
+        ${binDir}nn/sc_neighborhood_graph.py \
             $f \
             ${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off} \
+			${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
             ${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
 			${_processParams.getNCompsAsArgument(nComps)}
         """

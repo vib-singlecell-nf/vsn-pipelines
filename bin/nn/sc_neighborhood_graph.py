@@ -37,6 +37,16 @@ parser.add_argument(
     help="Use this many PCs. If n_pcs==0 use .X if use_rep is None."
 )
 
+parser.add_argument(
+    "-s", "--seed",
+    type=int,
+    action="store",
+    dest="seed",
+    default=0,
+    help="Use this integer seed for reproducibility."
+)
+
+
 args = parser.parse_args()
 
 # Define the arguments properly
@@ -57,7 +67,8 @@ except IOError:
 sc.pp.neighbors(
     adata=adata,
     n_neighbors=args.n_neighbors,
-    n_pcs=args.n_pcs
+    n_pcs=args.n_pcs,
+    random_state=args.seed
 )
 
 # I/O

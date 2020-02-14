@@ -94,7 +94,8 @@ process SC__SCANPY__DIM_REDUCTION {
 		tuple \
 			val(sampleId), \
 			path("${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"), \
-			val(stashedParams)
+			val(stashedParams), \
+			val(nComps)
 
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.dim_reduction.get(params.method))
@@ -110,6 +111,7 @@ process SC__SCANPY__DIM_REDUCTION {
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}dim_reduction/sc_dim_reduction.py \
+			${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
 			--method ${processParams.dimReductionMethod} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \

@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 
-include '../../utils/processes/utils.nf'
+include '../../utils/processes/utils.nf' params(params)
 
 // scanpy:
 include '../processes/cluster' params(params)
