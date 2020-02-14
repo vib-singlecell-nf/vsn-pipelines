@@ -107,7 +107,7 @@ workflow SCENIC {
                 auc_mtf,
                 'mtf'
             )
-            if(params.sc.scenic.cistarget.trackDb) {
+            if(params.sc.scenic.cistarget.tracksDb) {
                 scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
                     filteredLoom,
                     ctx_trk,
@@ -122,7 +122,7 @@ workflow SCENIC {
                 out = VISUALIZE(scenic_loom_mtf)
             }
         } else {
-            if(params.sc.scenic.cistarget.trackDb) {
+            if(params.sc.scenic.cistarget.tracksDb) {
                 out = VISUALIZE(
                     MERGE_MOTIF_TRACK_LOOMS(
                         auc_mtf
