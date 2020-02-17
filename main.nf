@@ -5,8 +5,10 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__CELLRANGER__MKFASTQ from './processes/mkfastq'  params(params)
-include SC__CELLRANGER__COUNT   from './processes/count'    params(params)
+include SC__CELLRANGER__MKFASTQ             from './processes/mkfastq'  params(params)
+include SC__CELLRANGER__COUNT               from './processes/count'    params(params)
+include CELLRANGER_COUNT_WITH_METADATA      from './workflows/cellRangerCountWithMetadata'    params(params)
+
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -45,5 +47,14 @@ workflow CELLRANGER {
     emit:
         SC__CELLRANGER__COUNT.out
 
+}
+
+workflow CELLRANGER_WITH_METADATA {
+
+    main:
+        CELLRANGER_COUNT_WITH_METADATA(file("metadata_test.tsv"))
+
+    emit:
+        CELLRANGER_COUNT_WITH_METADATA.out
 }
 
