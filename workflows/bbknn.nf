@@ -8,7 +8,9 @@ include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + p
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
-include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
+include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
+include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params + params.global)
+include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 // CLUSTER_IDENTIFICATION
 include '../src/scanpy/processes/cluster.nf' params(params)
 include '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global) // Don't only import a specific process (the function needs also to be imported)
@@ -36,25 +38,27 @@ workflow bbknn_base {
         SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
         NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        DIM_REDUCTION( HVG_SELECTION.out.scaled )
+        DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
+        NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
+        DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
-        //// Perform the clustering step w/o batch effect correction (for comparison matter)
+        // Perform the clustering step w/o batch effect correction (for comparison matter)
         clusterIdentificationPreBatchEffectCorrection = CLUSTER_IDENTIFICATION( 
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred_pca_tsne_umap,
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "Pre Batch Effect Correction"
         )
 
-        //// Perform the batch effect correction
+        // Perform the batch effect correction
         BEC_BBKNN(
             NORMALIZE_TRANSFORM.out,
-            //// include only PCA and t-SNE pre-merge dim reductions. Omit UMAP for clarity since it will have to be overwritten by BEC_BBKNN
-            DIM_REDUCTION.out.dimred_pca_tsne,
+            // Include only PCA and t-SNE pre-merge dim reductions. Omit UMAP for clarity since it will have to be overwritten by BEC_BBKNN
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne,
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
 
-        // // conversion
-        //// convert h5ad to X (here we choose: loom format)
+        // Conversion
+        // Convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
         scopeloom = FILE_CONVERTER(
             BEC_BBKNN.out.data.groupTuple(),
@@ -67,7 +71,7 @@ workflow bbknn_base {
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
-        // collect the reports:
+        // Collect the reports:
         ipynbs = project.combine(
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out
         ).join(

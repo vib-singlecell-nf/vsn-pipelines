@@ -8,7 +8,9 @@ include '../src/utils/processes/utils.nf' params(params)
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
-include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params)
+include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
+include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
+include '../src/scanpy/workflows/dim_reduction.nf' params(params)
 include '../src/scanpy/processes/cluster.nf' params(params)
 include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
@@ -36,37 +38,39 @@ workflow single_sample_base {
         QC_FILTER( data )
         NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        DIM_REDUCTION( HVG_SELECTION.out.scaled )
+        DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
+        NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
+        DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTER_IDENTIFICATION(
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred_pca_tsne_umap,
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "No Batch Effect Correction"
         )
 
-        // conversion
-        //// convert h5ad to X (here we choose: loom format)
+        // Conversion
+        // Convert h5ad to X (here we choose: loom format)
         filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
 
-        // In benchmark mode, this automatically merge all the results into the resulting loom
+        // In parameter exploration mode, this automatically merge all the results into the resulting loom
         scopeloom = FILE_CONVERTER(
             CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
             'loom',
             QC_FILTER.out.filtered
         )
 
-        // publishing
+        // Publishing
         SC__PUBLISH_H5AD( 
             CLUSTER_IDENTIFICATION.out.marker_genes,
             params.global.project_name+".single_sample.output"
         )
 
-        // reporting:
+        // Reporting:
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         SC__SCANPY__MERGE_REPORTS(
             QC_FILTER.out.report.mix(
                 samples.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out),
                 HVG_SELECTION.out.report,
-                DIM_REDUCTION.out.report,
+                DIM_REDUCTION_TSNE_UMAP.out.report,
                 CLUSTER_IDENTIFICATION.out.report
             ).groupTuple(),
             "merged_report",

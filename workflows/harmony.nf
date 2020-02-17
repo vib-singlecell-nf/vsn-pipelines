@@ -8,7 +8,9 @@ include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + p
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
-include DIM_REDUCTION from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
+include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
+include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params + params.global)
+include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
 // CLUSTER_IDENTIFICATION
 include '../src/scanpy/processes/cluster.nf' params(params + params.global)
 include '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global) // Don't only import a specific process (the function needs also to be imported)
@@ -37,12 +39,14 @@ workflow harmony_base {
         SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
         NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        DIM_REDUCTION( HVG_SELECTION.out.scaled )
+        DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
+        NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
+        DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
         // Perform the clustering step w/o batch effect correction (for comparison matter)
         clusterIdentificationPreBatchEffectCorrection = CLUSTER_IDENTIFICATION( 
             NORMALIZE_TRANSFORM.out,
-            DIM_REDUCTION.out.dimred_pca_tsne_umap,
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "Pre Batch Effect Correction"
         )
 
@@ -50,7 +54,7 @@ workflow harmony_base {
         BEC_HARMONY(
             NORMALIZE_TRANSFORM.out,
             // include only PCA since Harmony will correct this
-            DIM_REDUCTION.out.dimred_pca.map { it -> tuple(it[0], it[1]) },
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
         
