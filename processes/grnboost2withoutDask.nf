@@ -24,6 +24,7 @@ process GRNBOOST2_WITHOUT_DASK {
 
     script:
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"
+        seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.seed + runId) : params.seed
         """
         ${binDir}grnboost2_without_dask.py \
             $filteredLoom \
@@ -31,14 +32,13 @@ process GRNBOOST2_WITHOUT_DASK {
             --output ${outputFileName} \
             --num_workers ${processParams.numWorkers} \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
-            --gene_attribute ${toolParams.gene_attribute}
+            --gene_attribute ${toolParams.gene_attribute} \
+            --seed ${seed}
         """
 
 }
 
 /* options to implement:
-        --seed ${params.grn.seed} \
-
 flag parameters not yet implemented:
         --transpose
 */

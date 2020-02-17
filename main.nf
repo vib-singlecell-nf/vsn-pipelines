@@ -91,7 +91,7 @@ workflow SCENIC {
         /* AUCell, motif regulons */
         auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
 
-        if(params.sc.scenic.cistarget.trackDb) {
+        if(params.sc.scenic.cistarget.tracksDb) {
             /* AUCell, track regulons */
             auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
         }
@@ -107,7 +107,7 @@ workflow SCENIC {
                 auc_mtf,
                 'mtf'
             )
-            if(params.sc.scenic.cistarget.trackDb) {
+            if(params.sc.scenic.cistarget.tracksDb) {
                 scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
                     filteredLoom,
                     ctx_trk,
@@ -122,7 +122,7 @@ workflow SCENIC {
                 out = VISUALIZE(scenic_loom_mtf)
             }
         } else {
-            if(params.sc.scenic.cistarget.trackDb) {
+            if(params.sc.scenic.cistarget.tracksDb) {
                 out = VISUALIZE(
                     MERGE_MOTIF_TRACK_LOOMS(
                         auc_mtf
@@ -150,7 +150,8 @@ workflow SCENIC_append {
         scopeLoom
 
     main:
-        scenicLoom = SCENIC( filteredLoom )
+        filteredLoom.view()
+        scenicLoom = SCENIC( filteredLoom ).out.view()
         APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
         report_notebook = GENERATE_REPORT(
             file(workflow.projectDir + params.sc.scenic.report_ipynb),
