@@ -101,6 +101,13 @@ workflow cellranger {
 
 }
 
+workflow cellranger_metadata {
+
+    include CELLRANGER_COUNT_WITH_METADATA      from './src/cellranger/workflows/cellRangerCountWithMetadata'    params(params)
+    CELLRANGER_COUNT_WITH_METADATA(file(params.sc.cellranger.count.metadata))
+
+}
+
 
 // runs mkfastq, CellRanger count, then single_sample:
 workflow single_sample_cellranger {
