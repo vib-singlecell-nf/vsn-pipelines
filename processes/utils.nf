@@ -9,7 +9,7 @@ if(!params.containsKey("test")) {
 process SC__CELLRANGER__PREPARE_FOLDER {
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.outdir}/data/raw/cellranger_fastq_folders", mode: 'symlink', overwrite: true
+    publishDir "${params.global.outdir}/data/raw/cellranger_fastq_folders", mode: 'symlink', overwrite: true
 
     input:
         tuple val(sampleId), val(fastqs)

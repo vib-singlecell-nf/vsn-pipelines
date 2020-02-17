@@ -9,6 +9,8 @@ COPY cellranger-$CELLRANGER_VER.tar.gz /opt/cellranger-$CELLRANGER_VER.tar.gz
 COPY bcl2fastq2-v2-20-0-linux-x86-64.zip /tmp/bcl2fastq2-v2-20-0-linux-x86-64.zip
 
 RUN apt-get update && \
+    # Need to run ps
+    apt-get -y install procps && \
     apt-get install -y bsdtar p7zip-full cpio wget unzip
 
 # Install bcl2fastq by extracting rpm
@@ -27,4 +29,3 @@ RUN \
   export PATH=/opt/cellranger-$CELLRANGER_VER:$PATH && \
   ln -s /opt/cellranger-$CELLRANGER_VER/cellranger /usr/bin/cellranger && \
   rm -rf /opt/cellranger-$CELLRANGER_VER.tar.gz
-
