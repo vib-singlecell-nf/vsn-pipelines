@@ -2,6 +2,18 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
+if(!params.global.containsKey('seed')) {
+    params.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
+
+    Channel.from('').view {
+            """
+------------------------------------------------------------------
+\u001B[32m No seed detected in the config \u001B[0m
+\u001B[32m To ensure reproducibility the seed has been set to ${params.seed} \u001B[0m
+------------------------------------------------------------------
+            """
+    }
+}
 
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
@@ -89,6 +101,13 @@ workflow cellranger {
 
 }
 
+workflow cellranger_metadata {
+
+    include CELLRANGER_COUNT_WITH_METADATA      from './src/cellranger/workflows/cellRangerCountWithMetadata'    params(params)
+    CELLRANGER_COUNT_WITH_METADATA(file(params.sc.cellranger.count.metadata))
+
+}
+
 
 // runs mkfastq, CellRanger count, then single_sample:
 workflow single_sample_cellranger {
@@ -100,11 +119,33 @@ workflow single_sample_cellranger {
 
 workflow h5ad_single_sample {
 
-    include getChannel as getH5ADChannel from './src/channels/h5ad' params(params)
+    include getChannel as getH5ADChannel from './src/channels/file' params(params)
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     data = getH5ADChannel( 
         params.data.h5ad.file_paths,
         params.data.h5ad.suffix
+    ).view() | SINGLE_SAMPLE
+
+}
+
+workflow tsv_single_sample {
+
+    include getChannel as getTSVChannel from './src/channels/file' params(params)
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    data = getTSVChannel( 
+        params.data.tsv.file_paths,
+        params.data.tsv.suffix
+    ).view() | SINGLE_SAMPLE
+
+}
+
+workflow csv_single_sample {
+
+    include getChannel as getCSVChannel from './src/channels/file' params(params)
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    data = getCSVChannel( 
+        params.data.csv.file_paths,
+        params.data.csv.suffix
     ).view() | SINGLE_SAMPLE
 
 }

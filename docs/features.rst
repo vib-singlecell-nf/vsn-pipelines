@@ -1,10 +1,31 @@
 Features
 =========
 
-Change log fold change and FDR thresholds for markers stored in SCope loom
---------------------------------------------------------------------------
+Set the seed
+------------
+Some steps in the pipelines are nondeterministic. To be able that the results are reproducible in time, by default a seed is set to:
 
-By default, log fold change and FDR thresholds are set to 0 and 0.05 respectively.
+.. code:: groovy
+
+    workflow.manifest.version.replaceAll("\\.","").toInteger()
+
+The seed is a number derived from the the version of the pipeline used at the time of the analysis run.
+To override the seed (integer) you have edit the nextflow.config file with:
+
+.. code:: groovy
+
+    params {
+        global {
+            seed = [your-custom-seed]
+        }
+    }
+
+This filter will only be applied on the final loom file of the VSN-Pipelines. All the intermediate files prior to the loom file will still contain all of them the markers.
+
+Change log fold change (logFC) and false discovery rate (FDR) thresholds for the marker genes stored in the final SCope loom
+----------------------------------------------------------------------------------------------------------------------------
+
+By default, the logFC and FDR thresholds are set to 0 and 0.05 respectively.
 If you want to change those thresholds applied on the markers genes, edit the ``nextflow.config`` with the following entries,
 
 .. code:: groovy
@@ -22,8 +43,8 @@ If you want to change those thresholds applied on the markers genes, edit the ``
 
 This filter will only be applied on the final loom file of the VSN-Pipelines. All the intermediate files prior to the loom file will still contain all of them the markers.
 
-Select the optimal number of principal components
--------------------------------------------------
+Automated selection of the optimal number of principal components
+-----------------------------------------------------------------
 
 When generating the config using ``nextflow config`` (see above), add the ``pcacv`` profile.
 
@@ -87,7 +108,7 @@ The latest version only implements this feature for the following pipelines:
 - ``single_sample``
 - ``bbknn``
 
-Since ``v0.9.0``, it is possible to explore several combinations of parameters. The current version (``v0.9.0``) of the VSN-Pipelines allows to explore the following parameters:
+Since ``v0.9.0``, it is possible to explore several combinations of parameters. The latest version of the VSN-Pipelines allows to explore the following parameters:
 
 - ``params.sc.scanpy.clustering``
 
