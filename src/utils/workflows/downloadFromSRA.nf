@@ -69,11 +69,11 @@ workflow DOWNLOAD_FROM_SRA {
             sep: '\t'
         ).map {
             // Remove ending characters (])), all special characters ([]()), /) by underscores
-            row -> tuple(
-                row.run_accession,
-                row.sample_name​.replaceAll("[\\])]\$","")​​​​​​​​​​​​.​replaceAll("[)(\\[\\], /]","_")​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​
+            row -> tuple( 
+                row.run_accession, \
+                row.sample_name.replaceAll("[\\])]\$","").replaceAll("[\\]\\[)(), /]","_") 
             )
-        }
+        }.view()
         // Download and compress all the SRA runs defined in the metadata
         data = DOWNLOAD_FASTQS_FROM_SRA_ACC_ID( 
             metadata 
