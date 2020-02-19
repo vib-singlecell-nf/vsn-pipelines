@@ -93,7 +93,11 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 			val(nPcs)
 
 	script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
+        def sampleParams = params.parseConfig(
+			sampleId,
+			params.global,
+			params.sc.scanpy.neighborhood_graph
+		)
 		processParams = sampleParams.local
         // In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
