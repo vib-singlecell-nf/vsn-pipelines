@@ -46,7 +46,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 	String getNPcsAsArgument(nPcs) {
 		// Check if nPcs is both dynamically and if statically set
 		if(!this.env.isParamNull(nPcs) && this.configParams.containsKey('nPcs'))
-			throw new Exception("SC__SCANPY__NEIGHBORHOOD_GRAPH: nPcs is both statically (" + nPcs + ") and dynamically (" + this.configParams["nPcs"] + ") set. Choose one.")
+			throw new Exception("SC__SCANPY__NEIGHBORHOOD_GRAPH: nPcs is both statically (" + this.configParams["nPcs"] + ") and dynamically (" + nPcs + ") set. Choose one.")
 		if(!this.env.isParamNull(nPcs))
 			return '--n-pcs ' + nPcs.replaceAll("\n","")
 		return this.configParams.containsKey('nPcs') ? '--n-pcs ' + this.configParams.nPcs: ''
