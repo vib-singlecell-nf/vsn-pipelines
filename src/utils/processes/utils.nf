@@ -168,11 +168,17 @@ process SC__PUBLISH_H5AD {
 	
 
     input:
-		tuple val(tag), path(f)
+		tuple \
+			val(tag), \
+			path(f), \
+			val(stashedParams)
 		val(fOutSuffix)
 
     output:
-    	tuple val(tag), path("${tag}.${fOutSuffix}.h5ad")
+    	tuple \
+			val(tag), \
+			path("${tag}.${fOutSuffix}.h5ad"), \
+			val(stashedParams)
 
 	script:
 		"""
