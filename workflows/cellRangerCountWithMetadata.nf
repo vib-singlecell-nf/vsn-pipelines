@@ -30,7 +30,7 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
                 // Begin CellRanger parameters
                 row.expect_cells
             )
-        }.view()
+        }
         SC__CELLRANGER__COUNT_WITH_METADATA( data )
 
     emit:
