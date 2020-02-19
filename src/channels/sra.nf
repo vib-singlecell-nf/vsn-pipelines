@@ -11,7 +11,7 @@ workflow getChannel {
             sra
         ).map {
             it -> tuple(it.id, it.samples)
-        }.view()
+        }
 
     emit:
         channel

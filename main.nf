@@ -183,8 +183,8 @@ workflow sra_cellranger_bbknn {
         include bbknn as BBKNN from './workflows/bbknn' params(params)
         
         // Run 
-        DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) ).view()
-        SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() ).view()
+        DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
+        SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() )
         SC__CELLRANGER__COUNT(
             file(params.sc.cellranger.count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out

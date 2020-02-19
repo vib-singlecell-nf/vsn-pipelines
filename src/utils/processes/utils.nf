@@ -113,7 +113,7 @@ process SC__FILE_CONVERTER_HELP {
 
 }
 
-process SC__FILE_CONCATENATOR() {
+process SC__FILE_CONCATENATOR {
 
 	cache 'deep'
 	container params.sc.scanpy.container
