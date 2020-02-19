@@ -22,6 +22,9 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
         tuple val(sraId), file("${sraId}*.fastq.gz")
     
     script:
+        if(sampleId == null || sampleId.length() < 1) {
+            throw new Exception("DOWNLOAD_FASTQS_FROM_SRA_ACC_ID: Sample ID is empty.")
+        }
         """
         prefetch -v -p 1 ${sraId}
         fasterq-dump -S -v -p -e ${params.sratoolkit.downloadFastqs.threads} -O . ${sraId}
