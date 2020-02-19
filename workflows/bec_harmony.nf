@@ -8,6 +8,7 @@ include '../../utils/workflows/utils.nf' params(params)
 
 include SC__HARMONY__HARMONY_MATRIX from './../processes/runHarmony.nf' params(params)
 include SC__H5AD_UPDATE_X_PCA from './../../utils/processes/h5adUpdate.nf' params(params)
+include NEIGHBORHOOD_GRAPH from './../../scanpy/workflows/neighborhood_graph.nf' params(params)
 include DIM_REDUCTION_TSNE_UMAP from './../../scanpy/workflows/dim_reduction.nf' params(params)
 include './../../scanpy/processes/cluster.nf' params(params)
 include './../../scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
@@ -28,13 +29,25 @@ workflow BEC_HARMONY {
 
     main:
         // Run Harmony
-        harmony_embeddings = SC__HARMONY__HARMONY_MATRIX( dimReductionData )
-        SC__H5AD_UPDATE_X_PCA( 
-            dimReductionData.join(harmony_embeddings) 
+        harmony_embeddings = SC__HARMONY__HARMONY_MATRIX( 
+            dimReductionData.map { 
+                it -> tuple(it[0], it[1])
+            } 
         )
-
+        SC__H5AD_UPDATE_X_PCA( 
+            dimReductionData.map {
+                it -> tuple(it[0], it[1]) 
+            }.join(harmony_embeddings) 
+        )
+        NEIGHBORHOOD_GRAPH( 
+            SC__H5AD_UPDATE_X_PCA.out.join( 
+                dimReductionData.map { 
+                    it -> tuple(it[0], it[2], *it[3..(it.size()-1)])
+                }
+            )
+        )
         // Run dimensionality reduction
-        DIM_REDUCTION_TSNE_UMAP( SC__H5AD_UPDATE_X_PCA.out )
+        DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
         // Run clustering
         // Define the parameters for clustering
@@ -46,7 +59,7 @@ workflow BEC_HARMONY {
         )
 
         SC__PUBLISH_H5AD( 
-            CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1]) },
+            CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1], it[2]) },
             "BEC_HARMONY.output"
         )
         
@@ -60,10 +73,10 @@ workflow BEC_HARMONY {
             clusteringParams
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
-            becDualDataPrePost,
+            becDualDataPrePost.map { it -> tuple(it[0], it[1], it[2]) },
             file(workflow.projectDir + params.sc.harmony.report_ipynb),
             "SC_BEC_HARMONY_report",
-            clusteringParams.isBenchmarkMode()
+            clusteringParams.isParameterExplorationModeOn()
         )
 
     emit:
