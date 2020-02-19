@@ -18,7 +18,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 	String iff = null;
 	String off = null;
 	// Parameters benchmarkable
-    Integer nComps = null; ArrayList<Integer> nCompss = null;
+    Integer nPcs = null; ArrayList<Integer> nPcss = null;
 	Integer nNeighbors = null; ArrayList<Integer> nNeighborss = null;
 
 	void setEnv(env) {
@@ -36,39 +36,39 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 \u001B[32m Benchmarking SC__SCANPY__NEIGHBORHOOD_GRAPH step... \u001B[0m
 \u001B[32m Tag: ${tag} \u001B[0m
 \u001B[32m Parameters tested: \u001B[0m
-\u001B[32m - nComps: \u001B[0m \u001B[33m     ${nComps instanceof List} \u001B[0m
-\u001B[32m   - values: \u001B[0m \u001B[33m   ${nComps} \u001B[0m
+\u001B[32m - nPcs: \u001B[0m \u001B[33m     ${nPcss instanceof List} \u001B[0m
+\u001B[32m   - values: \u001B[0m \u001B[33m   ${nPcss} \u001B[0m
 ------------------------------------------------------------------
             """
         }
 	}
 
-	String getNCompsAsArgument(nComps) {
-		// Check if nComps is both dynamically and if statically set
-		if(!this.env.isParamNull(nComps) && this.configParams.containsKey('nComps'))
-			throw new Exception("SC__SCANPY__NEIGHBORHOOD_GRAPH: nComps is both statically (" + nComps + ") and dynamically (" + this.configParams["nComps"] + ") set. Choose one.")
-		if(!this.env.isParamNull(nComps))
-			return '--n-comps ' + nComps.replaceAll("\n","")
-		return this.configParams.containsKey('nComps') ? '--n-comps ' + this.configParams.nComps: ''
+	String getNPcsAsArgument(nPcs) {
+		// Check if nPcs is both dynamically and if statically set
+		if(!this.env.isParamNull(nPcs) && this.configParams.containsKey('nPcs'))
+			throw new Exception("SC__SCANPY__NEIGHBORHOOD_GRAPH: nPcs is both statically (" + nPcs + ") and dynamically (" + this.configParams["nPcs"] + ") set. Choose one.")
+		if(!this.env.isParamNull(nPcs))
+			return '--n-pcs ' + nPcs.replaceAll("\n","")
+		return this.configParams.containsKey('nPcs') ? '--n-pcs ' + this.configParams.nPcs: ''
 	}
 
 	// Define a function to check if the current process is running in parameter exploration mode
 	boolean isParameterExplorationModeOn() {
-		return (nComps instanceof List)
+		return (nPcs instanceof List)
 	}
 
 	DataflowBroadcast $(tag = null) {
 		// Prepare argument stream
-		def $nComps = Channel.from("NULL")
+		def $nPcs = Channel.from("NULL")
 		if(isParameterExplorationModeOn()) {
 			displayMessage(tag)
-			$nComps = Channel.from(nComps)
+			$nPcs = Channel.from(nPcs)
 		}
-		return $nComps
+		return $nPcs
 	}
 
 	ArrayTuple asTuple() {
-	   	return tuple(nComps)
+	   	return tuple(nPcs)
     }
 
 }
@@ -83,14 +83,14 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
             val(sampleId), \
             path(f), \
             val(stashedParams), \
-			val(nComps)
+			val(nPcs)
 
 	output:
         tuple \
             val(sampleId), \
             path("${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off}"), \
             val(stashedParams),
-			val(nComps)
+			val(nPcs)
 
 	script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
@@ -99,7 +99,7 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 		// - https://github.com/nextflow-io/nextflow/issues/470
 		// Output file will only be tagged with UUID if in parameter exploration mode
 		uuid = UUID.randomUUID().toString().substring(0,8)
-		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
+		// Cannot call constructor with parameter if nPcs is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS()
 		_processParams.setEnv(this)
 		_processParams.setConfigParams(processParams)
@@ -109,7 +109,7 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
             ${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off} \
 			${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
             ${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
-			${_processParams.getNCompsAsArgument(nComps)}
+			${_processParams.getNPcsAsArgument(nPcs)}
         """
 
 }
