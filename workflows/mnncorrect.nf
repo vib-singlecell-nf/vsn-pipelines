@@ -3,6 +3,7 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
+include '../src/utils/processes/files.nf' params(params.sc.file_concatenator + params.global + params)
 include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
@@ -32,7 +33,13 @@ workflow mnncorrect {
     // Run the pipeline
     data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path ).view()
     QC_FILTER( data ) // Remove concat
-    SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
+    SC__FILE_CONCATENATOR( 
+        QC_FILTER.out.filtered.map {
+            it -> it[1]
+        }.toSortedList( 
+            { a, b -> getBaseName(a) <=> getBaseName(b) }
+        )
+    )
     NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
@@ -83,7 +90,7 @@ workflow mnncorrect {
     SC__SCANPY__MERGE_REPORTS(
         ipynbs,
         "merged_report",
-        clusteringParams.isBenchmarkMode()
+        clusteringParams.isParameterExplorationModeOn()
     )
     SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 

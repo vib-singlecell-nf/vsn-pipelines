@@ -1,6 +1,58 @@
 Features
 =========
 
+Avoid re-running SCENIC and use pre-existing results
+----------------------------------------------------
+Often one would like to test different batch effect correction methods with SCENIC. Naively, one would run the following commands:
+
+.. code:: bash
+
+    nextflow config ~/vibsinglecellnf -profile tenx,bbknn,dm6,scenic,scenic_use_cistarget_motifs,singularity > bbknn.config
+    nextflow -C bbknn.config run vib-singlecell-nf/vsn-pipelines -entry bbknn_scenic
+
+and,
+
+.. code:: bash
+
+    nextflow config ~/vibsinglecellnf -profile tenx,bbknn,dm6,scenic,scenic_use_cistarget_motifs,singularity > bbknn.config
+    nextflow -C harmony.config run vib-singlecell-nf/vsn-pipelines -entry harmony_scenic
+
+The annoying bit here is that we run SCENIC twice. This is what we would like to avoid since the SCENIC results will be the same.
+To avoid this one can run the following code for generating the `harmony_scenic.config`,
+
+.. code:: bash
+
+    nextflow config ~/vibsinglecellnf -profile tenx,harmony,scenic_append_only,singularity > harmony.config
+
+This will add a different scenic entry in the config:
+
+.. code:: bash
+
+    params {
+        sc {
+            scenic {
+                container = 'vibsinglecellnf/scenic:0.9.19'
+                report_ipynb = '/src/scenic/bin/reports/scenic_report.ipynb'
+                existingScenicLoom = ''
+                sampleSuffixWithExtension = '' // Suffix after the sample name in the file path
+                scenicoutdir = "${params.global.outdir}/scenic/"
+                scenicScopeOutputLoom = 'SCENIC_SCope_output.loom'
+            }
+        }
+    }
+
+Make sure that the following entries are correctly set before running the pipeline,
+
+- ``existingScenicLoom = ''``
+- ``sampleSuffixWithExtension = '' // Suffix after the sample name in the file path``
+
+Finally run the pipeline,
+
+.. code:: bash
+
+    nextflow -C harmony.config run vib-singlecell-nf/vsn-pipelines -entry harmony_scenic
+
+
 Set the seed
 ------------
 Some steps in the pipelines are nondeterministic. To be able that the results are reproducible in time, by default a seed is set to:

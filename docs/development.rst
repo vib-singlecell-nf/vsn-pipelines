@@ -287,7 +287,7 @@ This step is not required. However it this step is skipped, the code would still
                 becDualDataPrePost,
                 file(workflow.projectDir + params.sc.harmony.report_ipynb),
                 "SC_BEC_HARMONY_report",
-                clusteringParams.isBenchmarkMode()
+                clusteringParams.isParameterExplorationModeOn()
             )
 
         emit:
@@ -388,7 +388,7 @@ This step is not required. However it this step is skipped, the code would still
             SC__SCANPY__MERGE_REPORTS(
                 ipynbs,
                 "merged_report",
-                clusteringParams.isBenchmarkMode()
+                clusteringParams.isParameterExplorationModeOn()
             )
             SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 

@@ -23,3 +23,21 @@ workflow getChannel {
         channel
 
 }
+
+workflow getChannelFromFilePath {
+
+    take:
+        filePath
+        sampleSuffixWithExtension // Suffix after the sample name in the file paths
+    
+    main:
+        channel = Channel.of(
+            tuple(filePath)
+        ).map {
+            it -> tuple(extractSample( "${it[0]}", sampleSuffixWithExtension ), file("${it[0]}"))
+        }
+
+    emit:
+        channel
+
+}

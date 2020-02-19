@@ -11,17 +11,18 @@ nextflow.preview.dsl=2
 workflow COMBINE_BY_PARAMS {
 
     take:
-        // Expects (sampleId, data, stashedParams, *params)
+        // Expects (sampleId, data, *params)
         A
+        // Expects (sampleId, data, [stashedParams])
         B
         params
 
     main:
-        if(params != null && params.isBenchmarkMode()) {
+        if(params != null && params.isParameterExplorationModeOn()) {
             out = A.concat(
-                B.map { it -> tuple(it[0], it[1], *it[2]) } // // Unstash params
+                B.map { it -> tuple(it[0], it[1], *it[2]) } // Unstash params
             ).map {
-                it -> tuple(it[2..(it.size()-1)], it[0], it[1])
+                it -> tuple(it[2..(it.size()-1)], it[0], it[1]) // Stash params
             }.groupTuple(
                 by: [0, params.numParams()-1]
             ).map { 
