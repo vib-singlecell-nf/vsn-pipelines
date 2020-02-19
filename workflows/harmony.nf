@@ -36,7 +36,13 @@ workflow harmony_base {
     main:
         // Run the pipeline
         QC_FILTER( data ) // Remove concat 
-        SC__FILE_CONCATENATOR( QC_FILTER.out.filtered.map{it -> it[1]}.collect() )
+        SC__FILE_CONCATENATOR( 
+            QC_FILTER.out.filtered.map {
+                it -> it[1]
+            }.toSortedList( 
+                { a, b -> getBaseName(a) <=> getBaseName(b) }
+            )
+        )
         NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
         DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
@@ -89,7 +95,7 @@ workflow harmony_base {
         SC__SCANPY__MERGE_REPORTS(
             ipynbs,
             "merged_report",
-            clusteringParams.isBenchmarkMode()
+            clusteringParams.isParameterExplorationModeOn()
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
