@@ -99,7 +99,7 @@ metadata = pd.concat(
     [
         metadata,
         metadata["experiment_title"].str.extract(
-            r'^(.*): ([a-zA-Z0-9\s,_-]*); (.*); (.*)$', expand=True
+            r'^(.*): (.*); (.*); (.*)$', expand=True
         ).rename(
             columns={
                 0: 'geo_accession',

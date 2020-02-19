@@ -69,7 +69,7 @@ workflow single_sample_star {
             CLUSTER_IDENTIFICATION.out.report
         ).groupTuple(),
         "merged_report",
-        clusteringParams.isBenchmarkMode()
+        clusteringParams.isParameterExplorationModeOn()
     )
     SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
