@@ -53,14 +53,14 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 	}
 
 	// Define a function to check if the current process is running in parameter exploration mode
-	boolean isBenchmarkMode() {
+	boolean isParameterExplorationModeOn() {
 		return (nComps instanceof List)
 	}
 
 	DataflowBroadcast $(tag = null) {
 		// Prepare argument stream
 		def $nComps = Channel.from("NULL")
-		if(isBenchmarkMode()) {
+		if(isParameterExplorationModeOn()) {
 			displayMessage(tag)
 			$nComps = Channel.from(nComps)
 		}

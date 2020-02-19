@@ -66,7 +66,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 	}
 
 	// Define a function to check if the current process is running in parameter exploration mode
-	boolean isBenchmarkMode() {
+	boolean isParameterExplorationModeOn() {
 		return (clusteringMethods instanceof List
 				|| resolutions instanceof List
 		)

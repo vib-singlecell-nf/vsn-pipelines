@@ -55,7 +55,7 @@ workflow BEC_MNNCORRECT {
                 it -> tuple(
                     it[0], // sampleId
                     it[1], // data
-                    !clusteringParams.isBenchmarkMode() ? null : it[2..(it.size()-1)], // Stash params
+                    !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
                 )
             }.combine(
                 dimRedParams.$()
@@ -80,7 +80,7 @@ workflow BEC_MNNCORRECT {
             becDualDataPrePost,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_MNNCORRECT_report",
-            clusteringParams.isBenchmarkMode()
+            clusteringParams.isParameterExplorationModeOn()
         )
 
     emit:
