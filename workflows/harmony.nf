@@ -3,6 +3,7 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
+include '../src/utils/processes/files.nf' params(params.sc.file_concatenator + params.global + params)
 include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
@@ -60,7 +61,7 @@ workflow harmony_base {
         BEC_HARMONY(
             NORMALIZE_TRANSFORM.out,
             // include only PCA since Harmony will correct this
-            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
+            DIM_REDUCTION_PCA.out,
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
         
