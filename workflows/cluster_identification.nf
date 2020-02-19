@@ -22,7 +22,7 @@ workflow CLUSTER_IDENTIFICATION {
     main:
         // To run multiple clustering, we need at least 1 argument that is a list
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
-        if(clusteringParams.isBenchmarkMode()) {
+        if(clusteringParams.isParameterExplorationModeOn()) {
             // Run
             out = SC__SCANPY__BENCHMARK_CLUSTERING(
                 data.map{ 
@@ -43,11 +43,11 @@ workflow CLUSTER_IDENTIFICATION {
             "CLUSTERING",
             out,
             file(workflow.projectDir + params.sc.scanpy.clustering.report_ipynb),
-            clusteringParams.isBenchmarkMode()
+            clusteringParams.isParameterExplorationModeOn()
         )
 
         // Find marker genes for each of clustering
-        if(clusteringParams.isBenchmarkMode()) {
+        if(clusteringParams.isParameterExplorationModeOn()) {
             marker_genes = SC__SCANPY__BENCHMARK_MARKER_GENES(
                 normalizedTransformedData.combine(out, by: 0)
             )

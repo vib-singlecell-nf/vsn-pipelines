@@ -27,14 +27,14 @@ workflow GENERATE_DUAL_INPUT_REPORT {
         data  // Expects (sampleIdd, anndata1, anndata2)
         ipynb
         reportTitle
-        isBenchmarkMode
+        isParameterExplorationModeOn
 
     main:
         report_notebook = SC__SCANPY__GENERATE_DUAL_INPUT_REPORT(
             ipynb,
             data,
             reportTitle,
-            isBenchmarkMode
+            isParameterExplorationModeOn
         )
         SC__SCANPY__REPORT_TO_HTML(report_notebook)
 
@@ -49,11 +49,11 @@ workflow GENERATE_REPORT {
         pipelineStep
         data // anndata
         ipynb
-        isBenchmarkMode
+        isParameterExplorationModeOn
 
     main:
         def reportTitle = "SC_Scanpy_" + pipelineStep.toLowerCase() + "_report"
-        if(isBenchmarkMode) {
+        if(isParameterExplorationModeOn) {
             switch(pipelineStep) {
                 case "CLUSTERING":
                     report_notebook = SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT(

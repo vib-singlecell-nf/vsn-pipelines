@@ -65,7 +65,7 @@ workflow BEC_BBKNN {
                 it -> tuple(
                     it[0], // sampleId
                     it[1], // data
-                    !clusteringParams.isBenchmarkMode() ? null : it[2..(it.size()-1)], // Stash params
+                    !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
                 )
             }.combine(
                 dimRedParams.$()
@@ -73,7 +73,7 @@ workflow BEC_BBKNN {
         )
 
         SC__PUBLISH_H5AD( 
-            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1]) },
+            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], it[2]) },
             "BEC_BBKNN.output"
         )
 
@@ -87,10 +87,10 @@ workflow BEC_BBKNN {
         )
 
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
-            becDualDataPrePost,
+            becDualDataPrePost.map { it -> tuple(it[0], it[1], it[2]) },
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report",
-            clusteringParams.isBenchmarkMode()
+            clusteringParams.isParameterExplorationModeOn()
         )
 
     emit:

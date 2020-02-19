@@ -46,21 +46,21 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 	String getNCompsAsArgument(nComps) {
 		// Check if nComps is both dynamically and if statically set
 		if(!this.env.isParamNull(nComps) && this.configParams.containsKey('nComps'))
-			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically (" + nComps + ") and dynamically (" + this.configParams["nComps"] + ") set. Choose one.")
+			throw new Exception("SC__SCANPY__DIM_REDUCTION: nComps is both statically (" + this.configParams["nComps"] + ") and dynamically (" + nComps + ") set. Choose one.")
 		if(!this.env.isParamNull(nComps))
 			return '--n-comps ' + nComps.replaceAll("\n","")
 		return this.configParams.containsKey('nComps') ? '--n-comps ' + this.configParams.nComps: ''
 	}
 
 	// Define a function to check if the current process is running in parameter exploration mode
-	boolean isBenchmarkMode() {
+	boolean isParameterExplorationModeOn() {
 		return (nComps instanceof List)
 	}
 
 	DataflowBroadcast $(tag = null) {
 		// Prepare argument stream
 		def $nComps = Channel.from("NULL")
-		if(isBenchmarkMode()) {
+		if(isParameterExplorationModeOn()) {
 			displayMessage(tag)
 			$nComps = Channel.from(nComps)
 		}
