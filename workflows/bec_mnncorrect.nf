@@ -63,7 +63,7 @@ workflow BEC_MNNCORRECT {
         )
 
         SC__PUBLISH_H5AD( 
-            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1], it[2]) },
             "BEC_MNNCORRECT.output"
         )
 
@@ -77,7 +77,7 @@ workflow BEC_MNNCORRECT {
         )
 
         mnncorrect_report = GENERATE_DUAL_INPUT_REPORT(
-            becDualDataPrePost,
+            becDualDataPrePost.map { it -> tuple(it[0], it[1], it[2]) },
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_MNNCORRECT_report",
             clusteringParams.isParameterExplorationModeOn()
