@@ -8,22 +8,29 @@ processParams = params.sc.scenic.cistarget
 process CISTARGET {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
+    label "${processParams.labels ? processParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/cistarget/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
     maxForks processParams.maxForks
-    
+
     input:
-        tuple val(sampleId), path(filteredLoom), path(f), val(runId)
+        tuple \
+            val(sampleId), \
+            path(filteredLoom), \
+            path(f), \
+            val(runId)
         file featherDB
         file annotation
         val type
 
     output:
-        tuple val(sampleId), path(filteredLoom), path("${outputFileName}"), val(runId)
-        
+        tuple \
+            val(sampleId), \
+            path(filteredLoom), \
+            path("${outputFileName}"), \
+            val(runId)
 
     script:
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"

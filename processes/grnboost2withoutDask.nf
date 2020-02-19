@@ -8,7 +8,7 @@ processParams = params.sc.scenic.grn
 process GRNBOOST2_WITHOUT_DASK {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
+    label "${processParams.labels ? processParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/grnboost2withoutDask/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
@@ -16,11 +16,17 @@ process GRNBOOST2_WITHOUT_DASK {
     maxForks processParams.maxForks
 
     input:
-        tuple val(sampleId), path(filteredLoom), val(runId)
+        tuple \
+            val(sampleId), \
+            path(filteredLoom), \
+            val(runId)
         file tfs
 
     output:
-        tuple val(sampleId), file(filteredLoom), file("${outputFileName}"), val(runId)
+        tuple val(sampleId), \
+        file(filteredLoom), \
+        file("${outputFileName}"), \
+        val(runId)
 
     script:
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"
