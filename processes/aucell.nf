@@ -8,7 +8,7 @@ processParams = params.sc.scenic.aucell
 process AUCELL {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (degfault)
-    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
+    label "${processParams.labels ? processParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/aucell/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
@@ -16,11 +16,19 @@ process AUCELL {
     maxForks processParams.maxForks
 
     input:
-        tuple val(sampleId), path(filteredLoom), path(regulons), val(runId)
+        tuple \
+           val(sampleId), \
+           path(filteredLoom), \
+           path(regulons), \
+           val(runId)
         val type
 
     output:
-        tuple val(sampleId), path(filteredLoom), path("${outputFileName}"), val(runId)
+        tuple \
+           val(sampleId), \
+           path(filteredLoom), \
+           path("${outputFileName}"), \
+           val(runId)
 
     script:
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"

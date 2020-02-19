@@ -622,6 +622,16 @@ class SCopeLoom:
             "Genome": self.nomenclature
         }
 
+    def sort(self, axis, by):
+        if(axis == 0):
+            if by not in self.row_attrs:
+                sys.exit(f"ERROR: Cannot sort on a row attribute that does not exist")
+            sorted_idx = np.argsort(self.row_attrs[by])
+            for ra_key in self.row_attrs.keys():
+                self.row_attrs[ra_key] = self.row_attrs[ra_key][sorted_idx]
+        else:
+            sys.exit(f"ERROR: Sorting by column axis is not implemented")
+
     def merge(self, loom):
         # Check all the cells and genes are in the same order
         if not all(self.get_cell_ids() == loom.get_cell_ids()):

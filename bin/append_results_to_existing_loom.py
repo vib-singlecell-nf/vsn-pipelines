@@ -51,6 +51,9 @@ def append_to_existing_loom(args):
 
     scope_loom = export_to_loom.SCopeLoom.read_loom(filename=args.loom_scope)
     scenic_loom = export_to_loom.SCopeLoom.read_loom(filename=args.loom_scenic)
+    # Make sure that both loom files have the same ordered feature space
+    scope_loom.sort(axis=0, by="Gene")
+    scenic_loom.sort(axis=0, by="Gene")
     scope_loom.merge(loom=scenic_loom)
     scope_loom.export(out_fname=args.loom_output)
 

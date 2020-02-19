@@ -14,22 +14,27 @@ nextflow.preview.dsl=2
 include './../utils/processes/config'
 resolveParams(params, true)
 
+isAppendOnlyMode = params.sc.scenic.containsKey("existingScenicLoom")
+
 //////////////////////////////////////////////////////
 //  Sanity checks
-if(!params.global.containsKey("genome"))
+if(!isAppendOnlyMode && !params.global.containsKey("genome"))
     throw new Exception("params.global.genome is required.")
 
-if(!params.global.genome.containsKey("assembly"))
+if(!isAppendOnlyMode && !params.global.genome.containsKey("assembly"))
     throw new Exception("params.global.genome.assembly is required. Choose of the profiles: dm6, hg38.")
 
-if(params.global.genome.assembly == '')
+if(!isAppendOnlyMode && params.global.genome.assembly == '')
     throw new Exception("params.global.genome.assembly cannot be empty. Choose of the profiles: dm6, hg38.")
 
-if(!(params.global.genome.assembly in ['dm6','hg38']))
+if(!isAppendOnlyMode && !(params.global.genome.assembly in ['dm6','hg38']))
     throw new Exception("The given genome assembly "+ params.global.genome.assembly + " is not implemented. Choose of the profiles: dm6, hg38.")
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
+
+include './../channels/file.nf' params(params)
+
 include GRNBOOST2_WITHOUT_DASK                                    from './processes/grnboost2withoutDask'  params(params)
 include CISTARGET as CISTARGET__MOTIF                             from './processes/cistarget'             params(params)
 include CISTARGET as CISTARGET__TRACK                             from './processes/cistarget'             params(params)
@@ -67,7 +72,6 @@ workflow SCENIC {
 
     main:
         /* GRN */
-        filteredLoom.view()
         tfs = file(params.sc.scenic.grn.tfs)
         grn = GRNBOOST2_WITHOUT_DASK( filteredLoom.combine(runs), tfs )
 
@@ -150,8 +154,21 @@ workflow SCENIC_append {
         scopeLoom
 
     main:
-        filteredLoom.view()
-        scenicLoom = SCENIC( filteredLoom ).out.view()
+        if(params.sc.scenic.containsKey("existingScenicLoom")) {
+            scenicLoom = getChannelFromFilePath(
+                params.sc.scenic.existingScenicLoom,
+                params.sc.scenic.sampleSuffixWithExtension
+            ).view {
+            """
+---------------------------------------------------------------------------
+\u001B[32m Existing SCENIC loom detected \u001B[0m
+\u001B[32m SCENIC won't run and this loom will be used as input to APPEND_SCENIC_LOOM \u001B[0m
+---------------------------------------------------------------------------
+            """
+            }
+        } else {
+            scenicLoom = SCENIC( filteredLoom ).out
+        }
         APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
         report_notebook = GENERATE_REPORT(
             file(workflow.projectDir + params.sc.scenic.report_ipynb),
