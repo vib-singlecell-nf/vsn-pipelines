@@ -55,7 +55,9 @@ workflow single_sample_star {
 
     // Publishing
     SC__PUBLISH_H5AD( 
-        CLUSTER_IDENTIFICATION.out.marker_genes,
+        CLUSTER_IDENTIFICATION.out.marker_genes.map {
+            it -> tuple(it[0], it[1], null)
+        },
         "single_sample.output"
     )
 
