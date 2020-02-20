@@ -63,6 +63,15 @@ parser.add_argument(
     help="Select genes with dispersion less than maximum dispersion."
 )
 
+parser.add_argument(
+    "-s", "--subset",
+    type=bool,
+    action="store",
+    dest="subset",
+    default=True,
+    help="Subset with the highly variable features"
+)
+
 args = parser.parse_args()
 
 # Define the arguments properly
@@ -81,7 +90,7 @@ except IOError:
 #
 
 if args.method == "mean_disp_plot":
-    # identify highly variable genes.
+    # Identify highly variable genes.
     # Expects logarithmized data: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.api.pp.highly_variable_genes.html#scanpy.api.pp.highly_variable_genes
     sc.pp.highly_variable_genes(
         adata,
@@ -90,10 +99,11 @@ if args.method == "mean_disp_plot":
         min_disp=args.min_disp,
         max_disp=args.max_disp
     )
-    # sc.pl.highly_variable_genes(adata)
 
-    # keep only highly variable genes:
-    # adata = adata[:, adata.var['highly_variable']]
+    # Keep only highly variable genes:
+    if args.subset:
+        print("Subsetting highly variable features from the matrix...")
+        adata = adata[:, adata.var['highly_variable']]
 else:
     raise Exception("Method does not exist.")
 
