@@ -32,7 +32,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		Channel.from('').view {
 			"""
 ------------------------------------------------------------------
-\u001B[32m Benchmarking SC__SCANPY__CLUSTERING step... \u001B[0m
+\u001B[32m Parameter exploration of SC__SCANPY__CLUSTERING step... \u001B[0m
 \u001B[32m Tag: ${tag} \u001B[0m
 \u001B[32m Parameters tested: \u001B[0m
 \u001B[32m - method: \u001B[0m \u001B[33m     ${clusteringMethods instanceof List} \u001B[0m
