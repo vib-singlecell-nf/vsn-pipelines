@@ -16,6 +16,7 @@ process SC__SCANPY__GENERATE_REPORT {
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
+	maxForks 2
 
 	input:
 		file ipynb
@@ -50,6 +51,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   	publishDir "${params.global.outdir}/notebooks/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "res_": resolution}", mode: 'symlink', overwrite: true
+	maxForks 2
 
 	input:
 		file ipynb
@@ -85,6 +87,7 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 	container params.sc.scanpy.container
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
+	maxForks 2
 
   	input:
 		file(ipynb)
@@ -116,6 +119,7 @@ process SC__SCANPY__REPORT_TO_HTML {
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	// copy final "merged_report" to notbooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
+	maxForks 2
 
 	input:
 		tuple val(sampleId), path(ipynb)
@@ -137,6 +141,7 @@ process SC__SCANPY__MERGE_REPORTS {
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	// copy final "merged_report" to notebooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
+	maxForks 2
 
 	input:
 		tuple \

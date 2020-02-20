@@ -73,7 +73,9 @@ workflow BEC_BBKNN {
         )
 
         SC__PUBLISH_H5AD( 
-            SC__SCANPY__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1], it[2]) },
+            SC__SCANPY__DIM_REDUCTION__UMAP.out.map {
+                it -> tuple(it[0], it[1], it[2]) 
+            },
             "BEC_BBKNN.output"
         )
 

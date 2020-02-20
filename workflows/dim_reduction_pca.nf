@@ -12,12 +12,19 @@ include PCACV__FIND_OPTIMAL_NPCS from './../../pcacv/processes/runPCACV' params(
 workflow DIM_REDUCTION_PCA {
 
     take:
+        // Expects sampleId, anndata
         data
 
     main:
         if(params.containsKey("pcacv")) {
             PCACV__FIND_OPTIMAL_NPCS( data )
-            out = SC__SCANPY__DIM_REDUCTION__PCA( data.join(PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC) )
+            out = SC__SCANPY__DIM_REDUCTION__PCA( 
+                data.join(
+                    PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC.map {
+                        it -> tuple(it[0], null, it[1]) // Add stashedParams as null
+                    }
+                )
+            )
         } else {
             data = data.map {
                 item -> tuple(item[0], item[1], null, null)

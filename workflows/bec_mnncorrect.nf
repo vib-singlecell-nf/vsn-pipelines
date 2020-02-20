@@ -39,31 +39,30 @@ workflow BEC_MNNCORRECT {
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data.map { it -> tuple(it[0], it[1], null) } )
         DIM_REDUCTION_PCA( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
+
+        // Run dimensionality reduction
+        DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
+
         // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
-            NEIGHBORHOOD_GRAPH.out,
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "Post Batch Effect Correction (MNNCORRECT)"
         )
 
-        // Define the parameters for dimensionality reduction
-        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.sc.scanpy.dim_reduction.umap) )
-
-        DIM_REDUCTION_TSNE_UMAP(
-            CLUSTER_IDENTIFICATION.out.marker_genes.map {
-                it -> tuple(
-                    it[0], // sampleId
-                    it[1], // data
-                    !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
-                )
-            }.combine(
-                dimRedParams.$()
+        marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map {
+            it -> tuple(
+                it[0], // sampleId
+                it[1], // data
+                !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
             )
-        )
+        }
 
         SC__PUBLISH_H5AD( 
-            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1], it[2]) },
+            marker_genes.map {
+                it -> tuple(it[0], it[1], it[2])
+            },
             "BEC_MNNCORRECT.output"
         )
 
