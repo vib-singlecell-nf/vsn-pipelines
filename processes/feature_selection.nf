@@ -19,6 +19,11 @@ process SC__SCANPY__FEATURE_SELECTION {
 		processParams = sampleParams.local
 		"""
 		${binDir}feature_selection/sc_select_variable_genes.py \
+			--method ${processParams.method} \
+			${(processParams.containsKey('minMean')) ? '--min-mean ' + processParams.minMean : ''} \
+			${(processParams.containsKey('maxMean')) ? '--max-mean ' + processParams.maxMean : ''} \
+			${(processParams.containsKey('minDisp')) ? '--min-disp ' + processParams.minDisp : ''} \
+			${(processParams.containsKey('maxDisp')) ? '--max-disp ' + processParams.maxDisp : ''} \
 			${(processParams.containsKey('subset')) ? '--subset ' + processParams.subset : ''} \
 			$f \
 			"${sampleId}.SC__SCANPY__FEATURE_SELECTION.${processParams.off}"

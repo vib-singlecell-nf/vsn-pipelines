@@ -17,7 +17,7 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 	// Parameters definiton
 	String iff = null;
 	String off = null;
-	String dimReductionMethod = null;
+	String method = null;
 	// Parameters benchmarkable
     Integer nComps = null; ArrayList<Integer> nCompss = null;
 
@@ -104,7 +104,7 @@ process SC__SCANPY__DIM_REDUCTION {
 		// - https://github.com/nextflow-io/nextflow/issues/470
 		// Output file will only be tagged with UUID if in parameter exploration mode
 		uuid = UUID.randomUUID().toString().substring(0,8)
-		method = processParams.dimReductionMethod.replaceAll('-','').toUpperCase()
+		method = processParams.method.replaceAll('-','').toUpperCase()
 		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__DIM_REDUCTION_PARAMS()
 		_processParams.setEnv(this)
@@ -112,7 +112,7 @@ process SC__SCANPY__DIM_REDUCTION {
 		"""
 		${binDir}dim_reduction/sc_dim_reduction.py \
 			${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
-			--method ${processParams.dimReductionMethod} \
+			--method ${processParams.method} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
 			${_processParams.getNCompsAsArgument(nComps)} \

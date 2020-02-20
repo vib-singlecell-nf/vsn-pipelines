@@ -17,7 +17,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 	String off = null;
 	String report_ipynb = null;
 	// Parameters benchmarkable
-	String clusteringMethod = null; ArrayList<String> clusteringMethods = null;
+	String method = null; ArrayList<String> methods = null;
     Float resolution = null; ArrayList<Float> resolutions = null;
 
 	void setEnv(env) {
@@ -35,8 +35,8 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 \u001B[32m Parameter exploration of SC__SCANPY__CLUSTERING step... \u001B[0m
 \u001B[32m Tag: ${tag} \u001B[0m
 \u001B[32m Parameters tested: \u001B[0m
-\u001B[32m - method: \u001B[0m \u001B[33m     ${clusteringMethods instanceof List} \u001B[0m
-\u001B[32m   - values: \u001B[0m \u001B[33m   ${clusteringMethods} \u001B[0m
+\u001B[32m - method: \u001B[0m \u001B[33m     ${methods instanceof List} \u001B[0m
+\u001B[32m   - values: \u001B[0m \u001B[33m   ${methods} \u001B[0m
 \u001B[32m - resolution: \u001B[0m \u001B[33m ${resolutions instanceof List} \u001B[0m
 \u001B[32m   - values: \u001B[0m \u001B[33m   ${resolutions} \u001B[0m
 ------------------------------------------------------------------
@@ -54,7 +54,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 
 	int numParamsBenchmarked() {
 		def paramsBenchmarked = [ 
-			clusteringMethods instanceof List,
+			methods instanceof List,
 			resolutions instanceof List
 		]
 		def sum = { result, i -> result + (i ? 1 : 0) }
@@ -67,14 +67,14 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 
 	// Define a function to check if the current process is running in parameter exploration mode
 	boolean isParameterExplorationModeOn() {
-		return (clusteringMethods instanceof List
+		return (methods instanceof List
 				|| resolutions instanceof List
 		)
 	}
 
 	DataflowBroadcast $(tag) {
 		// Prepare argument stream
-		def $method = Channel.from(clusteringMethods == null ? "NULL" : clusteringMethods)
+		def $method = Channel.from(methods == null ? "NULL" : methods)
 		def $resolution = Channel.from(resolutions == null ? "NULL" : resolutions)
 		displayMessage(tag)
 		return $method.combine($resolution)
@@ -106,7 +106,7 @@ process SC__SCANPY__CLUSTERING {
 		processParams = sampleParams.local
 		"""
 		${binDir}cluster/sc_clustering.py \
-			${(processParams.containsKey('clusteringMethod')) ? '--method ' + processParams.clusteringMethod : ''} \
+			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${(processParams.containsKey('resolution')) ? '--resolution ' + processParams.resolution : ''} \
 			$f \
 			"${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}"
