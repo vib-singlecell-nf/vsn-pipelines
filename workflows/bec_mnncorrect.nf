@@ -83,7 +83,7 @@ workflow BEC_MNNCORRECT {
         )
 
     emit:
-        data = DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap
+        data = marker_genes
         cluster_report = CLUSTER_IDENTIFICATION.out.report
         mnncorrect_report
 
