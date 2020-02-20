@@ -166,7 +166,7 @@ Since ``v0.9.0``, it is possible to explore several combinations of parameters. 
 
   - ``method`` ::
 
-        clusteringMethods = ['louvain','leiden']
+        methods = ['louvain','leiden']
 
   - ``resolution`` ::
 
