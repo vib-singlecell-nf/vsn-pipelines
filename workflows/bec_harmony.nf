@@ -58,8 +58,18 @@ workflow BEC_HARMONY {
             "Post Batch Effect Correction (Harmony)"
         )
 
+        marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map {
+            it -> tuple(
+                it[0], // sampleId
+                it[1], // data
+                !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
+            )
+        }
+
         SC__PUBLISH_H5AD( 
-            CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1], it[2]) },
+            marker_genes.map {
+                it -> tuple(it[0], it[1], it[2])
+            },
             "BEC_HARMONY.output"
         )
         
