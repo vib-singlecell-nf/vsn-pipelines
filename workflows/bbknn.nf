@@ -9,6 +9,7 @@ include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + p
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
+include SC__SCANPY__REGRESS_OUT from '../src/scanpy/processes/regress_out.nf' params(params)
 include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
 include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params + params.global)
 include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
@@ -45,7 +46,12 @@ workflow bbknn_base {
         )
         NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
+        if(params.sc.scanpy.containsKey("regress_out")) {
+            preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
+        } else {
+            preprocessed_data = HVG_SELECTION.out.scaled
+        }
+        DIM_REDUCTION_PCA( preprocessed_data )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 

@@ -8,6 +8,7 @@ include '../src/utils/processes/utils.nf' params(params)
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
+include SC__SCANPY__REGRESS_OUT from '../src/scanpy/processes/regress_out.nf' params(params)
 include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
 include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
 include '../src/scanpy/workflows/dim_reduction.nf' params(params)
@@ -38,7 +39,12 @@ workflow single_sample_base {
         QC_FILTER( data )
         NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
         HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
+        if(params.sc.scanpy.containsKey("regress_out")) {
+            preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
+        } else {
+            preprocessed_data = HVG_SELECTION.out.scaled
+        }
+        DIM_REDUCTION_PCA( preprocessed_data )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTER_IDENTIFICATION(
