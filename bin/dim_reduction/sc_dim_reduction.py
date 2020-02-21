@@ -5,6 +5,18 @@ import os
 import warnings
 import scanpy as sc
 
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
@@ -66,9 +78,10 @@ parser.add_argument(
 
 parser.add_argument(
     "-f", "--use-fast-tsne",
-    action="store_true",
+    type=str2bool,
+    action="store",
     dest="use_fast_tsne",
-    default=False,
+    default=True,
     help="Use the MulticoreTSNE package by D. Ulyanov if it is installed."
 )
 

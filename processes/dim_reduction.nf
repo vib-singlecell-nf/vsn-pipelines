@@ -118,7 +118,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			${_processParams.getNCompsAsArgument(nComps)} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
-			${(processParams.containsKey('useFastTsne') && processParams.useFastTsne) ? '--use-fast-tsne' : ''} \
+			${(processParams.containsKey('useFastTsne')) ? '--use-fast-tsne ' + processParams.useFastTsne : ''} \
 			$data \
 			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"
 		"""
