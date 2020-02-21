@@ -116,7 +116,8 @@ if args.method.lower() == "pca":
     sc.tl.pca(
         data=adata,
         n_comps=min(adata.shape[0], args.n_comps),
-        svd_solver=args.svd_solver
+        svd_solver=args.svd_solver,
+        random_state=args.seed
     )
 elif args.method.lower() == "umap":
     # Run UMAP
