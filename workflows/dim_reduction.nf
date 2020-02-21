@@ -40,16 +40,12 @@ workflow DIM_REDUCTION {
 workflow DIM_REDUCTION_TSNE_UMAP {
 
     take:
+        // Expects (sampleId, adata, stashedParams, *params); stashedParams and params can be null
         data
 
     main:
-        dimred_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( data.map {
-                item -> tuple(item[0], item[1], null, null)
-        })
-        dimred_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out.map {
-                item -> tuple(item[0], item[1], null, null)
-        })
-
+        dimred_tsne = SC__SCANPY__DIM_REDUCTION__TSNE( data )
+        dimred_tsne_umap = SC__SCANPY__DIM_REDUCTION__UMAP( SC__SCANPY__DIM_REDUCTION__TSNE.out )
         report = GENERATE_REPORT(
             "DIMENSIONALITY_REDUCTION",
             dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
