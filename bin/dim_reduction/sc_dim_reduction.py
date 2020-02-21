@@ -124,7 +124,10 @@ elif args.method.lower() == "umap":
     # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
     if "neighbors" not in adata.uns.keys():
         raise Exception("The neighborhood graph of observations has not been computed. Computing...")
-    sc.tl.umap(adata)
+    sc.tl.umap(
+        adata=adata,
+        random_state=args.seed
+    )
 elif args.method.lower() == "tsne":
     # Run t-SNE
     # Source: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.tl.tsne.html
@@ -138,7 +141,8 @@ elif args.method.lower() == "tsne":
         adata=adata,
         n_jobs=args.n_jobs,
         use_fast_tsne=args.use_fast_tsne,
-        n_pcs=args.n_pcs
+        n_pcs=args.n_pcs,
+        random_state=args.seed
     )
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(args.method))
