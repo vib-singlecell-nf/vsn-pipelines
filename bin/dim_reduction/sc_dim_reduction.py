@@ -24,7 +24,7 @@ parser.add_argument(
     type=str,
     action="store",
     dest="method",
-    default="PCA",
+    default="pca",
     help="Reduce the dimensionality of the data. Choose one of : PCA, UMAP, t-SNE"
 )
 
@@ -98,23 +98,29 @@ except IOError:
 # Transform the distribution of the data
 #
 
-if args.method == "PCA":
+if args.method.lower() == "pca":
     # Run PCA
     sc.tl.pca(
         data=adata,
         n_comps=min(adata.shape[0], args.n_comps),
         svd_solver=args.svd_solver
     )
-elif args.method == "UMAP":
+elif args.method.lower() == "umap":
     # Run UMAP
     # Notes:
     # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
     if "neighbors" not in adata.uns.keys():
         raise Exception("The neighborhood graph of observations has not been computed. Computing...")
     sc.tl.umap(adata)
-elif args.method == "t-SNE":
+elif args.method.lower() == "tsne":
     # Run t-SNE
+    # Source: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.tl.tsne.html
     # If n_pcs is None and X_pca has been computed, X_pca with max computed pcs will be used
+    # ||
+    # n_pcs : int, None (default: None)
+    #     Use this many PCs. If n_pcs==0 use .X if use_rep is None.
+    # use_rep : str, None (default: None)
+    #     Use the indicated representation. 'X' or any key for .obsm is valid. If None, the representation is chosen automatically: For .n_vars < 50, .X is used, otherwise ‘X_pca’ is used. If ‘X_pca’ is not present, it’s computed with default parameters.
     sc.tl.tsne(
         adata=adata,
         n_jobs=args.n_jobs,
