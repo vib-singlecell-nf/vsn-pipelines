@@ -602,11 +602,11 @@ The parameter structure internally (post-merge) is:
                 }
                 dim_reduction {
                     pca {
-                        method = 'PCA'
+                        method = 'pca'
                         ...
                     }
                     umap {
-                        method = 'UMAP'
+                        method = 'tsne'
                         ...
                     }
                 }
