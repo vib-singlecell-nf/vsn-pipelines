@@ -56,7 +56,10 @@ except IOError:
 
 if args.method == "zscore_scale":
     # scale each gene to unit variance, clip values exceeding SD max_sd.
-    sc.pp.scale(adata, max_value=SCALE__MAX_SD)
+    sc.pp.scale(
+        adata,
+        max_value=SCALE__MAX_SD
+    )
 else:
     raise Exception("Method does not exist.")
 

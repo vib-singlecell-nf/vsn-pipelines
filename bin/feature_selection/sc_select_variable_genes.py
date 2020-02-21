@@ -111,9 +111,8 @@ if args.method == "mean_disp_plot":
         min_disp=args.min_disp,
         max_disp=args.max_disp
     )
-
-    # Keep only highly variable genes:
-    if args.subset is True:
+    if args.subset:
+        # Keep only highly variable genes
         print("Subsetting highly variable features from the data...")
         adata = adata[:, adata.var['highly_variable']]
 else:
