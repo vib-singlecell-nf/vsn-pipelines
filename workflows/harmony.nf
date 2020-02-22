@@ -21,16 +21,13 @@ include BEC_HARMONY from '../src/harmony/workflows/bec_harmony.nf' params(params
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 
-// data channel to start from 10x data:
-include getChannel as getTenXChannel from '../src/channels/tenx.nf' params(params)
-
 // reporting:
 include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../src/utils/processes/reports.nf' params(params)
 include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params + params.global)
 include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
 
 
-workflow harmony_base {
+workflow harmony {
 
     take:
         data
@@ -109,31 +106,5 @@ workflow harmony_base {
     emit:
         filteredloom
         scopeloom
-
-}
-
-workflow harmony_standalone {
-
-    main:
-        data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path ).view()
-        harmony_base( data )
-
-    emit:
-        filteredloom = harmony_base.out.filteredloom
-        scopeloom = harmony_base.out.scopeloom
-
-}
-
-workflow harmony {
-
-    take:
-        data
-
-    main:
-        harmony_base( data )
-
-    emit:
-        filteredloom = harmony_base.out.filteredloom
-        scopeloom = harmony_base.out.scopeloom
 
 }
