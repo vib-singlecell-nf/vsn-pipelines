@@ -41,17 +41,17 @@ workflow {
         switch(params.test) {
             case "SC__FILE_CONVERTER":
                 include SC__FILE_CONVERTER from './processes/utils' params(params)
-                test_SC__FILE_CONVERTER( getTenXChannel( params.data.tenx.cellranger_outs_dir_path ) )
+                test_SC__FILE_CONVERTER( getTenXChannel( params.data.tenx.cellranger_outs_dir_paths ) )
             break;
             case "SC__FILE_CONCATENATOR":
-                test_SC__FILE_CONCATENATOR( getTenXChannel( params.data.tenx.cellranger_outs_dir_path ) )
+                test_SC__FILE_CONCATENATOR( getTenXChannel( params.data.tenx.cellranger_outs_dir_paths ) )
             break;
             case "FILTER_BY_CELL_METADATA":
                 // Imports
                 include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
                 // Run 
                 if(params.sc.cell_filter) {
-                    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path )
+                    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_paths )
                     SC__FILE_CONVERTER( data )    
                     FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
                 }
@@ -62,7 +62,7 @@ workflow {
                 include SC__ANNOTATE_BY_CELL_METADATA from './processes/h5adAnnotate' params(params)
                 // Run 
                 if(params.sc.cell_filter && params.sc.cell_annotate) {
-                    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path )
+                    data = getTenXChannel( params.data.tenx.cellranger_outs_dir_paths )
                     SC__FILE_CONVERTER( data )
                     FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
                     SC__ANNOTATE_BY_CELL_METADATA( FILTER_BY_CELL_METADATA.out )
