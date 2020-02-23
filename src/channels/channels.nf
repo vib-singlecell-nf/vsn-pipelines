@@ -8,19 +8,19 @@ workflow getDataChannel {
 
     main:
         data = Channel.empty()
-        if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_outs_dir_paths")) {
+        if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_mex")) {
             data = data.concat(
                 getTenXCellRangerMEXChannel(
-                    params.data.tenx.cellranger_outs_dir_paths 
+                    params.data.tenx.cellranger_mex
                 ).map {
                     it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
                 }
             ).view()
         }
-        if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5_file_paths")) {
+        if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5")) {
             data = data.concat(
                 getTenXCellRangerH5Channel( 
-                    params.data.tenx.cellranger_h5_file_paths
+                    params.data.tenx.cellranger_h5
                 ).map {
                     it -> tuple(it[0], it[1], "10x_cellranger_h5", "h5ad")
                 }
