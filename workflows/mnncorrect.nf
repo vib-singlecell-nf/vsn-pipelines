@@ -47,7 +47,7 @@ workflow mnncorrect {
         if(params.sc.scanpy.containsKey("regress_out")) {
             preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
         } else {
-            preprocessed_data = HVG_SELECTION.out.hvg
+            preprocessed_data = HVG_SELECTION.out.scaled
         }
         DIM_REDUCTION_PCA( preprocessed_data )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
@@ -62,7 +62,7 @@ workflow mnncorrect {
 
         BEC_MNNCORRECT(
             NORMALIZE_TRANSFORM.out,
-            preprocessed_data,
+            HVG_SELECTION.out.hvg,
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
 
