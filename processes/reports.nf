@@ -63,7 +63,11 @@ process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
 		val(reportTitle)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.${reportTitle}.${uuid}.ipynb")
+		tuple \
+			val(sampleId), \
+			path("${sampleId}.${reportTitle}.${uuid}.ipynb"), \
+			val(method), \
+			val(resolution)
 
 	script:
 		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
@@ -91,12 +95,19 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
   	input:
 		file(ipynb)
-		tuple val(sampleId), file(data1), file(data2)
+		tuple \
+			val(sampleId), \
+			file(data1), \
+			file(data2), \
+			val(stashedParams)
 		val(reportTitle)
 		val(isParameterExplorationModeOn)
 
   	output:
-    	tuple val(sampleId), file("${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + "." : ''}ipynb")
+    	tuple \
+			val(sampleId), \
+			file("${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + "." : ''}ipynb"), \
+			val(stashedParams)
 
   	script:
 	  	def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})

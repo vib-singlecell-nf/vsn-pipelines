@@ -24,7 +24,7 @@ include '../processes/reports.nf' params(params)
 workflow GENERATE_DUAL_INPUT_REPORT {
 
     take:
-        data  // Expects (sampleIdd, anndata1, anndata2)
+        data  // Expects (sampleIdd, anndata1, anndata2, stashedParams)
         ipynb
         reportTitle
         isParameterExplorationModeOn
@@ -36,7 +36,9 @@ workflow GENERATE_DUAL_INPUT_REPORT {
             reportTitle,
             isParameterExplorationModeOn
         )
-        SC__SCANPY__REPORT_TO_HTML(report_notebook)
+        SC__SCANPY__REPORT_TO_HTML(report_notebook.map {
+            it -> tuple(it[0], it[1])
+        })
 
     emit:
         report_notebook
@@ -61,7 +63,9 @@ workflow GENERATE_REPORT {
                         // expects (sample_id, adata, ...arguments)
                         data,
                         reportTitle
-                    )
+                    ).map {
+                        it -> tuple(it[0], it[1], it[2..(it.size()-1)]) // stash params
+                    }
                     break;
                 default: 
                     throw new Exception("Invalid pipeline step")
@@ -73,9 +77,13 @@ workflow GENERATE_REPORT {
                 // expects (sample_id, adata)
                 data,
                 reportTitle
-            )
+            ).map {
+                it -> tuple(it[0], it[1], null)
+            }
         }
-        SC__SCANPY__REPORT_TO_HTML(report_notebook)
+        SC__SCANPY__REPORT_TO_HTML(report_notebook.map {
+            it -> tuple(it[0], it[1])
+        })
 
     emit:
         report_notebook
