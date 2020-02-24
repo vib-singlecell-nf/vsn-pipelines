@@ -32,7 +32,7 @@ workflow getDataChannel {
                     params.data.h5ad.file_paths,
                     params.data.h5ad.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "tsv", "h5ad")
+                    it -> tuple(it[0], it[1], "h5ad", "h5ad")
                 }
             ).view()
         }
