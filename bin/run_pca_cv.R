@@ -30,6 +30,13 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
+  c("-y", "--use-variable-features"),
+  action = "store",
+  default = TRUE,
+  help = "Use the highly features only otherwise use all available features. [default %default]"
+)
+parser <- add_option(
+  parser,
   c("-k", "--k-fold"),
   action = "store",
   default = 10,
@@ -219,7 +226,26 @@ if(input_ext == "loom") {
   stop(paste0("Unrecognized input file format: ", input_ext, "."))
 }
 
+use_variable_features <- as.logical(args$`use-variable-features`)
+
+if(use_variable_features) {
+  meta_features <- seurat@assays$RNA@meta.features
+  if(!("highly.variable" %in% colnames(x = meta_features))) {
+    stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
+  }
+  meta_features$highly.variable[is.na(x = meta_features$highly.variable)] <- FALSE
+  hvf <- row.names(x = meta_features)[meta_features$highly.variable]
+  if(all(hvf == row.names(x = data))) {
+    print("Input contains already data with highly variable features.")
+    print("Skipping the subsetting.")
+  } else {
+    print(paste0("Subsetting matrix with highly variable features... "))
+    data <- data[hvf,]
+  }
+}
+
 print(paste0("Data matrix has ", dim(x = data)[1], " rows, ", dim(x = data)[2], " columns."))
+
 
 # Run
 out <- RunPCACV(
