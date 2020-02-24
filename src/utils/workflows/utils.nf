@@ -11,7 +11,7 @@ nextflow.preview.dsl=2
 workflow COMBINE_BY_PARAMS {
 
     take:
-        // Expects (sampleId, data, *params)
+        // Expects (sampleId, data, unstashedParams)
         A
         // Expects (sampleId, data, [stashedParams])
         B
@@ -26,7 +26,7 @@ workflow COMBINE_BY_PARAMS {
             }.groupTuple(
                 by: [0, params.numParams()-1]
             ).map { 
-                it -> tuple(it[1], *it[2]) 
+                it -> tuple(it[1], *it[2], it[0]) 
             }
         } else {
             out = A.join(B)
