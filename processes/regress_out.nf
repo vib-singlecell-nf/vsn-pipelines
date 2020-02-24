@@ -23,7 +23,7 @@ process SC__SCANPY__REGRESS_OUT {
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${(processParams.containsKey('variablesToRegressOut')) ? variablesToRegressOutAsArguments : ''} \
 			$f \
-			"${sampleId}.SC__SCANPY__REGRESS_OUT.${params.off}" 
+			"${sampleId}.SC__SCANPY__REGRESS_OUT.${processParams.off}"
 		"""
 
 }
