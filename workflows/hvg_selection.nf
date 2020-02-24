@@ -4,7 +4,8 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__FEATURE_SELECTION from '../processes/feature_selection.nf' params(params)
+include SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES from '../processes/feature_selection.nf' params(params)
+include SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES from '../processes/feature_selection.nf' params(params)
 include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params)
 
 // reporting:
@@ -19,11 +20,13 @@ workflow HVG_SELECTION {
         data
 
     main:
-        SC__SCANPY__FEATURE_SELECTION( data )
-        scaled = SC__SCANPY__FEATURE_SCALING( SC__SCANPY__FEATURE_SELECTION.out )
+        hvg = data \
+            | SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES \
+            | SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES
+        scaled = SC__SCANPY__FEATURE_SCALING( hvg )
         report = GENERATE_REPORT(
             "HVG",
-            SC__SCANPY__FEATURE_SCALING.out,
+            SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES.out,
             file(workflow.projectDir + params.sc.scanpy.feature_selection.report_ipynb),
             false
         )

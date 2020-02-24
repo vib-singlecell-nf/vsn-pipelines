@@ -4,18 +4,6 @@ import argparse
 import os
 import scanpy as sc
 
-
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
@@ -75,15 +63,6 @@ parser.add_argument(
     help="Select genes with dispersion less than maximum dispersion."
 )
 
-parser.add_argument(
-    "-s", "--subset",
-    type=str2bool,
-    action="store",
-    dest="subset",
-    default=True,
-    help="Subset the data with the highly variable features."
-)
-
 args = parser.parse_args()
 
 # Define the arguments properly
@@ -111,10 +90,6 @@ if args.method == "mean_disp_plot":
         min_disp=args.min_disp,
         max_disp=args.max_disp
     )
-    if args.subset:
-        # Keep only highly variable genes
-        print("Subsetting highly variable features from the data...")
-        adata = adata[:, adata.var['highly_variable']]
 else:
     raise Exception("Method does not exist.")
 
