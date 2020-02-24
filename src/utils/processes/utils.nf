@@ -40,16 +40,22 @@ process SC__FILE_CONVERTER {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-		tuple val(sampleId), path(f)
+		tuple \
+			val(sampleId), \
+			path(f), \
+			val(inputDataType), \
+			val(outputDataType)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.SC__FILE_CONVERTER.${processParams.off}")
+		tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__FILE_CONVERTER.${outputDataType}")
 
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
 		processParams = sampleParams.local
 
-		switch(processParams.iff) {
+		switch(inputDataType) {
 			case "10x_cellranger_mex":
 				// Reference: https://kb.10xgenomics.com/hc/en-us/articles/115000794686-How-is-the-MEX-format-used-for-the-gene-barcode-matrices-
 				// Check if output was generated with CellRanger v2 or v3
@@ -78,11 +84,11 @@ process SC__FILE_CONVERTER {
 			break;
 			
 			default:
-				throw new Exception("The given input format ${processParams.iff} is not recognized.")
+				throw new Exception("The given input format ${inputDataType} is not recognized.")
 			break;
 		}
 
-		if(processParams.iff == "h5ad")
+		if(inputDataType == "h5ad")
 			"""
 			cp ${f} "${sampleId}.SC__FILE_CONVERTER.h5ad"
 			"""
@@ -91,10 +97,10 @@ process SC__FILE_CONVERTER {
 			${binDir}sc_file_converter.py \
 				--sample-id "${sampleId}" \
 				${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id' : ''} \
-				--input-format $processParams.iff \
-				--output-format $processParams.off \
+				--input-format $inputDataType \
+				--output-format $outputDataType \
 				${f} \
-				"${sampleId}.SC__FILE_CONVERTER.${processParams.off}"
+				"${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
 			"""
 
 }
