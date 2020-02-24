@@ -171,3 +171,23 @@ Since ``v0.9.0``, it is possible to explore several combinations of parameters. 
   - ``resolution`` ::
 
         resolutions = [0.4, 0.8]
+
+Regress out variables
+---------------------
+
+By default, don't regress any variable out. To enable this features, the ``scanpy_regress_out`` profile should be added when generating the main config using ``nextflow config``. This will add the following entry in the config:
+
+.. code:: groovy
+
+    params {
+        sc {
+            scanpy {
+                regress_out {
+                    variablesToRegressOut = []
+                    off = 'h5ad'
+                }
+            }
+        }
+    }
+
+Add any variable in ``variablesToRegressOut`` to regress out: e.g.: 'n_counts', 'percent_mito'.
