@@ -72,11 +72,19 @@ workflow single_sample {
         // Reporting:
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         SC__SCANPY__MERGE_REPORTS(
-            QC_FILTER.out.report.mix(
+            QC_FILTER.out.report.map {
+                it -> tuple(it[0], it[1])
+            }.mix(
                 samples.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out),
-                HVG_SELECTION.out.report,
-                DIM_REDUCTION_TSNE_UMAP.out.report,
-                CLUSTER_IDENTIFICATION.out.report
+                HVG_SELECTION.out.report.map {
+                    it -> tuple(it[0], it[1])
+                },
+                DIM_REDUCTION_TSNE_UMAP.out.report.map {
+                    it -> tuple(it[0], it[1])
+                },
+                CLUSTER_IDENTIFICATION.out.report.map {
+                    it -> tuple(it[0], it[1])
+                }
             ).groupTuple(),
             "merged_report",
             clusteringParams.isParameterExplorationModeOn()
