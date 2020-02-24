@@ -200,12 +200,36 @@ Input Data Formats
 
 Depending on the type of data you run the pipeline with, one or more appropriate profiles should be set when running ``nextflow config``.
 
+All the input data parameters are compatible with the following features:
+
+- Glob patterns
+
+.. code::
+
+    "data/10x/1k_pbmc/1k_pbmc_*/outs/"
+
+- Comma separated paths (paths can contain glob patterns)
+
+.. code::
+
+    "data/10x/1k_pbmc/1k_pbmc_v2_chemistry/outs/, data/10x/1k_pbmc/1k_pbmc_v3_chemistry/outs/"
+
+- Array of paths (paths can contain glob patterns)
+
+.. code::
+
+    [
+        "data/10x/1k_pbmc/1k_pbmc_v2_chemistry/outs/",
+        "data/10x/1k_pbmc/1k_pbmc_v3_chemistry/outs/"
+    ]
+
+
 Cell Ranger (10xGenomics)
 -------------------------
 
 Use the following profile when generating the config file:
 
-- either using the Cell Ranger ``MEX`` output folder,
+- Either using the Cell Ranger ``MEX`` output folder,
 
 .. code::
 
@@ -221,10 +245,8 @@ In the generated .config file, make sur the ``cellranger_mex`` parameter is set 
     }
     [...]
 
-The ``cellranger_mex`` parameter accepts glob patterns and also comma separated paths.
 
-
-- or the Cell Ranger ``h5`` file,
+- Or the Cell Ranger ``h5`` file,
 
 .. code::
 
@@ -240,8 +262,6 @@ In the generated .config file, make sur the ``cellranger_h5`` parameter is set w
         cellranger_h5 = "data/10x/1k_pbmc/1k_pbmc_*/outs/"
     }
     [...]
-
-- The ``cellranger_mex`` parameter accepts glob patterns and also comma separated paths.
 
 
 Information on using 10x Genomics datasets
@@ -291,7 +311,6 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
     [...]
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
-- The ``file_paths`` accepts glob patterns and also comma separated paths.
 
 TSV
 ---
@@ -312,7 +331,6 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
     [...]
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
-- The ``file_paths`` accepts glob patterns and also comma separated paths.
 
 
 CSV
@@ -334,4 +352,3 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
     [...]
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
-- The ``file_paths`` accepts glob patterns and also comma separated paths.
