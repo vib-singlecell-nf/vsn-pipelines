@@ -9,9 +9,9 @@ print('''Correct the data from batch effects. Choose one of:
 - bbknn:
     Batch balanced kNN alters the kNN procedure to identify each cell's top neighbours in each batch separately instead of the entire cell pool with no accounting for batch.
     Details at: https://icb-scanpy.readthedocs-hosted.com/en/stable/external/scanpy.external.pp.bbknn.html
-- mnn_correct:
+- mnncorrect:
     Correct batch effects by matching mutual nearest neighbors.
-    Details at: see https://icb-scanpy.readthedocs-hosted.com/en/stable/external/scanpy.external.pp.mnn_correct.html
+    Details at: see https://icb-scanpy.readthedocs-hosted.com/en/stable/external/scanpy.external.pp.mnncorrect.html
 ''')
 
 parser = argparse.ArgumentParser(description='')
@@ -29,7 +29,7 @@ parser.add_argument(
     action="store",
     dest="method",
     default="bbknn",
-    help="Correct the data from batch effects. Choose one of: bkknn, mnn_correct."
+    help="Correct the data from batch effects. Choose one of: bkknn, mnncorrect."
 )
 
 parser.add_argument(
@@ -47,7 +47,7 @@ parser.add_argument(
     action="store",
     dest="batch_key",
     default='batch',
-    help="[bbknn, mnn_correct], adata.obs column name discriminating between your batches."
+    help="[bbknn, mnncorrect], adata.obs column name discriminating between your batches."
 )
 
 parser.add_argument(
@@ -74,7 +74,7 @@ parser.add_argument(
     action="store",
     dest="k",
     default=20,
-    help="[mnn_correct]. Number of mutual nearest neighbors."
+    help="[mnncorrect]. Number of mutual nearest neighbors."
 )
 
 parser.add_argument(
@@ -83,7 +83,7 @@ parser.add_argument(
     action="store",
     dest="var_index",
     default=None,
-    help="[mnn_correct]. The index (list of str) of vars (genes). Necessary when using only a subset of vars to perform MNN correction, and should be supplied with var_subset."
+    help="[mnncorrect]. The index (list of str) of vars (genes). Necessary when using only a subset of vars to perform MNN correction, and should be supplied with var_subset."
 )
 
 parser.add_argument(
@@ -91,7 +91,7 @@ parser.add_argument(
     action="store",
     dest="var_subset",
     default=None,
-    help="[mnn_correct]. The subset of vars (list of str) to be used when performing MNN correction. Typically, a list of highly variable genes (HVGs). When set to None, uses all vars."
+    help="[mnncorrect]. The subset of vars (list of str) to be used when performing MNN correction. Typically, a list of highly variable genes (HVGs). When set to None, uses all vars."
 )
 
 parser.add_argument(
@@ -100,7 +100,7 @@ parser.add_argument(
     action="store",
     dest="n_jobs",
     default=None,
-    help="[bbknn, mnn_correct], The number of jobs. When set to None, automatically uses the number of cores."
+    help="[bbknn, mnncorrect], The number of jobs. When set to None, automatically uses the number of cores."
 )
 
 parser.add_argument(
@@ -138,12 +138,6 @@ for FILE_PATH_IN in args.input:
     except IOError:
         raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
-# Get all HVG into a list
-# Union
-hvgs = []
-for ADATA in adatas:
-    hvgs = np.union1d(hvgs, ADATA.var.index[ADATA.var.highly_variable])
-
 #
 # Aggregate the data
 #
@@ -164,16 +158,31 @@ elif args.method == 'bbknn':
         n_pcs=args.n_pcs,
         neighbors_within_batch=args.neighbors_within_batch,
         trim=args.trim)
-elif args.method == 'mnn':
+elif args.method == 'mnncorrect':
     # Run MNN_CORRECT (mnnpy)
     # GitHub: https://github.com/chriscainx/mnnpy/tree/master
     # Open issue: https://github.com/chriscainx/mnnpy/issues/24
     #  Use numba==0.43.1
     from mnnpy import mnn_correct
 
+    _adatas = []
+    print(f"Splitting the AnnData into batches defined by {args.batch_key}...")
+    for batch in np.unique(adata.obs[args.batch_key]):
+        _adatas.append(
+            adata[adata.obs[args.batch_key] == batch, :]
+        )
+
+    # Get all HVG into a list
+    # Union
+    print(f"Getting all highly variable genes...")
+    hvgs = []
+    for ADATA in _adatas:
+        hvgs = np.union1d(hvgs, ADATA.var.index[ADATA.var.highly_variable])
+
     # [mnn_correct] Subset only HVG otherwise "ValueError: Lengths must match to compare"
+    print(f"Perform mnnCorrect...")
     corrected = mnn_correct(
-        *list(map(lambda adata: adata[:, adata.var.index.isin(hvgs)], adatas)),
+        *_adatas,
         var_index=args.var_index,
         var_subset=hvgs if args.var_subset is None else args.var_subset,
         batch_key=args.batch_key,
@@ -188,7 +197,7 @@ elif args.method == 'mnn':
     #     batch_key=options.batch_key,
     #     k=options.k)
 else:
-    raise Exception("Method does not exist.")
+    raise Exception(f"The given batch effect correction method {args.method} is not implemented.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(DATA_FILE_PATH_BASENAME))

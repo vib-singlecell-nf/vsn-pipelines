@@ -32,6 +32,7 @@ workflow HVG_SELECTION {
         )
 
     emit:
+        hvg
         scaled
         report
 

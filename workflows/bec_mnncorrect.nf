@@ -13,6 +13,8 @@ include '../../utils/workflows/utils.nf' params(params)
 
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
+include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params)
+include SC__SCANPY__REGRESS_OUT from '../processes/regress_out.nf' params(params)
 include DIM_REDUCTION_PCA from './dim_reduction_pca' params(params + [method: "pca"])
 include NEIGHBORHOOD_GRAPH from './neighborhood_graph.nf' params(params)
 include DIM_REDUCTION_TSNE_UMAP from './dim_reduction' params(params)
@@ -37,7 +39,13 @@ workflow BEC_MNNCORRECT {
 
     main:
         SC__SCANPY__BATCH_EFFECT_CORRECTION( data.map { it -> tuple(it[0], it[1], null) } )
-        DIM_REDUCTION_PCA( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
+        SC__SCANPY__FEATURE_SCALING( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
+        if(params.sc.scanpy.containsKey("regress_out")) {
+            preprocessed_data = SC__SCANPY__REGRESS_OUT( SC__SCANPY__FEATURE_SCALING.out )
+        } else {
+            preprocessed_data = SC__SCANPY__FEATURE_SCALING.out
+        }
+        DIM_REDUCTION_PCA( preprocessed_data )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
 
         // Run dimensionality reduction
@@ -76,7 +84,7 @@ workflow BEC_MNNCORRECT {
         )
 
         mnncorrect_report = GENERATE_DUAL_INPUT_REPORT(
-            becDualDataPrePost.map { it -> tuple(it[0], it[1], it[2]) },
+            becDualDataPrePost,
             file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_MNNCORRECT_report",
             clusteringParams.isParameterExplorationModeOn()
