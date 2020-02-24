@@ -5,6 +5,7 @@ nextflow.preview.dsl=2
 
 include '../src/utils/processes/files.nf' params(params.sc.file_concatenator + params.global + params)
 include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
+include '../src/utils/workflows/utils.nf' params(params)
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
@@ -81,21 +82,45 @@ workflow harmony {
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
-        // collect the reports:
+        
+        // Collect the reports:
+        // Define the parameters for clustering
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        // Pairing clustering reports with bec reports
+        if(!clusteringParams.isParameterExplorationModeOn()) {
+            clusteringBECReports = BEC_HARMONY.out.cluster_report.map {
+                it -> tuple(it[0], it[1])
+            }.combine(
+                BEC_HARMONY.out.harmony_report.map {
+                    it -> tuple(it[0], it[1])
+                },
+                by: 0
+            )
+        } else {
+            clusteringBECReports = COMBINE_BY_PARAMS(
+                BEC_HARMONY.out.cluster_report.map { 
+                    it -> tuple(it[0], it[1], *it[2])
+                },
+                BEC_HARMONY.out.harmony_report,
+                clusteringParams
+            ).map { 
+                it -> tuple(it[0], it[1], it[2])
+            }
+        }
         ipynbs = project.combine(
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out
         ).join(
-            HVG_SELECTION.out.report
-        ).join(
-            BEC_HARMONY.out.cluster_report
+            HVG_SELECTION.out.report.map {
+                it -> tuple(it[0], it[1])
+            }
         ).combine(
-            BEC_HARMONY.out.harmony_report,
+            clusteringBECReports,
             by: 0
         ).map { 
             tuple( it[0], it.drop(1) ) 
         }
+
         // reporting:
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         SC__SCANPY__MERGE_REPORTS(
             ipynbs,
             "merged_report",
