@@ -64,7 +64,7 @@ if(params.sc.scenic.containsKey("numRuns")) {
     runs = Channel.from( 1..1 )
 }
 
-workflow SCENIC {
+workflow scenic {
 
     take:
         // Expects (sampleId, loom)
@@ -147,7 +147,7 @@ workflow SCENIC {
 }
 
 
-workflow SCENIC_append {
+workflow scenic_append {
 
     take:
         filteredLoom
@@ -167,7 +167,7 @@ workflow SCENIC_append {
             """
             }
         } else {
-            scenicLoom = SCENIC( filteredLoom ).out
+            scenicLoom = scenic( filteredLoom ).out
         }
         APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
         report_notebook = GENERATE_REPORT(
@@ -189,6 +189,6 @@ workflow {
     main:
         if(!("filteredLoom" in params.sc.scenic))
             throw new Exception("The given filteredLoom required parameter does not exist in the params.sc.scenic scope.")
-        SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
+        scenic( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
 
 }

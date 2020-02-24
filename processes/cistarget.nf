@@ -12,7 +12,7 @@ process CISTARGET {
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/cistarget/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=${processParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=${processParams.walltime} -A ${params.global.qsubaccount}"
     maxForks processParams.maxForks
 
     input:
@@ -33,6 +33,14 @@ process CISTARGET {
             val(runId)
 
     script:
+        if(!processParams.containsKey("numWorkers"))
+            throw new Exception("numWorkers is missing in params.sc.scenic.aucell")
+        if(processParams.labels && processParams.labels.processExecutor == 'qsub') {
+            if(!processParams.containsKey("pmem"))
+                throw new Exception("pmem is missing in params.sc.scenic.aucell")
+            if(!processParams.containsKey("walltime"))
+                throw new Exception("walltime is missing in params.sc.scenic.aucell")
+        }
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
         """
         pyscenic ctx \

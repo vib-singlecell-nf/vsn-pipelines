@@ -3,6 +3,7 @@
 import argparse
 import sys
 import time
+from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
 
 import loompy as lp
@@ -107,16 +108,26 @@ if __name__ == '__main__':
     expression_matrix, gene_names, tf_names = _prepare_input(ex_matrix, gene_names, tf_names)
     tf_matrix, tf_matrix_gene_names = to_tf_matrix(expression_matrix, gene_names, tf_names)
 
+    data = target_gene_indices(gene_names, target_genes='all')
+
     print('starting GRNBoost2 using {} processes...'.format(args.num_workers), file=sys.stderr)
     start_time = time.time()
 
-    with Pool(args.num_workers) as p:
-        adjs = p.map(
-            runInferPartialNet,
-            target_gene_indices(gene_names, target_genes='all')
+    with Pool(args.num_workers) as pool:
+        adjs = list(
+            tqdm(
+                pool.imap(
+                    runInferPartialNet,
+                    data
+                ), total=len(data)
+            )
         )
+        pool.close()
+        pool.join()
     adj = pd.concat(adjs).sort_values(by='importance', ascending=False)
 
     end_time = time.time()
     print('Done in {} seconds.'.format(end_time - start_time), file=sys.stderr)
+    print('Saving adjancies matrix...')
     adj.to_csv(args.output, index=False, sep="\t")
+    print('Done.')
