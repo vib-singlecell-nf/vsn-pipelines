@@ -5,6 +5,18 @@ import os
 import warnings
 import scanpy as sc
 
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
@@ -24,7 +36,7 @@ parser.add_argument(
     type=str,
     action="store",
     dest="method",
-    default="PCA",
+    default="pca",
     help="Reduce the dimensionality of the data. Choose one of : PCA, UMAP, t-SNE"
 )
 
@@ -66,9 +78,10 @@ parser.add_argument(
 
 parser.add_argument(
     "-f", "--use-fast-tsne",
-    action="store_true",
+    type=str2bool,
+    action="store",
     dest="use_fast_tsne",
-    default=False,
+    default=True,
     help="Use the MulticoreTSNE package by D. Ulyanov if it is installed."
 )
 
@@ -98,28 +111,39 @@ except IOError:
 # Transform the distribution of the data
 #
 
-if args.method == "PCA":
+if args.method.lower() == "pca":
     # Run PCA
     sc.tl.pca(
         data=adata,
         n_comps=min(adata.shape[0], args.n_comps),
-        svd_solver=args.svd_solver
+        svd_solver=args.svd_solver,
+        random_state=args.seed
     )
-elif args.method == "UMAP":
+elif args.method.lower() == "umap":
     # Run UMAP
     # Notes:
     # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
     if "neighbors" not in adata.uns.keys():
         raise Exception("The neighborhood graph of observations has not been computed. Computing...")
-    sc.tl.umap(adata)
-elif args.method == "t-SNE":
+    sc.tl.umap(
+        adata=adata,
+        random_state=args.seed
+    )
+elif args.method.lower() == "tsne":
     # Run t-SNE
+    # Source: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.tl.tsne.html
     # If n_pcs is None and X_pca has been computed, X_pca with max computed pcs will be used
+    # ||
+    # n_pcs : int, None (default: None)
+    #     Use this many PCs. If n_pcs==0 use .X if use_rep is None.
+    # use_rep : str, None (default: None)
+    #     Use the indicated representation. 'X' or any key for .obsm is valid. If None, the representation is chosen automatically: For .n_vars < 50, .X is used, otherwise ‘X_pca’ is used. If ‘X_pca’ is not present, it’s computed with default parameters.
     sc.tl.tsne(
         adata=adata,
         n_jobs=args.n_jobs,
         use_fast_tsne=args.use_fast_tsne,
-        n_pcs=args.n_pcs
+        n_pcs=args.n_pcs,
+        random_state=args.seed
     )
 else:
     raise Exception("The dimensionality reduction method {} does not exist.".format(args.method))

@@ -33,7 +33,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 		Channel.from('').view {
 			"""
 ------------------------------------------------------------------
-\u001B[32m Benchmarking SC__SCANPY__NEIGHBORHOOD_GRAPH step... \u001B[0m
+\u001B[32m Parameter exploration of SC__SCANPY__NEIGHBORHOOD_GRAPH step... \u001B[0m
 \u001B[32m Tag: ${tag} \u001B[0m
 \u001B[32m Parameters tested: \u001B[0m
 \u001B[32m - nPcs: \u001B[0m \u001B[33m     ${nPcss instanceof List} \u001B[0m

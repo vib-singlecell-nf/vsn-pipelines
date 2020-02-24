@@ -22,7 +22,7 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 		processParams = sampleParams.local
 		"""
 		${binDir}aggregate/sc_batch_effect_correction.py \
-			${(processParams.containsKey('batchEffectCorrectionMethod')) ? '--method ' + processParams.batchEffectCorrectionMethod : ''} \
+			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			--output-file "${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}" \
 			${(processParams.containsKey('key')) ? '--key ' + processParams.key : ''} \
 			${(processParams.containsKey('batchKey')) ? '--batch-key ' + processParams.batchKey : ''} \
