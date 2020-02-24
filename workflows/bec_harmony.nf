@@ -83,7 +83,7 @@ workflow BEC_HARMONY {
             clusteringParams
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
-            becDualDataPrePost.map { it -> tuple(it[0], it[1], it[2]) },
+            becDualDataPrePost,
             file(workflow.projectDir + params.sc.harmony.report_ipynb),
             "SC_BEC_HARMONY_report",
             clusteringParams.isParameterExplorationModeOn()
