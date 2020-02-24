@@ -12,7 +12,7 @@ process SC__SCANPY__REGRESS_OUT {
 		tuple val(sampleId), path(f)
 
 	output:
-		tuple val(sampleId), path("${sampleId}.SC__SCANPY__REGRESS_OUT.${params.off}")
+		tuple val(sampleId), path("${sampleId}.SC__SCANPY__REGRESS_OUT.${processParams.off}")
 
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.regress_out)
