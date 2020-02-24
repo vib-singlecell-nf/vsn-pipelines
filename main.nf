@@ -81,7 +81,7 @@ workflow single_sample {
 workflow single_sample_scenic {
 
     include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
-    include single_sample_standalone as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     getDataChannel | SINGLE_SAMPLE
     SCENIC_APPEND(
         SINGLE_SAMPLE.out.filteredloom,
