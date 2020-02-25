@@ -15,11 +15,13 @@ if(!params.global.containsKey('seed')) {
     }
 }
 
+include './src/channels/channels' params(params)
+
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
 
-    include bbknn_standalone as BBKNN from './workflows/bbknn' params(params)
-    BBKNN()
+    include bbknn as BBKNN from './workflows/bbknn' params(params)
+    getDataChannel | BBKNN
 
 }
 
@@ -27,35 +29,41 @@ workflow bbknn {
 workflow mnncorrect {
 
     include mnncorrect as MNNCORRECT from './workflows/mnncorrect' params(params)
-    MNNCORRECT()
+    getDataChannel | MNNCORRECT
 
 }
 
 // run multi-sample with bbknn, output a scope loom file
 workflow harmony {
 
-    include harmony_standalone as HARMONY from './workflows/harmony' params(params)
-    HARMONY()
+    include harmony as HARMONY from './workflows/harmony' params(params)
+    getDataChannel | HARMONY
 
 }
 
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
 
-    include bbknn_standalone as BBKNN from './workflows/bbknn' params(params)
-    include SCENIC_append from './src/scenic/main.nf' params(params)
-    BBKNN()
-    SCENIC_append( BBKNN.out.filteredloom, BBKNN.out.scopeloom )
+    include bbknn as BBKNN from './workflows/bbknn' params(params)
+    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+    getDataChannel | BBKNN
+    SCENIC_APPEND(
+        BBKNN.out.filteredloom,
+        BBKNN.out.scopeloom
+    )
 
 }
 
 // run multi-sample with harmony, then scenic from the filtered output:
 workflow harmony_scenic {
 
-    include harmony_standalone as HARMONY from './workflows/harmony' params(params)
-    include SCENIC_append from './src/scenic/main.nf' params(params)
-    HARMONY()
-    SCENIC_append( HARMONY.out.filteredloom, HARMONY.out.scopeloom )
+    include harmony as HARMONY from './workflows/harmony' params(params)
+    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+    getDataChannel | HARMONY
+    SCENIC_APPEND( 
+        HARMONY.out.filteredloom,
+        HARMONY.out.scopeloom 
+    )
 
 }
 
@@ -63,8 +71,8 @@ workflow harmony_scenic {
 // run single_sample, output a scope loom file
 workflow single_sample {
 
-    include single_sample_standalone as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    SINGLE_SAMPLE()
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    getDataChannel | SINGLE_SAMPLE
 
 }
 
@@ -72,10 +80,13 @@ workflow single_sample {
 // run single_sample, then scenic from the filtered output:
 workflow single_sample_scenic {
 
-    include SCENIC_append from './src/scenic/main.nf' params(params)
-    include single_sample_standalone as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    SINGLE_SAMPLE()
-    SCENIC_append( SINGLE_SAMPLE.out.filteredloom, SINGLE_SAMPLE.out.scopeloom )
+    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    getDataChannel | SINGLE_SAMPLE
+    SCENIC_APPEND(
+        SINGLE_SAMPLE.out.filteredloom,
+        SINGLE_SAMPLE.out.scopeloom
+    )
 
 }
 
@@ -83,8 +94,8 @@ workflow single_sample_scenic {
 // run scenic directly from an existing loom file:
 workflow scenic {
 
-    include SCENIC as SCENIC_WF from './src/scenic/main.nf' params(params)
-    SCENIC_WF( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) )
+    include scenic as SCENIC from './src/scenic/main.nf' params(params)
+    SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) )
 
 }
 
@@ -103,8 +114,10 @@ workflow cellranger {
 
 workflow cellranger_metadata {
 
-    include CELLRANGER_COUNT_WITH_METADATA      from './src/cellranger/workflows/cellRangerCountWithMetadata'    params(params)
-    CELLRANGER_COUNT_WITH_METADATA(file(params.sc.cellranger.count.metadata))
+    include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
+    CELLRANGER_COUNT_WITH_METADATA(
+        file(params.sc.cellranger.count.metadata)
+    )
 
 }
 
@@ -114,39 +127,6 @@ workflow single_sample_cellranger {
 
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     cellranger | SINGLE_SAMPLE
-
-}
-
-workflow h5ad_single_sample {
-
-    include getChannel as getH5ADChannel from './src/channels/file' params(params)
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    data = getH5ADChannel( 
-        params.data.h5ad.file_paths,
-        params.data.h5ad.suffix
-    ).view() | SINGLE_SAMPLE
-
-}
-
-workflow tsv_single_sample {
-
-    include getChannel as getTSVChannel from './src/channels/file' params(params)
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    data = getTSVChannel( 
-        params.data.tsv.file_paths,
-        params.data.tsv.suffix
-    ).view() | SINGLE_SAMPLE
-
-}
-
-workflow csv_single_sample {
-
-    include getChannel as getCSVChannel from './src/channels/file' params(params)
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    data = getCSVChannel( 
-        params.data.csv.file_paths,
-        params.data.csv.suffix
-    ).view() | SINGLE_SAMPLE
 
 }
 
@@ -199,9 +179,9 @@ workflow sra_cellranger_bbknn {
 
 workflow sra_cellranger_bbknn_scenic {
 
-    include SCENIC_append from './src/scenic/main.nf' params(params)
+    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
     sra_cellranger_bbknn()
-    SCENIC_append(
+    SCENIC_APPEND(
         sra_cellranger_bbknn.out.filteredLoom,
         sra_cellranger_bbknn.out.scopeLoom
     )

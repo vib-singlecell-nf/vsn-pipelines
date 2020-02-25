@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import scanpy as sc
+import numpy as np
 
 in_formats = [
     '10x_cellranger_mex',
@@ -114,6 +115,7 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
         adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+    adata = adata[:, np.sort(adata.var.index)]
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
@@ -132,6 +134,7 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
         adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+    adata = adata[:, np.sort(adata.var.index)]
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
@@ -146,6 +149,7 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
         delimiter=delim,
         first_column_names=True
     ).T
+    adata = adata[:, np.sort(adata.var.index)]
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
 else:
