@@ -296,29 +296,71 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
     # Populate
     for i in range(0, num_clusters):
         i = str(i)
-        num_genes = len(adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i])
-        sig_genes_mask = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i] < args.markers_fdr_threshold
+        gene_names = adatas[adata_idx].uns['rank_genes_groups']['names'][i]
+        pvals_adj = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i]
+        logfoldchanges = adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i]
+        num_genes = len(pvals_adj)
+        sig_genes_mask = pvals_adj < args.markers_fdr_threshold
         deg_genes_mask = np.logical_and(
             np.logical_or(
-                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] >= args.markers_log_fc_threshold,
-                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i] <= -args.markers_log_fc_threshold
+                logfoldchanges >= args.markers_log_fc_threshold,
+                logfoldchanges <= -args.markers_log_fc_threshold
             ),
             np.isfinite(
-                adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i]
+                logfoldchanges
             )
         )
         sig_and_deg_genes_mask = np.logical_and(
             sig_genes_mask,
             deg_genes_mask
         )
-        gene_names = adatas[adata_idx].uns['rank_genes_groups']['names'][i][sig_and_deg_genes_mask]
-        cluster_markers.loc[np.in1d(cluster_markers.index, gene_names), i] = 1
-        cluster_markers_avg_logfc.loc[np.in1d(cluster_markers.index, gene_names), i] = np.around(
-            adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i][sig_and_deg_genes_mask],
+        marker_names = gene_names[sig_and_deg_genes_mask]
+
+        marker_genes_along_raw_adata_mask = np.in1d(
+            raw_filtered_adata.var.index,
+            gene_names[sig_and_deg_genes_mask]
+        )
+        marker_genes_along_raw_adata = cluster_markers.index[marker_genes_along_raw_adata_mask]
+
+        # Populate the marker mask
+        markers_df = pd.DataFrame(
+            1,
+            index=marker_names,
+            columns=["is_marker"]
+        )
+        cluster_markers.loc[
+            marker_genes_along_raw_adata_mask,
+            i
+        ] = np.around(
+            markers_df["is_marker"][marker_genes_along_raw_adata],
             decimals=6
         )
-        cluster_markers_pval.loc[np.in1d(cluster_markers.index, gene_names), i] = np.around(
-            adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i][sig_and_deg_genes_mask],
+
+        # Populate the marker gene log fold changes
+        logfoldchanges_df = pd.DataFrame(
+            logfoldchanges[sig_and_deg_genes_mask],
+            index=marker_names,
+            columns=["logfc"]
+        )
+        cluster_markers_avg_logfc.loc[
+            marker_genes_along_raw_adata_mask,
+            i
+        ] = np.around(
+            logfoldchanges_df["logfc"][marker_genes_along_raw_adata],
+            decimals=6
+        )
+
+        # Populate the marker gene false discovery rates
+        pvals_adj_df = pd.DataFrame(
+            logfoldchanges[sig_and_deg_genes_mask],
+            index=marker_names,
+            columns=["fdr"]
+        )
+        cluster_markers_avg_logfc.loc[
+            marker_genes_along_raw_adata_mask,
+            i
+        ] = np.around(
+            pvals_adj_df["fdr"][marker_genes_along_raw_adata],
             decimals=6
         )
 
