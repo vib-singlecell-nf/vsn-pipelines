@@ -299,7 +299,7 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
         gene_names = adatas[adata_idx].uns['rank_genes_groups']['names'][i]
         pvals_adj = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i]
         logfoldchanges = adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i]
-        num_genes = len(pvals_adj)
+        num_genes = len(gene_names)
         sig_genes_mask = pvals_adj < args.markers_fdr_threshold
         deg_genes_mask = np.logical_and(
             np.logical_or(
@@ -318,7 +318,7 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
 
         marker_genes_along_raw_adata_mask = np.in1d(
             raw_filtered_adata.var.index,
-            gene_names[sig_and_deg_genes_mask]
+            marker_names
         )
         marker_genes_along_raw_adata = cluster_markers.index[marker_genes_along_raw_adata_mask]
 
@@ -345,24 +345,18 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
         cluster_markers_avg_logfc.loc[
             marker_genes_along_raw_adata_mask,
             i
-        ] = np.around(
-            logfoldchanges_df["logfc"][marker_genes_along_raw_adata],
-            decimals=6
-        )
+        ] = logfoldchanges_df["logfc"][marker_genes_along_raw_adata]
 
         # Populate the marker gene false discovery rates
         pvals_adj_df = pd.DataFrame(
-            logfoldchanges[sig_and_deg_genes_mask],
+            pvals_adj[sig_and_deg_genes_mask],
             index=marker_names,
             columns=["fdr"]
         )
-        cluster_markers_avg_logfc.loc[
+        cluster_markers_pval.loc[
             marker_genes_along_raw_adata_mask,
             i
-        ] = np.around(
-            pvals_adj_df["fdr"][marker_genes_along_raw_adata],
-            decimals=6
-        )
+        ] = pvals_adj_df["fdr"][marker_genes_along_raw_adata]
 
     # Update row attribute Dict
     row_attrs_cluster_markers = {
