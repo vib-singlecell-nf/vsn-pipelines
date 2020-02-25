@@ -27,7 +27,7 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 			${(processParams.containsKey('key')) ? '--key ' + processParams.key : ''} \
 			${(processParams.containsKey('batchKey')) ? '--batch-key ' + processParams.batchKey : ''} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
-			${(processParams.containsKey('k')) ? '--k' + processParams.k : ''} \
+			${(processParams.containsKey('k')) ? '--k ' + processParams.k : ''} \
 			${(processParams.containsKey('varIndex')) ? '--var-index ' + processParams.varIndex : ''} \
 			${(processParams.containsKey('varSubset')) ? '--var-subset ' + processParams.varSubset : ''} \
 			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
