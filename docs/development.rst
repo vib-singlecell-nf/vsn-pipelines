@@ -329,7 +329,7 @@ This step is not required. However it this step is skipped, the code would still
     include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
 
 
-    workflow harmony_base {
+    workflow harmony {
 
         take:
             data
@@ -380,8 +380,8 @@ This step is not required. However it this step is skipped, the code would still
             ).combine(
                 BEC_HARMONY.out.harmony_report,
                 by: 0
-            ).map { 
-                tuple( it[0], it.drop(1) ) 
+            ).map {
+                tuple( it[0], it.drop(1) )
             }
             // reporting:
             def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
@@ -398,31 +398,6 @@ This step is not required. However it this step is skipped, the code would still
 
     }
 
-    workflow harmony_standalone {
-
-        main:
-            data = getTenXChannel( params.data.tenx.cellranger_outs_dir_path ).view()
-            harmony_base( data )
-
-        emit:
-            filteredloom = harmony_base.out.filteredloom
-            scopeloom = harmony_base.out.scopeloom
-
-    }
-
-    workflow harmony {
-
-        take:
-            data
-
-        main:
-            harmony_base( data )
-
-        emit:
-            filteredloom = harmony_base.out.filteredloom
-            scopeloom = harmony_base.out.scopeloom
-
-    }
 
 11. Add a new Nextflow profile in ``nextflow.config`` of the ``vsn-pipelines`` repository
 
@@ -430,8 +405,8 @@ This step is not required. However it this step is skipped, the code would still
 
     workflow harmony {
 
-        include harmony_standalone as HARMONY from './workflows/harmony' params(params)
-        HARMONY()
+        include harmony as HARMONY from './workflows/harmony' params(params)
+        getDataChannel | HARMONY
 
     }
 
@@ -602,11 +577,11 @@ The parameter structure internally (post-merge) is:
                 }
                 dim_reduction {
                     pca {
-                        dimReductionMethod = 'PCA'
+                        method = 'pca'
                         ...
                     }
                     umap {
-                        dimReductionMethod = 'UMAP'
+                        method = 'tsne'
                         ...
                     }
                 }

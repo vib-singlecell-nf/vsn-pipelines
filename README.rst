@@ -15,7 +15,47 @@ VSN-Pipelines
     :target: https://gitter.im/vib-singlecell-nf/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
     :alt: Gitter
 
+|single_sample| |single_sample_scenic| |scenic| |scenic_multiruns| |single_sample_scenic_multiruns| |bbknn| |bbknn_scenic| |harmony| |mnncorrect|
+
+.. |single_sample| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-single-sample
+    :alt: Single-sample Pipeline
+
+.. |single_sample_scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-scenic-single-sample-scenic
+    :alt: Single-sample SCENIC Pipeline
+
+.. |scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#scenic-scenic
+    :alt: SCENIC Pipeline
+
+.. |scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic_multiruns/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#scenic-multiruns-scenic-multiruns-single-sample-scenic-multiruns
+    :alt: SCENIC Multi-runs Pipeline
+
+.. |single_sample_scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic_multiruns/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#scenic-multiruns-scenic-multiruns-single-sample-scenic-multiruns
+    :alt: Single-sample SCENIC Multi-runs Pipeline
+
+.. |bbknn| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/bbknn/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#bbknn-bbknn
+    :alt: BBKNN Pipeline
+
+.. |bbknn_scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/bbknn_scenic/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#bbknn-scenic
+    :alt: BBKNN SCENIC Pipeline
+
+.. |harmony| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/harmony/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#harmony-harmony
+    :alt: Harmony Pipeline
+
+.. |mnncorrect| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/mnncorrect/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#mnncorrect-mnncorrect
+    :alt: MNN-correct Pipeline
+
 A repository of pipelines for single-cell data in Nextflow DSL2.
+
+Do you want a quick tour of the VSN pipelines ? Please read `Quick Start <https://vsn-pipelines.readthedocs.io/en/latest/getting-started.html#quick-start>`_.
 
 Full documentation available on `Read the Docs <https://vsn-pipelines.readthedocs.io/en/latest/>`_
 

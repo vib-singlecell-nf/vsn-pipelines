@@ -48,45 +48,59 @@ Example Output
     $ nextflow -C single_sample.config run vib-singlecell-nf/vsn-pipelines -entry single_sample
 
     N E X T F L O W  ~  version 19.12.0-edge
-    Launching `vib-singlecell-nf/vsn-pipelines` [condescending_liskov] - revision: 92368248f3 [master]
+    Launching `/ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/aertslab/GitHub/vib-singlecell-nf/main.nf` [nice_engelbart] - revision: 0096df9054
     WARN: DSL 2 IS AN EXPERIMENTAL FEATURE UNDER DEVELOPMENT -- SYNTAX MAY CHANGE IN FUTURE RELEASE
+    executor >  local (59)
+    [0c/d33a4e] process > single_sample:SINGLE_SAMPLE:UTILS__GENERATE_WORKFLOW_CONFIG_REPORT                                          [100%] 1 of 1 ✔
+    [17/ab2b39] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__FILE_CONVERTER (1)                                                [100%] 2 of 2 ✔
+    [e4/84f688] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__SCANPY__COMPUTE_QC_STATS (2)                                      [100%] 2 of 2 ✔
+    [1b/daa1c3] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__SCANPY__GENE_FILTER (2)                                           [100%] 2 of 2 ✔
+    [fc/8653d0] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__SCANPY__CELL_FILTER (2)                                           [100%] 2 of 2 ✔
+    [9d/ebeff9] process > single_sample:SINGLE_SAMPLE:QC_FILTER:GENERATE_DUAL_INPUT_REPORT:SC__SCANPY__GENERATE_DUAL_INPUT_REPORT (2) [100%] 2 of 2 ✔
+    [87/e13dd0] process > single_sample:SINGLE_SAMPLE:QC_FILTER:GENERATE_DUAL_INPUT_REPORT:SC__SCANPY__REPORT_TO_HTML (2)             [100%] 2 of 2 ✔
+    [a6/867a4a] process > single_sample:SINGLE_SAMPLE:NORMALIZE_TRANSFORM:SC__SCANPY__NORMALIZATION (2)                               [100%] 2 of 2 ✔
+    [07/8e63b1] process > single_sample:SINGLE_SAMPLE:NORMALIZE_TRANSFORM:SC__SCANPY__DATA_TRANSFORMATION (2)                         [100%] 2 of 2 ✔
+    [c1/07c18c] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES (2)                        [100%] 2 of 2 ✔
+    [e9/53e204] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES (2)                      [100%] 2 of 2 ✔
+    [0b/e7ae8c] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:SC__SCANPY__FEATURE_SCALING (2)                                   [100%] 2 of 2 ✔
+    [5d/52236c] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:GENERATE_REPORT:SC__SCANPY__GENERATE_REPORT (2)                   [100%] 2 of 2 ✔
+    [71/5d6559] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:GENERATE_REPORT:SC__SCANPY__REPORT_TO_HTML (2)                    [100%] 2 of 2 ✔
+    [8c/1b4cc9] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION_PCA:SC__SCANPY__DIM_REDUCTION__PCA (2)                            [100%] 2 of 2 ✔
+    [7b/d423f7] process > single_sample:SINGLE_SAMPLE:NEIGHBORHOOD_GRAPH:SC__SCANPY__NEIGHBORHOOD_GRAPH (2)                           [100%] 2 of 2 ✔
+    [9b/3a10d2] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION_TSNE_UMAP:SC__SCANPY__DIM_REDUCTION__TSNE (2)                     [100%] 2 of 2 ✔
+    [5f/2c6325] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION_TSNE_UMAP:SC__SCANPY__DIM_REDUCTION__UMAP (2)                     [100%] 2 of 2 ✔
+    [ff/b5c6ef] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION_TSNE_UMAP:GENERATE_REPORT:SC__SCANPY__GENERATE_REPORT (2)         [100%] 2 of 2 ✔
+    [b6/86bc36] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION_TSNE_UMAP:GENERATE_REPORT:SC__SCANPY__REPORT_TO_HTML (2)          [100%] 2 of 2 ✔
+    [1a/2fec91] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:SC__SCANPY__CLUSTERING (2)                               [100%] 2 of 2 ✔
+    [38/8a814b] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:GENERATE_REPORT:SC__SCANPY__GENERATE_REPORT (2)          [100%] 2 of 2 ✔
+    [35/530dcf] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:GENERATE_REPORT:SC__SCANPY__REPORT_TO_HTML (2)           [100%] 2 of 2 ✔
+    [05/3e201e] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:SC__SCANPY__MARKER_GENES (2)                             [100%] 2 of 2 ✔
+    [04/ad44c6] process > single_sample:SINGLE_SAMPLE:SC__H5AD_TO_FILTERED_LOOM (2)                                                   [100%] 2 of 2 ✔
+    [46/47cac6] process > single_sample:SINGLE_SAMPLE:FILE_CONVERTER:SC__H5AD_TO_LOOM (2)                                             [100%] 2 of 2 ✔
+    [33/640ffa] process > single_sample:SINGLE_SAMPLE:FILE_CONVERTER:COMPRESS_HDF5 (2)                                                [100%] 2 of 2 ✔
+    [77/87b596] process > single_sample:SINGLE_SAMPLE:SC__PUBLISH_H5AD (2)                                                            [100%] 2 of 2 ✔
+    [61/82bf98] process > single_sample:SINGLE_SAMPLE:SC__SCANPY__MERGE_REPORTS (1)                                                   [100%] 2 of 2 ✔
+    [5a/26ce75] process > single_sample:SINGLE_SAMPLE:SC__SCANPY__REPORT_TO_HTML (2)                                                  [100%] 2 of 2 ✔
 
-    [33/68d885] process > single_sample:SINGLE_SAMPLE:UTILS__GENERATE_WORKFLOW_CONFIG_REPORT                                          [100%] 1 of 1 ✔
-    [a2/dcf990] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__FILE_CONVERTER (1)                                                [100%] 1 of 1 ✔
-    [9c/dff236] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__SCANPY__COMPUTE_QC_STATS (1)                                      [100%] 1 of 1 ✔
-    [65/e1bf9f] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__SCANPY__GENE_FILTER (1)                                           [100%] 1 of 1 ✔
-    [92/faae99] process > single_sample:SINGLE_SAMPLE:QC_FILTER:SC__SCANPY__CELL_FILTER (1)                                           [100%] 1 of 1 ✔
-    [52/c39d90] process > single_sample:SINGLE_SAMPLE:QC_FILTER:GENERATE_DUAL_INPUT_REPORT:SC__SCANPY__GENERATE_DUAL_INPUT_REPORT (1) [100%] 1 of 1 ✔
-    [d2/b38e10] process > single_sample:SINGLE_SAMPLE:QC_FILTER:GENERATE_DUAL_INPUT_REPORT:SC__SCANPY__REPORT_TO_HTML (1)             [100%] 1 of 1 ✔
-    [87/96ef4d] process > single_sample:SINGLE_SAMPLE:NORMALIZE_TRANSFORM:SC__SCANPY__NORMALIZATION (1)                               [100%] 1 of 1 ✔
-    [b2/493705] process > single_sample:SINGLE_SAMPLE:NORMALIZE_TRANSFORM:SC__SCANPY__DATA_TRANSFORMATION (1)                         [100%] 1 of 1 ✔
-    [69/a2a237] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:SC__SCANPY__FEATURE_SELECTION (1)                                 [100%] 1 of 1 ✔
-    [1d/0ec983] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:SC__SCANPY__FEATURE_SCALING (1)                                   [100%] 1 of 1 ✔
-    [91/11965d] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:GENERATE_REPORT:SC__SCANPY__GENERATE_REPORT (1)                   [100%] 1 of 1 ✔
-    [4e/620e9e] process > single_sample:SINGLE_SAMPLE:HVG_SELECTION:GENERATE_REPORT:SC__SCANPY__REPORT_TO_HTML (1)                    [100%] 1 of 1 ✔
-    [fd/c6e8c5] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION:DIM_REDUCTION_PCA:SC__SCANPY__DIM_REDUCTION__PCA (1)              [100%] 1 of 1 ✔
-    [32/548f80] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION:SC__SCANPY__DIM_REDUCTION__TSNE (1)                               [100%] 1 of 1 ✔
-    [e0/9b68f3] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION:SC__SCANPY__DIM_REDUCTION__UMAP (1)                               [100%] 1 of 1 ✔
-    [20/337908] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION:GENERATE_REPORT:SC__SCANPY__GENERATE_REPORT (1)                   [100%] 1 of 1 ✔
-    [b9/dc2795] process > single_sample:SINGLE_SAMPLE:DIM_REDUCTION:GENERATE_REPORT:SC__SCANPY__REPORT_TO_HTML (1)                    [100%] 1 of 1 ✔
-    [0b/42a0a3] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:SC__SCANPY__CLUSTERING (1)                               [100%] 1 of 1 ✔
-    [3a/084e6f] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:GENERATE_REPORT:SC__SCANPY__GENERATE_REPORT (1)          [100%] 1 of 1 ✔
-    [06/6ea130] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:GENERATE_REPORT:SC__SCANPY__REPORT_TO_HTML (1)           [100%] 1 of 1 ✔
-    [84/ca1672] process > single_sample:SINGLE_SAMPLE:CLUSTER_IDENTIFICATION:SC__SCANPY__MARKER_GENES (1)                             [100%] 1 of 1 ✔
-    [db/d66797] process > single_sample:SINGLE_SAMPLE:SC__H5AD_TO_FILTERED_LOOM (1)                                                   [100%] 1 of 1 ✔
-    [46/be45d7] process > single_sample:SINGLE_SAMPLE:FILE_CONVERTER:SC__H5AD_TO_LOOM (1)                                             [100%] 1 of 1 ✔
-    [78/3988ff] process > single_sample:SINGLE_SAMPLE:FILE_CONVERTER:COMPRESS_HDF5 (1)                                                [100%] 1 of 1 ✔
-    [4d/bfb133] process > single_sample:SINGLE_SAMPLE:SC__PUBLISH_H5AD (1)                                                            [100%] 1 of 1 ✔
-    [9c/b5f299] process > single_sample:SINGLE_SAMPLE:SC__SCANPY__MERGE_REPORTS (1)                                                   [100%] 1 of 1 ✔
-    [00/b15be5] process > single_sample:SINGLE_SAMPLE:SC__SCANPY__REPORT_TO_HTML (1)                                                  [100%] 1 of 1 ✔
-    Converting 1k_pbmc_v2_chemistry.SC__SCANPY__MARKER_GENES.h5ad to 1k_pbmc_v2_chemistry.SC__SCANPY__MARKER_GENES.loom (w/ additional compression)...
-    Completed at: 22-Jan-2020 13:45:59
-    Duration    : 2m 38s
+    ------------------------------------------------------------------
+    Converting 1k_pbmc_v2_chemistry.SC__SCANPY__MARKER_GENES.h5ad to 1k_pbmc_v2_chemistry.SC__SCANPY__MARKER_GENES.loom
+    (w/ additional compression)...
+    ------------------------------------------------------------------
+
+
+    ------------------------------------------------------------------
+    Converting 1k_pbmc_v3_chemistry.SC__SCANPY__MARKER_GENES.h5ad to 1k_pbmc_v3_chemistry.SC__SCANPY__MARKER_GENES.loom
+    (w/ additional compression)...
+    ------------------------------------------------------------------
+
+    WARN: To render the execution DAG in the required format it is required to install Graphviz -- See http://www.graphviz.org for more info.
+    Completed at: 25-Feb-2020 12:31:44
+    Duration    : 2m 15s
     CPU hours   : 0.1
-    Succeeded   : 28
+    Succeeded   : 59
 
 
-The pipelines will generate 3 types of results in the output directory (`params.global.outdir`), by default `out/`
+The pipelines will generate 3 types of results in the output directory (`params.global.outdir`), by default ``out/``
 
 - ``data``: contains the workflow output file (in h5ad format), plus symlinks to all the intermediate files.
 - ``loom``: contains final loom files which can be imported inside SCope visualization tool for further visualization of the results.
