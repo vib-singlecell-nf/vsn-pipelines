@@ -76,6 +76,7 @@ if args.format == 'h5ad':
         join=args.join,
         index_unique=index_unique
     )
+    adata.var.index = adata.var.index.astype(str)
     adata = adata[:, np.sort(adata.var.index)]
 else:
     raise Exception("Concatenation of .{} files is not implemented.".format(args.format))
