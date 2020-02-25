@@ -160,8 +160,11 @@ Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 .. |BBKNN Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/bbknn.svg?sanitize=true
 
 
-**bbknn_scenic**
-----------------
+**bbknn_scenic** |bbknn_scenic|
+-------------------------------
+
+.. |bbknn_scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/bbknn_scenic/badge.svg
+
 Runs the ``bbknn`` workflow above, then runs the ``scenic`` workflow on the output, generating a comprehensive loom file with the combined results.
 This could be very resource intensive, depending on the dataset.
 
