@@ -15,12 +15,11 @@ process UTILS__GENERATE_WORKFLOW_CONFIG_REPORT {
 		path("workflow_configuration_report.ipynb")
 
 	script:
-		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
 		"""
 		papermill ${ipynb} \
 			workflow_configuration_report.ipynb \
-            -p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
-			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
+			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
 
 }
