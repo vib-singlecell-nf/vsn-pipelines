@@ -74,8 +74,10 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 
 	DataflowBroadcast $(tag) {
 		// Prepare argument stream
-		def $method = Channel.from(methods == null ? "NULL" : methods)
-		def $resolution = Channel.from(resolutions == null ? "NULL" : resolutions)
+		def _method = method == null ? "NULL" : method
+		def _resolution = resolution == null ? "NULL" : resolution
+		def $method = Channel.from(methods == null ? _method : methods)
+		def $resolution = Channel.from(resolutions == null ? _resolution : resolutions)
 		displayMessage(tag)
 		return $method.combine($resolution)
 	}
