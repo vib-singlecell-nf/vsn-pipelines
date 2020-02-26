@@ -15,6 +15,10 @@ if(!params.global.containsKey('seed')) {
     }
 }
 
+def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
+params.manifestAsJSON = toJson(workflow.manifest)
+params.paramsAsJSON = toJson(paramsCopy)
+
 include './src/channels/channels' params(params)
 
 // run multi-sample with bbknn, output a scope loom file

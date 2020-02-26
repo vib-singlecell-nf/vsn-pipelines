@@ -331,10 +331,7 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
         cluster_markers.loc[
             marker_genes_along_raw_adata_mask,
             i
-        ] = np.around(
-            markers_df["is_marker"][marker_genes_along_raw_adata],
-            decimals=6
-        )
+        ] = markers_df["is_marker"][marker_genes_along_raw_adata]
 
         # Populate the marker gene log fold changes
         logfoldchanges_df = pd.DataFrame(
