@@ -70,7 +70,9 @@ process SC__SCANPY__PARAM_EXPLORE_MARKER_GENES {
 		processParams = sampleParams.local
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		stashedParams = [clusteringMethod, clusteringResolution]
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
 		${binDir}cluster/sc_marker_genes.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \

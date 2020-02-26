@@ -101,8 +101,8 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 		processParams = sampleParams.local
         // In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
-		// Output file will only be tagged with UUID if in parameter exploration mode
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		// Cannot call constructor with parameter if nPcs is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS()
 		_processParams.setEnv(this)

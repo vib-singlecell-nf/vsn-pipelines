@@ -73,7 +73,9 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		stashedParams = [method, resolution]
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
@@ -110,8 +112,8 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 			val(stashedParams)
 
   	script:
-	  	def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
@@ -157,7 +159,8 @@ process SC__SCANPY__MERGE_REPORTS {
 	input:
 		tuple \
 			val(sampleId), \
-			path(ipynbs)
+			path(ipynbs), \
+			val(stashedParams)
 		val(reportTitle)
 		val(isParameterExplorationModeOn)
 
@@ -165,9 +168,12 @@ process SC__SCANPY__MERGE_REPORTS {
 		tuple val(sampleId), path("${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + '.' : ''}ipynb")
 
 	script:
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
-		nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + '.' : ''}ipynb"
+		nbmerge \
+			${ipynbs} \
+			-o "${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + '.' : ''}ipynb"
 		"""
 
 }
