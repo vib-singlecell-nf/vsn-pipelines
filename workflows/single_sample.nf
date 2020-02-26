@@ -103,8 +103,8 @@ workflow single_sample {
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
-    // emit:
-    //     filteredloom
-    //     scopeloom
+    emit:
+        filteredloom
+        scopeloom
 
 }
