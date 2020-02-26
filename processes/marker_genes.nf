@@ -42,7 +42,7 @@ process SC__SCANPY__MARKER_GENES {
 /**
  * BENCHMARK VERSION OF SCANPY MARKER GENES
  */
-process SC__SCANPY__BENCHMARK_MARKER_GENES {
+process SC__SCANPY__PARAM_EXPLORE_MARKER_GENES {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -61,7 +61,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
   	output:
     	tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCANPY__BENCHMARK_MARKER_GENES.${uuid}.${processParams.off}"), \
+			path("${sampleId}.SC__SCANPY__PARAM_EXPLORE_MARKER_GENES.${uuid}.${processParams.off}"), \
 			val(clusteringMethod), \
 			val(clusteringResolution)
   
@@ -70,7 +70,9 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
 		processParams = sampleParams.local
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		stashedParams = [clusteringMethod, clusteringResolution]
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
 		${binDir}cluster/sc_marker_genes.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
@@ -78,7 +80,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
 			${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
 			$normalizedTransformedData \
 			$clusteredData \
-			"${sampleId}.SC__SCANPY__BENCHMARK_MARKER_GENES.${uuid}.${processParams.off}"
+			"${sampleId}.SC__SCANPY__PARAM_EXPLORE_MARKER_GENES.${uuid}.${processParams.off}"
 		"""
 
 }

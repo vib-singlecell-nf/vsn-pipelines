@@ -27,26 +27,25 @@ process SC__SCANPY__GENERATE_REPORT {
 		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 
 	script:
-		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
 			${sampleId}.${reportTitle}.ipynb \
 			-p FILE $adata \
-			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
-			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
+			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
 
 }
 
 /* 
- * BENCHMARK VERSION OF SCANPY CLUSTERING GENERATE REPORT
+ * PARAMETER EXPLORATION VERSION OF SCANPY CLUSTERING GENERATE REPORT
  * 
  * General reporting function: 
  * takes a template ipynb and adata as input,
  * outputs ipynb named by the value in ${reportTitle}
  */
-process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
+process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -70,17 +69,18 @@ process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
 			val(resolution)
 
 	script:
-		def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		stashedParams = [method, resolution]
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
 			${sampleId}.${reportTitle}.${uuid}.ipynb \
 			-p FILE $adata \
-			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
-			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
+			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
 
 }
@@ -110,15 +110,15 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 			val(stashedParams)
 
   	script:
-	  	def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
 			${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + "." : ''}ipynb \
 			-p FILE1 $data1 -p FILE2 $data2 \
-			-p WORKFLOW_MANIFEST '${toJson(workflow.manifest)}' \
-			-p WORKFLOW_PARAMETERS '${toJson(paramsCopy)}'
+			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
 
 }
@@ -157,7 +157,8 @@ process SC__SCANPY__MERGE_REPORTS {
 	input:
 		tuple \
 			val(sampleId), \
-			path(ipynbs)
+			path(ipynbs), \
+			val(stashedParams)
 		val(reportTitle)
 		val(isParameterExplorationModeOn)
 
@@ -165,9 +166,12 @@ process SC__SCANPY__MERGE_REPORTS {
 		tuple val(sampleId), path("${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + '.' : ''}ipynb")
 
 	script:
-		uuid = UUID.randomUUID().toString().substring(0,8)
+		if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
-		nbmerge ${ipynbs} -o "${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + '.' : ''}ipynb"
+		nbmerge \
+			${ipynbs} \
+			-o "${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + '.' : ''}ipynb"
 		"""
 
 }

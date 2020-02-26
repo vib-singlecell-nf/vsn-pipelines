@@ -58,7 +58,7 @@ workflow GENERATE_REPORT {
         if(isParameterExplorationModeOn) {
             switch(pipelineStep) {
                 case "CLUSTERING":
-                    report_notebook = SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT(
+                    report_notebook = SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT(
                         ipynb,
                         // expects (sample_id, adata, ...arguments)
                         data,

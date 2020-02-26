@@ -24,7 +24,7 @@ workflow CLUSTER_IDENTIFICATION {
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         if(clusteringParams.isParameterExplorationModeOn()) {
             // Run
-            out = SC__SCANPY__BENCHMARK_CLUSTERING(
+            out = SC__SCANPY__PARAM_EXPLORE_CLUSTERING(
                 data.map{ 
                     // Remove the runtimeParams
                     it -> tuple(it[0], it[1], it[2])
@@ -48,7 +48,7 @@ workflow CLUSTER_IDENTIFICATION {
 
         // Find marker genes for each of clustering
         if(clusteringParams.isParameterExplorationModeOn()) {
-            marker_genes = SC__SCANPY__BENCHMARK_MARKER_GENES(
+            marker_genes = SC__SCANPY__PARAM_EXPLORE_MARKER_GENES(
                 normalizedTransformedData.combine(out, by: 0)
             )
         } else {
