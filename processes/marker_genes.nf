@@ -42,7 +42,7 @@ process SC__SCANPY__MARKER_GENES {
 /**
  * BENCHMARK VERSION OF SCANPY MARKER GENES
  */
-process SC__SCANPY__BENCHMARK_MARKER_GENES {
+process SC__SCANPY__PARAM_EXPLORE_MARKER_GENES {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -61,7 +61,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
   	output:
     	tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCANPY__BENCHMARK_MARKER_GENES.${uuid}.${processParams.off}"), \
+			path("${sampleId}.SC__SCANPY__PARAM_EXPLORE_MARKER_GENES.${uuid}.${processParams.off}"), \
 			val(clusteringMethod), \
 			val(clusteringResolution)
   
@@ -78,7 +78,7 @@ process SC__SCANPY__BENCHMARK_MARKER_GENES {
 			${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
 			$normalizedTransformedData \
 			$clusteredData \
-			"${sampleId}.SC__SCANPY__BENCHMARK_MARKER_GENES.${uuid}.${processParams.off}"
+			"${sampleId}.SC__SCANPY__PARAM_EXPLORE_MARKER_GENES.${uuid}.${processParams.off}"
 		"""
 
 }

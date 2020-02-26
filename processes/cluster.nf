@@ -117,7 +117,7 @@ process SC__SCANPY__CLUSTERING {
 /**
  * BENCHMARK VERSION OF SCANPY CLUSTERING
  */
-process SC__SCANPY__BENCHMARK_CLUSTERING {
+process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -134,7 +134,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING {
   	output:
     	tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"), \
+			path("${sampleId}.SC__SCANPY__PARAM_EXPLORE_CLUSTERING.${processParams.off}"), \
 			val(method), \
 			val(resolution)
 
@@ -149,7 +149,7 @@ process SC__SCANPY__BENCHMARK_CLUSTERING {
 			${_processParams.getMethodAsArgument(method)} \
 			${_processParams.getResolutionAsArgument(resolution)} \
 			$f \
-			"${sampleId}.SC__SCANPY__BENCHMARK_CLUSTERING.${processParams.off}"
+			"${sampleId}.SC__SCANPY__PARAM_EXPLORE_CLUSTERING.${processParams.off}"
 		"""
 
 }

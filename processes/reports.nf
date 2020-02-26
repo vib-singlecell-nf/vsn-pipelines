@@ -40,13 +40,13 @@ process SC__SCANPY__GENERATE_REPORT {
 }
 
 /* 
- * BENCHMARK VERSION OF SCANPY CLUSTERING GENERATE REPORT
+ * PARAMETER EXPLORATION VERSION OF SCANPY CLUSTERING GENERATE REPORT
  * 
  * General reporting function: 
  * takes a template ipynb and adata as input,
  * outputs ipynb named by the value in ${reportTitle}
  */
-process SC__SCANPY__BENCHMARK_CLUSTERING_GENERATE_REPORT {
+process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 
   	container params.sc.scanpy.container
   	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
