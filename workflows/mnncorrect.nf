@@ -92,7 +92,9 @@ workflow mnncorrect {
                     it -> tuple(it[0], it[1])
                 },
                 by: 0
-            )
+            ).map {
+                it -> tuple(it[0], *it[1..it.size()-1], null)
+            }
         } else {
             clusteringBECReports = COMBINE_BY_PARAMS(
                 BEC_MNNCORRECT.out.cluster_report.map { 
@@ -100,9 +102,7 @@ workflow mnncorrect {
                 },
                 BEC_MNNCORRECT.out.mnncorrect_report,
                 clusteringParams
-            ).map { 
-                it -> tuple(it[0], it[1], it[2])
-            }
+            )
         }
         ipynbs = project.combine(
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out
@@ -113,8 +113,8 @@ workflow mnncorrect {
         ).combine(
             clusteringBECReports,
             by: 0
-        ).map { 
-            tuple( it[0], it.drop(1) ) 
+        ).map {
+            it -> tuple(it[0], it[1..it.size()-2], it[it.size()-1])
         }
 
         // reporting:

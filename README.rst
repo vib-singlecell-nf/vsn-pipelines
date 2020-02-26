@@ -55,7 +55,7 @@ VSN-Pipelines
 
 A repository of pipelines for single-cell data in Nextflow DSL2.
 
-Do you want a quick tour of the VSN pipelines ? Please read `Quick Start <https://vsn-pipelines.readthedocs.io/en/latest/getting-started.html#quick-start>`_.
+A quick tour of the VSN pipelines ? Please read `Quick Start <https://vsn-pipelines.readthedocs.io/en/latest/getting-started.html#quick-start>`_.
 
 Full documentation available on `Read the Docs <https://vsn-pipelines.readthedocs.io/en/latest/>`_
 

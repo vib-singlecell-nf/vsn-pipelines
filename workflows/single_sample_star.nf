@@ -69,13 +69,33 @@ workflow single_sample_star {
 
     // Reporting:
     def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+    ipynbs = QC_FILTER.out.report.map {
+        it -> tuple(it[0], it[1])
+    }.mix(
+        samples.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out),
+        HVG_SELECTION.out.report.map {
+            it -> tuple(it[0], it[1])
+        },
+        DIM_REDUCTION_TSNE_UMAP.out.report.map {
+            it -> tuple(it[0], it[1])
+        }
+    ).join(
+        CLUSTER_IDENTIFICATION.out.report,
+        by: 0
+    )
+
+    if(!clusteringParams.isParameterExplorationModeOn()) {
+        ipynbs = ipynbs.map {
+            it -> tuple(it[0], it[1..it.size()-2], null)
+        }
+    } else {
+        ipynbs = ipynbs.map {
+            it -> tuple(it[0], it[1..it.size()-2], it[it.size()-1])
+        }
+    }
+
     SC__SCANPY__MERGE_REPORTS(
-        QC_FILTER.out.report.mix(
-            samples.combine(UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out),
-            HVG_SELECTION.out.report,
-            DIM_REDUCTION_TSNE_UMAP.out.report,
-            CLUSTER_IDENTIFICATION.out.report
-        ).groupTuple(),
+        ipynbs,
         "merged_report",
         clusteringParams.isParameterExplorationModeOn()
     )
