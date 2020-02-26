@@ -97,7 +97,7 @@ workflow single_sample {
         }
 
         SC__SCANPY__MERGE_REPORTS(
-            ipynbs.view(),
+            ipynbs,
             "merged_report",
             clusteringParams.isParameterExplorationModeOn()
         )

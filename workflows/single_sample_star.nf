@@ -95,7 +95,7 @@ workflow single_sample_star {
     }
 
     SC__SCANPY__MERGE_REPORTS(
-        ipynbs.view(),
+        ipynbs,
         "merged_report",
         clusteringParams.isParameterExplorationModeOn()
     )
