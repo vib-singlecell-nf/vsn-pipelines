@@ -40,6 +40,7 @@ process AUCELL {
                 throw new Exception("walltime is missing in params.sc.scenic.aucell")
         }
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"
+        seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.seed + runId) : params.seed
         """
         pyscenic aucell \
             $filteredLoom \
@@ -47,6 +48,7 @@ process AUCELL {
             -o "${outputFileName}" \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
             --gene_attribute ${toolParams.gene_attribute} \
+            --seed ${seed} \
             --num_workers ${processParams.numWorkers}
         """
 

@@ -35,7 +35,7 @@ if(!isAppendOnlyMode && !(params.global.genome.assembly in ['dm6','hg38']))
 
 include './../channels/file.nf' params(params)
 
-include GRNBOOST2_WITHOUT_DASK                                    from './processes/grnboost2withoutDask'  params(params)
+include ARBORETO_WITH_MULTIPROCESSING                             from './processes/arboreto_with_multiprocessing'  params(params)
 include CISTARGET as CISTARGET__MOTIF                             from './processes/cistarget'             params(params)
 include CISTARGET as CISTARGET__TRACK                             from './processes/cistarget'             params(params)
 include AUCELL as AUCELL__MOTIF                                   from './processes/aucell'                params(params)
@@ -73,7 +73,7 @@ workflow scenic {
     main:
         /* GRN */
         tfs = file(params.sc.scenic.grn.tfs)
-        grn = GRNBOOST2_WITHOUT_DASK( filteredLoom.combine(runs), tfs )
+        grn = ARBORETO_WITH_MULTIPROCESSING( filteredLoom.combine(runs), tfs )
 
         /* cisTarget motif analysis */
         // channel for SCENIC databases resources:
