@@ -5,13 +5,13 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" 
 toolParams = params.sc.scenic
 processParams = params.sc.scenic.grn
 
-process GRNBOOST2_WITHOUT_DASK {
+process ARBORETO_WITH_MULTIPROCESSING {
 
     // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
     label "${processParams.labels ? processParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
-    publishDir "${toolParams.scenicoutdir}/${sampleId}/grnboost2withoutDask/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
+    publishDir "${toolParams.scenicoutdir}/${sampleId}/arboreto_with_multiprocessing/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=${processParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=${processParams.walltime} -A ${params.global.qsubaccount}"
     maxForks processParams.maxForks
 
@@ -40,13 +40,14 @@ process GRNBOOST2_WITHOUT_DASK {
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"
         seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.seed + runId) : params.seed
         """
-        ${binDir}grnboost2_without_dask.py \
+        ${binDir}arboreto_with_multiprocessing.py \
             $filteredLoom \
             $tfs \
             --output ${outputFileName} \
             --num_workers ${processParams.numWorkers} \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
             --gene_attribute ${toolParams.gene_attribute} \
+            --method ${processParams.algorithm} \
             --seed ${seed}
         """
 
