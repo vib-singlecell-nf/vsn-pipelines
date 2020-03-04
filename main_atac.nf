@@ -19,6 +19,8 @@ def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.ke
 params.manifestAsJSON = toJson(workflow.manifest)
 params.paramsAsJSON = toJson(paramsCopy)
 
+include './src/channels/channels' params(params)
+
 /* 
     ATAC-seq pipelines
 */
@@ -34,5 +36,11 @@ workflow cellranger_atac {
         file(params.sc.cellranger_atac.count.reference)
     )
 
+}
+
+
+workflow cistopic {
+    include cistopic as CISTOPIC from './src/cistopic/main' params(params)
+    getDataChannel | CISTOPIC
 }
 

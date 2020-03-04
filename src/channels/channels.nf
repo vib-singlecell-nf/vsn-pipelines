@@ -17,6 +17,15 @@ workflow getDataChannel {
                 }
             ).view()
         }
+        if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex")) {
+            data = data.concat(
+                getTenXCellRangerMEXChannel(
+                    params.data.tenx_atac.cellranger_mex
+                ).map {
+                    it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", "cistopic_rds")
+                }
+            ).view()
+        }
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5")) {
             data = data.concat(
                 getTenXCellRangerH5Channel( 

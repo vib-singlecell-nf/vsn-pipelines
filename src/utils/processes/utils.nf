@@ -33,9 +33,14 @@ def detectCellRangerVersionData(cellRangerV2Data, cellRangerV3Data) {
 
 process SC__FILE_CONVERTER {
 
-    echo true
+    echo false
 	cache 'deep'
-	container params.sc.scanpy.container
+
+    if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
+        container params.sc.cistopic.container
+    else
+        container params.sc.scanpy.container
+
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
@@ -62,6 +67,9 @@ process SC__FILE_CONVERTER {
 				cellranger_outs_v2_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_gene_bc_matrices/")
 				cellranger_outs_v3_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix/")
 				f = detectCellRangerVersionData(cellranger_outs_v2_mex, cellranger_outs_v3_mex)
+			break;
+			case "10x_atac_cellranger_mex":
+				// Nothing to be done here
 			break;
 
 			case "10x_cellranger_h5":
@@ -91,6 +99,13 @@ process SC__FILE_CONVERTER {
 		if(inputDataType == "h5ad")
 			"""
 			cp ${f} "${sampleId}.SC__FILE_CONVERTER.h5ad"
+			"""
+        else if(inputDataType == "10x_atac_cellranger_mex" && outputDataType == "cistopic_rds")
+			"""
+			${binDir}create_cistopic_object.R \
+                --tenx_path ${f} \
+                --sampleId ${sampleId} \
+                --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
 			"""
 		else
 			"""
