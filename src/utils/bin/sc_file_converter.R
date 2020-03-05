@@ -59,7 +59,7 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
-  c("-l", "--seurat-layer"),
+  c("-l", "--seurat-main-layer"),
   action = "store",
   default = "counts",
   help = "The layer name of array to put as main matrix."
@@ -108,7 +108,7 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     from="seurat",
     to="anndata",
     assay = args$`seurat-assay`,
-    main_layer = args$`seurat-layer`,
+    main_layer = args$`seurat-main-layer`,
     outFile=paste0(FILE_PATH_OUT_BASENAME, ".h5ad")
   )
 } else {
