@@ -38,7 +38,9 @@ process SC__FILE_CONVERTER {
 
     if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
         container params.sc.cistopic.container
-    else
+    else if(params.data.containsKey("seurat_rds"))
+		container "vibsinglecellnf/sceasy:0.1.0"
+	else
         container params.sc.scanpy.container
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
@@ -107,7 +109,17 @@ process SC__FILE_CONVERTER {
                 --sampleId ${sampleId} \
                 --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
             """
-        else
+        else if(inputDataType.toLowerCase().contains("rds"))
+			"""
+			${binDir}sc_file_converter.R \
+                --sample-id "${sampleId}" \
+                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id' : ''} \
+                --input-format $inputDataType \
+                --output-format $outputDataType \
+                ${f} \
+                "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
+			"""
+		else
             """
             ${binDir}sc_file_converter.py \
                 --sample-id "${sampleId}" \
