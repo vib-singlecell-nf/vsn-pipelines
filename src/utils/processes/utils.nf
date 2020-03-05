@@ -195,7 +195,7 @@ process SC__PUBLISH_H5AD {
 
 process COMPRESS_HDF5() {
 
-	container "aertslab/sctx-hdf5:1.10.5-r2"
+	container "vibsinglecellnf/hdf5:1.10.5-r2"
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
