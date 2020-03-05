@@ -115,7 +115,9 @@ process SC__FILE_CONVERTER {
 			"""
 			${binDir}sc_file_converter.R \
                 --sample-id "${sampleId}" \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.containsKey('tagCellWithSampleId') : ''} \
+                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+                ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
+                ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
                 --input-format $inputDataType \
                 --output-format $outputDataType \
                 --input-file ${f} \
