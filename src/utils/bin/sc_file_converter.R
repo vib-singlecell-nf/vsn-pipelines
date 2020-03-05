@@ -70,15 +70,16 @@ args <- parse_args(parser)
 isTrue <- function(x) {
   x <- tolower(x = x)
   return (
-    x | x == 't' | x == 'true' | x == 'y' | x == 'yes'
+    x == FALSE | x == F | x == 't' | x == 'true' | x == 'y' | x == 'yes'
   )
 }
 
 # Define the arguments properly
-FILE_PATH_IN = args$input
-FILE_PATH_OUT_BASENAME = strsplit(x = args$output, split = "\\.")[[1]][1]
-INPUT_FORMAT = args$`input-format`
-OUTPUT_FORMAT = args$`output-format`
+FILE_PATH_IN <- args$`input-file`
+FILE_NAME_SPLITTED <- strsplit(x = basename(path = args$`output-file`), split = "\\.")[[1]]
+FILE_PATH_OUT_BASENAME <- paste0(FILE_NAME_SPLITTED[1], ".", FILE_NAME_SPLITTED[2])
+INPUT_FORMAT <- args$`input-format`
+OUTPUT_FORMAT <- args$`output-format`
 
 if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
   seurat <- tryCatch({
@@ -86,12 +87,12 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
   }, warning = function(w) {
   }, error = function(e) {
     stop("Cannot read the given Rds file.")
-  }, finally = {}
+  }, finally = {})
 
-  if(class(seurat) != "Seurat") {
+  if(class(x = seurat) != "Seurat") {
     stop("The object contained in the Rds file is not a Seurat object.")
   }
-  if(isTrue(x = args$`tag-cell-with-sample-id)) {
+  if(isTrue(x = args$`tag-cell-with-sample-id`)) {
     new.names <- gsub(
       pattern = "-([0-9]+)$",
       replace = paste0("-", args$`sample-id`),

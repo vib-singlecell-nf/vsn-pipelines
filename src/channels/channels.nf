@@ -49,7 +49,7 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.tsv.file_paths,
-                    params.data.h5ad.suffix
+                    params.data.tsv.suffix
                 ).map {
                     it -> tuple(it[0], it[1], "tsv", "h5ad")
                 }
@@ -59,9 +59,19 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.csv.file_paths,
-                    params.data.h5ad.suffix
+                    params.data.csv.suffix
                 ).map {
                     it -> tuple(it[0], it[1], "csv", "h5ad")
+                }
+            ).view()
+        }
+        if(params.data.containsKey("seurat_rds")) {
+            data = data.concat(
+                getFileChannel( 
+                    params.data.seurat_rds.file_paths,
+                    params.data.seurat_rds.suffix
+                ).map {
+                    it -> tuple(it[0], it[1], "seurat_rds", "h5ad")
                 }
             ).view()
         }
