@@ -35,14 +35,12 @@ process SC__FILE_CONVERTER {
 
     echo false
     cache 'deep'
-
-    if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
+	if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
         container params.sc.cistopic.container
     else if(params.data.containsKey("seurat_rds"))
-		container "vibsinglecellnf/sceasy:0.1.0"
+		container "vibsinglecellnf/sceasy:0.0.5"
 	else
         container params.sc.scanpy.container
-
     clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
@@ -92,6 +90,10 @@ process SC__FILE_CONVERTER {
             case "h5ad":
                 // Nothing to be done here
             break;
+
+            case "seurat_rds":
+                // Nothing to be done here
+            break;
             
             default:
                 throw new Exception("The given input format ${inputDataType} is not recognized.")
@@ -113,11 +115,11 @@ process SC__FILE_CONVERTER {
 			"""
 			${binDir}sc_file_converter.R \
                 --sample-id "${sampleId}" \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id' : ''} \
+                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.containsKey('tagCellWithSampleId') : ''} \
                 --input-format $inputDataType \
                 --output-format $outputDataType \
-                ${f} \
-                "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
+                --input-file ${f} \
+                --output-file "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
 			"""
 		else
             """
