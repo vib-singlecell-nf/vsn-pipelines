@@ -64,6 +64,13 @@ parser <- add_option(
   default = "counts",
   help = "The layer name of array to put as main matrix."
 )
+parser <- add_option(
+  parser,
+  c("-r", "--seurat-reset"),
+  action = "store",
+  default = TRUE,
+  help = "If true, the following slots will be removed: @graphs, @neighbors, @reductions, $[[args$`seurat-assay`]]@data, $[[args$`seurat-assay`]]@scale.data."
+)
 
 args <- parse_args(parser)
 
@@ -102,6 +109,18 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
       object = seurat,
       new.names = new.names
     )
+  }
+  if(isTrue(x = args$`seurat-reset`)) {
+    print("Resetting @graphs in seurat object...")
+    seurat@graphs<-list()
+    print("Resetting @reductions in seurat object...")
+    seurat@reductions<-list()
+    print("Resetting @neighbors in seurat object...")
+    seurat@neighbors<-list()
+    print(paste0("Resetting @assays$",args$`seurat-assay`,"@data in seurat object..."))
+    seurat@assays[[args$`seurat-assay`]]@data<-matrix(ncol = 0, nrow = 0)
+    print(paste0("Resetting @assays$",args$`seurat-assay`,"@scale.data in seurat object..."))
+    seurat@assays[[args$`seurat-assay`]]@scale.data<-matrix(ncol = 0, nrow = 0)
   }
   sceasy::convertFormat(
     seurat,
