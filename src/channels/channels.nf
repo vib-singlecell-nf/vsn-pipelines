@@ -17,6 +17,15 @@ workflow getDataChannel {
                 }
             ).view()
         }
+        if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex")) {
+            data = data.concat(
+                getTenXCellRangerMEXChannel(
+                    params.data.tenx_atac.cellranger_mex
+                ).map {
+                    it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", "cistopic_rds")
+                }
+            ).view()
+        }
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5")) {
             data = data.concat(
                 getTenXCellRangerH5Channel( 
@@ -40,7 +49,7 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.tsv.file_paths,
-                    params.data.h5ad.suffix
+                    params.data.tsv.suffix
                 ).map {
                     it -> tuple(it[0], it[1], "tsv", "h5ad")
                 }
@@ -50,9 +59,19 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.csv.file_paths,
-                    params.data.h5ad.suffix
+                    params.data.csv.suffix
                 ).map {
                     it -> tuple(it[0], it[1], "csv", "h5ad")
+                }
+            ).view()
+        }
+        if(params.data.containsKey("seurat_rds")) {
+            data = data.concat(
+                getFileChannel( 
+                    params.data.seurat_rds.file_paths,
+                    params.data.seurat_rds.suffix
+                ).map {
+                    it -> tuple(it[0], it[1], "seurat_rds", "h5ad")
                 }
             ).view()
         }
