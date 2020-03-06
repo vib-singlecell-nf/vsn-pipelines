@@ -3,28 +3,28 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include '../src/utils/processes/files.nf' params(params.sc.file_concatenator + params.global + params)
-include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
+include '../src/utils/processes/files.nf' params(params)
+include '../src/utils/processes/utils.nf' params(params)
 include '../src/utils/workflows/utils.nf' params(params)
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params + params.global)
-include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params + params.global)
+include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
+include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
 include SC__SCANPY__REGRESS_OUT from '../src/scanpy/processes/regress_out.nf' params(params)
 include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params + params.global)
-include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
+include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
+include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params)
 // CLUSTER_IDENTIFICATION
 include '../src/scanpy/processes/cluster.nf' params(params)
-include '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global) // Don't only import a specific process (the function needs also to be imported)
-include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params + params.global)
+include '../src/scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
+include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 include BEC_BBKNN from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
 
 // reporting:
 include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../src/utils/processes/reports.nf' params(params)
-include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params + params.global)
-include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
+include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params)
+include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params)
 
 
 workflow bbknn {
