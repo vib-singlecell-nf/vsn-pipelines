@@ -1,6 +1,7 @@
 nextflow.preview.dsl=2
 
 import static groovy.json.JsonOutput.*
+import org.yaml.snakeyaml.Yaml
 
 include '../../utils/processes/utils.nf'
 
@@ -27,11 +28,13 @@ process SC__SCANPY__GENERATE_REPORT {
 		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 
 	script:
+		def reportParams = new Yaml().dump(annotations_to_plot: params.sc.scanpy.report.annotations_to_plot)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
 			${sampleId}.${reportTitle}.ipynb \
 			-p FILE $adata \
+			-y "${reportParams}" \
 			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
 			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
@@ -112,11 +115,13 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
   	script:
 		if(!isParamNull(stashedParams))
 			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
+		def reportParams = new Yaml().dump(annotations_to_plot: params.sc.scanpy.report.annotations_to_plot)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
 			${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + "." : ''}ipynb \
 			-p FILE1 $data1 -p FILE2 $data2 \
+			-y "${reportParams}" \
 			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
 			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
