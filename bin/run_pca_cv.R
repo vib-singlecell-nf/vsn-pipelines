@@ -244,9 +244,15 @@ use_variable_features <- as.logical(args$`use-variable-features`)
 
 if(use_variable_features) {
   # meta_features <- seurat@assays$RNA@meta.features
+  hv_column_names <- c("highly.variable","highly_variable")
+  hv_column_mask <- hv_column_names %in% colnames(x = meta_features)
+  if(sum(x = hv_column_mask) == 0) {
+    stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable' or 'highly_variable' is not present does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
+  } else {
+    hv_column_name <- hv_column_names[hv_column_mask]
+    meta_features[[hv_column_name]][is.na(x = meta_features[[hv_column_name]])] <- FALSE
+    hvf <- row.names(x = meta_features)[meta_features[[hv_column_name]]]
   }
-  meta_features$highly.variable[is.na(x = meta_features$highly.variable)] <- FALSE
-  hvf <- row.names(x = meta_features)[meta_features$highly.variable]
   if(all(hvf == row.names(x = data))) {
     print("Input contains already data with highly variable features.")
     print("Skipping the subsetting.")
