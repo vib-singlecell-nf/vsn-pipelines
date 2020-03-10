@@ -241,6 +241,9 @@ class SCopeLoom:
         y = self.col_attrs['Embeddings_Y'][str(embedding_id)]
         return np.column_stack((x, y))
 
+    def has_embedding(self, embedding_name):
+        return embedding_name in self.embeddings.keys()
+
     def add_embedding(self, embedding: np.ndarray, embedding_name, is_default: bool = False):
         df_embedding = pd.DataFrame(embedding, columns=['_X', '_Y'], index=self.ex_mtx.index)
         _embedding = Embedding(embedding=df_embedding, embedding_name=embedding_name, is_default=is_default)
@@ -632,7 +635,7 @@ class SCopeLoom:
         else:
             sys.exit(f"ERROR: Sorting by column axis is not implemented")
 
-    def merge(self, loom):
+    def merge(self, loom, overwrite_embeddings=False):
         # Check all the cells and genes are in the same order
         if not all(self.get_cell_ids() == loom.get_cell_ids()):
             sys.exit(f"ERROR: Column attribute CellIDs does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
@@ -644,10 +647,13 @@ class SCopeLoom:
 
             print(f"Merging embeddings from {os.path.basename(loom.filename)} into {os.path.basename(self.filename)}...")
             for embedding in loom.get_meta_data()['embeddings']:
-                self.add_embedding(
-                    embedding_name=embedding['name'],
-                    embedding=loom.get_embedding_by_id(embedding_id=embedding['id'])
-                )
+                # Only add the embedding if not present in this loom and overwrite_embeddings is False
+                if not self.has_embedding(embedding_name=embedding['name']) or overwrite_embeddings:
+                    print(f"Adding {embedding['name']} embedding...")
+                    self.add_embedding(
+                        embedding_name=embedding['name'],
+                        embedding=loom.get_embedding_by_id(embedding_id=embedding['id'])
+                    )
             print("Done.")
 
         # Add SCENIC results if present in the given loom
