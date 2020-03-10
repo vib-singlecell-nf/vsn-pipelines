@@ -33,23 +33,30 @@ workflow mnncorrect {
 
     main:
 
-        // Run the pipeline
-        QC_FILTER( data ) // Remove concat
-        SC__FILE_CONCATENATOR( 
-            QC_FILTER.out.filtered.map {
-                it -> it[1]
-            }.toSortedList( 
-                { a, b -> getBaseName(a) <=> getBaseName(b) }
-            )
-        )
-        NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
-        HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
-        } else {
-            preprocessed_data = HVG_SELECTION.out.scaled
+        out = data
+        out = SC__FILE_CONVERTER( data )
+        if(params.sc.scanpy.containsKey("filter")) {
+            out = QC_FILTER( out ) // Remove concat
         }
-        DIM_REDUCTION_PCA( preprocessed_data )
+        if(params.sc.containsKey("file_concatenator")) {
+            out = SC__FILE_CONCATENATOR( 
+                out.filtered.map {
+                    it -> it[1]
+                }.toSortedList( 
+                    { a, b -> getBaseName(a) <=> getBaseName(b) }
+                ) 
+            )
+        }
+        if(params.sc.scanpy.containsKey("data_transformation") && params.sc.scanpy.containsKey("normalization")) {
+            out = NORMALIZE_TRANSFORM( out )
+        }
+        out = HVG_SELECTION( out )
+        if(params.sc.scanpy.containsKey("regress_out")) {
+            out = SC__SCANPY__REGRESS_OUT( out.scaled )
+        } else {
+            out = out.scaled
+        }
+        DIM_REDUCTION_PCA( out )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
@@ -66,14 +73,23 @@ workflow mnncorrect {
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
 
-        // Conversion
+       // Conversion
         // Convert h5ad to X (here we choose: loom format)
-        filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-        scopeloom = FILE_CONVERTER(
-            BEC_MNNCORRECT.out.data.groupTuple(),
-            'loom',
-            SC__FILE_CONCATENATOR.out,
-        )
+        if(params.sc.containsKey("file_concatenator")) {
+            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
+                scopeloom = FILE_CONVERTER(
+                BEC_MNNCORRECT.out.data.groupTuple(),
+                'loom',
+                SC__FILE_CONCATENATOR.out
+            )
+        } else {
+            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
+                scopeloom = FILE_CONVERTER(
+                BEC_MNNCORRECT.out.data.groupTuple(),
+                'loom',
+                SC__FILE_CONVERTER.out
+            )
+        }
 
         project = CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
