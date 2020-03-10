@@ -69,16 +69,20 @@ workflow GENERATE_REPORT {
                     break;
                 default: 
                     throw new Exception("Invalid pipeline step")
-                    break; 
+                    break;
             }
         } else {
-            report_notebook = SC__SCANPY__GENERATE_REPORT(
-                ipynb,
-                // expects (sample_id, adata)
-                data,
-                reportTitle
-            ).map {
-                it -> tuple(it[0], it[1], null)
+            switch(pipelineStep) {
+                default:
+                    report_notebook = SC__SCANPY__GENERATE_REPORT(
+                        ipynb,
+                        // expects (sample_id, adata)
+                        data,
+                        reportTitle
+                    ).map {
+                        it -> tuple(it[0], it[1], null)
+                    }
+                    break;
             }
         }
         SC__SCANPY__REPORT_TO_HTML(report_notebook.map {
