@@ -52,11 +52,22 @@ if(is.null(args$`vars-use`)) {
 input_ext <- tools::file_ext(args$`input-file`)
 
 if(input_ext == "h5ad") {
-  seurat <- Seurat::ReadH5AD(file = args$`input-file`)
-  if(!("pca" %in% names(seurat@reductions)) || is.null(x = seurat@reductions$pca))
-    stop("Expects a PCA embeddings data matrix but it does not exist.")
-  data <- seurat@reductions$pca
-  metadata <- seurat@meta.data
+  # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
+  file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
+  if(!("X_pca" %in% names(x = file[["obsm"]]))) {
+    stop("HI")
+  }
+  obs <- file[['obs']][]
+  pca_embeddings <- t(x = file[["obsm"]][["X_pca"]][,])
+  row.names(x = pca_embeddings) <- obs$index
+  colnames(x = pca_embeddings) <- paste0("PCA_", seq(from = 1, to = ncol(x = pca_embeddings)))
+  metadata <- obs
+  # seurat <- Seurat::ReadH5AD(file = args$`input-file`)
+  # if(!("pca" %in% names(seurat@reductions)) || is.null(x = seurat@reductions$pca))
+  #   stop("Expects a PCA embeddings data matrix but it does not exist.")
+  # data <- seurat@reductions$pca
+  # pca_embeddings <- data@cell.embeddings
+  # metadata <- seurat@meta.data
 } else {
   stop(paste0("Unrecognized input file format: ", input_ext, "."))
 }
@@ -68,7 +79,8 @@ if(sum(args$`vars-use` %in% colnames(x = metadata)) != length(x = args$`vars-use
 }
 
 # Run Harmony
-harmony_embeddings <- harmony::HarmonyMatrix(data_mat = data@cell.embeddings
+# Expects PCA matrix (Cells as rows and PCs as columns.)
+harmony_embeddings <- harmony::HarmonyMatrix(data_mat = pca_embeddings
                                              , meta_data = metadata
                                              , vars_use = args$`vars-use`
                                              , do_pca = args$`do-pca`
