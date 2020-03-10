@@ -37,11 +37,11 @@ workflow bbknn {
         out = data
         out = SC__FILE_CONVERTER( data )
         if(params.sc.scanpy.containsKey("filter")) {
-            out = QC_FILTER( out ) // Remove concat
+            out = QC_FILTER( out ).filtered // Remove concat
         }
         if(params.sc.containsKey("file_concatenator")) {
             out = SC__FILE_CONCATENATOR( 
-                out.filtered.map {
+                out.map {
                     it -> it[1]
                 }.toSortedList( 
                     { a, b -> getBaseName(a) <=> getBaseName(b) }
@@ -80,14 +80,14 @@ workflow bbknn {
         // Convert h5ad to X (here we choose: loom format)
         if(params.sc.containsKey("file_concatenator")) {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-                scopeloom = FILE_CONVERTER(
+            scopeloom = FILE_CONVERTER(
                 BEC_BBKNN.out.data.groupTuple(),
                 'loom',
                 SC__FILE_CONCATENATOR.out
             )
         } else {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
-                scopeloom = FILE_CONVERTER(
+            scopeloom = FILE_CONVERTER(
                 BEC_BBKNN.out.data.groupTuple(),
                 'loom',
                 SC__FILE_CONVERTER.out
