@@ -38,7 +38,6 @@ workflow QC_FILTER {
         data
 
     main:
-        data = SC__FILE_CONVERTER( data )
         if(params.utils.update_feature_metadata_index) {
             data = UPDATE_FEATURE_NOMENCLATURE( data )
         }
