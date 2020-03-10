@@ -213,15 +213,29 @@ if(input_ext == "loom") {
     , path = args$`accessor`
   )
 } else if(input_ext == "h5ad") {
-  seurat <- Seurat::ReadH5AD(file = args$`input-file`)
-  if(!methods::.hasSlot(object = seurat@assays$RNA, name = "scale.data") || is.null(x = slot(object = seurat@assays$RNA, name = "scale.data")))
-    stop("Expects a feature-scaled data matrix but it does not exist.")
-  if(is.null(args$`accessor`))
-    stop("The --accessor argument need to be set.")
-  data <- GetDataFromS4ObjectByAccessPath(
-    object = seurat
-    , path = args$`accessor`
-  )
+  # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
+  file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
+  if (is(object = file[['X']], class2 = 'H5Group')) {
+    data <- Seurat::as.sparse(x = file[['X']])
+  } else {
+    data <- file[['X']][, ]
+  }
+  # x will be an S3 matrix if X was scaled, otherwise will be a dgCMatrix
+  # Pull cell- and feature-level metadata
+  obs <- file[['obs']][]
+  meta_features <- file[['var']][]
+  rownames(x = data) <- rownames(x = meta_features) <- meta_features$index
+  colnames(x = data) <- rownames(x = obs) <- obs$index
+  file$close_all()
+  # seurat <- Seurat::ReadH5AD(file = args$`input-file`)
+  # if(!methods::.hasSlot(object = seurat@assays$RNA, name = "scale.data") || is.null(x = slot(object = seurat@assays$RNA, name = "scale.data")))
+  #   stop("Expects a feature-scaled data matrix but it does not exist.")
+  # if(is.null(args$`accessor`))
+  #   stop("The --accessor argument need to be set.")
+  # data <- GetDataFromS4ObjectByAccessPath(
+  #   object = seurat
+  #   , path = args$`accessor`
+  # )
 } else {
   stop(paste0("Unrecognized input file format: ", input_ext, "."))
 }
@@ -229,12 +243,16 @@ if(input_ext == "loom") {
 use_variable_features <- as.logical(args$`use-variable-features`)
 
 if(use_variable_features) {
-  meta_features <- seurat@assays$RNA@meta.features
-  if(!("highly.variable" %in% colnames(x = meta_features))) {
-    stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
+  # meta_features <- seurat@assays$RNA@meta.features
+  hv_column_names <- c("highly.variable","highly_variable")
+  hv_column_mask <- hv_column_names %in% colnames(x = meta_features)
+  if(sum(x = hv_column_mask) == 0) {
+    stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable' or 'highly_variable' is not present does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
+  } else {
+    hv_column_name <- hv_column_names[hv_column_mask]
+    meta_features[[hv_column_name]][is.na(x = meta_features[[hv_column_name]])] <- FALSE
+    hvf <- row.names(x = meta_features)[meta_features[[hv_column_name]]]
   }
-  meta_features$highly.variable[is.na(x = meta_features$highly.variable)] <- FALSE
-  hvf <- row.names(x = meta_features)[meta_features$highly.variable]
   if(all(hvf == row.names(x = data))) {
     print("Input contains already data with highly variable features.")
     print("Skipping the subsetting.")
