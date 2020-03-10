@@ -3,8 +3,8 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include '../src/utils/processes/files.nf' params(params.sc.file_concatenator + params.global + params)
-include '../src/utils/processes/utils.nf' params(params.sc.file_concatenator + params.global + params)
+include '../src/utils/processes/files.nf' params(params)
+include '../src/utils/processes/utils.nf' params(params)
 include '../src/utils/workflows/utils.nf' params(params)
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
@@ -12,19 +12,19 @@ include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf
 include SC__SCANPY__REGRESS_OUT from '../src/scanpy/processes/regress_out.nf' params(params)
 include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
 include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params + params.global)
-include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params + params.global)
+include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
+include DIM_REDUCTION_TSNE_UMAP from '../src/scanpy/workflows/dim_reduction.nf' params(params)
 // CLUSTER_IDENTIFICATION
-include '../src/scanpy/processes/cluster.nf' params(params + params.global)
-include '../src/scanpy/workflows/cluster_identification.nf' params(params + params.global) // Don't only import a specific process (the function needs also to be imported)
+include '../src/scanpy/processes/cluster.nf' params(params)
+include '../src/scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
 include BEC_MNNCORRECT from '../src/scanpy/workflows/bec_mnncorrect.nf' params(params)
 include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
 include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
 
 // reporting:
 include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../src/utils/processes/reports.nf' params(params)
-include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params + params.global)
-include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params + params.global)
+include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params)
+include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params)
 
 workflow mnncorrect {
 
@@ -33,23 +33,30 @@ workflow mnncorrect {
 
     main:
 
-        // Run the pipeline
-        QC_FILTER( data ) // Remove concat
-        SC__FILE_CONCATENATOR( 
-            QC_FILTER.out.filtered.map {
-                it -> it[1]
-            }.toSortedList( 
-                { a, b -> getBaseName(a) <=> getBaseName(b) }
-            )
-        )
-        NORMALIZE_TRANSFORM( SC__FILE_CONCATENATOR.out )
-        HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
-        } else {
-            preprocessed_data = HVG_SELECTION.out.scaled
+        out = data
+        out = SC__FILE_CONVERTER( data )
+        if(params.sc.scanpy.containsKey("filter")) {
+            out = QC_FILTER( out ) // Remove concat
         }
-        DIM_REDUCTION_PCA( preprocessed_data )
+        if(params.sc.containsKey("file_concatenator")) {
+            out = SC__FILE_CONCATENATOR( 
+                out.filtered.map {
+                    it -> it[1]
+                }.toSortedList( 
+                    { a, b -> getBaseName(a) <=> getBaseName(b) }
+                ) 
+            )
+        }
+        if(params.sc.scanpy.containsKey("data_transformation") && params.sc.scanpy.containsKey("normalization")) {
+            out = NORMALIZE_TRANSFORM( out )
+        }
+        out = HVG_SELECTION( out )
+        if(params.sc.scanpy.containsKey("regress_out")) {
+            out = SC__SCANPY__REGRESS_OUT( out.scaled )
+        } else {
+            out = out.scaled
+        }
+        DIM_REDUCTION_PCA( out )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
@@ -66,14 +73,23 @@ workflow mnncorrect {
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
 
-        // Conversion
+       // Conversion
         // Convert h5ad to X (here we choose: loom format)
-        filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-        scopeloom = FILE_CONVERTER(
-            BEC_MNNCORRECT.out.data.groupTuple(),
-            'loom',
-            SC__FILE_CONCATENATOR.out,
-        )
+        if(params.sc.containsKey("file_concatenator")) {
+            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
+                scopeloom = FILE_CONVERTER(
+                BEC_MNNCORRECT.out.data.groupTuple(),
+                'loom',
+                SC__FILE_CONCATENATOR.out
+            )
+        } else {
+            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
+                scopeloom = FILE_CONVERTER(
+                BEC_MNNCORRECT.out.data.groupTuple(),
+                'loom',
+                SC__FILE_CONVERTER.out
+            )
+        }
 
         project = CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
