@@ -53,7 +53,7 @@ workflow single_sample {
 
         // Conversion
         // Convert h5ad to X (here we choose: loom format)
-        if(params.sc.containsKey("filter")) {
+        if(params.sc.scanpy.containsKey("filter")) {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
             // In parameter exploration mode, this automatically merge all the results into the resulting loom
             scopeloom = FILE_CONVERTER(
