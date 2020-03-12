@@ -1,7 +1,7 @@
 VSN-Pipelines
 ==============
 
-|Nextflow| |Gitter| |ReadTheDocs|
+|Nextflow| |Gitter| |ReadTheDocs| |Zenodo|
 
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/vsn-pipelines/badge/?version=latest
     :target: https://vsn-pipelines.readthedocs.io/en/latest/?badge=latest
@@ -14,6 +14,11 @@ VSN-Pipelines
 .. |Gitter| image:: https://badges.gitter.im/vib-singlecell-nf/community.svg
     :target: https://gitter.im/vib-singlecell-nf/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
     :alt: Gitter
+
+.. |Zenodo| image:: https://zenodo.org/badge/199477571.svg
+    :target: https://zenodo.org/badge/latestdoi/199477571
+    :alt: Zenodo
+
 
 |single_sample| |single_sample_scenic| |scenic| |scenic_multiruns| |single_sample_scenic_multiruns| |bbknn| |bbknn_scenic| |harmony| |mnncorrect|
 
@@ -58,6 +63,11 @@ A repository of pipelines for single-cell data in Nextflow DSL2.
 A quick tour of the VSN pipelines ? Please read `Quick Start <https://vsn-pipelines.readthedocs.io/en/latest/getting-started.html#quick-start>`_.
 
 Full documentation available on `Read the Docs <https://vsn-pipelines.readthedocs.io/en/latest/>`_
+
+If VSN-Pipelines is useful for your research, consider citing:
+
+- VSN-Pipelines v0.14.0: `10.5281/zenodo.3703109 <https://doi.org/10.5281/zenodo.3703109>`_.
+- VSN-Pipelines All Versions (will always resolve to the latest one): `10.5281/zenodo.3703108 <https://doi.org/10.5281/zenodo.3703108>`_.
 
 This main repo contains multiple workflows for analyzing single cell transcriptomics data, and depends on a number of tools, which are organized into submodules within the VIB-Singlecell-NF_ organization.
 Currently available workflows include:

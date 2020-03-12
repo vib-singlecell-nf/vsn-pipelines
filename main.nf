@@ -3,13 +3,13 @@ import static groovy.json.JsonOutput.*
 nextflow.preview.dsl=2
 
 if(!params.global.containsKey('seed')) {
-    params.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
+    params.global.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
 
     Channel.from('').view {
             """
 ------------------------------------------------------------------
 \u001B[32m No seed detected in the config \u001B[0m
-\u001B[32m To ensure reproducibility the seed has been set to ${params.seed} \u001B[0m
+\u001B[32m To ensure reproducibility the seed has been set to ${params.global.seed} \u001B[0m
 ------------------------------------------------------------------
             """
     }
@@ -173,7 +173,11 @@ workflow sra_cellranger_bbknn {
             file(params.sc.cellranger.count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out
         )
-        BBKNN( SC__CELLRANGER__COUNT.out )
+        BBKNN( 
+            SC__CELLRANGER__COUNT.out.map {
+                it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+            }
+        )
 
     emit:
         filteredLoom = BBKNN.out.filteredloom
