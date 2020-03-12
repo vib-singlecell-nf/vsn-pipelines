@@ -25,7 +25,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
         """
         ${binDir}run_pca_cv.R \
             --input-file ${f} \
-            ${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
+            --seed ${params.global.seed} \
             ${(processParams.containsKey('accessor')) ? '--accessor "' + processParams.accessor.replace('$','\\$') + '"': ''} \
             ${(processParams.containsKey('useVariableFeatures')) ? '--use-variable-features ' + processParams.useVariableFeatures: ''} \
             ${(processParams.containsKey('kFold')) ? '--k-fold ' + processParams.libraries: ''} \
