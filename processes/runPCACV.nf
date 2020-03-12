@@ -21,7 +21,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.pcacv.find_optimal_npcs)
-		processParams = sampleParams.local
+        processParams = sampleParams.local
         """
         ${binDir}run_pca_cv.R \
             --input-file ${f} \
@@ -29,12 +29,12 @@ process PCACV__FIND_OPTIMAL_NPCS {
             ${(processParams.containsKey('accessor')) ? '--accessor "' + processParams.accessor.replace('$','\\$') + '"': ''} \
             ${(processParams.containsKey('useVariableFeatures')) ? '--use-variable-features ' + processParams.useVariableFeatures: ''} \
             ${(processParams.containsKey('kFold')) ? '--k-fold ' + processParams.libraries: ''} \
-			${(processParams.containsKey('fromNPC')) ? '--from-n-pc ' + processParams.fromNPC: ''} \
-			${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
-			${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
+            ${(processParams.containsKey('fromNPC')) ? '--from-n-pc ' + processParams.fromNPC: ''} \
+            ${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
+            ${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
             ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.libraries: ''} \
-			${(processParams.containsKey('nCores')) ? '--n-cores ' + processParams.nCores: ''} \
-			${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
+            ${(processParams.containsKey('nCores')) ? '--n-cores ' + processParams.nCores: ''} \
+            ${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
             --output-prefix "${sampleId}.PCACV__FIND_OPTIMAL_NPCS" \
             > .command.log 2>&1
