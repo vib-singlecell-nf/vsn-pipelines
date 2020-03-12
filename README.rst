@@ -1,7 +1,7 @@
 VSN-Pipelines
 ==============
 
-|Nextflow| |Gitter| |ReadTheDocs|
+|Nextflow| |Gitter| |ReadTheDocs| |Zenodo|
 
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/vsn-pipelines/badge/?version=latest
     :target: https://vsn-pipelines.readthedocs.io/en/latest/?badge=latest
@@ -17,7 +17,7 @@ VSN-Pipelines
 
 .. |Zenodo| image:: https://zenodo.org/badge/199477571.svg
     :target: https://zenodo.org/badge/latestdoi/199477571
-    :alt: Zenodo https://zenodo.org/badge/latestdoi/199477571
+    :alt: Zenodo
 
 
 |single_sample| |single_sample_scenic| |scenic| |scenic_multiruns| |single_sample_scenic_multiruns| |bbknn| |bbknn_scenic| |harmony| |mnncorrect|
