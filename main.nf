@@ -173,7 +173,11 @@ workflow sra_cellranger_bbknn {
             file(params.sc.cellranger.count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out
         )
-        BBKNN( SC__CELLRANGER__COUNT.out )
+        BBKNN( 
+            SC__CELLRANGER__COUNT.out.map {
+                it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+            }
+        )
 
     emit:
         filteredLoom = BBKNN.out.filteredloom
