@@ -111,7 +111,7 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
         ${binDir}nn/sc_neighborhood_graph.py \
             $f \
             ${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off} \
-			${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
+			--seed ${params.global.seed} \
             ${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
 			${_processParams.getNPcsAsArgument(nPcs)}
         """

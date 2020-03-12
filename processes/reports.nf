@@ -77,11 +77,13 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 		stashedParams = [method, resolution]
 		if(!isParamNull(stashedParams))
 			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
+		def reportParams = new Yaml().dump(annotations_to_plot: params.sc.scanpy.report.annotations_to_plot)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
 			${sampleId}.${reportTitle}.${uuid}.ipynb \
 			-p FILE $adata \
+			-y "${reportParams}" \
 			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
 			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
 		"""
