@@ -71,7 +71,7 @@ workflow DOWNLOAD_FROM_SRA {
             // Remove ending characters (])), all special characters ([]()), /) by underscores
             row -> tuple( 
                 row.run_accession, \
-                row.sample_name.replaceAll("[\\])]\$","").replaceAll("[\\]\\[)(), /]","_") 
+                row.sample_name.replaceAll("[\\])]\$","").replaceAll("[\\]\\[)(), /\\.]","_") 
             )
         }.view()
         // Download and compress all the SRA runs defined in the metadata
