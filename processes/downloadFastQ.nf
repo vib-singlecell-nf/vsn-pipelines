@@ -6,14 +6,18 @@ if(!params.containsKey("test")) {
     binDir = ""
 }
 
+toolParams = params.sratoolkit
+
 process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
 
+    // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
+    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     errorStrategy 'retry'
     maxRetries 3
-    container params.sratoolkit.container
+    container toolParams.container
     publishDir "${params.global.outdir}/data/raw/fastqs", mode: 'symlink', overwrite: true
-    clusterOptions "-l nodes=1:ppn=20 -l walltime=24:00:00 -A ${params.qsubaccount}"
-    maxForks params.sratoolkit.downloadFastqs.maxForks
+    clusterOptions "-l nodes=1:ppn=20 -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    maxForks toolParams.downloadFastqs.maxForks
 
     input:
         tuple val(sraId), val(sampleId)
@@ -27,8 +31,8 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
         }
         """
         prefetch -v -p 1 ${sraId}
-        fasterq-dump -S -v -p -e ${params.sratoolkit.downloadFastqs.threads} -O . ${sraId}
-        pigz -p ${params.sratoolkit.downloadFastqs.threads} *.fastq
+        fasterq-dump -S -v -p -e ${toolParams.downloadFastqs.threads} -O . ${sraId}
+        pigz -p ${toolParams.downloadFastqs.threads} *.fastq
         """
 
 }
