@@ -66,8 +66,7 @@ Full documentation available on `Read the Docs <https://vsn-pipelines.readthedoc
 
 If VSN-Pipelines is useful for your research, consider citing:
 
-- VSN-Pipelines v0.14.0: `10.5281/zenodo.3703109 <https://doi.org/10.5281/zenodo.3703109>`_.
-- VSN-Pipelines All Versions (will always resolve to the latest one): `10.5281/zenodo.3703108 <https://doi.org/10.5281/zenodo.3703108>`_.
+- VSN-Pipelines All Versions (latest): `10.5281/zenodo.3703108 <https://doi.org/10.5281/zenodo.3703108>`_.
 
 This main repo contains multiple workflows for analyzing single cell transcriptomics data, and depends on a number of tools, which are organized into submodules within the VIB-Singlecell-NF_ organization.
 Currently available workflows include:
