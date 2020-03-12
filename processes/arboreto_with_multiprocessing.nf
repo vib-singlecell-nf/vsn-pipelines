@@ -38,7 +38,7 @@ process ARBORETO_WITH_MULTIPROCESSING {
                 throw new Exception("walltime is missing in params.sc.scenic.aucell")
         }
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"
-        seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.seed + runId) : params.seed
+        seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.global.seed + runId) : params.global.seed
         """
         ${binDir}arboreto_with_multiprocessing.py \
             $filteredLoom \
