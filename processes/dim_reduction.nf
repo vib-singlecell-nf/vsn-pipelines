@@ -111,7 +111,7 @@ process SC__SCANPY__DIM_REDUCTION {
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}dim_reduction/sc_dim_reduction.py \
-			${'--seed ' + (params.global.containsKey('seed') ? params.global.seed: params.seed)} \
+			--seed ${params.global.seed} \
 			--method ${processParams.method} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
