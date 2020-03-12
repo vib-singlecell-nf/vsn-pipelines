@@ -11,7 +11,7 @@ process GET_SRA_DB {
 
     container params.utils.container
     publishDir "${processParams.sraDbOutDir}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     output:
         file("SRAmetadb.sqlite")
@@ -28,7 +28,7 @@ process SRA_TO_METADATA {
 
     container params.utils.container
     publishDir "${params.global.outdir}/metadata", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
         tuple val(sraId), val(sampleFilters)
@@ -75,7 +75,7 @@ def normalizeSRAFastQ(fastQPath, sampleName) {
 process NORMALIZE_SRA_FASTQS {
 
     // publishDir "${params.global.outdir}/data", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
         tuple val(sampleId), file(fastqs)
