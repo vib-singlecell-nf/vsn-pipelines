@@ -54,8 +54,8 @@ workflow QC_FILTER {
             data = SC__ANNOTATE_BY_SAMPLE_METADATA( data )
         }
         unfiltered = SC__SCANPY__COMPUTE_QC_STATS( data )
-        SC__SCANPY__GENE_FILTER( unfiltered )
-        filtered = SC__SCANPY__CELL_FILTER( SC__SCANPY__GENE_FILTER.out )
+        SC__SCANPY__CELL_FILTER( unfiltered )
+        filtered = SC__SCANPY__GENE_FILTER( SC__SCANPY__CELL_FILTER.out )
         report = GENERATE_DUAL_INPUT_REPORT(
             unfiltered.join(filtered).map { it -> tuple(*it[0..(it.size()-1)], null)},
             file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
