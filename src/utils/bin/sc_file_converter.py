@@ -155,6 +155,15 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
     adata = adata[:, np.sort(adata.var.index)]
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
+elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
+    adata = sc.read_h5ad(
+        FILE_PATH_IN
+    )
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 else:
     raise Exception(
         "File format conversion {0} --> {1} hasn't been implemented yet.".format(INPUT_FORMAT, OUTPUT_FORMAT))
