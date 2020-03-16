@@ -267,8 +267,6 @@ In the generated .config file, make sur the ``cellranger_h5`` parameter is set w
     [...]
 
 
-Information on using 10x Genomics datasets
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Let's say the file structure of your data looks like this,
 
 .. code::
@@ -313,6 +311,28 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
     }
     [...]
 
+- The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
+
+Seurat Rds
+----------
+
+Use the following profile when generating the config file:
+
+.. code::
+
+    -profile seurat_rds
+
+
+In the generated .config file, make sure the ``file_paths`` parameter is set with the paths to the ``.Rds`` files::
+
+    [...]
+    seurat_rds {
+        file_paths = "data/1k_pbmc_v*_chemistry_SUFFIX.SC__FILE_CONVERTER.Rds"
+        suffix = "_SUFFIX.SC__FILE_CONVERTER.Rds"
+    }
+    [...]
+
+- The pipelines expect a Seurat v3 object contained in the .Rds file. (Seurat v2 objects are currently not supported).
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 
 TSV
