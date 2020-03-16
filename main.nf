@@ -125,6 +125,11 @@ workflow cellranger_metadata {
 
 }
 
+workflow popscle {
+
+    include popscle as POPSCLE from './workflows/popscle' params(params)
+    getDataChannel | POPSCLE
+}
 
 // runs mkfastq, CellRanger count, then single_sample:
 workflow single_sample_cellranger {
