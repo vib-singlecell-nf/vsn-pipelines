@@ -100,11 +100,7 @@ process SC__FILE_CONVERTER {
             break;
         }
 
-        if(inputDataType == "h5ad")
-            """
-            cp ${f} "${sampleId}.SC__FILE_CONVERTER.h5ad"
-            """
-        else if(inputDataType == "10x_atac_cellranger_mex" && outputDataType == "cistopic_rds")
+        if(inputDataType == "10x_atac_cellranger_mex" && outputDataType == "cistopic_rds")
             """
             ${binDir}create_cistopic_object.R \
                 --tenx_path ${f} \
