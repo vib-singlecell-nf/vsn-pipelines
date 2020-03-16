@@ -125,10 +125,14 @@ workflow cellranger_metadata {
 
 }
 
-workflow popscle {
+workflow freemuxlet {
+    include freemuxlet as FREEMUXLET from './workflows/popscle' params(params)
+    getDataChannel | FREEMUXLET
+}
 
-    include popscle as POPSCLE from './workflows/popscle' params(params)
-    getDataChannel | POPSCLE
+workflow demuxlet {
+    include demuxlet as DEMUXLET from './workflows/popscle' params(params)
+    getDataChannel | DEMUXLET
 }
 
 // runs mkfastq, CellRanger count, then single_sample:
