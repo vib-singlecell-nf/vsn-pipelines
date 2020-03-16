@@ -7,8 +7,7 @@ include '../src/utils/processes/files.nf' params(params)
 include '../src/utils/processes/utils.nf' params(params)
 include '../src/utils/workflows/utils.nf' params(params)
 
-include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-include SC__POPSCLE__DSC_PILEUP from '../src/popscle/processes/dsc_pileup.nf' params(params)
+include DSC_PILEUP_FILTERED from '../src/popscle/workflows/dsc_pileup.nf' params(params)
 
 workflow popscle {
 
@@ -21,7 +20,7 @@ workflow popscle {
                 it -> tuple(it[0], it[1])
             }
         print(data)
-        out = SC__POPSCLE__DSC_PILEUP( data )
+        out = DSC_PILEUP_FILTERED( data )
 
     // emit:
 
