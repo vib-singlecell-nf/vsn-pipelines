@@ -30,8 +30,8 @@ workflow DEMUXLET {
 
     main:
         vcf = file(params.sc.popscle.vcf)
-        DSC_PILEUP_FILTERED(data) |
-        SC__POPSCLE__DEMUXLET(vcf)
+        DSC_PILEUP_FILTERED(data)
+        SC__POPSCLE__DEMUXLET(DSC_PILEUP_FILTERED.out, vcf)
     
     emit:
         SC__POPSCLE__DEMUXLET.out
