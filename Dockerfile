@@ -18,16 +18,32 @@ RUN apt-get clean all && \
         libcurl4-openssl-dev \
         libssl-dev \
         zlib1g-dev \
-        liblzma-dev
+        liblzma-dev \
+        automake \
+        make \
+        gcc \
+        perl \
+        libncurses5-dev \
+        bedtools
 
 # apt clean and remove cached source lists
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install htslib
 RUN git clone https://github.com/samtools/htslib.git
 RUN cd htslib && \
     autoheader && \
     autoconf && \
+    ./configure --prefix=/usr/local/ && \
+    make && \
+    make install
+
+# Install SAMtools
+RUN git clone https://github.com/samtools/samtools.git
+RUN cd samtools && \
+    autoheader && \
+    autoconf -Wno-syntax && \
     ./configure --prefix=/usr/local/ && \
     make && \
     make install
@@ -39,6 +55,7 @@ RUN cd popscle && \
     cd build && \
     cmake .. && \
     make
+
 RUN cp /popscle/bin/popscle /usr/local/bin
 
   # Define default command
