@@ -18,8 +18,11 @@ workflow DSC_PILEUP_FILTERED {
         data
 
     main:
-        SC__POPSCLE__PREFILTER_DSC_PILEUP(data) |
-        SC__POPSCLE__DSC_PILEUP
-
+        vcf = file(params.sc.popscle.vcf)
+        SC__POPSCLE__PREFILTER_DSC_PILEUP(data, vcf)
+        SC__POPSCLE__DSC_PILEUP(SC__POPSCLE__PREFILTER_DSC_PILEUP.out, vcf)
+    
+    emit:
+        SC__POPSCLE__DSC_PILEUP.out
 }
 
