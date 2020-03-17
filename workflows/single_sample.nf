@@ -95,7 +95,9 @@ workflow single_sample {
             DIM_REDUCTION_TSNE_UMAP.out.report.map {
                 it -> tuple(it[0], it[1])
             }
-        ).join(
+        ).groupTuple().map {
+            it -> tuple(it[0], *it[1])
+        }.join(
             CLUSTER_IDENTIFICATION.out.report,
             by: 0
         )
