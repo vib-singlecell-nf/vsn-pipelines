@@ -43,4 +43,3 @@
 [submodule "src/popscle"]
 	path = src/popscle
 	url = https://github.com/vib-singlecell-nf/popscle.git
-	branch = develop
