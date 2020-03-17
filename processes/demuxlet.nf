@@ -15,12 +15,12 @@ process SC__POPSCLE__DEMUXLET {
         tuple val(sampleId), path("${sampleId}_demuxlet*")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.popscle)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.popscle.demuxlet)
 		processParams = sampleParams.local
 
         """
         popscle demuxlet \
-            --vcf ${vcf}
+            --vcf ${vcf} \
             ${(processParams.containsKey('field')) ? '--field ' + processParams.field : ''} \
             --plp ${sampleId}_dsc-pileup \
             --out ${sampleId}_demuxlet
