@@ -117,7 +117,7 @@ metadata = pd.concat(
 )
 
 # Filter the meta data based on the given ilters (if provided)
-if "sample_filters" in args:
+if args.sample_filters is not None:
     # Convert * (if not preceded by .) to .*
     def replace_bash_asterisk_wildcard(glob):
         return re.sub(r'(?<!\.)\*', '.*', glob)
@@ -126,7 +126,7 @@ if "sample_filters" in args:
         list(map(
             lambda glob: metadata[
                 list(map(
-                    lambda x: re.match(replace_bash_asterisk_wildcard(glob=glob), x) != None,
+                    lambda x: re.match(replace_bash_asterisk_wildcard(glob=glob), x) is not None,
                     metadata['sample_name'].values
                 ))
             ].drop_duplicates(),
