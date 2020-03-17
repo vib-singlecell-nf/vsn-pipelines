@@ -5,13 +5,14 @@ nextflow.preview.dsl=2
 
 include SC__FILE_CONVERTER from '../utils/processes/utils.nf' params(params)
 
-include SC__TEMPLATE__PROCESS1 from './processes/process1.nf' params(params)
+include SC__POPSCLE__DSC_PILEUP from './processes/dsc_pileup.nf' params(params)
+include SC__POPSCLE__PREFILTER_DSC_PILEUP from './processes/dsc_pileup.nf' params(params)
 
 
 //////////////////////////////////////////////////////
 // Define the workflow
 
-workflow template {
+workflow popscle {
 
     take:
         data
@@ -19,8 +20,8 @@ workflow template {
     main:
         data = SC__FILE_CONVERTER(data)
         data.view()
-
-        SC__TEMPLATE__PROCESS1(data)
+        SC__POPSCLE__PREFILTER_DSC_PILEUP(data) |
+        SC__POPSCLE__DSC_PILEUP
 
 }
 
