@@ -12,9 +12,23 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
-1. Configure with these options '...'
-2. Run using this entry point '....'
-3. See error
+1. Configure with these options:
+<!-- Please specify the configure command used (if applicable, otherwise delete this block): -->
+```
+...
+```
+
+2. Run using this entry point:
+<!-- Please specify the run command used (if applicable, otherwise delete this block): -->
+```
+...
+```
+
+3. See error:
+<!-- Please paste the full error output in this code block (if applicable, otherwise delete this block): -->
+```
+...
+```
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
