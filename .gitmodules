@@ -40,3 +40,6 @@
 [submodule "src/cellranger-atac"]
 	path = src/cellranger-atac
 	url = https://github.com/vib-singlecell-nf/cellranger-atac.git
+[submodule "src/popscle"]
+	path = src/popscle
+	url = https://github.com/vib-singlecell-nf/popscle.git
