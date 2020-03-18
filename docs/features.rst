@@ -241,3 +241,32 @@ By default, don't regress any variable out. To enable this features, the ``scanp
     }
 
 Add any variable in ``variablesToRegressOut`` to regress out: e.g.: 'n_counts', 'percent_mito'.
+
+Skip steps
+----------
+
+By default, the pipelines are run from raw data (unfiltered data, not normalized).
+
+If you have already performed an independent steps with another it's possible to skip some steps from the pipelines. Currently, here are the steps that can be skipped:
+- ``Scanpy`` filtering
+- ``Scanpy`` normalization
+
+Skip Scanpy filtering step
+**************************
+
+In order to skip the Scanpy filtering step, we need to add 3 new profiles when generating the config:
+
+- ``min``
+- ``scanpy_data_transformation``
+- ``scanpy_normalization``
+
+The following command, will create a Nextflow config which the pipeline will understand and will not run the Scanpy filtering step:
+
+.. code:: groovy
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile min,[data-profile],scanpy_data_transformation,scanpy_normalization,[...],singularity > nextflow.config
+
+- ``[data-profile]``: Can be one of the different possible data profiles e.g.: ``h5ad``
+- ``[...]``: Can be other profiles like ``bbknn``, ``harmony``, ``pcacv``, ...

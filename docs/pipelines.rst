@@ -134,6 +134,16 @@ Input parameters are specified within the config file:
 * ``params.sc.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
 
 
+**demuxlet/freemuxlet**
+-----------------------
+Runs the ``demuxlet`` or ``freemuxlet`` workflows (``dsc-pileup`` [with prefiltering], then ``freemuxlet`` or ``demuxlet``)
+Input parameters are specified within the config file:
+
+* ``params.sc.popscle.vcf``: path to the VCF file for demultiplexing
+* ``params.sc.popscle.freemuxlet.nSamples``: Number of clusters to extract (should match the number of samples pooled)
+* ``params.sc.popscle.demuxlet.field``: Field in the VCF with genotype information
+
+
 **nemesh**
 ----------
 Runs the ``nemesh`` pipeline (Drop-seq) on a single sample or multiple samples separately.
@@ -174,7 +184,7 @@ This could be very resource intensive, depending on the dataset.
 
 
 **harmony** |harmony|
------------------
+----------------------
 
 .. |harmony| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/harmony/badge.svg
 
@@ -186,7 +196,7 @@ The output is a loom file with the results embedded.
 .. |Harmony Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/harmony.svg?sanitize=true
 
 **mnncorrect** |mnncorrect|
------------------
+----------------------------
 
 .. |mnncorrect| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/mnncorrect/badge.svg
 
@@ -267,8 +277,6 @@ In the generated .config file, make sur the ``cellranger_h5`` parameter is set w
     [...]
 
 
-Information on using 10x Genomics datasets
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Let's say the file structure of your data looks like this,
 
 .. code::
@@ -313,6 +321,28 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
     }
     [...]
 
+- The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
+
+Seurat Rds
+----------
+
+Use the following profile when generating the config file:
+
+.. code::
+
+    -profile seurat_rds
+
+
+In the generated .config file, make sure the ``file_paths`` parameter is set with the paths to the ``.Rds`` files::
+
+    [...]
+    seurat_rds {
+        file_paths = "data/1k_pbmc_v*_chemistry_SUFFIX.SC__FILE_CONVERTER.Rds"
+        suffix = "_SUFFIX.SC__FILE_CONVERTER.Rds"
+    }
+    [...]
+
+- The pipelines expect a Seurat v3 object contained in the .Rds file. (Seurat v2 objects are currently not supported).
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 
 TSV

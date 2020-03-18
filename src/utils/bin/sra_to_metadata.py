@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-import fnmatch
+import re
 import argparse
 from argparse import RawTextHelpFormatter
 from pysradb import SRAdb
@@ -117,12 +117,16 @@ metadata = pd.concat(
 )
 
 # Filter the meta data based on the given ilters (if provided)
-if "sample_filters" in args:
+if args.sample_filters is not None:
+    # Convert * (if not preceded by .) to .*
+    def replace_bash_asterisk_wildcard(glob):
+        return re.sub(r'(?<!\.)\*', '.*', glob)
+
     metadata = pd.concat(
         list(map(
             lambda glob: metadata[
                 list(map(
-                    lambda x: fnmatch.fnmatch(str(x), glob),
+                    lambda x: re.match(replace_bash_asterisk_wildcard(glob=glob), x) is not None,
                     metadata['sample_name'].values
                 ))
             ].drop_duplicates(),
