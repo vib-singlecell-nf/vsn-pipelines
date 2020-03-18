@@ -56,6 +56,22 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--min-genes-regulon',
+    type=int,
+    default=5,
+    dest="min_genes_regulon",
+    help='The threshold used for filtering the regulons based on the number of targets (default: {}).'.format(5)
+)
+
+parser.add_argument(
+    '--min-regulon-gene-occurrence',
+    type=int,
+    default=5,
+    dest="min_regulon_gene_occurrence",
+    help='The threshold used for filtering the genes bases on their occurrence (default: {}).'.format(5)
+)
+
+parser.add_argument(
     '--loom_output',
     help='Final loom file with pySCENIC motif and track results integrated',
     required=True,
@@ -105,6 +121,8 @@ def integrate_motif_track(args):
 
     # Merge regulon data from scenic track output into scenic motif output
     mtf_scope_loom.merge_regulon_data(scope_loom=trk_scope_loom)
+    mtf_scope_loom.set_scenic_min_genes_regulon(min_genes_regulon=args.min_genes_regulon)
+    mtf_scope_loom.set_scenic_min_regulon_gene_occurrence(min_regulon_gene_occurrence=args.min_regulon_gene_occurrence)
     mtf_scope_loom.add_metrics(metrics=["nUMI", "nGene", "Percent_mito"])
     mtf_scope_loom.export(out_fname=args.loom_output, save_embeddings=False)
 
