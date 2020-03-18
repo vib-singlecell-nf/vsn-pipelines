@@ -147,6 +147,13 @@ class SCopeLoom:
         )
         if 'embeddings' in scope_loom.get_meta_data():
             scope_loom.convert_loom_embeddings_repr_to_internal_repr()
+
+        # If multi-runs mode
+        is_multi_runs_mode = scope_loom.has_scenic_multi_runs_data()
+        if is_multi_runs_mode:
+            scope_loom.set_scenic_min_genes_regulon(min_genes_regulon=global_attrs["MetaData"]["regulonSettings"]["min_genes_regulon"])
+            scope_loom.set_scenic_min_regulon_gene_occurrence(min_regulon_gene_occurrence=global_attrs["MetaData"]["regulonSettings"]["min_regulon_gene_occurrence"])
+
         return scope_loom
 
     #############
@@ -155,9 +162,8 @@ class SCopeLoom:
 
     def add_meta_data(self, _dict):
         md = self.global_attrs["MetaData"]
-        meta_data = json.loads(md)
-        meta_data.update(_dict)
-        self.global_attrs["MetaData"] = meta_data
+        md.update(_dict)
+        self.global_attrs["MetaData"] = md
 
     def get_meta_data(self):
         return self.global_attrs["MetaData"]
@@ -336,11 +342,23 @@ class SCopeLoom:
     # SCENIC #
     ##########
 
+    def set_scenic_min_genes_regulon(self, min_genes_regulon):
+        self.scenic_min_genes_regulon = min_genes_regulon
+
+    def set_scenic_min_regulon_gene_occurrence(self, min_regulon_gene_occurrence):
+        self.scenic_min_regulon_gene_occurrence = min_regulon_gene_occurrence
+
     def set_regulon_filter(self, regulons):
         self.regulon_filter = regulons
 
     def has_scenic_multi_runs_data(self):
-        return 'RegulonGeneOccurrences' in self.row_attrs.keys() and 'RegulonGeneWeights' in self.row_attrs.keys()
+        return (
+            'RegulonGeneOccurrences' in self.row_attrs.keys() and 'RegulonGeneWeights' in self.row_attrs.keys()
+        ) or (
+            'MotifRegulonGeneOccurrences' in self.row_attrs.keys() and 'MotifRegulonGeneWeights' in self.row_attrs.keys()
+        ) or (
+            'TrackRegulonGeneOccurrences' in self.row_attrs.keys() and 'TrackRegulonGeneWeights' in self.row_attrs.keys()
+        )
 
     def scopify_md_regulon_data(self):
         # Fix regulon objects to display properly in SCope:
@@ -686,6 +704,12 @@ class SCopeLoom:
 
             print("Done.")
 
+        # If multi-runs mode
+        is_multi_runs_mode = self.has_scenic_multi_runs_data()
+        if is_multi_runs_mode:
+            self.set_scenic_min_genes_regulon(min_genes_regulon=loom.scenic_min_genes_regulon)
+            self.set_scenic_min_regulon_gene_occurrence(min_regulon_gene_occurrence=loom.scenic_min_regulon_gene_occurrence)
+
     def export(self, out_fname: str, save_embeddings: bool = True, compress_meta_data: bool = False):
 
         if out_fname is None:
@@ -701,6 +725,16 @@ class SCopeLoom:
         ##########
         # SCENIC #
         ##########
+        is_multi_runs_mode = self.has_scenic_multi_runs_data()
+        if is_multi_runs_mode:
+            if "regulonSettings" not in self.global_attrs["MetaData"].keys():
+                self.add_meta_data(_dict={
+                    "regulonSettings": {
+                        "min_genes_regulon": self.scenic_min_genes_regulon,
+                        "min_regulon_gene_occurrence": self.scenic_min_regulon_gene_occurrence
+                    }
+                })
+
         if any('Regulon' in s for s in self.row_attrs.keys()):
             self.row_attrs.update(self.scopify_loom_ra_regulon_data())
         if any('RegulonsAUC' in s for s in self.col_attrs.keys()):
