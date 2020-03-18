@@ -120,7 +120,19 @@ workflow cellranger_metadata {
 
     include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
     CELLRANGER_COUNT_WITH_METADATA(
+        file(params.sc.cellranger.count.transcriptome),
         file(params.sc.cellranger.count.metadata)
+    )
+
+}
+
+workflow cellranger_libraries {
+
+    include CELLRANGER_COUNT_WITH_LIBRARIES from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
+    CELLRANGER_COUNT_WITH_LIBRARIES(
+        file(params.sc.cellranger.count.transcriptome),
+        file(params.sc.cellranger.count.featureRef),
+        file(params.sc.cellranger.count.libraries)
     )
 
 }
