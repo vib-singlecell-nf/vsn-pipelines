@@ -163,7 +163,7 @@ scope_loom.set_generic_loom()
 scope_loom.add_row_attr_regulon_gene_weights()
 scope_loom.add_row_attr_regulon_gene_occurrences()
 scope_loom.set_scenic_min_genes_regulon(min_genes_regulon=args.min_genes_regulon)
-scope_loom.set_scenic_min_regulon_gene_occurrence(min_regulon_gene_occurrence=min_regulon_gene_occurrence)
+scope_loom.set_scenic_min_regulon_gene_occurrence(min_regulon_gene_occurrence=args.min_regulon_gene_occurrence)
 scope_loom.export(out_fname=args.output.name, save_embeddings=False)
 
 print(f"... took {time.time() - start} seconds to run.", flush=True)
