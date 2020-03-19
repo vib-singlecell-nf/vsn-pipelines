@@ -626,7 +626,7 @@ class SCopeLoom:
     def set_generic_global_attrs(self):
         self.global_attrs = {
             "title": os.path.splitext(os.path.basename(self.out_fname))[0] if self.title is None else self.title,
-            "MetaData": json.dumps({
+            "MetaData": {
                 "embeddings": [{'id': identifier, 'name': name} for identifier, name in self.id2name.items()],
                 "annotations": [{
                     "name": "",
@@ -639,7 +639,7 @@ class SCopeLoom:
                     "clusters": [{"id": idx, "description": name} for name, idx in self.name2idx().items()]
                 }],
                 "regulonThresholds": self.regulon_thresholds
-            }),
+            },
             "Genome": self.nomenclature
         }
 
