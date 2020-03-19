@@ -650,6 +650,7 @@ class SCopeLoom:
             sorted_idx = np.argsort(self.row_attrs[by])
             for ra_key in self.row_attrs.keys():
                 self.row_attrs[ra_key] = self.row_attrs[ra_key][sorted_idx]
+            self.ex_mtx = self.ex_mtx[self.row_attrs[by]]
         else:
             sys.exit(f"ERROR: Sorting by column axis is not implemented")
 
@@ -659,6 +660,10 @@ class SCopeLoom:
             sys.exit(f"ERROR: Column attribute CellIDs does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
         if not all(self.get_genes() == loom.get_genes()):
             sys.exit(f"ERROR: Row attribute 'Gene' does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
+        if not all(self.get_genes() == self.ex_mtx.columns):
+            sys.exit(f"ERROR: Row attribute 'Gene' does not match with the features in the matrix of {os.path.basename(self.filename)}.")
+        if not all(loom.get_genes() == loom.ex_mtx.columns):
+            sys.exit(f"ERROR: Row attribute 'Gene' does not match with the features in the matrix of {os.path.basename(loom.filename)}.")
 
         # Add the embeddings of the given loom (SCopeLoom) to this SCopeLoom
         if 'embeddings' in loom.get_meta_data():
