@@ -80,7 +80,6 @@ workflow single_sample {
 
 }
 
-
 // run single_sample, then scenic from the filtered output:
 workflow single_sample_scenic {
 
@@ -91,6 +90,22 @@ workflow single_sample_scenic {
         SINGLE_SAMPLE.out.filteredloom,
         SINGLE_SAMPLE.out.scopeloom
     )
+
+}
+
+// run single_sample, then scenic from the previous input (not standalone):
+workflow pipe_single_sample_scenic {
+
+    take:
+        data
+    main:
+        include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+        include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+        data | SINGLE_SAMPLE
+        SCENIC_APPEND(
+            SINGLE_SAMPLE.out.filteredloom,
+            SINGLE_SAMPLE.out.scopeloom
+        )
 
 }
 
@@ -118,10 +133,23 @@ workflow cellranger {
 
 workflow cellranger_metadata {
 
-    include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
-    CELLRANGER_COUNT_WITH_METADATA(
-        file(params.sc.cellranger.count.metadata)
-    )
+    main:
+        include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
+        CELLRANGER_COUNT_WITH_METADATA(
+            file(params.sc.cellranger.count.metadata)
+        )
+    emit:
+        CELLRANGER_COUNT_WITH_METADATA.out
+
+}
+
+workflow cellranger_metadata_single_sample_scenic {
+
+    cellranger_metadata | \
+        map {
+            it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+        } | \
+        pipe_single_sample_scenic
 
 }
 
@@ -142,7 +170,6 @@ workflow single_sample_cellranger {
     cellranger | SINGLE_SAMPLE
 
 }
-
 
 workflow star {
 
