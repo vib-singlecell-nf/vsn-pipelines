@@ -101,9 +101,9 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 
     input:
 		file(transcriptome)
+		file(featureRef)
 		tuple \
 			val(sampleId), \
-			file(featureRef), \
 			file(libraries)
 
   	output:

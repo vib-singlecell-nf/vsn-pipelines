@@ -17,23 +17,32 @@ workflow CELLRANGER_COUNT_WITH_LIBRARIES {
         featureRef
         libraries
 
+
     main:
         // Define the sampleId
-        data = Channel.from(
-            libraries
-        ).splitCsv(
-            header:true,
-            limit: 1
-        ).map {
-            row -> tuple(
-                row.sample,
-                featureRef,
-                libraries
-            )
+        if(libraries.contains(',')) {
+            libraries = Arrays.asList(libraries.split(',')); 
         }
-        SC__CELLRANGER__COUNT_WITH_LIBRARIES( transcriptome, data )
+        Channel
+            .fromPath(libraries, checkIfExists: true)
+            .map {
+                path -> file("${path}")
+            } 
+            .multiMap {
+            csv: it.splitCsv(header:true, limit: 1)
+            files: file(it)
+            }
+            .set { data }
+        
+        data = data.csv.merge( data.files )
+            .map {
+            tuple(
+                it[0].sample,
+                it[1]
+            )
 
-    emit:
-        SC__CELLRANGER__COUNT_WITH_LIBRARIES.out
+        } 
+
+        SC__CELLRANGER__COUNT_WITH_LIBRARIES( transcriptome, featureRef, data )
 
 }
