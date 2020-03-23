@@ -34,9 +34,9 @@ def runCellRangerCount = {
 	return (
 		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
 		"""	\
-		--id=${id} \
+		--id=${id}_out \
 		--sample=${sample} \
-		--fastqs=${fastqs.join(",")}
+		--fastqs=${fastqs}
 		"""
 	)
 }
@@ -51,7 +51,7 @@ def runCellRangerCountLibraries = {
 	return (
 		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
 		""" \
-		--id ${id} \
+		--id ${id}_out \
 		--libraries ${libraries} \
 		--feature-ref ${featureRef}
 		"""
@@ -63,16 +63,18 @@ process SC__CELLRANGER__COUNT {
 	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
-	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
 	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
 	maxForks = toolParams.count.maxForks
 
     input:
 		file(transcriptome)
-		tuple val(sampleId), file(fastqs)
+		tuple \
+			val(sampleId), 
+			path(fastqs, stageAs: "fastqs_??/*")
 
   	output:
-    	tuple val(sampleId), file("${sampleId}/outs")
+    	tuple val(sampleId), file("${sampleId}_out/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
@@ -80,6 +82,7 @@ process SC__CELLRANGER__COUNT {
 		if(processParams.sample == '') {
 			throw new Exception("Regards params.sc.cellranger.count: sample parameter cannot be empty")
 		}
+		fastqs = fastqs instanceof List ? fastqs.join(',') : fastqs
 		runCellRangerCount(
 			processParams,
 			transcriptome,
@@ -95,7 +98,7 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
-	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
 	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
 	maxForks = toolParams.count.maxForks
 
@@ -130,7 +133,7 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
-	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
 	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
 	maxForks = toolParams.count.maxForks
 

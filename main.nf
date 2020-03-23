@@ -24,13 +24,19 @@ workflow MKFASTQ {
         runFolder
     main:
         SC__CELLRANGER__MKFASTQ(mkfastq_csv, runFolder)
-        SC__CELLRANGER__MKFASTQ.out.view()
-        fastqs = SC__CELLRANGER__MKFASTQ.out.map {
-            fastqDirPath -> (full, parentDir, sampleId) = (fastqDirPath =~ /(.+)\/(.+)_fastqOut/)[0]
-            return tuple(sampleId, fastqDirPath)
+        .flatMap()
+        .map { fastq ->
+            sample = file(fastq).getParent()
+            tuple(
+                sample.name,
+                file(sample)
+            )
         }
+        .unique()
+        .set { data }
+        
     emit:
-        fastqs
+        data
 
 }
 
@@ -42,8 +48,27 @@ workflow CELLRANGER {
         runFolder
         transcriptome
     main:
-        fastqs = MKFASTQ(mkfastq_csv, runFolder)
-        SC__CELLRANGER__COUNT(transcriptome, fastqs)
+        data = MKFASTQ(mkfastq_csv, runFolder)
+
+        // Allow to combine old demultiplexed data with new data
+        if (params.sc.cellranger.count.fastqs instanceof Map) {
+            // Remove default key
+            Channel.from(params.sc.cellranger.count.fastqs.findAll {
+                it.key != 'default' 
+            }.collect { k, v -> 
+                // Split possible multiple file paths
+                if(v.contains(',')) {
+                    v = Arrays.asList(v.split(',')).collect { fqs -> file(fqs) }
+                } else {
+                    v = file(v)
+                }
+                tuple(k, v) 
+            })
+            .concat(data)
+            .groupTuple()
+            .set { data }               
+        }
+        SC__CELLRANGER__COUNT(transcriptome, data)
     emit:
         SC__CELLRANGER__COUNT.out
 
