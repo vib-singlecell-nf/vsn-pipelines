@@ -68,13 +68,13 @@ process SC__CELLRANGER__COUNT {
 	maxForks = toolParams.count.maxForks
 
     input:
-		file(transcriptome)
+		path(transcriptome)
 		tuple \
 			val(sampleId), 
 			path(fastqs, stageAs: "fastqs_??/*")
 
   	output:
-    	tuple val(sampleId), file("${sampleId}_out/outs")
+    	tuple val(sampleId), path("${sampleId}_out/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
@@ -103,14 +103,14 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 	maxForks = toolParams.count.maxForks
 
     input:
-		file(transcriptome)
-		file(featureRef)
+		path(transcriptome)
+		path(featureRef)
 		tuple \
 			val(sampleId), \
 			file(libraries)
 
   	output:
-    	tuple val(sampleId), file("${sampleId}/outs")
+    	tuple val(sampleId), path("${sampleId}_out/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
@@ -138,17 +138,17 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 	maxForks = toolParams.count.maxForks
 
     input:
-		file(transcriptome)
+		path(transcriptome)
 		tuple \
 			val(sampleId), \
 			val(samplePrefix), \
-			file(fastqs), \
+			path(fastqs), \
 			val(expectCells)
 
   	output:
     	tuple \
 			val(sampleId), \
-			file("${sampleId}/outs")
+			path("${sampleId}/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
