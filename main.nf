@@ -116,6 +116,18 @@ workflow cellranger {
 
 }
 
+workflow cellranger_libraries {
+
+    include CELLRANGER_LIBRARIES from './src/cellranger/workflows/cellranger_libraries.nf' params(params)
+    CELLRANGER_LIBRARIES(
+        file(params.sc.cellranger.mkfastq.csv),
+        file(params.sc.cellranger.mkfastq.runFolder),
+        file(params.sc.cellranger.count.transcriptome),
+        file(params.sc.cellranger.count.featureRef)
+    )
+
+}
+
 workflow cellranger_metadata {
 
     include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
@@ -126,13 +138,13 @@ workflow cellranger_metadata {
 
 }
 
-workflow cellranger_libraries {
+workflow cellranger_count_libraries {
 
     include CELLRANGER_COUNT_WITH_LIBRARIES from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
     CELLRANGER_COUNT_WITH_LIBRARIES(
         file(params.sc.cellranger.count.transcriptome),
         file(params.sc.cellranger.count.featureRef),
-        file(params.sc.cellranger.count.libraries)
+        params.sc.cellranger.count.libraries
     )
 
 }
