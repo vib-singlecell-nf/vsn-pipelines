@@ -107,7 +107,9 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 		path(featureRef)
 		tuple \
 			val(sampleId), \
-			file(libraries)
+			path(fastqs, stageAs: "fastqs_??/*"),
+			val(sampleNames),
+			val(assays)
 
   	output:
     	tuple val(sampleId), path("${sampleId}_out/outs")
@@ -115,15 +117,26 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
 		processParams = sampleParams.local
+
 		if(processParams.sample == '') {
 			throw new Exception("Regards params.sc.cellranger.count: sample parameter cannot be empty")
 		}
-		runCellRangerCountLibraries(
+
+		// We need to create the libraries.csv file here because it needs absolute paths
+
+		csvData = "fastqs,sample,library_type\n"
+		fastqs.eachWithIndex { fastq, ix -> 
+			csvData += "\$PWD/${fastq},${sampleNames[ix]},${assays[ix]}\n"
+		}
+
+		"""
+		echo "${csvData}" > libraries.csv
+		""" + runCellRangerCountLibraries(
 			processParams,
 			transcriptome,
 			sampleId,
 			featureRef,
-			libraries
+			"libraries.csv"
 		)
 
 }

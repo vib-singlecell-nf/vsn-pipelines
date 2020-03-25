@@ -15,33 +15,48 @@ workflow CELLRANGER_COUNT_WITH_LIBRARIES {
     take:
         transcriptome
         featureRef
-        libraries
-
+        librariesFiles
 
     main:
-        // Define the sampleId
-        if(libraries.contains(',')) {
-            libraries = Arrays.asList(libraries.split(',')); 
-        }
-        Channel
-            .fromPath(libraries, checkIfExists: true)
-            .map {
-                path -> file("${path}")
-            } 
-            .multiMap {
-            csv: it.splitCsv(header:true, limit: 1)
-            files: file(it)
+        if (!(librariesFiles instanceof Map)) {
+            poolName = params.global.containsKey('project_name') ? params.global.project_name : ''
+            if(librariesFiles.contains(',')) {
+                librariesFiles = Arrays.asList(librariesFiles.split(','))
+                .collectEntries { f -> 
+                    [(file(f).baseName): f]
+                }
+            } else {
+                librariesFiles = [(file(librariesFiles).baseName): librariesFiles]
             }
-            .set { data }
-        
-        data = data.csv.merge( data.files )
-            .map {
-            tuple(
-                it[0].sample,
-                it[1]
-            )
+        }
 
-        } 
+        Channel.from(
+            librariesFiles.collect { samplePoolName, libraryFiles -> 
+                if(libraryFiles.contains(',')) {
+                    libraryFiles = Arrays.asList(libraryFiles.split(',')).collect { f -> file(f) } 
+                } else {
+                    libraryFiles = [file(libraryFiles)]
+                }
+                libFData = libraryFiles.collectMany { libraryFile ->
+                    libraryFile
+                    .splitCsv(skip: 1)
+                    .collect {
+                        return tuple(file(it[0]), it[1], it[2])
+                    }
+                }
+                return tuple(samplePoolName, libFData)
+            }
+        )
+        .map { pool -> 
+            transposed =  GroovyCollections.transpose(pool[1])
+            return tuple(
+                pool[0], 
+                transposed[0],
+                transposed[1],
+                transposed[2]              
+            )
+        }
+        .set { data }
 
         SC__CELLRANGER__COUNT_WITH_LIBRARIES( transcriptome, featureRef, data )
 
