@@ -8,37 +8,7 @@ nextflow.preview.dsl=2
 include SC__CELLRANGER__MKFASTQ             from './processes/mkfastq'  params(params)
 include SC__CELLRANGER__COUNT               from './processes/count'    params(params)
 include CELLRANGER_COUNT_WITH_METADATA      from './workflows/cellRangerCountWithMetadata'    params(params)
-
-
-//////////////////////////////////////////////////////
-//  Define the workflow 
-
-/*
- * Run the workflow for each 10xGenomics CellRanger output folders specified.
- */ 
-
-workflow MKFASTQ {
-
-    take:
-        mkfastq_csv
-        runFolder
-    main:
-        SC__CELLRANGER__MKFASTQ(mkfastq_csv, runFolder)
-        .flatMap()
-        .map { fastq ->
-            sample = file(fastq).getParent()
-            tuple(
-                sample.name,
-                file(sample)
-            )
-        }
-        .unique()
-        .set { data }
-        
-    emit:
-        data
-
-}
+include MKFASTQ                             from './workflows/mkfastq'    params(params)
 
 
 workflow CELLRANGER {
@@ -64,6 +34,7 @@ workflow CELLRANGER {
                 }
                 tuple(k, v) 
             })
+            // Group fastqs per sample
             .concat(data)
             .groupTuple()
             .set { data }               
