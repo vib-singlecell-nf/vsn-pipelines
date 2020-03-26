@@ -80,6 +80,13 @@ workflow single_sample {
 
 }
 
+workflow multi_sample {
+
+    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    getDataChannel | MULTI_SAMPLE
+
+}
+
 // run single_sample, then scenic from the filtered output:
 workflow single_sample_scenic {
 
@@ -191,6 +198,36 @@ workflow single_sample_cellranger {
 
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
     cellranger | SINGLE_SAMPLE
+
+}
+
+workflow cellranger_multi_sample {
+
+    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    cellranger | MULTI_SAMPLE
+
+}
+
+workflow cellranger_libraries_multi_sample {
+
+    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    cellranger_libaries | MULTI_SAMPLE
+
+}
+
+workflow cellranger_libraries_freemuxlet_multi_sample {
+
+    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    include freemuxlet as FREEMUXLET from './workflows/popscle' params(params)
+    cellranger_libaries | (FREEMUXLET & MULTI_SAMPLE)
+
+}
+
+workflow cellranger_libraries_demuxlet_multi_sample {
+
+    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    include demuxlet as DEMUXLET from './workflows/popscle' params(params)
+    cellranger_libaries | (DEMUXLET & MULTI_SAMPLE)
 
 }
 
