@@ -102,6 +102,7 @@ If VSN-Pipelines is useful for your research, consider citing:
 
 
 .. |VSN-Pipelines| image:: https://img.shields.io/github/v/release/vib-singlecell-nf/vsn-pipelines
+    :target: https://github.com/vib-singlecell-nf/vsn-pipelines/releases
     :alt: GitHub release (latest by date)
 
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/vsn-pipelines/badge/?version=latest
