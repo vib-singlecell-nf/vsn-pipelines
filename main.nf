@@ -131,13 +131,25 @@ workflow cellranger {
 
 }
 
+workflow cellranger_libraries {
+
+    include CELLRANGER_LIBRARIES from './src/cellranger/workflows/cellranger_libraries.nf' params(params)
+    CELLRANGER_LIBRARIES(
+        file(params.sc.cellranger.mkfastq.csv),
+        file(params.sc.cellranger.mkfastq.runFolder),
+        file(params.sc.cellranger.count.transcriptome),
+        file(params.sc.cellranger.count.featureRef)
+    )
+
+}
+
 workflow cellranger_metadata {
 
-    main:
-        include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
-        CELLRANGER_COUNT_WITH_METADATA(
-            file(params.sc.cellranger.count.metadata)
-        )
+    include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
+    CELLRANGER_COUNT_WITH_METADATA(
+        file(params.sc.cellranger.count.transcriptome),
+        file(params.sc.cellranger.count.metadata)
+    )
     emit:
         CELLRANGER_COUNT_WITH_METADATA.out
 
@@ -150,6 +162,17 @@ workflow cellranger_metadata_single_sample_scenic {
             it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         } | \
         pipe_single_sample_scenic
+
+}
+
+workflow cellranger_count_libraries {
+
+    include CELLRANGER_COUNT_WITH_LIBRARIES from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
+    CELLRANGER_COUNT_WITH_LIBRARIES(
+        file(params.sc.cellranger.count.transcriptome),
+        file(params.sc.cellranger.count.featureRef),
+        params.sc.cellranger.count.libraries
+    )
 
 }
 
