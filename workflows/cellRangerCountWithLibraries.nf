@@ -18,7 +18,7 @@ workflow CELLRANGER_COUNT_WITH_LIBRARIES {
         librariesFiles
 
     main:
-        if (!(librariesFiles instanceof Map)) {
+        if (!(librariesFiles instanceof Map) && libraryFiles) {
             poolName = params.global.containsKey('project_name') ? params.global.project_name : ''
             if(librariesFiles.contains(',')) {
                 librariesFiles = Arrays.asList(librariesFiles.split(','))
@@ -60,4 +60,8 @@ workflow CELLRANGER_COUNT_WITH_LIBRARIES {
 
         SC__CELLRANGER__COUNT_WITH_LIBRARIES( transcriptome, featureRef, data )
 
+    emit:
+        SC__CELLRANGER__COUNT_WITH_LIBRARIES.out
 }
+
+

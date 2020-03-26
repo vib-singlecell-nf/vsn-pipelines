@@ -26,13 +26,21 @@ workflow CELLRANGER_LIBRARIES {
             throw new Exception("When running the full cellranger pipeline with libraries, you must specify the librariesMap (see docs).")
         }
 
-        if (params.sc.cellranger.count.containsKey('libraries') && !(params.sc.cellranger.count.libraries instanceof Map)) {
-            throw new Exception("To provide a single libraries file while specifying multiple library sets you must use sample specific parameters.")
+        librariesFiles = params.sc.cellranger.count.libraries
+
+        if (!(librariesFiles instanceof Map) && librariesFiles) {
+            poolName = params.global.containsKey('project_name') ? params.global.project_name : ''
+            if(librariesFiles.contains(',')) {
+                librariesFiles = Arrays.asList(librariesFiles.split(','))
+                .collectEntries { f -> 
+                    [(file(f).baseName): f]
+                }
+            } else {
+                librariesFiles = [(file(librariesFiles).baseName): librariesFiles]
+            }
         }
 
         // Get any existing libraries files and process them
-        librariesFiles = params.sc.cellranger.count.libraries
-
         Channel.from(
             librariesFiles.collect { samplePoolName, libraryFiles -> 
                 if(libraryFiles.contains(',')) {
