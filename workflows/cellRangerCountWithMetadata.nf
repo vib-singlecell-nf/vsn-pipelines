@@ -13,6 +13,7 @@ include SC__CELLRANGER__COUNT_WITH_METADATA   from './../processes/count'    par
 workflow CELLRANGER_COUNT_WITH_METADATA {
 
     take:
+        transcriptome
         metadata
 
     main:
@@ -31,7 +32,7 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
                 row.expect_cells
             )
         }
-        SC__CELLRANGER__COUNT_WITH_METADATA( data )
+        SC__CELLRANGER__COUNT_WITH_METADATA( transcriptome, data )
 
     emit:
         SC__CELLRANGER__COUNT_WITH_METADATA.out

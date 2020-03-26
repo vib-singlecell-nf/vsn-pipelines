@@ -8,31 +8,7 @@ nextflow.preview.dsl=2
 include SC__CELLRANGER__MKFASTQ             from './processes/mkfastq'  params(params)
 include SC__CELLRANGER__COUNT               from './processes/count'    params(params)
 include CELLRANGER_COUNT_WITH_METADATA      from './workflows/cellRangerCountWithMetadata'    params(params)
-
-
-//////////////////////////////////////////////////////
-//  Define the workflow 
-
-/*
- * Run the workflow for each 10xGenomics CellRanger output folders specified.
- */ 
-
-workflow MKFASTQ {
-
-    take:
-        mkfastq_csv
-        runFolder
-    main:
-        SC__CELLRANGER__MKFASTQ(mkfastq_csv, runFolder)
-        SC__CELLRANGER__MKFASTQ.out.view()
-        fastqs = SC__CELLRANGER__MKFASTQ.out.map {
-            fastqDirPath -> (full, parentDir, sampleId) = (fastqDirPath =~ /(.+)\/(.+)_fastqOut/)[0]
-            return tuple(sampleId, fastqDirPath)
-        }
-    emit:
-        fastqs
-
-}
+include MKFASTQ                             from './workflows/mkfastq'    params(params)
 
 
 workflow CELLRANGER {
@@ -42,8 +18,28 @@ workflow CELLRANGER {
         runFolder
         transcriptome
     main:
-        fastqs = MKFASTQ(mkfastq_csv, runFolder)
-        SC__CELLRANGER__COUNT(transcriptome, fastqs)
+        data = MKFASTQ(mkfastq_csv, runFolder)
+
+        // Allow to combine old demultiplexed data with new data
+        if (params.sc.cellranger.count.fastqs instanceof Map) {
+            // Remove default key
+            Channel.from(params.sc.cellranger.count.fastqs.findAll {
+                it.key != 'default' 
+            }.collect { k, v -> 
+                // Split possible multiple file paths
+                if(v.contains(',')) {
+                    v = Arrays.asList(v.split(',')).collect { fqs -> file(fqs) }
+                } else {
+                    v = file(v)
+                }
+                tuple(k, v) 
+            })
+            // Group fastqs per sample
+            .concat(data)
+            .groupTuple()
+            .set { data }               
+        }
+        SC__CELLRANGER__COUNT(transcriptome, data)
     emit:
         SC__CELLRANGER__COUNT.out
 

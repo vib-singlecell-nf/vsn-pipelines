@@ -2,35 +2,58 @@ nextflow.preview.dsl=2
 
 toolParams = params.sc.cellranger
 
-def runCellRangerCount = {
-	id,
-	sample,
-	fastqs,
+def generateCellRangerCountCommandDefaults = {
 	processParams,
-	expectCells = null ->
+	transcriptome,
+	expectCells ->
 	return (
 		"""
-		# --id: CellRanger will create a directory with this name in cellranger_parent_output_dir.
-		# --sample: Start of FASTQ filenames that identifies a sample uniquely (multiple prefixes separated by ",").
 		cellranger count \
-			--id=${id} \
-			--sample=${sample} \
-			--fastqs=${fastqs.join(",")} \
-			--transcriptome=${processParams.transcriptome} \
-			${(processParams.containsKey('libraries')) ? '--libraries ' + processParams.libraries: ''} \
-			${(processParams.containsKey('featureRef')) ? '--feature-ref ' + processParams.featureRef: ''} \
+			--transcriptome=${transcriptome} \
 			${(processParams.containsKey('expectCells')) ? '--expect-cells ' + processParams.expectCells: ''} \
 			${(expectCells && !processParams.containsKey('expectCells')) ? '--expect-cells ' + expectCells: ''} \
 			${(processParams.containsKey('forceCells')) ? '--force-cells ' + processParams.forceCells: ''} \
 			${(processParams.containsKey('nosecondary')) ? '--nosecondary ' + processParams.nosecondary: ''} \
-			${(processParams.containsKey('noLibraries')) ? '--no-libraries ' + processParams.noLibraries: ''} \
 			${(processParams.containsKey('chemistry')) ? '--chemistry ' + processParams.chemistry: ''} \
 			${(processParams.containsKey('r1Length')) ? '--r1-length ' + processParams.r1Length: ''} \
 			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
 			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
 			${(processParams.containsKey('localCores')) ? '--localcores ' + processParams.localCores: ''} \
 			${(processParams.containsKey('localMem')) ? '--localmem ' + processParams.localMem: ''} \
-			${(processParams.containsKey('indicies')) ? '--indicies ' + processParams.indicies: ''} 
+		"""
+	)
+}
+
+def runCellRangerCount = {
+	processParams,
+	transcriptome,
+	id,
+	sample,
+	fastqs,
+	expectCells = null ->
+	return (
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
+		"""	\
+		--id=${id}_out \
+		--sample=${sample} \
+		--fastqs=${fastqs}
+		"""
+	)
+}
+
+def runCellRangerCountLibraries = {
+	processParams,
+	transcriptome,
+	id,
+	featureRef,
+	libraries = null,
+	expectCells = null ->
+	return (
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
+		""" \
+		--id ${id}_out \
+		--libraries ${libraries} \
+		--feature-ref ${featureRef}
 		"""
 	)
 }
@@ -40,16 +63,18 @@ process SC__CELLRANGER__COUNT {
 	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
-	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
 	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
 	maxForks = toolParams.count.maxForks
 
     input:
-		file(transcriptome)
-		tuple val(sampleId), file(fastqs)
+		path(transcriptome)
+		tuple \
+			val(sampleId), 
+			path(fastqs, stageAs: "fastqs_??/*")
 
   	output:
-    	tuple val(sampleId), file("${sampleId}/outs")
+    	tuple val(sampleId), path("${sampleId}_out/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
@@ -57,11 +82,61 @@ process SC__CELLRANGER__COUNT {
 		if(processParams.sample == '') {
 			throw new Exception("Regards params.sc.cellranger.count: sample parameter cannot be empty")
 		}
+		fastqs = fastqs instanceof List ? fastqs.join(',') : fastqs
 		runCellRangerCount(
+			processParams,
+			transcriptome,
 			sampleId,
 			sampleId,
-			fastqs,
-			processParams
+			fastqs
+		)
+
+}
+
+process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
+
+	label toolParams.labels.processExecutor
+	cache 'deep'
+	container toolParams.container
+	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
+	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
+	maxForks = toolParams.count.maxForks
+
+    input:
+		path(transcriptome)
+		path(featureRef)
+		tuple \
+			val(sampleId), \
+			path(fastqs, stageAs: "fastqs_??/*"),
+			val(sampleNames),
+			val(assays)
+
+  	output:
+    	tuple val(sampleId), path("${sampleId}_out/outs")
+
+  	script:
+	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
+		processParams = sampleParams.local
+
+		if(processParams.sample == '') {
+			throw new Exception("Regards params.sc.cellranger.count: sample parameter cannot be empty")
+		}
+
+		// We need to create the libraries.csv file here because it needs absolute paths
+
+		csvData = "fastqs,sample,library_type\n"
+		fastqs.eachWithIndex { fastq, ix -> 
+			csvData += "\$PWD/${fastq},${sampleNames[ix]},${assays[ix]}\n"
+		}
+
+		"""
+		echo "${csvData}" > libraries.csv
+		""" + runCellRangerCountLibraries(
+			processParams,
+			transcriptome,
+			sampleId,
+			featureRef,
+			"libraries.csv"
 		)
 
 }
@@ -71,30 +146,32 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
-	publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
+	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
 	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
 	maxForks = toolParams.count.maxForks
 
     input:
+		path(transcriptome)
 		tuple \
 			val(sampleId), \
 			val(samplePrefix), \
-			file(fastqs), \
+			path(fastqs), \
 			val(expectCells)
 
   	output:
     	tuple \
 			val(sampleId), \
-			file("${sampleId}/outs")
+			path("${sampleId}/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
 		processParams = sampleParams.local
 		runCellRangerCount(
+			processParams,
+			transcriptome,
 			sampleId,
 			samplePrefix,
 			fastqs,
-			processParams,
 			expectCells
 		)
 
