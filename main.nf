@@ -13,6 +13,15 @@ if(!params.global.containsKey('seed')) {
 ------------------------------------------------------------------
             """
     }
+} else {
+    Channel.from('').view {
+            """
+------------------------------------------------------------------
+\u001B[32m Custom seed detected in the config \u001B[0m
+\u001B[32m Seed is set to ${params.global.seed} \u001B[0m
+------------------------------------------------------------------
+            """
+    }
 }
 
 def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})

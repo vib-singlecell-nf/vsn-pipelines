@@ -16,8 +16,12 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with BBKNN
-4. **Gene regulatory network inference** is performed using the SCENIC pipeline.
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
+4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
 
 Davie, K., Janssens, J., Koldere, D. et al., 2018
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -31,7 +35,11 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with both BBKNN and Harmony (in separate pipeline runs).
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
 4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
 
 Bageritz, J., Willnow, P., Valentini, E. et al., 2019
@@ -46,7 +54,11 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with both BBKNN and Harmony (in separate pipeline runs).
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
 4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
 
 Kurmangaliyev et al., 2019
@@ -61,7 +73,11 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with both BBKNN and Harmony (in separate pipeline runs).
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
 4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
 
 Guo, X. et al., 2019
@@ -76,7 +92,11 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with both BBKNN and Harmony (in separate pipeline runs).
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
 4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
 
 Ji, T., et al., 2019
@@ -91,7 +111,11 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with both BBKNN and Harmony (in separate pipeline runs).
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
 4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
 
 Brunet Avalos, C. et al., 2019 
@@ -106,10 +130,12 @@ This case study illustrates the following steps:
 
 1. **Input data** is loaded directly from the `Sequence Read Archive (SRA) <https://www.ncbi.nlm.nih.gov/sra>`_ by giving an SRA identifier to the ``sra`` input channel.
 2. Cell Ranger is run to generate expression counts
-3. Multiple samples are combined, and **batch effect correction** is performed with both BBKNN and Harmony (in separate pipeline runs).
+3. Multiple samples are combined, and **batch effect correction** is performed with 2 different batch correction methods (in separate pipeline runs):
+
+   - BBKNN
+   - Harmony
+
 4. **Gene regulatory network inference** is performed using the SCENIC pipeline. The SCENIC append mode is used to include the SCENIC results with both independent batch effect correction methods, to avoid re-running SCENIC.
-
-
 
 
 Human
