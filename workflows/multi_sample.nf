@@ -3,7 +3,9 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
+include '../src/utils/processes/files.nf' params(params)
 include '../src/utils/processes/utils.nf' params(params)
+include '../src/utils/workflows/utils.nf' params(params)
 
 include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
 include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)

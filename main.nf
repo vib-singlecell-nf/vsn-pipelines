@@ -136,6 +136,8 @@ workflow cellranger {
         file(params.sc.cellranger.count.transcriptome)
     )
 
+    emit:
+        CELLRANGER.out
 }
 
 workflow cellranger_libraries {
@@ -147,6 +149,9 @@ workflow cellranger_libraries {
         file(params.sc.cellranger.count.transcriptome),
         file(params.sc.cellranger.count.featureRef)
     )
+
+    emit:
+        CELLRANGER_LIBRARIES.out
 
 }
 
@@ -181,6 +186,9 @@ workflow cellranger_count_libraries {
         params.sc.cellranger.count.libraries
     )
 
+    emit:
+        CELLRANGER_COUNT_WITH_LIBRARIES.out
+
 }
 
 workflow freemuxlet {
@@ -204,22 +212,37 @@ workflow single_sample_cellranger {
 workflow cellranger_multi_sample {
 
     include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
-    cellranger | MULTI_SAMPLE
+    data = cellranger()
+    MULTI_SAMPLE(        
+        data.map {
+            tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+        }
+    )
 
 }
 
 workflow cellranger_libraries_multi_sample {
 
     include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
-    cellranger_libaries | MULTI_SAMPLE
-
+    data = cellranger_libraries()
+    MULTI_SAMPLE(        
+        data.map {
+            tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+        }
+    )
 }
 
 workflow cellranger_libraries_freemuxlet_multi_sample {
 
     include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
     include freemuxlet as FREEMUXLET from './workflows/popscle' params(params)
-    cellranger_libaries | (FREEMUXLET & MULTI_SAMPLE)
+    data = cellranger_libraries()
+    MULTI_SAMPLE(
+        data.map {
+            tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+            }
+    )
+    FREEMUXLET(data)
 
 }
 
@@ -227,8 +250,13 @@ workflow cellranger_libraries_demuxlet_multi_sample {
 
     include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
     include demuxlet as DEMUXLET from './workflows/popscle' params(params)
-    cellranger_libaries | (DEMUXLET & MULTI_SAMPLE)
-
+    data = cellranger_libraries()
+    MULTI_SAMPLE(
+        data.map {
+            tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+            }
+    )
+    DEMUXLET(data)
 }
 
 workflow star {
