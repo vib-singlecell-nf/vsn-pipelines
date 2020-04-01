@@ -64,23 +64,14 @@ workflow multi_sample {
 
         // Conversion
         // Convert h5ad to X (here we choose: loom format)
-        if(params.sc.scanpy.containsKey("filter")) {
-            filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
-            // In parameter exploration mode, this automatically merge all the results into the resulting loom
-            scopeloom = FILE_CONVERTER(
-                CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
-                'loom',
-                QC_FILTER.out.filtered
-            )
-        } else {
-            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
-            scopeloom = FILE_CONVERTER(
-                CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
-                'loom',
-                SC__FILE_CONVERTER.out
-            )
-        }
-
+        filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
+        // In parameter exploration mode, this automatically merge all the results into the resulting loom
+        scopeloom = FILE_CONVERTER(
+            CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
+            'loom',
+            SC__FILE_CONCATENATOR.out
+        )
+        
         // Publishing
         SC__PUBLISH_H5AD( 
             CLUSTER_IDENTIFICATION.out.marker_genes.map { 
