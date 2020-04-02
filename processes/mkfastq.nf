@@ -12,13 +12,9 @@ process SC__CELLRANGER__MKFASTQ {
     	file(runFolder)
 
   	output:
-    	path "*/outs/fastq_path/${flowCell}/*/*.fastq.gz"
+    	path "*/outs/fastq_path/*/*/*.fastq.gz"
 
   	script:
-	  	rf = new File("${toolParams.mkfastq.runFolder}")
-	  	runInfo = new File(rf, "RunInfo.xml").text
-		flowCell = new XmlParser().parseText(runInfo).Run.Flowcell.text()
-
 		"""
 		cellranger mkfastq \
 			--run=${runFolder} \
