@@ -205,7 +205,12 @@ workflow demuxlet {
 workflow single_sample_cellranger {
 
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    cellranger | SINGLE_SAMPLE
+    data = cellranger()
+    SINGLE_SAMPLE(
+        data.map {
+            tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+            }
+    )
 
 }
 
@@ -213,11 +218,25 @@ workflow cellranger_multi_sample {
 
     include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
     data = cellranger()
+    MULTI_SAMPLE(
+        data.map {
+            tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+            }
+    )
+
+}
+
+workflow cellranger_multi_sample_demuxlet {
+
+    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    include demuxlet as DEMUXLET from './workflows/popscle' params(params)
+    data = cellranger()
     MULTI_SAMPLE(        
         data.map {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         }
     )
+    DEMUXLET(data)
 
 }
 
