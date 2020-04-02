@@ -34,7 +34,7 @@ def runCellRangerCount = {
 	return (
 		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
 		"""	\
-		--id=${id}_out \
+		--id=${id} \
 		--sample=${sample} \
 		--fastqs=${fastqs}
 		"""
@@ -51,7 +51,7 @@ def runCellRangerCountLibraries = {
 	return (
 		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
 		""" \
-		--id ${id}_out \
+		--id ${id} \
 		--libraries ${libraries} \
 		--feature-ref ${featureRef}
 		"""
@@ -74,7 +74,7 @@ process SC__CELLRANGER__COUNT {
 			path(fastqs, stageAs: "fastqs_??/*")
 
   	output:
-    	tuple val(sampleId), path("${sampleId}_out/outs")
+    	tuple val(sampleId), path("${sampleId}/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
@@ -112,7 +112,7 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 			val(assays)
 
   	output:
-    	tuple val(sampleId), path("${sampleId}_out/outs")
+    	tuple val(sampleId), path("${sampleId}/outs")
 
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
