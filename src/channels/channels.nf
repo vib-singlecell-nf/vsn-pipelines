@@ -1,39 +1,79 @@
 nextflow.preview.dsl=2
 
-include getMEXChannel as getTenXCellRangerMEXChannel from './tenx' params(params)
+include getOutsChannel as getTenXCellRangerOutsChannel from './tenx' params(params)
 include getH5Channel as getTenXCellRangerH5Channel from './tenx' params(params)
+include getMEXChannel as getTenXCellRangerMEXChannel from './tenx' params(params)
 include getChannel as getFileChannel from './file' params(params)
+
+def isOuts = { glob ->
+    // Avoid file() which will resolve the glob
+    if(glob.contains(',')) {
+        glob_splitted = Arrays.asList(glob.split(','))
+        return glob_splitted.collect { new File(it).getName() == "outs" }.sum(0, { it ? 1 : 0 }) == glob_splitted.size()
+    }
+    return new File(glob).getName() == "outs"
+}
 
 workflow getDataChannel {
 
     main:
         data = Channel.empty()
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_mex")) {
-            data = data.concat(
-                getTenXCellRangerMEXChannel(
-                    params.data.tenx.cellranger_mex
-                ).map {
-                    it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
-                }
-            ).view()
+            if(isOuts(params.data.tenx.cellranger_mex)) {
+                data = data.concat(
+                    getTenXCellRangerOutsChannel(
+                        params.data.tenx.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", "h5ad")
+                    }
+                ).view()
+            } else {
+                data = data.concat(
+                    getTenXCellRangerMEXChannel(
+                        params.data.tenx.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+                    }
+                ).view()
+            }
         }
         if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex")) {
-            data = data.concat(
-                getTenXCellRangerMEXChannel(
-                    params.data.tenx_atac.cellranger_mex
-                ).map {
-                    it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", "cistopic_rds")
-                }
-            ).view()
+            if(isOuts(params.data.tenx_atac.cellranger_mex)) {
+                data = data.concat(
+                    getTenXCellRangerOutsChannel(
+                        params.data.tenx_atac.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", "cistopic_rds")
+                    }
+                ).view()
+            } else {
+                data = data.concat(
+                    getTenXCellRangerMEXChannel(
+                        params.data.tenx_atac.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", "cistopic_rds")
+                    }
+                ).view()
+            }
         }
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5")) {
-            data = data.concat(
-                getTenXCellRangerH5Channel( 
-                    params.data.tenx.cellranger_h5
-                ).map {
-                    it -> tuple(it[0], it[1], "10x_cellranger_h5", "h5ad")
-                }
-            ).view()
+            if(isOuts(params.data.tenx.cellranger_h5)) {
+                data = data.concat(
+                    getTenXCellRangerOutsChannel(
+                        params.data.tenx.cellranger_h5
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", "h5ad")
+                    }
+                ).view()
+            } else {
+                data = data.concat(
+                    getTenXCellRangerH5Channel( 
+                        params.data.tenx.cellranger_h5
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5", "h5ad")
+                    }
+                ).view()
+            }
         }
         if(params.data.containsKey("h5ad")) {
             data = data.concat(
