@@ -63,6 +63,8 @@ For example, in a pipeline with long running step that occurs after filtering (e
 it can be useful to generate the full config file (``nextflow config vib-singlecell-nf/vsn-pipelines -profile single_sample_scenic``),
 then run a first pass for filtering using ``nextflow run vib-singlecell-nf/vsn-pipelines -entry single_sample``, and a second pass using the full pipeline ``-entry single_sample_scenic``).
 
+----
+
 Single-sample Pipelines
 ***********************
 Pipelines to run on a single sample or multiple samples separately and in parallel.
@@ -81,6 +83,8 @@ The output is a loom file with the results embedded.
 .. |Single-sample Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample.svg?sanitize=true
 
 
+----
+
 **single_sample_scenic** |single_sample_scenic|
 -----------------------------------------------
 
@@ -94,9 +98,10 @@ This could be very resource intensive, depending on the dataset.
 .. |Single-sample SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample_scenic.svg?sanitize=true
 
 
+----
+
 **scenic** |scenic|
 -------------------
-
 
 .. |scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic/badge.svg
 
@@ -107,6 +112,8 @@ Currently, the required input is a loom file (set by `params.sc.scenic.filteredL
 
 .. |SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/scenic.svg?sanitize=true
 
+
+----
 
 **scenic_multiruns** |scenic_multiruns| |single_sample_scenic_multiruns|
 ------------------------------------------------------------------------
@@ -124,6 +131,8 @@ Simply adding `-profile scenic_multiruns` during the config step will activate t
 .. |SCENIC Multi-runs Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/scenic_multiruns.svg?sanitize=true
 
 
+----
+
 **cellranger**
 --------------
 Runs the ``cellranger`` workflow (``makefastq``, then ``count``).
@@ -133,6 +142,8 @@ Input parameters are specified within the config file:
 * ``params.sc.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
 * ``params.sc.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
 
+
+----
 
 **demuxlet/freemuxlet**
 -----------------------
@@ -144,12 +155,16 @@ Input parameters are specified within the config file:
 * ``params.sc.popscle.demuxlet.field``: Field in the VCF with genotype information
 
 
+----
+
 **nemesh**
 ----------
 Runs the ``nemesh`` pipeline (Drop-seq) on a single sample or multiple samples separately.
 
 `Source <http://mccarrolllab.org/wp-content/uploads/2016/03/Drop-seqAlignmentCookbookv1.2Jan2016.pdf>`_
 
+
+----
 
 Sample Aggregation Pipelines
 ****************************
@@ -170,6 +185,8 @@ Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 .. |BBKNN Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/bbknn.svg?sanitize=true
 
 
+----
+
 **bbknn_scenic** |bbknn_scenic|
 -------------------------------
 
@@ -183,6 +200,8 @@ This could be very resource intensive, depending on the dataset.
 .. |BBKNN SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/bbknn_scenic.svg?sanitize=true
 
 
+----
+
 **harmony** |harmony|
 ----------------------
 
@@ -195,6 +214,8 @@ The output is a loom file with the results embedded.
 
 .. |Harmony Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/harmony.svg?sanitize=true
 
+----
+
 **mnncorrect** |mnncorrect|
 ----------------------------
 
@@ -202,6 +223,8 @@ The output is a loom file with the results embedded.
 
 Runs the ``mnncorrect`` workflow (sample-specific filtering, merging of individual samples, normalization, log-transformation, HVG selection, PCA analysis, batch-effect correction (mnnCorrect), clustering, dimensionality reduction (t-SNE and UMAP)).
 The output is a loom file with the results embedded.
+
+----
 
 |mnnCorrect Workflow|
 
@@ -268,15 +291,11 @@ Multiple samples can be selected by providing the path to this directory using g
 MEX
 ___
 
-To use the Cell Ranger Market Exchange (**MEX**) files, use the following profile when generating the config file:
-
-.. code::
+To use the Cell Ranger Market Exchange (**MEX**) files, use the following profile when generating the config file::
 
     -profile tenx
 
-This profile adds the following parameter (``params.data.tenx.cellranger_mex``) into the generated .config file:
-
-.. code::
+This profile adds the following parameter (``params.data.tenx.cellranger_mex``) into the generated .config file::
 
     [...]
     data {
@@ -290,15 +309,11 @@ This profile adds the following parameter (``params.data.tenx.cellranger_mex``) 
 H5
 __
 
-To use the Cell Ranger ``h5`` file as input, use the following profile:
-
-.. code::
+To use the Cell Ranger ``h5`` file as input, use the following profile::
 
     -profile tenx_h5
 
-This profile adds the ``params.data.tenx.cellranger_h5`` parameter into the generated .config file:
-
-.. code::
+This profile adds the ``params.data.tenx.cellranger_h5`` parameter into the generated .config file::
 
     [...]
     data {
@@ -313,9 +328,7 @@ Input file detection
 ____________________
 
 Setting the input directory appropriately, using a glob in the directory path in place of the sample names, will collect all the samples listed in the ``filtered_[feature|gene]_bc_matrix`` directories listed above.
-For example, in ``params.data.tenx``, setting:
-
-.. code::
+For example, in ``params.data.tenx``, setting::
 
     cellranger_mex = "/home/data/cellranger/sample*/outs/"
 
@@ -333,9 +346,7 @@ The pipeline will use either the ``outs/filtered_feature_bc_matrix/`` or the ``o
 
 H5AD (Scanpy)
 -------------
-Use the following profile when generating the config file:
-
-.. code::
+Use the following profile when generating the config file::
 
     -profile h5ad
 
@@ -358,9 +369,7 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 Seurat Rds
 ----------
 
-Use the following profile when generating the config file:
-
-.. code::
+Use the following profile when generating the config file::
 
     -profile seurat_rds
 
@@ -383,9 +392,7 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 TSV
 ---
-Use the following profile when generating the config file:
-
-.. code::
+Use the following profile when generating the config file::
 
     -profile tsv
 
@@ -407,9 +414,7 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 CSV
 ---
-Use the following profile when generating the config file:
-
-.. code::
+Use the following profile when generating the config file::
 
     -profile csv
 
