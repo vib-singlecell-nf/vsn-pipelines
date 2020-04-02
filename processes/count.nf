@@ -155,7 +155,7 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 		tuple \
 			val(sampleId), \
 			val(samplePrefix), \
-			path(fastqs), \
+			path(fastqs, stageAs: "fastqs_??/*"), \
 			val(expectCells)
 
   	output:
@@ -166,6 +166,7 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
   	script:
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
 		processParams = sampleParams.local
+		fastqs = fastqs instanceof List ? fastqs.join(',') : fastqs
 		runCellRangerCount(
 			processParams,
 			transcriptome,
