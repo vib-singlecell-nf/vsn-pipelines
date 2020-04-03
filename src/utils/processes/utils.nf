@@ -12,8 +12,8 @@ def clean(params) {
    return params.findAll { !it.key.contains('-') }
 }
 
-def detectCellRangerVersionData(cellRangerV2Data, cellRangerV3Data) {
-    if(cellRangerV2Data.isDirectory()) {
+def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
+    if(cellRangerV2Data.isDirectory() || cellRangerV3Data.isDirectory()) {
         if(cellRangerV2Data.exists()) {
             genomes = cellRangerV2Data.list()
             if(genomes.size() > 1 || genomes.size() == 0)
@@ -25,9 +25,11 @@ def detectCellRangerVersionData(cellRangerV2Data, cellRangerV3Data) {
     } else {
         if(cellRangerV2Data.exists()) {
             return cellRangerV2Data
-        } else if(cellRangerV3Data.exists())
+        } else if(cellRangerV3Data.exists()) {
             return cellRangerV3Data
-        throw new Exception("Cannot detect the version of the data format of CellRanger.")
+        } else {
+            throw new Exception("Cannot detect the version of the data format of CellRanger.")
+        }
     }
 }
 
@@ -35,7 +37,9 @@ process SC__FILE_CONVERTER {
 
     echo false
     cache 'deep'
-	if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
+    if(!params.containsKey("data"))
+        container params.sc.scanpy.container
+	else if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
         container params.sc.cistopic.container
     else if(params.data.containsKey("seurat_rds"))
 		container "vibsinglecellnf/sceasy:0.0.5"
@@ -62,23 +66,28 @@ process SC__FILE_CONVERTER {
 
         switch(inputDataType) {
             case "10x_cellranger_mex":
+                // Nothing to be done here
+            break;
+            case "10x_cellranger_mex_outs":
                 // Reference: https://kb.10xgenomics.com/hc/en-us/articles/115000794686-How-is-the-MEX-format-used-for-the-gene-barcode-matrices-
                 // Check if output was generated with CellRanger v2 or v3
                 cellranger_outs_v2_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_gene_bc_matrices/")
                 cellranger_outs_v3_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix/")
                 f = detectCellRangerVersionData(cellranger_outs_v2_mex, cellranger_outs_v3_mex)
+                inputDataType = "10x_cellranger_mex"
             break;
-            case "10x_atac_cellranger_mex":
+            case "10x_cellranger_h5":
                 // Nothing to be done here
             break;
-
-            case "10x_cellranger_h5":
+            case "10x_cellranger_h5_outs":
                 // Check if output was generated with CellRanger v2 or v3
                 cellranger_outs_v2_h5 = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_gene_bc_matrices.h5")
                 cellranger_outs_v3_h5 = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix.h5")
                 f = detectCellRangerVersionData(cellranger_outs_v2_h5, cellranger_outs_v3_h5)
+                inputDataType = "10x_cellranger_h5"
+            case "10x_atac_cellranger_mex_outs":
+                // Nothing to be done here
             break;
-
             case "csv":
                 // Nothing to be done here
             break;
@@ -100,7 +109,7 @@ process SC__FILE_CONVERTER {
             break;
         }
 
-        if(inputDataType == "10x_atac_cellranger_mex" && outputDataType == "cistopic_rds")
+        if(inputDataType == "10x_atac_cellranger_mex_outs" && outputDataType == "cistopic_rds")
             """
             ${binDir}create_cistopic_object.R \
                 --tenx_path ${f} \
@@ -123,7 +132,8 @@ process SC__FILE_CONVERTER {
             """
             ${binDir}sc_file_converter.py \
                 --sample-id "${sampleId}" \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id' : ''} \
+                ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
+                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
                 --input-format $inputDataType \
                 --output-format $outputDataType \
                 ${f} \
