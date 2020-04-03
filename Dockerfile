@@ -1,4 +1,4 @@
-FROM python:3.7.4-slim AS compile-image
+FROM vibsinglecellnf/scanpy:0.5.1 AS compile-image
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN BUILDPKGS="build-essential apt-utils \
@@ -20,15 +20,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 FROM python:3.7.4-slim AS build-image
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get -y update && \
-    apt-get -y --no-install-recommends install \
-        # Need to run ps
-        procps \
-        libxml2 && \
-    rm -rf /var/cache/apt/* && \
-    rm -rf /var/lib/apt/lists/*
 
 COPY --from=compile-image /opt/venv /opt/venv
 # Make sure we use the virtualenv:
 ENV PATH="/opt/venv/bin:$PATH"
-
