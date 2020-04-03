@@ -28,7 +28,7 @@ parser.add_argument(
 
 parser.add_argument(
     "input_hvg",
-    type=argparse.FileType('w'),
+    type=argparse.FileType('r'),
     help='Input h5ad containing the highly_variable slot.'
 )
 
@@ -140,7 +140,7 @@ try:
     adata_raw = sc.read_h5ad(filename=FILE_PATH_IN.name)
     adata_hvg = sc.read_h5ad(filename=FILE_PATH_IN_HVG.name)
 except IOError:
-    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
+    raise Exception("Wrong input format. Expects .h5ad files.")
 
 ################################################################################
 # Processing...

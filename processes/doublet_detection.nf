@@ -1,6 +1,9 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scrublet/bin/" : ""
+import java.nio.file.Paths
+import groovy.transform.TupleConstructor
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scrublet/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "scrublet/bin")
 
 include '../../utils/processes/utils.nf'
 
@@ -52,18 +55,18 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 	output:
 		tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.${processParams.off}"), \
+			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.txt"), \
 			val(stashedParams), \
 			val(nPrinComps)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scrublet.scrub_doublets)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scrublet.doublet_detection)
 		processParams = sampleParams.local
-		def _processParams = new SC__SCANPY__DIM_REDUCTION_PARAMS()
+		def _processParams = new SC__SCRUBLET__DOUBLET_DETECTION_PARAMS()
 		_processParams.setEnv(this)
 		_processParams.setConfigParams(processParams)
 		"""
-		${binDir}sc_doublet_detection.py \
+		${binDir}/sc_doublet_detection.py \
             ${(processParams.containsKey('syntheticDoubletUmiSubsampling')) ? '--synthetic-doublet-umi-subsampling ' + processParams.syntheticDoubletUmiSubsampling : ''} \
             ${(processParams.containsKey('minCounts')) ? '--min-counts ' + processParams.minCounts : ''} \
             ${(processParams.containsKey('minCells')) ? '--min-cells ' + processParams.minCells : ''} \
@@ -74,8 +77,8 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
             ${_processParams.getNPrinCompsAsArgument(nPrinComps)} \
             ${(processParams.containsKey('technology')) ? '--technology ' + processParams.technology : ''} \
 			$adataRaw \
-            $dataHvg \
-			"${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.${processParams.off}"
+            $adataHvg \
+			"${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.txt"
 		"""
 
 }
