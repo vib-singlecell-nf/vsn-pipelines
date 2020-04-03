@@ -1,8 +1,12 @@
 nextflow.preview.dsl=2
 
+import static groovy.json.JsonOutput.*
+
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
+include '../utils/workflows/utils.nf' params(params)
+INIT()
 include '../utils/processes/utils.nf' params(params)
 
 include QC_FILTER from './workflows/qc_filter.nf' params(params)
@@ -67,9 +71,22 @@ workflow single_sample {
 
     emit:
         filtered_data = params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.filtered : Channel.empty()
+        hvg_data = HVG_SELECTION.out.hvg
+        dr_pca_data = DIM_REDUCTION_PCA.out.view()
         final_processed_data = CLUSTER_IDENTIFICATION.out.marker_genes
         reports = ipynbs
         merged_report
+
+}
+
+workflow single_sample_scrublet {
+
+    take:
+        data
+
+    main:
+        single_sample( data )
+        
 
 }
 
