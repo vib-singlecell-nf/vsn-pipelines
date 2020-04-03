@@ -2,22 +2,9 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
-if(!params.global.containsKey('seed')) {
-    params.global.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
-
-    Channel.from('').view {
-            """
-------------------------------------------------------------------
-\u001B[32m No seed detected in the config \u001B[0m
-\u001B[32m To ensure reproducibility the seed has been set to ${params.global.seed} \u001B[0m
-------------------------------------------------------------------
-            """
-    }
-}
-
-def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-params.manifestAsJSON = toJson(workflow.manifest)
-params.paramsAsJSON = toJson(paramsCopy)
+include '../utils/workflows/utils.nf' params(params)
+INIT()
+include '../utils/processes/utils.nf' params(params)
 
 include './src/channels/channels' params(params)
 

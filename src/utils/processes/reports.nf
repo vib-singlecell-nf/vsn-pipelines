@@ -18,8 +18,8 @@ process UTILS__GENERATE_WORKFLOW_CONFIG_REPORT {
 		"""
 		papermill ${ipynb} \
 			workflow_configuration_report.ipynb \
-			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
-			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
+			-p WORKFLOW_MANIFEST '${params.global.manifestAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.global.paramsAsJSON}'
 		"""
 
 }
