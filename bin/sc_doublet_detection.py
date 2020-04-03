@@ -122,7 +122,7 @@ parser.add_argument(
     "-t", "--technology",
     type=str,
     dest="technology",
-    choices=["10xv2"],
+    choices=["10x"],
     help='Single-cell technology used.'
 )
 
@@ -138,14 +138,14 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 # Expects h5ad file
 try:
     adata_raw = sc.read_h5ad(filename=FILE_PATH_IN.name)
-    hvg_adata = sc.read_h5ad(filename=FILE_PATH_IN_HVG.name)
+    adata_hvg = sc.read_h5ad(filename=FILE_PATH_IN_HVG.name)
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 ################################################################################
 # Processing...
 
-adata_raw_var = adata_raw.X[:, np.array(hvg_adata.var['highly_variable'])]
+adata_raw_var = adata_raw.X[:, np.array(adata_hvg.var['highly_variable'])]
 scrub = scr.Scrublet(adata_raw_var)
 adata_raw.obs['doublet_scores'], adata_raw.obs['predicted_doublets'] = scrub.scrub_doublets(
     synthetic_doublet_umi_subsampling=args.synthetic_doublet_umi_subsampling,
@@ -162,7 +162,7 @@ adata_raw.obs['doublet_scores'], adata_raw.obs['predicted_doublets'] = scrub.scr
     verbose=True
 )
 
-if args.technology == "10xv2":
+if args.technology == "10x":
     # Take doublet cells based on expected doublets based on number of cells (10x Chromium)
     cells_recovered = len(adata_raw)
     doublet_rate = 0.0008 * cells_recovered + 0.0527
