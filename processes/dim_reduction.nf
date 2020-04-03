@@ -1,11 +1,12 @@
 nextflow.preview.dsl=2
 
+import java.nio.file.Paths
 import groovy.transform.TupleConstructor
 import groovyx.gpars.dataflow.DataflowBroadcast
 import nextflow.util.ArrayTuple
 import nextflow.script.ScriptBinding
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
 include '../../utils/processes/utils.nf'
 
@@ -110,7 +111,7 @@ process SC__SCANPY__DIM_REDUCTION {
 		_processParams.setEnv(this)
 		_processParams.setConfigParams(processParams)
 		"""
-		${binDir}dim_reduction/sc_dim_reduction.py \
+		${binDir}/dim_reduction/sc_dim_reduction.py \
 			--seed ${params.global.seed} \
 			--method ${processParams.method} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
