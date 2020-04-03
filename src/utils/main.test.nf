@@ -6,7 +6,7 @@ nextflow.preview.dsl=2
 include SC__FILE_CONVERTER from './processes/utils' params(params)
 
 // Uncomment to test
-include getChannel as getTenXChannel from '../channels/tenx.nf'
+include getDataChannel from '../channels/channels.nf' params(params)
 
 // Make the test workflow 
 workflow test_SC__FILE_CONVERTER {
@@ -40,20 +40,19 @@ workflow {
     main:
         switch(params.test) {
             case "SC__FILE_CONVERTER":
-                include SC__FILE_CONVERTER from './processes/utils' params(params)
-                test_SC__FILE_CONVERTER( getTenXChannel( params.data.tenx.cellranger_mex ) )
+                getDataChannel | test_SC__FILE_CONVERTER
             break;
             case "SC__FILE_CONCATENATOR":
-                test_SC__FILE_CONCATENATOR( getTenXChannel( params.data.tenx.cellranger_mex ) )
+                getDataChannel | test_SC__FILE_CONCATENATOR
             break;
             case "FILTER_BY_CELL_METADATA":
                 // Imports
                 include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
                 // Run 
                 if(params.sc.cell_filter) {
-                    data = getTenXChannel( params.data.tenx.cellranger_mex )
-                    SC__FILE_CONVERTER( data )    
-                    FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
+                    getDataChannel | \
+                        SC__FILE_CONVERTER | \
+                        FILTER_BY_CELL_METADATA
                 }
             break;
             case "FILTER_AND_ANNOTATE_BY_CELL_METADATA":
@@ -62,10 +61,10 @@ workflow {
                 include SC__ANNOTATE_BY_CELL_METADATA from './processes/h5adAnnotate' params(params)
                 // Run 
                 if(params.sc.cell_filter && params.sc.cell_annotate) {
-                    data = getTenXChannel( params.data.tenx.cellranger_mex )
-                    SC__FILE_CONVERTER( data )
-                    FILTER_BY_CELL_METADATA( SC__FILE_CONVERTER.out )
-                    SC__ANNOTATE_BY_CELL_METADATA( FILTER_BY_CELL_METADATA.out )
+                    getDataChannel | \
+                        SC__FILE_CONVERTER | \
+                        FILTER_BY_CELL_METADATA | \
+                        SC__ANNOTATE_BY_CELL_METADATA
                 }
             break;
             case "GET_METADATA_FROM_SRA":
