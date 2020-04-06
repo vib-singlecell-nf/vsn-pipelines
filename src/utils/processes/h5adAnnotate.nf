@@ -21,6 +21,8 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         """
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
             --index-column-name ${processParams.indexColumnName} \
+            --sample-id ${sampleId} \
+            --sample-column-name ${processParams.sampleColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
             ${processParams.cellMetaDataFilePath} \
