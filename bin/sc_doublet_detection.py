@@ -161,21 +161,48 @@ adata_raw.obs['doublet_scores'], adata_raw.obs['predicted_doublets'] = scrub.scr
     n_prin_comps=args.n_prin_comps,
     verbose=True
 )
+# Rename the columns
+adata_raw.obs.rename(
+    columns={
+        "doublet_scores": "scrublet__doublet_scores",
+        "predicted_doublets": "scrublet__predicted_doublets"
+    },
+    inplace=True
+)
 
 if args.technology == "10x":
     # Take doublet cells based on expected doublets based on number of cells (10x Chromium)
     cells_recovered = len(adata_raw)
     doublet_rate = 0.0008 * cells_recovered + 0.0527
     expected_doublets = np.int(doublet_rate / 100 * cells_recovered)
-    doublet_cells = adata_raw.obs['doublet_scores'].sort_values(
+    doublet_cells = adata_raw.obs['scrublet__doublet_scores'].sort_values(
         ascending=False
     ).head(
         n=expected_doublets
     ).index
+    adata_raw.obs['scrublet__predicted_doublets_based_on_10x_chromium_spec'] = False
+    adata_raw.obs.loc[
+        doublet_cells,
+        'scrublet__predicted_doublets_based_on_10x_chromium_spec'
+    ] = True
+    final_adata = adata_raw.obs.loc[
+        :,
+        [
+            'sample_id',
+            'scrublet__doublet_scores',
+            'scrublet__predicted_doublets',
+            'scrublet__predicted_doublets_based_on_10x_chromium_spec'
+        ]
+    ]
 else:
     raise Exception(f"Doublet detection with Scrublet for the given technolog {args.technology} is not implemented")
 
 ################################################################################
 
 # I/O
-np.savetxt(f"{FILE_PATH_OUT_BASENAME}.txt", doublet_cells, fmt="%s")
+final_adata.to_csv(
+    path_or_buf=f"{FILE_PATH_OUT_BASENAME}.tsv",
+    sep="\t",
+    index=True,
+    header=True
+)

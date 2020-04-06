@@ -55,7 +55,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 	output:
 		tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.txt"), \
+			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.tsv"), \
 			val(stashedParams), \
 			val(nPrinComps)
 
@@ -78,7 +78,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
             ${(processParams.containsKey('technology')) ? '--technology ' + processParams.technology : ''} \
 			$adataRaw \
             $adataHvg \
-			"${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.txt"
+			"${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.tsv"
 		"""
 
 }
