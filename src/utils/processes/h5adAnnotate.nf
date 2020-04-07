@@ -29,6 +29,8 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
             ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --index-column-name ${processParams.indexColumnName} \
+            --sample-id ${sampleId} \
+            --sample-column-name ${processParams.sampleColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
             ${metadata} \
@@ -51,7 +53,7 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.sample_annotate)
-		processParams = sampleParams.local
+        processParams = sampleParams.local
         """
         ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
             ${(processParams.containsKey('type')) ? '--type ' + processParams.type : ''} \
