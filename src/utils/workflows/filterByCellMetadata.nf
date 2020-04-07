@@ -1,14 +1,3 @@
-//
-// Version: 
-// Test: 
-// Command: 
-//
-/*
- * QC workflow 
- * Source:
- * 
- */ 
-
 nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
