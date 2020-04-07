@@ -14,6 +14,8 @@ workflow ANNOTATE_BY_CELL_METADATA {
     take:
         // Expects (sampleId, h5ad)
         data
+        // Expects (sampleId, tsv) || null
+        metadata
 
     main:
         def workflowParams = params.sc.cell_annotate
@@ -25,10 +27,12 @@ workflow ANNOTATE_BY_CELL_METADATA {
                 }
             )
         } else if(method == 'obo') {
-            metadata = getChannel(
-                workflowParams.cellMetaDataFilePath,
-                workflowParams.sampleSuffixWithExtension
-            )
+            if(metadata == null) {
+                metadata = getChannel(
+                    workflowParams.cellMetaDataFilePath,
+                    workflowParams.sampleSuffixWithExtension
+                )
+            }
             out = SC__ANNOTATE_BY_CELL_METADATA(
                 data.join(metadata)
             )
@@ -40,3 +44,21 @@ workflow ANNOTATE_BY_CELL_METADATA {
         out
 
 }
+
+workflow STATIC__ANNOTATE_BY_CELL_METADATA {
+
+    take:
+        // Expects (sampleId, h5ad)
+        data
+
+    main:
+        out = ANNOTATE_BY_CELL_METADATA(
+            data,
+            null
+        )
+
+    emit:
+        out
+
+}
+
