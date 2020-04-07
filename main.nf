@@ -25,6 +25,11 @@ include SC__SCANPY__MERGE_REPORTS from './processes/reports.nf' params(params)
 include SC__SCANPY__REPORT_TO_HTML from './processes/reports.nf' params(params)
 include COMBINE_REPORTS from './workflows/combine_reports.nf' params(params)
 
+//////////////////////////////////////////////////////
+//  Import from external modules:
+include SC__SCRUBLET__DOUBLET_DETECTION from "../scrublet/processes/doublet_detection" params(params)
+
+
 workflow single_sample {
 
     take:
@@ -72,7 +77,7 @@ workflow single_sample {
     emit:
         filtered_data = params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.filtered : Channel.empty()
         hvg_data = HVG_SELECTION.out.hvg
-        dr_pca_data = DIM_REDUCTION_PCA.out.view()
+        dr_pca_data = DIM_REDUCTION_PCA.out
         final_processed_data = CLUSTER_IDENTIFICATION.out.marker_genes
         reports = ipynbs
         merged_report
@@ -86,7 +91,9 @@ workflow single_sample_scrublet {
 
     main:
         single_sample( data )
-        
+        SC__SCRUBLET__DOUBLET_DETECTION(
+            data.join( single_sample.out.dr_pca_data )
+        )
 
 }
 
