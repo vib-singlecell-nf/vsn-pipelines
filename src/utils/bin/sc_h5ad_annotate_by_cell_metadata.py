@@ -29,6 +29,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '-m', '--method',
+    type=str,
+    dest="method",
+    choices=['aio', 'obo'],
+    default='obo',
+    help="The method to use to annotate the cells in the AnnData."
+)
+
+parser.add_argument(
     '-i', '--sample-id',
     type=str,
     dest="sample_id",
@@ -54,7 +63,7 @@ parser.add_argument(
     '-a', '--annotation-column-name',
     type=str,
     action="append",
-    required=True,
+    required=False,
     dest="annotation_column_names",
     help="The columns of the given cell_meta_data_file_path that will be used as annotation to annotate the cells."
 )
@@ -80,19 +89,34 @@ except IOError:
 metadata = pd.read_csv(
     filepath_or_buffer=args.cell_meta_data_file_path,
     sep="\t",
-    header=0
+    header=0,
+    index_col=args.index_column_name
 )
 
-for annotation_column_name in args.annotation_column_names:
-    # Extract the metadata for the cells from the adata
-    metadata_subset = metadata[
-        np.logical_and(
-            metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
-            metadata[args.index_column_name].isin(adata.obs.index.values))
-    ]
-    # Annotate
-    adata.obs[annotation_column_name] = None
-    adata.obs[annotation_column_name][metadata_subset[args.index_column_name]] = metadata_subset[annotation_column_name]
+if args.method is not None:
+    if "sample_id" in metadata.columns:
+        # Drop the sample_id if already contained in adata.obs otherwise join needs a suffix
+        # but we want to keep sample_id as column name w/o any suffix
+        metadata.drop(
+            columns=['sample_id'],
+            inplace=True
+        )
+    if args.annotation_column_names is not None:
+        metadata = metadata.filter(items=args.annotation_column_names)
+    adata.obs = adata.obs.join(
+        other=metadata
+    )
+else:
+    for annotation_column_name in args.annotation_column_names:
+        # Extract the metadata for the cells from the adata
+        metadata_subset = metadata[
+            np.logical_and(
+                metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
+                metadata.index.isin(adata.obs.index.values))
+        ]
+        # Annotate
+        adata.obs[annotation_column_name] = None
+        adata.obs[annotation_column_name][metadata_subset.index] = metadata_subset[annotation_column_name]
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
