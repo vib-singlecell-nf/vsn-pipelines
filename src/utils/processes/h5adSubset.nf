@@ -9,21 +9,31 @@ process SC__PREPARE_OBS_FILTER {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(sampleId), path(f), val(filterConfig)
+        tuple \
+            val(sampleId), \
+            path(f), \
+            val(filterConfig)
 
     output:
-        tuple val(sampleId), path(f), path("${sampleId}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
+        tuple \
+            val(sampleId), \
+            path(f), \
+            path("${sampleId}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt")
 
     script:
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.cell_filter)
+		processParams = sampleParams.local
+        input = processParams.method == 'internal' ? f : filterConfig.cellMetaDataFilePath
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
         ${binDir}sc_h5ad_prepare_obs_filter.py \
+            ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --sample-id ${sampleId} \
-            --sample-column-name ${filterConfig.sampleColumnName} \
-            --barcode-column-name ${filterConfig.barcodeColumnName} \
             --filter-column-name ${filterConfig.filterColumnName} \
             ${valuesToKeepFromFilterColumnAsArguments} \
-            ${filterConfig.cellMetaDataFilePath} \
+            ${filterConfig.containsKey('indexColumnName') ? '--index-column-name ' + filterConfig.indexColumnName : ''} \
+            ${filterConfig.containsKey('sampleColumnName') ? '--sample-column-name ' + filterConfig.sampleColumnName : ''} \
+            $input \
             "${sampleId}.SC__PREPARE_OBS_FILTER.${filterConfig.id}.txt"
         """
 
