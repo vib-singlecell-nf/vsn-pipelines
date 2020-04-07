@@ -42,8 +42,8 @@ workflow COMBINE_BY_PARAMS {
 def INIT() {
 
     def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-    params.global.manifestAsJSON = toJson(workflow.manifest)
-    params.global.paramsAsJSON = toJson(paramsCopy)
+    params.misc.manifestAsJSON = toJson(workflow.manifest)
+    params.misc.paramsAsJSON = toJson(paramsCopy)
 
     if(!params.global.containsKey('seed')) {
         params.global.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
