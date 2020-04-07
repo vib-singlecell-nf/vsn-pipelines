@@ -45,6 +45,16 @@ workflow {
             case "SC__FILE_CONCATENATOR":
                 getDataChannel | test_SC__FILE_CONCATENATOR
             break;
+            case "ANNOTATE_BY_CELL_METADATA":
+                // Imports
+                include ANNOTATE_BY_CELL_METADATA from './workflows/annotateByCellMetadata' params(params)
+                // Run
+                if(params.sc.cell_annotate) {
+                    getDataChannel | \
+                        SC__FILE_CONVERTER | \
+                        ANNOTATE_BY_CELL_METADATA
+                }
+            break;
             case "FILTER_BY_CELL_METADATA":
                 // Imports
                 include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
