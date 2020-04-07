@@ -9,21 +9,29 @@ process SC__ANNOTATE_BY_CELL_METADATA {
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(sampleId), path(f)
+        tuple \
+            val(sampleId), \
+            path(f), \
+            path(metadata)
 
     output:
-        tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.cell_annotate)
 		processParams = sampleParams.local
-        annotationColumnNamesAsArguments = processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
+        annotationColumnNamesAsArguments = processParams.containsKey("annotationColumnNames") ?
+            processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
+            : ''
         """
         ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
+            ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --index-column-name ${processParams.indexColumnName} \
             ${annotationColumnNamesAsArguments} \
             $f \
-            ${processParams.cellMetaDataFilePath} \
+            ${metadata} \
             --output "${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
         """
 
