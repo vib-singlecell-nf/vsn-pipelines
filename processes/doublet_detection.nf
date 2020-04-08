@@ -55,7 +55,8 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 	output:
 		tuple \
 			val(sampleId), \
-			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.tsv"), \
+			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.ScrubletDoubletTable.tsv"), \
+			path("${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.ScrubletObject.pklz"), \
 			val(stashedParams), \
 			val(nPrinComps)
 
@@ -67,6 +68,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}/sc_doublet_detection.py \
+			${(processParams.containsKey('useVariableFeatures')) ? '--use-variable-features ' + processParams.useVariableFeatures : ''} \
             ${(processParams.containsKey('syntheticDoubletUmiSubsampling')) ? '--synthetic-doublet-umi-subsampling ' + processParams.syntheticDoubletUmiSubsampling : ''} \
             ${(processParams.containsKey('minCounts')) ? '--min-counts ' + processParams.minCounts : ''} \
             ${(processParams.containsKey('minCells')) ? '--min-cells ' + processParams.minCells : ''} \
@@ -76,9 +78,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
             ${(processParams.containsKey('normalizeVariance')) ? '--normalize-variance ' + processParams.normalizeVariance : ''} \
             ${_processParams.getNPrinCompsAsArgument(nPrinComps)} \
             ${(processParams.containsKey('technology')) ? '--technology ' + processParams.technology : ''} \
-			$adataRaw \
-            $adataHvg \
-			"${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION.tsv"
+			--output-prefix "${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION" \
 		"""
 
 }
