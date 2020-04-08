@@ -33,6 +33,7 @@ parser.add_argument(
     type=str,
     dest="method",
     choices=['aio', 'obo'],
+    required=True,
     default='obo',
     help="The method to use to annotate the cells in the AnnData."
 )
@@ -93,7 +94,8 @@ metadata = pd.read_csv(
     index_col=args.index_column_name
 )
 
-if args.method is not None:
+if args.method == 'obo':
+    print("Annotating using the OBO method...")
     if "sample_id" in metadata.columns:
         # Drop the sample_id if already contained in adata.obs otherwise join needs a suffix
         # but we want to keep sample_id as column name w/o any suffix
@@ -106,7 +108,8 @@ if args.method is not None:
     adata.obs = adata.obs.join(
         other=metadata
     )
-else:
+elif args.method == 'aio':
+    print("Annotating using the AIO method...")
     for annotation_column_name in args.annotation_column_names:
         # Extract the metadata for the cells from the adata
         metadata_subset = metadata[
@@ -116,7 +119,9 @@ else:
         ]
         # Annotate
         adata.obs[annotation_column_name] = None
-        adata.obs[annotation_column_name][metadata_subset.index] = metadata_subset[annotation_column_name]
+        adata.obs.loc[metadata_subset.index, annotation_column_name] = metadata_subset[annotation_column_name]
+else:
+    raise Exception(f"The given method '{args.method}' is not valid.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
