@@ -55,7 +55,7 @@ Finally run the pipeline,
 
 Set the seed
 ------------
-Some steps in the pipelines are nondeterministic. To be able that the results are reproducible in time, by default a seed is set to:
+Some steps in the pipelines are nondeterministic. In order to have reproducible results in time, a seed is set by default to:
 
 .. code:: groovy
 
@@ -117,9 +117,10 @@ The profile ``utils_cell_annotate`` should be added when generating the main con
     params {
         sc {
             cell_annotate {
-                iff = '10x_cellranger_mex'
                 off = 'h5ad'
+                method = ''
                 cellMetaDataFilePath = ''
+                sampleSuffixWithExtension = ''
                 indexColumnName = ''
                 sampleColumnName = ''
                 annotationColumnNames = ['']
@@ -127,10 +128,29 @@ The profile ``utils_cell_annotate`` should be added when generating the main con
         }
     }
 
-Then, the following parameters should be updated to use the module feature:
+Two methods (``params.sc.cell_annotate.method``) are available:
 
+- ``aio``
+- ``obo``
+
+If you have a single file containing the metadata information of all your samples, use ``aio`` method otherwise use ``obo``.
+
+For both methods, here are the mandatory params to be set:
+
+- ``off`` should be set to ``h5ad``
+- ``method`` choose either ``obo`` or ``aio``
 - ``cellMetaDataFilePath`` is a TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
-- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information.
+
+If ``obo`` is used, the following params are required:
+
+- ``sampleSuffixWithExtension`` is the suffix used to extract the sample ID from the file name of ``cellMetaDataFilePath`` i.e.: it is the suffix after the sample name in the file path.
+- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **should** have unique values. 
+
+Note: the file name of ``cellMetaDataFilePath`` is required to contain the sample ID.
+
+If ``aio`` used, the following additional params are required:
+
+- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **can** have unique values; if it's not the case, it's important that the combination of the values from the ``indexColumnName`` and the ``sampleColumnName`` are unique. 
 - ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information.
 - ``annotationColumnNames`` is an array of columns names from ``cellMetaDataFilePath`` containing different annotation metadata to add.
 
