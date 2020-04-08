@@ -1,6 +1,9 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
 
 process SC__ANNOTATE_BY_CELL_METADATA {
 
@@ -26,7 +29,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
             processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
             : ''
         """
-        ${binDir}sc_h5ad_annotate_by_cell_metadata.py \
+        ${binDir}/sc_h5ad_annotate_by_cell_metadata.py \
             ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --index-column-name ${processParams.indexColumnName} \
             --sample-id ${sampleId} \
@@ -55,7 +58,7 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA() {
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.sample_annotate)
         processParams = sampleParams.local
         """
-        ${binDir}sc_h5ad_annotate_by_sample_metadata.py \
+        ${binDir}/sc_h5ad_annotate_by_sample_metadata.py \
             ${(processParams.containsKey('type')) ? '--type ' + processParams.type : ''} \
             ${(processParams.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + processParams.metaDataFilePath : ''} \
             $f \
