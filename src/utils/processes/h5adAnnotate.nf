@@ -4,6 +4,8 @@ import java.nio.file.Paths
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
+include './utils.nf' params(params)
+
 
 process SC__ANNOTATE_BY_CELL_METADATA {
 
@@ -28,10 +30,10 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            tool == null ? params.sc.cell_annotate : params.sc[tool].cell_annotate
+            isParamNull(tool) ? params.sc.cell_annotate : params.sc[tool].cell_annotate
         )
 		processParams = sampleParams.local
-        toolTag = tool == null ? '' : tool.toUpperCase() + '.'
+        toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
         annotationColumnNamesAsArguments = processParams.containsKey("annotationColumnNames") ?
             processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
             : ''

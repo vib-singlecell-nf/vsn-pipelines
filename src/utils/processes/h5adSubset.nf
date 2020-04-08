@@ -4,6 +4,7 @@ import java.nio.file.Paths
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
+include './utils.nf' params(params)
 
 process SC__PREPARE_OBS_FILTER {
 
@@ -29,10 +30,10 @@ process SC__PREPARE_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            tool == null ? params.sc.cell_filter : params.sc[tool].cell_filter
+            isParamNull(tool) ? params.sc.cell_filter : params.sc[tool].cell_filter
         )
 		processParams = sampleParams.local
-        toolTag = tool == null ? '' : tool.toUpperCase() + '.'
+        toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
 
         input = processParams.method == 'internal' ? f : filterConfig.cellMetaDataFilePath
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
@@ -73,10 +74,10 @@ process SC__APPLY_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            tool == null ? params.sc.cell_filter : params.sc[tool].cell_filter
+            isParamNull(tool) ? params.sc.cell_filter : params.sc[tool].cell_filter
         )
 		processParams = sampleParams.local
-        toolTag = tool == null ? '' : tool.toUpperCase() + '.'
+        toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
 
         filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
         """

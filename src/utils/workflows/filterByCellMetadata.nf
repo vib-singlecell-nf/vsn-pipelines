@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  process imports:
-
+include './../processes/utils.nf' params(params)
 include SC__PREPARE_OBS_FILTER from './../processes/h5adSubset' params(params)
 include SC__APPLY_OBS_FILTER from './../processes/h5adSubset' params(params)
 
@@ -18,17 +18,17 @@ workflow FILTER_BY_CELL_METADATA {
         tool
 
     main:
-        def workflowParams = tool == null ? params.sc.cell_filter : params.sc[tool].cell_filter
+        def workflowParams = isParamNull(tool) ? params.sc.cell_filter : params.sc[tool].cell_filter
         Channel
             .from(workflowParams.filters)
             .set{ filters }
         SC__PREPARE_OBS_FILTER(
             data.combine(filters),
-            tool
+            isParamNull(tool) ? 'NULL' : tool
         )
         out = SC__APPLY_OBS_FILTER(
             SC__PREPARE_OBS_FILTER.out.groupTuple(),
-            tool
+            isParamNull(tool) ? 'NULL' : tool
         )
 
     emit:
