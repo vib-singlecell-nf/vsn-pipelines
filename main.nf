@@ -91,7 +91,8 @@ workflow single_sample_scrublet {
     main:
         single_sample( data )
         SCRUBLET__DOUBLET_REMOVAL(
-            data.join( single_sample.out.dr_pca_data )
+            data.join( single_sample.out.dr_pca_data ),
+            single_sample.out.final_processed_data
         )
 
 }
