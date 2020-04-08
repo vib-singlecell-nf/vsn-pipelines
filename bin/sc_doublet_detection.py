@@ -123,6 +123,24 @@ parser.add_argument(
     help='Single-cell technology used.'
 )
 
+parser.add_argument(
+    "-f", "--use-variable-features",
+    type=str2bool,
+    action="store",
+    dest="use_variable_features",
+    default=False,
+    help='''
+        If False, don't filter the feature space by the most variable featurse.
+        '''
+)
+
+parser.add_argument(
+    "-z", "--h5ad-with-variable-features-info",
+    dest="h5ad_with_variable_features_info",
+    type=argparse.FileType('r'),
+    help='Input is a .h5ad containing the highly_variable slot. This should be coupled with the use of --use-variable-features True.'
+)
+
 args = parser.parse_args()
 
 
@@ -134,15 +152,24 @@ FILE_PATH_OUT_BASENAME = args.output_prefix
 # Expects h5ad file
 try:
     adata_raw = sc.read_h5ad(filename=FILE_PATH_IN.name)
-    adata_hvg = sc.read_h5ad(filename=FILE_PATH_IN_HVG.name)
 except IOError:
     raise Exception("Wrong input format. Expects .h5ad files.")
 
 ################################################################################
 # Processing...
 
-adata_raw_var = adata_raw.X[:, np.array(adata_hvg.var['highly_variable'])]
-scrub = scr.Scrublet(adata_raw_var)
+if args.use_variable_features:
+    print("Subsetting the variable features from the counts matrix...")
+    if args.h5ad_with_variable_features_info is None:
+        raise Exception("Expecting --h5ad-with-variable-features-info argument to be set since --use-variable-features argument is set to True.")
+
+    FILE_PATH_H5AD_WITH_HVG_INFO = args.h5ad_with_variable_features_info
+    adata_hvg = sc.read_h5ad(filename=FILE_PATH_H5AD_WITH_HVG_INFO.name)
+    counts_matrix = adata_raw.X[:, np.array(adata_hvg.var['highly_variable'])]
+else:
+    counts_matrix = adata_raw.X
+
+scrub = scr.Scrublet(counts_matrix)
 adata_raw.obs['doublet_scores'], adata_raw.obs['predicted_doublets'] = scrub.scrub_doublets(
     synthetic_doublet_umi_subsampling=args.synthetic_doublet_umi_subsampling,
     use_approx_neighbors=True,

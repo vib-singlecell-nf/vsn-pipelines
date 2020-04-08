@@ -48,7 +48,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 		tuple \
 			val(sampleId), \
 			path(adataRaw), \
-            path(adataHvg), \
+            path(adataWithHvgInfo), \
 			val(stashedParams), \
 			val(nPrinComps)
 
@@ -78,7 +78,9 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
             ${(processParams.containsKey('normalizeVariance')) ? '--normalize-variance ' + processParams.normalizeVariance : ''} \
             ${_processParams.getNPrinCompsAsArgument(nPrinComps)} \
             ${(processParams.containsKey('technology')) ? '--technology ' + processParams.technology : ''} \
+			${(processParams.containsKey('useVariableFeatures')) ? '--h5ad-with-variable-features-info ' + adataWithHvgInfo : ''} \
 			--output-prefix "${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION" \
+			$adataRaw
 		"""
 
 }
