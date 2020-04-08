@@ -13,7 +13,7 @@ nextflow.preview.dsl=2
 
 // utils:
 include '../../channels/file.nf' params(params)
-include ANNOTATE_BY_CELL_METADATA from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
+include STATIC__ANNOTATE_BY_CELL_METADATA from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
 include UPDATE_FEATURE_NOMENCLATURE from '../../utils/workflows/updateFeatureNomenclature.nf' params(params)
 include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
 include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
@@ -40,7 +40,10 @@ workflow QC_FILTER {
             data = FILTER_BY_CELL_METADATA( data )
         }
         if(params.sc.cell_annotate) {
-            data = ANNOTATE_BY_CELL_METADATA( data )
+            data = STATIC__ANNOTATE_BY_CELL_METADATA( 
+                data,
+                null
+            )
         }
         if (params.sc.sample_annotate
             && params.sc.sample_annotate.metaDataFilePath
