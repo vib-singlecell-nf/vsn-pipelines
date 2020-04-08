@@ -16,15 +16,22 @@ process SC__ANNOTATE_BY_CELL_METADATA {
             val(sampleId), \
             path(f), \
             path(metadata)
+        // Expects tool name [string || null]
+        val(tool)
 
     output:
         tuple \
             val(sampleId), \
-            path("${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+            path("${sampleId}.${toolTag}SC__ANNOTATE_BY_CELL_METADATA.h5ad")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.cell_annotate)
+        def sampleParams = params.parseConfig(
+            sampleId,
+            params.global,
+            tool == null ? params.sc.cell_annotate : params.sc[tool].cell_annotate
+        )
 		processParams = sampleParams.local
+        toolTag = tool == null ? '' : tool.toUpperCase() + '.'
         annotationColumnNamesAsArguments = processParams.containsKey("annotationColumnNames") ?
             processParams.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ')
             : ''
@@ -37,7 +44,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
             ${annotationColumnNamesAsArguments} \
             $f \
             ${metadata} \
-            --output "${sampleId}.SC__ANNOTATE_BY_CELL_METADATA.h5ad"
+            --output "${sampleId}.${toolTag}SC__ANNOTATE_BY_CELL_METADATA.h5ad"
         """
 
 }
