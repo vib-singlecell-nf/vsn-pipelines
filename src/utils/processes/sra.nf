@@ -3,7 +3,8 @@ nextflow.preview.dsl=2
 import java.nio.file.Files
 import java.nio.file.Paths
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
 
 processParams = params.utils.sra_metadata
 
@@ -55,7 +56,7 @@ process SRA_TO_METADATA {
         }
         def sampleFiltersAsArguments = sampleFilters.collect({ '--sample-filter' + ' "' + it + '"'}).join(' ')
         """
-        ${binDir}sra_to_metadata.py \
+        ${binDir}/sra_to_metadata.py \
             ${sraId} \
             ${sraDbAsArgument} \
             ${sampleFiltersAsArguments} \

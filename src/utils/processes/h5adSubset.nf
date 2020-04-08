@@ -1,6 +1,9 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
 
 process SC__PREPARE_OBS_FILTER {
 
@@ -26,7 +29,7 @@ process SC__PREPARE_OBS_FILTER {
         input = processParams.method == 'internal' ? f : filterConfig.cellMetaDataFilePath
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
-        ${binDir}sc_h5ad_prepare_obs_filter.py \
+        ${binDir}/sc_h5ad_prepare_obs_filter.py \
             ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --sample-id ${sampleId} \
             --filter-column-name ${filterConfig.filterColumnName} \
@@ -56,7 +59,7 @@ process SC__APPLY_OBS_FILTER {
 		processParams = sampleParams.local
         filtersAsArguments = filters.collect({ '--filter-file-path' + ' ' + it }).join(' ')
         """
-        ${binDir}sc_h5ad_apply_obs_filter.py \
+        ${binDir}/sc_h5ad_apply_obs_filter.py \
             $f \
             --output "${sampleId}.SC__APPLY_OBS_FILTER.${processParams.off}" \
             $filtersAsArguments
