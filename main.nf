@@ -2,9 +2,9 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
-include '../utils/workflows/utils.nf' params(params)
+include './src/utils/workflows/utils.nf' params(params)
 INIT()
-include '../utils/processes/utils.nf' params(params)
+include './src/utils/processes/utils.nf' params(params)
 include './src/channels/channels' params(params)
 
 // run multi-sample with bbknn, output a scope loom file
