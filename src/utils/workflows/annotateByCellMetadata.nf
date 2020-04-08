@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  process imports:
-
+include './../processes/utils.nf' params(params)
 include './../../channels/file' params(params)
 include './../processes/h5adAnnotate.nf' params(params)
 
@@ -20,14 +20,14 @@ workflow ANNOTATE_BY_CELL_METADATA {
         tool
 
     main:
-        def workflowParams = tool == null ? params.sc.cell_annotate : params.sc[tool].cell_annotate
+        def workflowParams = isParamNull(tool) ? params.sc.cell_annotate : params.sc[tool].cell_annotate
         def method = workflowParams.method
         if(method == 'aio') {
             out = SC__ANNOTATE_BY_CELL_METADATA( 
                 data.map {
                     it -> tuple(it[0], it[1], file(workflowParams.cellMetaDataFilePath))
                 },
-                tool
+                isParamNull(tool) ? 'NULL' : tool
             )
         } else if(method == 'obo') {
             if(metadata == null) {
@@ -38,7 +38,7 @@ workflow ANNOTATE_BY_CELL_METADATA {
             }
             out = SC__ANNOTATE_BY_CELL_METADATA(
                 data.join(metadata),
-                tool
+                isParamNull(tool) ? 'NULL' : tool
             )
         } else {
             throw new Exception("The given method '" + method + "' is not valid for cell_annotate.")
@@ -54,12 +54,14 @@ workflow STATIC__ANNOTATE_BY_CELL_METADATA {
     take:
         // Expects (sampleId, h5ad)
         data
+        // Expects name of tool ([string] || null)
+        tool
 
     main:
         out = ANNOTATE_BY_CELL_METADATA(
             data,
             null,
-            null
+            tool
         )
 
     emit:

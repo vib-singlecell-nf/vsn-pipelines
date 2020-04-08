@@ -51,8 +51,11 @@ workflow {
                 // Run
                 if(params.sc.cell_annotate) {
                     getDataChannel | \
-                        SC__FILE_CONVERTER | \
-                        ANNOTATE_BY_CELL_METADATA
+                        SC__FILE_CONVERTER
+                    ANNOTATE_BY_CELL_METADATA( 
+                        SC__FILE_CONVERTER.out, 
+                        null
+                    )
                 }
             break;
             case "FILTER_BY_CELL_METADATA":
@@ -61,8 +64,11 @@ workflow {
                 // Run 
                 if(params.sc.cell_filter) {
                     getDataChannel | \
-                        SC__FILE_CONVERTER | \
-                        FILTER_BY_CELL_METADATA
+                        SC__FILE_CONVERTER
+                    FILTER_BY_CELL_METADATA(
+                        SC__FILE_CONVERTER.out,
+                        null
+                    )
                 }
             break;
             case "FILTER_AND_ANNOTATE_BY_CELL_METADATA":
@@ -72,9 +78,16 @@ workflow {
                 // Run
                 if(params.sc.cell_annotate) {
                     getDataChannel | \
-                        SC__FILE_CONVERTER | \
-                        ANNOTATE_BY_CELL_METADATA | \
-                        FILTER_BY_CELL_METADATA
+                        SC__FILE_CONVERTER
+
+                    ANNOTATE_BY_CELL_METADATA(
+                        SC__FILE_CONVERTER.out,
+                        null
+                    )
+                    FILTER_BY_CELL_METADATA(
+                        ANNOTATE_BY_CELL_METADATA.out,
+                        null
+                    )
                 }
             break;
             case "GET_METADATA_FROM_SRA":
