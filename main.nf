@@ -27,8 +27,7 @@ include COMBINE_REPORTS from './workflows/combine_reports.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Import from external modules:
-include SC__SCRUBLET__DOUBLET_DETECTION from "../scrublet/processes/doublet_detection" params(params)
-
+include DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL from "../scrublet/workflows/doublet_removal.nf" params(params)
 
 workflow single_sample {
 
@@ -91,7 +90,7 @@ workflow single_sample_scrublet {
 
     main:
         single_sample( data )
-        SC__SCRUBLET__DOUBLET_DETECTION(
+        SCRUBLET__DOUBLET_REMOVAL(
             data.join( single_sample.out.dr_pca_data )
         )
 
