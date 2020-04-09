@@ -100,6 +100,20 @@ This could be very resource intensive, depending on the dataset.
 
 ----
 
+**single_sample_scrublet** |single_sample_scrublet|
+---------------------------------------------------
+
+.. |single_sample_scrublet| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scrublet/badge.svg
+
+Runs the ``single_sample`` workflow above together with the Scrublet workflow.
+
+|Single-sample Scrublet Workflow|
+
+.. |Single-sample Scrublet Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample_scrublet.svg?sanitize=true
+
+
+----
+
 **scenic** |scenic|
 -------------------
 
