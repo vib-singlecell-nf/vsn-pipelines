@@ -17,6 +17,7 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 in_formats = [
     '10x_cellranger_mex',
     '10x_cellranger_h5',
