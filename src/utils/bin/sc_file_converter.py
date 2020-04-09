@@ -138,7 +138,7 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("VSN ERROR: AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
@@ -165,7 +165,7 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("VSN ERROR: AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
@@ -195,7 +195,7 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("VSN ERROR: AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
@@ -217,7 +217,7 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("VSN ERROR: AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
