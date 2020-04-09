@@ -152,7 +152,7 @@ def read_data(args):
     try:
         adata = sc.read_h5ad(filename=args.input.name)
     except IOError:
-        raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(args.input)[0]))
+        raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(args.input)[0]))
     return adata
 
 

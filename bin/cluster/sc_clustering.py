@@ -58,7 +58,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 
 def check_neighborhood_graph_exists(adata):
@@ -88,7 +88,7 @@ elif args.method.lower() == "leiden":
         resolution=args.resolution
     )
 else:
-    raise Exception("The given clustering algorithm {} does not exist or is not implemeted.".format(args.method))
+    raise Exception("VSN ERROR: The given clustering algorithm {} does not exist or is not implemeted.".format(args.method))
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

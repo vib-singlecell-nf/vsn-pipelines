@@ -47,7 +47,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
+    raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 #
 # Normalize the data
@@ -59,7 +59,7 @@ if args.method == 'cpx':
     # Total-count normalize (library-size correct) to '-r' reads/cell
     sc.pp.normalize_per_cell(adata, counts_per_cell_after=args.counts_per_cell_after)
 else:
-    raise Exception("Method does not exist.")
+    raise Exception("VSN ERROR: Method does not exist.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

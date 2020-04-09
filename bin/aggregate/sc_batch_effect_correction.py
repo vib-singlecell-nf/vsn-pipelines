@@ -136,7 +136,7 @@ for FILE_PATH_IN in args.input:
         adata = sc.read_h5ad(filename=FILE_PATH_IN)
         adatas.append(adata)
     except IOError:
-        raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
+        raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 #
 # Aggregate the data
@@ -150,7 +150,7 @@ elif args.method == 'bbknn':
     # Expects:
     # - the PCA to have been computed and stored in adata.obsm['X_pca']
     if 'X_pca' not in adata.obsm.keys():
-        raise Exception("Expect the PCA to have been computed and stored in adata.obsm['X_pca']")
+        raise Exception("VSN ERROR: Expect the PCA to have been computed and stored in adata.obsm['X_pca']")
     # Run BBKNN
     sc.external.pp.bbknn(
         adatas[0],

@@ -45,7 +45,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
+    raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 #
 # Adjust the data
@@ -55,7 +55,7 @@ if args.method == 'linear_regression':
     # regress out variables (e.g.: total counts per cell and the percentage of mitochondrial genes expressed)
     sc.pp.regress_out(adata, args.vars_to_regress_out)
 else:
-    raise Exception("Method does not exist.")
+    raise Exception("VSN ERROR: Method does not exist.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
