@@ -102,7 +102,7 @@ def check_10x_cellranger_mex_path(path):
             )
         )
     if not os.path.exists(path):
-        raise Exception("The given directory {} does not exist.".format(path))
+        raise Exception("VSN ERROR: The given directory {} does not exist.".format(path))
     if not (
         not os.path.exists(os.path.join(path, "matrix.mtx")) or not os.path.exists(os.path.join(path, "matrix.mtx.gz"))
     ):
@@ -138,7 +138,7 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
@@ -149,7 +149,7 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
 
 elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     if not os.path.exists(FILE_PATH_IN):
-        raise Exception("The given file {} does not exist.".format(FILE_PATH_IN))
+        raise Exception("VSN ERROR: The given file {} does not exist.".format(FILE_PATH_IN))
     # Convert
     print("Reading 10x data from HDF5 format...")
     adata = sc.read_10x_h5(
@@ -165,7 +165,7 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
@@ -195,7 +195,7 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
@@ -217,7 +217,7 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("AnnData var index is not unique.")
+        raise Exception("VSN ERROR: AnnData var index is not unique.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")
