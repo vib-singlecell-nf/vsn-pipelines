@@ -21,7 +21,7 @@ Steps:
 
 #. Ask the `VIB-SingleCell-NF` administrators to create a new repository (in this case: ``harmony``) or create one on your GitHub account that could be brought into the `VIB-SingleCell-NF` organization.
 
-    When using your own repo, you MUST start from the `template repository`_ in the vib-singlecell-nf organisation. Click the green "Use this template" button and provide a name for your new repo. Make sur the "Include all branches" checkbox is checked.
+    When using your own repo, you MUST start from the `template repository`_ in the vib-singlecell-nf organisation. Click the green "Use this template" button and provide a name for your new repo. Make sure the "Include all branches" checkbox is checked.
 
     .. _`template repository`: https://github.com/vib-singlecell-nf/template
 

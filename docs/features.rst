@@ -55,7 +55,7 @@ Finally run the pipeline,
 
 Set the seed
 ------------
-Some steps in the pipelines are nondeterministic. In order to have reproducible results in time, a seed is set by default to:
+Some steps in the pipelines are nondeterministic. In order to have reproducible results, a seed is set by default to:
 
 .. code:: groovy
 
@@ -144,7 +144,7 @@ For both methods, here are the mandatory params to be set:
 If ``obo`` is used, the following params are required:
 
 - ``sampleSuffixWithExtension`` is the suffix used to extract the sample ID from the file name of ``cellMetaDataFilePath`` i.e.: it is the suffix after the sample name in the file path.
-- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **should** have unique values. 
+- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
 
 Note: the file name of ``cellMetaDataFilePath`` is required to contain the sample ID.
 
