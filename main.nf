@@ -86,6 +86,19 @@ workflow single_sample_scenic {
 
 }
 
+workflow single_sample_scrublet {
+
+    include single_sample as SCANPY__SINGLE_SAMPLE from './src/scanpy/main.nf' params(params)
+    include DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL from "./src/scrublet/workflows/doublet_removal.nf" params(params)
+    data = getDataChannel | SC__FILE_CONVERTER
+    SCANPY__SINGLE_SAMPLE( data )
+    SCRUBLET__DOUBLET_REMOVAL(
+        data.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data
+    )
+
+}
+
 // run single_sample, then scenic from the previous input (not standalone):
 workflow pipe_single_sample_scenic {
 
