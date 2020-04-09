@@ -63,7 +63,7 @@ if f.endswith('.pkl') or f.endswith('.pkl.gz') or f.endswith('.pickle') or f.end
 elif f.endswith('.csv') or f.endswith('.csv.gz'):
     motif_enrichment_table = utils.read_feature_enrichment_table(fname=args.motif_enrichment_table_fname.name, sep=",")
 else:
-    raise Exception("The aggregated feature enrichment table is in the wrong format. Expecting .pickle or .csv formats.")
+    raise Exception("VSN ERROR: The aggregated feature enrichment table is in the wrong format. Expecting .pickle or .csv formats.")
 print(f"... took {time.time() - start} seconds to run.", flush=True)
 
 print(f"Making the regulons...", flush=True)
