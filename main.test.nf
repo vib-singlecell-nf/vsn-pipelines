@@ -18,25 +18,12 @@ workflow test_single_sample {
 
 }
 
-workflow test_single_sample_scrublet {
-
-    take:
-        data
-
-    main:
-        single_sample_scrublet( data )
-
-}
-
 workflow {
 
     main:
         switch(params.test) {
             case "single_sample":
                 getDataChannel | SC__FILE_CONVERTER | test_single_sample
-            break;
-            case "single_sample_scrublet":
-                getDataChannel | SC__FILE_CONVERTER | test_single_sample_scrublet
             break;
             default:
                 throw new Exception("The test parameters should be specified.")

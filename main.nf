@@ -25,10 +25,6 @@ include SC__SCANPY__MERGE_REPORTS from './processes/reports.nf' params(params)
 include SC__SCANPY__REPORT_TO_HTML from './processes/reports.nf' params(params)
 include COMBINE_REPORTS from './workflows/combine_reports.nf' params(params)
 
-//////////////////////////////////////////////////////
-//  Import from external modules:
-include DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL from "../scrublet/workflows/doublet_removal.nf" params(params)
-
 workflow single_sample {
 
     take:
@@ -82,18 +78,3 @@ workflow single_sample {
         merged_report
 
 }
-
-workflow single_sample_scrublet {
-
-    take:
-        data
-
-    main:
-        single_sample( data )
-        SCRUBLET__DOUBLET_REMOVAL(
-            data.join( single_sample.out.dr_pca_data ),
-            single_sample.out.final_processed_data
-        )
-
-}
-
