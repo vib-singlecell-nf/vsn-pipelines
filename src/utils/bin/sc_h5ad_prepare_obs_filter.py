@@ -81,7 +81,7 @@ if args.method == 'internal':
         adata = sc.read_h5ad(filename=FILE_PATH_IN)
         metadata = adata.obs
     except IOError:
-        raise Exception("Can only handle .h5ad files.")
+        raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 elif args.method == 'external':
     metadata = pd.read_csv(

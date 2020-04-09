@@ -39,7 +39,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 #
 # Subset the h5ad using the given cell IDs
@@ -53,7 +53,7 @@ for filter_file_path in args.filter_file_paths:
     )
 
 if len(obs_to_keep) != len(np.unique(obs_to_keep)):
-    raise Exception("This use case is currently not handled. This could happen if you are using different filters")
+    raise Exception("VSN ERROR: This use case is currently not handled. This could happen if you are using different filters")
 
 print(f"Dimension of pre-filtered AnnData: {adata.shape}")
 adata_filtered = adata[obs_to_keep, :]
