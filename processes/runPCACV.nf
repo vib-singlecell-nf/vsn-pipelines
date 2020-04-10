@@ -1,10 +1,9 @@
 nextflow.preview.dsl=2
 
-if(!params.containsKey("test")) {
-    binDir = "${workflow.projectDir}/src/pcacv/bin/"
-} else {
-    binDir = ""
-}
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pcacv/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "pcacv/bin")
+
 
 process PCACV__FIND_OPTIMAL_NPCS {
     
@@ -23,7 +22,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
         def sampleParams = params.parseConfig(sampleId, params.global, params.pcacv.find_optimal_npcs)
         processParams = sampleParams.local
         """
-        ${binDir}run_pca_cv.R \
+        ${binDir}/run_pca_cv.R \
             --input-file ${f} \
             --seed ${params.global.seed} \
             ${(processParams.containsKey('accessor')) ? '--accessor "' + processParams.accessor.replace('$','\\$') + '"': ''} \
