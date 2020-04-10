@@ -225,7 +225,7 @@ process SC__PUBLISH_H5AD {
 
     script:
         """
-        ln -s $f "${tag}.${fOutSuffix}.h5ad"
+        ln $f "${tag}.${fOutSuffix}.h5ad"
         """
 
 }
