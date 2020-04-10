@@ -105,7 +105,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 #
 # Transform the distribution of the data
@@ -124,7 +124,7 @@ elif args.method.lower() == "umap":
     # Notes:
     # - /!\ BBKNN is slotting into the sc.pp.neighbors() => sc.pp.neighbors() should not be run afterwards otherwise results will be overwritten
     if "neighbors" not in adata.uns.keys():
-        raise Exception("The neighborhood graph of observations has not been computed. Computing...")
+        raise Exception("VSN ERROR: The neighborhood graph of observations has not been computed. Computing...")
     sc.tl.umap(
         adata=adata,
         random_state=args.seed
@@ -146,7 +146,7 @@ elif args.method.lower() == "tsne":
         random_state=args.seed
     )
 else:
-    raise Exception("The dimensionality reduction method {} does not exist.".format(args.method))
+    raise Exception("VSN ERROR: The dimensionality reduction method {} does not exist.".format(args.method))
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

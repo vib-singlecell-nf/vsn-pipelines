@@ -1,6 +1,8 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
 process SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES {
 
@@ -18,7 +20,7 @@ process SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES {
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.feature_selection)
 		processParams = sampleParams.local
 		"""
-		${binDir}feature_selection/sc_find_variable_genes.py \
+		${binDir}/feature_selection/sc_find_variable_genes.py \
 			--method ${processParams.method} \
 			${(processParams.containsKey('minMean')) ? '--min-mean ' + processParams.minMean : ''} \
 			${(processParams.containsKey('maxMean')) ? '--max-mean ' + processParams.maxMean : ''} \
@@ -46,7 +48,7 @@ process SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES {
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.feature_selection)
 		processParams = sampleParams.local
 		"""
-		${binDir}feature_selection/sc_subset_variable_genes.py \
+		${binDir}/feature_selection/sc_subset_variable_genes.py \
 			$f \
 			"${sampleId}.SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES.${processParams.off}"
 		"""

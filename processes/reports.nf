@@ -35,8 +35,8 @@ process SC__SCANPY__GENERATE_REPORT {
 			${sampleId}.${reportTitle}.ipynb \
 			-p FILE $adata \
 			-y "${reportParams}" \
-			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
-			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
+			-p WORKFLOW_MANIFEST '${params.misc.paramsAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.misc.paramsAsJSON}'
 		"""
 
 }
@@ -84,8 +84,8 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 			${sampleId}.${reportTitle}.${uuid}.ipynb \
 			-p FILE $adata \
 			-y "${reportParams}" \
-			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
-			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
+			-p WORKFLOW_MANIFEST '${params.misc.paramsAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.misc.paramsAsJSON}'
 		"""
 
 }
@@ -124,8 +124,8 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 			${sampleId}.${reportTitle}.${isParameterExplorationModeOn ? uuid + "." : ''}ipynb \
 			-p FILE1 $data1 -p FILE2 $data2 \
 			-y "${reportParams}" \
-			-p WORKFLOW_MANIFEST '${params.manifestAsJSON}' \
-			-p WORKFLOW_PARAMETERS '${params.paramsAsJSON}'
+			-p WORKFLOW_MANIFEST '${params.misc.paramsAsJSON}' \
+			-p WORKFLOW_PARAMETERS '${params.misc.paramsAsJSON}'
 		"""
 
 }

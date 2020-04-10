@@ -48,7 +48,7 @@ SCALE__MAX_SD = args.max_sd if args.max_sd > 0 else None
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 #
 # Transform the distribution of the data
@@ -61,7 +61,7 @@ if args.method == "zscore_scale":
         max_value=SCALE__MAX_SD
     )
 else:
-    raise Exception("Method does not exist.")
+    raise Exception("VSN ERROR: Method does not exist.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

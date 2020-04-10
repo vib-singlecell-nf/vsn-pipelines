@@ -1,11 +1,12 @@
 nextflow.preview.dsl=2
 
+import java.nio.file.Paths
 import groovy.transform.TupleConstructor
 import groovyx.gpars.dataflow.DataflowBroadcast
 import nextflow.util.ArrayTuple
 import nextflow.script.ScriptBinding
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
 include '../../utils/processes/utils.nf'
 
@@ -108,7 +109,7 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 		_processParams.setEnv(this)
 		_processParams.setConfigParams(processParams)
         """
-        ${binDir}nn/sc_neighborhood_graph.py \
+        ${binDir}/nn/sc_neighborhood_graph.py \
             $f \
             ${sampleId}.SC__SCANPY__NEIGHBORHOOD_GRAPH.${processParams.off} \
 			--seed ${params.global.seed} \

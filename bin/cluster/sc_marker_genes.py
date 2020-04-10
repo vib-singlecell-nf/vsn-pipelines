@@ -64,7 +64,7 @@ try:
     normalized_tranformed_data = sc.read_h5ad(filename=args.normalized_tranformed_data.name)
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 # if 'raw' not in dir(adata):
 #     warnings.warn(

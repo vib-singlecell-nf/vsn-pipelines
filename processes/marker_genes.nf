@@ -1,6 +1,8 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
 include '../../utils/processes/utils.nf'
 
@@ -28,7 +30,7 @@ process SC__SCANPY__MARKER_GENES {
     	def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.marker_genes)
 		processParams = sampleParams.local
 		"""
-		${binDir}cluster/sc_marker_genes.py \
+		${binDir}/cluster/sc_marker_genes.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${(processParams.containsKey('groupby')) ? '--groupby ' + processParams.groupby : ''} \
 			${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \
@@ -74,7 +76,7 @@ process SC__SCANPY__PARAM_EXPLORE_MARKER_GENES {
 		if(!isParamNull(stashedParams))
 			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
 		"""
-		${binDir}cluster/sc_marker_genes.py \
+		${binDir}/cluster/sc_marker_genes.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${!isParamNull(clusteringMethod) ? '--groupby ' + clusteringMethod : ''} \
 			${(processParams.containsKey('ngenes')) ? '--ngenes ' + processParams.ngenes : ''} \

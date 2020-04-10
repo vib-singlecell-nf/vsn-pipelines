@@ -1,6 +1,8 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
 process SC__SCANPY__COMPUTE_QC_STATS {
 
@@ -17,7 +19,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
 		processParams = sampleParams.local
         """
-        ${binDir}filter/sc_cell_gene_filtering.py \
+        ${binDir}/filter/sc_cell_gene_filtering.py \
             compute \
             $f \
             ${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off} \
@@ -48,7 +50,7 @@ process SC__SCANPY__GENE_FILTER {
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
 		processParams = sampleParams.local
         """
-        ${binDir}filter/sc_cell_gene_filtering.py \
+        ${binDir}/filter/sc_cell_gene_filtering.py \
             genefilter \
             $f \
             ${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off} \
@@ -74,7 +76,7 @@ process SC__SCANPY__CELL_FILTER {
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.filter)
 		processParams = sampleParams.local
         """
-        ${binDir}filter/sc_cell_gene_filtering.py \
+        ${binDir}/filter/sc_cell_gene_filtering.py \
             cellfilter \
             $f \
             ${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off} \

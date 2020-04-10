@@ -1,9 +1,10 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" : ""
-
+import java.nio.file.Paths
 import groovy.transform.TupleConstructor
 import groovyx.gpars.dataflow.DataflowBroadcast
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
 include '../../utils/processes/utils.nf'
 
@@ -107,7 +108,7 @@ process SC__SCANPY__CLUSTERING {
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.clustering)
 		processParams = sampleParams.local
 		"""
-		${binDir}cluster/sc_clustering.py \
+		${binDir}/cluster/sc_clustering.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${(processParams.containsKey('resolution')) ? '--resolution ' + processParams.resolution : ''} \
 			$f \
@@ -147,7 +148,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 		_processParams.setEnv(this)
 		_processParams.setConfigParams(processParams)
 		"""
-		${binDir}cluster/sc_clustering.py \
+		${binDir}/cluster/sc_clustering.py \
 			${_processParams.getMethodAsArgument(method)} \
 			${_processParams.getResolutionAsArgument(resolution)} \
 			$f \
