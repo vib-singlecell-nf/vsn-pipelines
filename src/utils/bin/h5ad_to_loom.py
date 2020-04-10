@@ -112,7 +112,7 @@ try:
     for adata_idx in range(0, len(FILE_PATHS_IN)):
         adatas = adatas + [read_h5ad(file_path=FILE_PATHS_IN[adata_idx].name)]
 except IOError:
-    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATHS_IN[0])[0]))
+    raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATHS_IN[0])[0]))
 
 #####################
 # Global Attributes #

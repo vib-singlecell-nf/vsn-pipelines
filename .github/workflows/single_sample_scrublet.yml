@@ -1,4 +1,4 @@
-name: single_sample_scenic_multiruns
+name: single_sample_scrublet
 
 on: 
   push:
@@ -24,10 +24,10 @@ jobs:
         sudo mv nextflow /usr/local/bin/
     - name: Get sample data
       run: |
-        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_small.tar.gz
-        tar xvf sample_data_small.tar.gz
-    - name: Run single_sample_scenic test
+        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
+        tar xvf sample_data.tar.gz
+    - name: Run single_sample_scrublet test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scenic,scenic_multiruns,test__single_sample_scenic_multiruns,docker -entry single_sample_scenic -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scrublet,test__single_sample_scrublet,docker -entry single_sample_scrublet -ansi-log false
         cat .nextflow.log
 
