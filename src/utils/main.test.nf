@@ -45,26 +45,49 @@ workflow {
             case "SC__FILE_CONCATENATOR":
                 getDataChannel | test_SC__FILE_CONCATENATOR
             break;
+            case "ANNOTATE_BY_CELL_METADATA":
+                // Imports
+                include STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA from './workflows/annotateByCellMetadata' params(params)
+                // Run
+                if(params.sc.cell_annotate) {
+                    getDataChannel | \
+                        SC__FILE_CONVERTER
+                    ANNOTATE_BY_CELL_METADATA( 
+                        SC__FILE_CONVERTER.out, 
+                        null
+                    )
+                }
+            break;
             case "FILTER_BY_CELL_METADATA":
                 // Imports
                 include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
                 // Run 
                 if(params.sc.cell_filter) {
                     getDataChannel | \
-                        SC__FILE_CONVERTER | \
-                        FILTER_BY_CELL_METADATA
+                        SC__FILE_CONVERTER
+                    FILTER_BY_CELL_METADATA(
+                        SC__FILE_CONVERTER.out,
+                        null
+                    )
                 }
             break;
             case "FILTER_AND_ANNOTATE_BY_CELL_METADATA":
                 // Imports
+                include STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA from './workflows/annotateByCellMetadata' params(params)
                 include FILTER_BY_CELL_METADATA from './workflows/filterByCellMetadata' params(params)
-                include SC__ANNOTATE_BY_CELL_METADATA from './processes/h5adAnnotate' params(params)
-                // Run 
-                if(params.sc.cell_filter && params.sc.cell_annotate) {
+                // Run
+                if(params.sc.cell_annotate) {
                     getDataChannel | \
-                        SC__FILE_CONVERTER | \
-                        FILTER_BY_CELL_METADATA | \
-                        SC__ANNOTATE_BY_CELL_METADATA
+                        SC__FILE_CONVERTER
+
+                    ANNOTATE_BY_CELL_METADATA(
+                        SC__FILE_CONVERTER.out,
+                        null
+                    )
+                    FILTER_BY_CELL_METADATA(
+                        ANNOTATE_BY_CELL_METADATA.out,
+                        null
+                    )
                 }
             break;
             case "GET_METADATA_FROM_SRA":

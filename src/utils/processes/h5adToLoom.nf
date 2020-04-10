@@ -1,5 +1,9 @@
 nextflow.preview.dsl=2
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
 
 process SC__H5AD_TO_LOOM {
 
@@ -21,7 +25,7 @@ process SC__H5AD_TO_LOOM {
 
 	script:
 		"""
-		${binDir}h5ad_to_loom.py \
+		${binDir}/h5ad_to_loom.py \
 			${(params.sc.containsKey('scope') && params.sc.scope.genome.length() > 0) ? '--nomenclature "' + params.sc.scope.genome + '"' : ''} \
 			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_1.length() > 0 ) ? '--scope-tree-level-1 "' + params.sc.scope.tree.level_1 + '"'  : ''} \
 			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_2.length() > 0 ) ? '--scope-tree-level-2 "' + params.sc.scope.tree.level_2 + '"'  : ''} \
@@ -49,7 +53,7 @@ process SC__H5AD_TO_FILTERED_LOOM {
 
 	script:
 		"""
-		${binDir}h5ad_to_filtered_loom.py \
+		${binDir}/h5ad_to_filtered_loom.py \
 			$f \
 			"${sampleId}.filtered.loom"
 		"""
