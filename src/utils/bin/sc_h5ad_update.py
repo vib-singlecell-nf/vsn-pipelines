@@ -39,7 +39,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 #
 # Update the feature/observation-based metadata with all the columns present within the look-up table.

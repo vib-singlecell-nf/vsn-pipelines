@@ -2,32 +2,9 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
-if(!params.global.containsKey('seed')) {
-    params.global.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
-
-    Channel.from('').view {
-            """
-------------------------------------------------------------------
-\u001B[32m No seed detected in the config \u001B[0m
-\u001B[32m To ensure reproducibility the seed has been set to ${params.global.seed} \u001B[0m
-------------------------------------------------------------------
-            """
-    }
-} else {
-    Channel.from('').view {
-            """
-------------------------------------------------------------------
-\u001B[32m Custom seed detected in the config \u001B[0m
-\u001B[32m Seed is set to ${params.global.seed} \u001B[0m
-------------------------------------------------------------------
-            """
-    }
-}
-
-def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-params.manifestAsJSON = toJson(workflow.manifest)
-params.paramsAsJSON = toJson(paramsCopy)
-
+include './src/utils/workflows/utils.nf' params(params)
+INIT()
+include './src/utils/processes/utils.nf' params(params)
 include './src/channels/channels' params(params)
 
 // run multi-sample with bbknn, output a scope loom file
@@ -105,6 +82,19 @@ workflow single_sample_scenic {
     SCENIC_APPEND(
         SINGLE_SAMPLE.out.filteredloom,
         SINGLE_SAMPLE.out.scopeloom
+    )
+
+}
+
+workflow single_sample_scrublet {
+
+    include SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE from './src/scanpy/workflows/single_sample.nf' params(params)
+    include DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL from "./src/scrublet/workflows/doublet_removal.nf" params(params)
+    data = getDataChannel | SC__FILE_CONVERTER
+    SCANPY__SINGLE_SAMPLE( data )
+    SCRUBLET__DOUBLET_REMOVAL(
+        data.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data
     )
 
 }

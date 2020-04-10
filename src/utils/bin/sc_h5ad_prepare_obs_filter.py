@@ -10,15 +10,24 @@ import numpy as np
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
-    "cell_meta_data_file_path",
+    "input",
     type=argparse.FileType('r'),
-    help='A file path to meta data (TSV) for each cell where values from a column could be used as filter.'
+    help='Either a .h5ad file with additional metadata (which can be used as filters) or .tsv file containing cell-based metadata.'
 )
 
 parser.add_argument(
     "output",
     type=argparse.FileType('w'),
     help='The path to the output containing cells IDs that will be used for applying the filter.'
+)
+
+parser.add_argument(
+    '-m', '--method',
+    type=str,
+    dest="method",
+    choices=['internal', 'external'],
+    default='internal',
+    help="The method to prepare the filters. Internal means, the input is expected to be a .h5ad otherwise it expects a .tsv."
 )
 
 parser.add_argument(
@@ -32,14 +41,14 @@ parser.add_argument(
     '-s', '--sample-column-name',
     type=str,
     dest="sample_column_name",
-    help="The column name containing the sample ID for each cell entry in the cell meta data."
+    help="The column name containing the sample ID for each row in the cell meta data."
 )
 
 parser.add_argument(
-    '-b', '--barcode-column-name',
+    '-x', '--index-column-name',
     type=str,
-    dest="barcode_column_name",
-    help="The column name containing the barcode for each cell entry in the cell meta data."
+    dest="index_column_name",
+    help="The column name containing the index (unique identifier) for each row in the cell meta data."
 )
 
 parser.add_argument(
@@ -65,24 +74,54 @@ args = parser.parse_args()
 # Extract cells that will be kept
 #
 
-metadata = pd.read_csv(
-    filepath_or_buffer=args.cell_meta_data_file_path,
-    header=0,
-    sep="\t"
-)
+if args.method == 'internal':
+    # Expects h5ad file
+    try:
+        FILE_PATH_IN = args.input.name
+        adata = sc.read_h5ad(filename=FILE_PATH_IN)
+        metadata = adata.obs
+    except IOError:
+        raise Exception("VSN ERROR: Can only handle .h5ad files.")
+
+elif args.method == 'external':
+    metadata = pd.read_csv(
+        filepath_or_buffer=args.input,
+        header=0,
+        index_col=args.index_column_name,
+        sep="\t"
+    )
+else:
+    raise Exception(f"The given method {args.method} is invalid.")
 
 if args.sample_column_name not in metadata.columns:
-    raise Exception(f"The meta data TSV file expects a header with a required '{args.sample_column_name}' column.")
-if args.barcode_column_name not in metadata.columns:
-    raise Exception(f"The meta data TSV file expects a header with a required '{args.barcode_column_name}' column.")
+    raise Exception(f"The meta data .tsv file expects a header with a required '{args.sample_column_name}' column.")
 if args.filter_column_name not in metadata.columns:
-    raise Exception(f"The meta data TSV file expects a header with a required '{args.filter_column_name}' column.")
+    raise Exception(f"The meta data .tsv file expects a header with a required '{args.filter_column_name}' column.")
 
-sample_mask = np.logical_and(
+
+def is_bool(s):
+    return s.lower() in ['true', 'false']
+
+
+def str_to_bool(s):
+    if s == 'True':
+        return True
+    elif s == 'False':
+        return False
+    else:
+        raise ValueError
+
+
+# Convert to boolean type if needed
+values_to_keep_from_filter_column_formatted = [
+    value_to_keep if not is_bool(s=value_to_keep) else str_to_bool(s=value_to_keep) for value_to_keep in args.values_to_keep_from_filter_column
+]
+
+filter_mask = np.logical_and(
     metadata[args.sample_column_name] == args.sample_id,
-    metadata[args.filter_column_name].isin(args.values_to_keep_from_filter_column)
+    metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
 )
-sample_cells = metadata[args.barcode_column_name][sample_mask]
+cells_to_keep = metadata.index[filter_mask]
 
 # I/O
-sample_cells.to_csv(path=args.output, index=False)
+np.savetxt(args.output, cells_to_keep, fmt="%s")
