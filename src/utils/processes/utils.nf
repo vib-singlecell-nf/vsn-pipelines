@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 import java.nio.file.Paths
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
 def isParamNull(param) {
     return param == null || param == "NULL"
@@ -111,14 +111,14 @@ process SC__FILE_CONVERTER {
 
         if(inputDataType == "10x_atac_cellranger_mex_outs" && outputDataType == "cistopic_rds")
             """
-            ${binDir}create_cistopic_object.R \
+            ${binDir}/create_cistopic_object.R \
                 --tenx_path ${f} \
                 --sampleId ${sampleId} \
                 --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
             """
         else if(inputDataType.toLowerCase().contains("rds"))
 			"""
-			${binDir}sc_file_converter.R \
+			${binDir}/sc_file_converter.R \
                 --sample-id "${sampleId}" \
                 ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
                 ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
@@ -130,7 +130,7 @@ process SC__FILE_CONVERTER {
 			"""
 		else
             """
-            ${binDir}sc_file_converter.py \
+            ${binDir}/sc_file_converter.py \
                 --sample-id "${sampleId}" \
                 ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
                 ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
@@ -151,7 +151,7 @@ process SC__FILE_CONVERTER_HELP {
 
     script:
         """
-        ${binDir}sc_file_converter.py -h | awk '/-h/{y=1;next}y'
+        ${binDir}/sc_file_converter.py -h | awk '/-h/{y=1;next}y'
         """
 
 }
@@ -172,7 +172,7 @@ process SC__FILE_CONCATENATOR {
     script:
         processParams = params.sc.file_concatenator
         """
-        ${binDir}sc_file_concatenator.py \
+        ${binDir}/sc_file_concatenator.py \
             --file-format $processParams.off \
             ${(processParams.containsKey('join')) ? '--join ' + processParams.join : ''} \
             --output "${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}" *
@@ -197,7 +197,7 @@ process SC__STAR_CONCATENATOR() {
         processParams = sampleParams.local
         id = params.global.project_name
         """
-        ${binDir}sc_star_concatenator.py \
+        ${binDir}/sc_star_concatenator.py \
             --stranded ${processParams.stranded} \
             --output "${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}" $f
         """
@@ -225,7 +225,7 @@ process SC__PUBLISH_H5AD {
 
     script:
         """
-        ln -s $f "${tag}.${fOutSuffix}.h5ad"
+        ln $f "${tag}.${fOutSuffix}.h5ad"
         """
 
 }

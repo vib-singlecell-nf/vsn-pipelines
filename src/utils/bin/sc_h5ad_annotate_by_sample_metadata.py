@@ -48,7 +48,7 @@ SAMPLE_NAME = os.path.splitext(FILE_PATH_OUT_BASENAME)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 #
 # Annotate the data
@@ -60,13 +60,13 @@ metadata = pd.read_csv(
 )
 
 if 'id' not in metadata.columns:
-    raise Exception("The meta data TSV file expects a header with a required 'id' column.")
+    raise Exception("VSN ERROR: The meta data TSV file expects a header with a required 'id' column.")
 
 if args.type == "sample":
     for (column_name, column_data) in metadata[metadata.id == SAMPLE_NAME].iteritems():
         adata.obs[column_name] = column_data.values[0]
 else:
-    raise Exception("This meta data type {} is not implemented".format(args.type))
+    raise Exception("VSN ERROR: This meta data type {} is not implemented".format(args.type))
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

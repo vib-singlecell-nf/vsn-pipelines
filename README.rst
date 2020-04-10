@@ -64,6 +64,9 @@ The **Single Sample Workflows** perform a "best practices" scRNA-seq analysis. M
     * - single_sample_scenic_multiruns
       - Ind. samples + multi-SCENIC
       - |single_sample_scenic_multiruns|
+    * - single_sample_scrublet
+      - Ind. samples + Scrublet
+      - |single_sample_scrublet|
 
 
 Sample Aggregation Workflows
@@ -146,6 +149,10 @@ If VSN-Pipelines is useful for your research, consider citing:
 .. |single_sample_scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic_multiruns/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#scenic-multiruns-scenic-multiruns-single-sample-scenic-multiruns
     :alt: Single-sample SCENIC Multi-runs Pipeline
+
+.. |single_sample_scrublet| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scrublet/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-scrublet-single-sample-scrublet
+    :alt: Single-sample Scrublet Pipeline
 
 .. |bbknn| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/bbknn/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#bbknn-bbknn
