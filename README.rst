@@ -150,7 +150,7 @@ If VSN-Pipelines is useful for your research, consider citing:
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#scenic-multiruns-scenic-multiruns-single-sample-scenic-multiruns
     :alt: Single-sample SCENIC Multi-runs Pipeline
 
-.. |single_sample_scrublet| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic_multiruns/badge.svg
+.. |single_sample_scrublet| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scrublet/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-scrublet-single-sample-scrublet
     :alt: Single-sample Scrublet Pipeline
 
