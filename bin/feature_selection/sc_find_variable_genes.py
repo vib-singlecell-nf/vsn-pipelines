@@ -3,6 +3,7 @@
 import argparse
 import os
 import scanpy as sc
+import warnings
 
 parser = argparse.ArgumentParser(description='')
 
@@ -90,6 +91,13 @@ if args.method == "mean_disp_plot":
         min_disp=args.min_disp,
         max_disp=args.max_disp
     )
+    num_variable_genes = sum(adata.var["highly_variable"])
+    if num_variable_genes == 0:
+        raise Exception("No variable genes found. Make sure the following options (minMean, maxMean, minDisp, maxDisp) are in the right range of your data.")
+    if num_variable_genes < 100:
+        warnings.warn(
+            "Low number of variables genes found. Make sure the following options (minMean, maxMean, minDisp, maxDisp) are in the right range of your data."
+        )
 else:
     raise Exception("VSN ERROR: Method does not exist.")
 
