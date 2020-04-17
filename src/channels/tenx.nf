@@ -84,9 +84,8 @@ workflow getMEXChannel {
         }
         channel = Channel
             .fromPath(glob, type: 'dir', checkIfExists: true)
-            .view()
             .map {
-                filePath -> tuple(extractSampleFromH5( "${filePath}" ), file("${filePath}"))
+                filePath -> tuple(extractSampleFromMEX( "${filePath}" ), file("${filePath}"))
             }
 
     emit:
