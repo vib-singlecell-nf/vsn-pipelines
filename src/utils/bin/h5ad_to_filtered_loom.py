@@ -40,9 +40,11 @@ col_attrs = {
     "nUMI": np.array(np.sum(adata.X.transpose(), axis=0)).flatten(),
 }
 
+matrix = (adata.X).T
+
 lp.create(
     filename=f"{FILE_PATH_OUT_BASENAME}.loom",
-    layers=(adata.X).T.toarray(),
+    layers=matrix if type(matrix) == np.ndarray else matrix.toarray(),
     row_attrs=row_attrs,
     col_attrs=col_attrs,
 )
