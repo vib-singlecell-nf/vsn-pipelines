@@ -85,6 +85,16 @@ workflow getDataChannel {
                 }
             ).view()
         }
+        if(params.data.containsKey("loom")) {
+            data = data.concat(
+                getFileChannel( 
+                    params.data.loom.file_paths,
+                    params.data.loom.suffix
+                ).map {
+                    it -> tuple(it[0], it[1], "loom", "h5ad")
+                }
+            ).view()
+        }
         if(params.data.containsKey("tsv")) {
             data = data.concat(
                 getFileChannel( 

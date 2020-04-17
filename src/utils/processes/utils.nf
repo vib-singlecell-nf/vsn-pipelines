@@ -143,6 +143,10 @@ process SC__FILE_CONVERTER {
                 // Nothing to be done here
             break;
 
+            case "loom":
+                // Nothing to be done here
+            break;
+
             case "seurat_rds":
                 // Nothing to be done here
             break;

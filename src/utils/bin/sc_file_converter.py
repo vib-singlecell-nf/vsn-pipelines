@@ -225,6 +225,28 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
     # Sort var index
     adata = adata[:, np.sort(adata.var.index)]
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+elif INPUT_FORMAT == 'loom' and OUTPUT_FORMAT == 'h5ad':
+    adata = sc.read_loom(
+        FILE_PATH_IN,
+        sparse=False
+    )
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    if args.tag_cell_with_sample_id:
+        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+    adata.var.index = adata.var.index.astype(str)
+    # Check if var index is unique
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
+        adata.var_names_make_unique()
+        print("Making AnnData var index unique...")
+    # Sort var index
+    adata = adata[:, np.sort(adata.var.index)]
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 else:
     raise Exception(
         "File format conversion {0} --> {1} hasn't been implemented yet.".format(INPUT_FORMAT, OUTPUT_FORMAT))
