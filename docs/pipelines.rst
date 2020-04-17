@@ -380,6 +380,28 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 ----
 
+Loom
+----
+Use the following profile when generating the config file::
+
+    -profile loom
+
+
+In the generated .config file, make sure the ``file_paths`` parameter is set with the paths to the ``.loom`` files::
+
+    [...]
+    data {
+        loom {
+            file_paths = "data/1k_pbmc_v*_chemistry_SUFFIX.SC__FILE_CONVERTER.loom"
+            suffix = "_SUFFIX.SC__FILE_CONVERTER.loom"
+        }
+    }
+    [...]
+
+- The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
+
+----
+
 Seurat Rds
 ----------
 
