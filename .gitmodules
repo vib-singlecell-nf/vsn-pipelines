@@ -1,49 +1,49 @@
 [submodule "src/cellranger"]
 	path = src/cellranger
-	url = git@github.com:vib-singlecell-nf/cellranger.git
+	url = https://github.com/vib-singlecell-nf/cellranger.git
 [submodule "src/dropletutils"]
 	path = src/dropletutils
-	url = git@github.com:vib-singlecell-nf/dropletutils.git
+	url = https://github.com/vib-singlecell-nf/dropletutils.git
 [submodule "src/dropseqtools"]
 	path = src/dropseqtools
-	url = git@github.com:vib-singlecell-nf/dropseqtools.git
+	url = https://github.com/vib-singlecell-nf/dropseqtools.git
 [submodule "src/edirect"]
 	path = src/edirect
-	url = git@github.com:vib-singlecell-nf/edirect.git
+	url = https://github.com/vib-singlecell-nf/edirect.git
 [submodule "src/fastp"]
 	path = src/fastp
-	url = git@github.com:vib-singlecell-nf/fastp.git
+	url = https://github.com/vib-singlecell-nf/fastp.git
 [submodule "src/picard"]
 	path = src/picard
-	url = git@github.com:vib-singlecell-nf/picard.git
+	url = https://github.com/vib-singlecell-nf/picard.git
 [submodule "src/scanpy"]
 	path = src/scanpy
-	url = git@github.com:vib-singlecell-nf/scanpy.git
+	url = https://github.com/vib-singlecell-nf/scanpy.git
 [submodule "src/scenic"]
 	path = src/scenic
-	url = git@github.com:vib-singlecell-nf/scenic.git
+	url = https://github.com/vib-singlecell-nf/scenic.git
 [submodule "src/sratoolkit"]
 	path = src/sratoolkit
-	url = git@github.com:vib-singlecell-nf/sratoolkit.git
+	url = https://github.com/vib-singlecell-nf/sratoolkit.git
 [submodule "src/star"]
 	path = src/star
-	url = git@github.com:vib-singlecell-nf/star.git
+	url = https://github.com/vib-singlecell-nf/star.git
 [submodule "src/flybaser"]
 	path = src/flybaser
-	url = git@github.com:vib-singlecell-nf/flybaser.git
+	url = https://github.com/vib-singlecell-nf/flybaser.git
 [submodule "src/pcacv"]
 	path = src/pcacv
-	url = git@github.com:vib-singlecell-nf/pcacv.git
+	url = https://github.com/vib-singlecell-nf/pcacv.git
 [submodule "src/harmony"]
 	path = src/harmony
-	url = git@github.com:vib-singlecell-nf/harmony.git
+	url = https://github.com/vib-singlecell-nf/harmony.git
 [submodule "src/cellranger-atac"]
 	path = src/cellranger-atac
-	url = git@github.com:vib-singlecell-nf/cellranger-atac.git
+	url = https://github.com/vib-singlecell-nf/cellranger-atac.git
 [submodule "src/popscle"]
 	path = src/popscle
-	url = git@github.com:vib-singlecell-nf/popscle.git
+	url = https://github.com/vib-singlecell-nf/popscle.git
 [submodule "src/scrublet"]
 	path = src/scrublet
-	url = git@github.com:vib-singlecell-nf/scrublet.git
+	url = https://github.com/vib-singlecell-nf/scrublet.git
 	branch = develop
