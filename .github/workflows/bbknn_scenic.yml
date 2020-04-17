@@ -26,7 +26,7 @@ jobs:
       run: |
         mkdir testdata
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_small.tar.gz
-        tar xvf sample_data_small.tar.gz
+        tar xzvf sample_data_small.tar.gz
         cp -r sample_data testdata/sample1
         mv sample_data testdata/sample2
     - name: Run bbknn_scenic test
