@@ -16,19 +16,21 @@ resolveParams(params, true)
 
 isAppendOnlyMode = params.sc.scenic.containsKey("existingScenicLoom")
 
+def ALLOWED_GENOME_ASSEMBLIES = ['dm6','hg19','hg38', 'mm10']
+
 //////////////////////////////////////////////////////
 //  Sanity checks
 if(!isAppendOnlyMode && !params.global.containsKey("genome"))
     throw new Exception("params.global.genome is required.")
 
 if(!isAppendOnlyMode && !params.global.genome.containsKey("assembly"))
-    throw new Exception("params.global.genome.assembly is required. Choose of the profiles: dm6, hg38.")
+    throw new Exception("params.global.genome.assembly is required. Choose of the profiles: " + ALLOWED_GENOME_ASSEMBLIES.join(', '))
 
 if(!isAppendOnlyMode && params.global.genome.assembly == '')
-    throw new Exception("params.global.genome.assembly cannot be empty. Choose of the profiles: dm6, hg38.")
+    throw new Exception("params.global.genome.assembly cannot be empty. Choose of the profiles: " + ALLOWED_GENOME_ASSEMBLIES.join(', '))
 
-if(!isAppendOnlyMode && !(params.global.genome.assembly in ['dm6','hg38']))
-    throw new Exception("The given genome assembly "+ params.global.genome.assembly + " is not implemented. Choose of the profiles: dm6, hg38.")
+if(!isAppendOnlyMode && !(params.global.genome.assembly in ALLOWED_GENOME_ASSEMBLIES))
+    throw new Exception("The given genome assembly "+ params.global.genome.assembly + " is not implemented. Choose of the profiles: " + ALLOWED_GENOME_ASSEMBLIES.join(', '))
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
