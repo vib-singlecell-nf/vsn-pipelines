@@ -3,6 +3,7 @@
 import argparse
 import os
 import scanpy as sc
+import numpy as np
 import warnings
 
 parser = argparse.ArgumentParser(description='')
@@ -87,7 +88,7 @@ if args.method == "mean_disp_plot":
     sc.pp.highly_variable_genes(
         adata,
         min_mean=args.min_mean,
-        max_mean=args.max_mean,
+        max_mean=np.inf if args.max_mean is None else args.max_mean,
         min_disp=args.min_disp,
         max_disp=args.max_disp
     )
