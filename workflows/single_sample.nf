@@ -33,19 +33,23 @@ workflow SINGLE_SAMPLE {
 
     main:
         // Process the data
-        out = params.sc.scanpy.containsKey("filter") ? QC_FILTER( data ).filtered : data
-        out = params.sc.scanpy.containsKey("data_transformation") && 
-            params.sc.scanpy.containsKey("normalization") ? NORMALIZE_TRANSFORM( out ) : out
-        out = HVG_SELECTION( out )
-        out = params.sc.scanpy.containsKey("regress_out") ? SC__SCANPY__REGRESS_OUT( out.scaled ) : out.scaled
+        filtered = params.sc.scanpy.containsKey("filter") 
+            ? QC_FILTER( data ).filtered : data
+        transformed_normalized = params.sc.scanpy.containsKey("data_transformation") \
+            && params.sc.scanpy.containsKey("normalization") 
+            ? NORMALIZE_TRANSFORM( filtered ) : filtered
+        hvg_selection = HVG_SELECTION( transformed_normalized )
+        out = params.sc.scanpy.containsKey("regress_out") 
+            ? SC__SCANPY__REGRESS_OUT( hvg_selection.scaled ) : hvg_selection.scaled
         DIM_REDUCTION_PCA( out )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTER_IDENTIFICATION(
-            NORMALIZE_TRANSFORM.out,
+            transformed_normalized,
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "No Batch Effect Correction"
         )
+
 
         // Reporting
         samples = data.map { it -> it[0] }.view()
@@ -56,7 +60,7 @@ workflow SINGLE_SAMPLE {
         ipynbs = COMBINE_REPORTS(
             samples,
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out,
-            QC_FILTER.out.report,
+            params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.report : Channel.empty(),
             HVG_SELECTION.out.report,
             DIM_REDUCTION_TSNE_UMAP.out.report,
             CLUSTER_IDENTIFICATION.out.report
@@ -81,11 +85,12 @@ workflow SINGLE_SAMPLE {
                 QC_FILTER.out.filtered
             )
         } else {
-            filtered_loom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
+            // We expect here the data channel to contain a filtered h5ad
+            filtered_loom = SC__H5AD_TO_FILTERED_LOOM( data )
             final_processed_scope_loom = FILE_CONVERTER(
                 CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
                 'loom',
-                SC__FILE_CONVERTER.out
+                data
             )
         }
 
