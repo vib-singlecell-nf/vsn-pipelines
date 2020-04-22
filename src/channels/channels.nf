@@ -5,12 +5,17 @@ include getH5Channel as getTenXCellRangerH5Channel from './tenx' params(params)
 include getMEXChannel as getTenXCellRangerMEXChannel from './tenx' params(params)
 include getChannel as getFileChannel from './file' params(params)
 
+boolean isCollectionOrArray(object) {    
+    [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
+}
+
 def isOuts = { glob ->
     // Avoid file() which will resolve the glob
-    if(glob.contains(',')) {
-        glob_splitted = Arrays.asList(glob.split(','))
-        return glob_splitted.collect { new File(it).getName() == "outs" }.sum(0, { it ? 1 : 0 }) == glob_splitted.size()
-    }
+    def _isOuts = { arr -> collect { new File(it).getName() == "outs" }.sum(0, { it ? 1 : 0 }) == glob.size() }
+    if(glob.contains(','))
+        return _isOuts(Arrays.asList(glob.split(',')))
+    if(isCollectionOrArray(glob))
+        return _isOuts(glob)
     return new File(glob).getName() == "outs"
 }
 
