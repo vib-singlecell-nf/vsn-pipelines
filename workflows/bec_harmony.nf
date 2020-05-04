@@ -66,11 +66,12 @@ workflow BEC_HARMONY {
             )
         }
 
-        SC__PUBLISH_H5AD( 
+        PUBLISH( 
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
-            "BEC_HARMONY.output"
+            "BEC_HARMONY.output",
+            null
         )
         
         // This will generate a dual report with results from
@@ -78,8 +79,8 @@ workflow BEC_HARMONY {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
-            // Use SC__PUBLISH_H5AD output to avoid "input file name collision"
-            SC__PUBLISH_H5AD.out,
+            // Use PUBLISH output to avoid "input file name collision"
+            PUBLISH.out,
             clusteringParams
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
