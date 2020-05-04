@@ -282,7 +282,7 @@ Steps:
                     "Post Batch Effect Correction (Harmony)"
                 )
 
-                SC__PUBLISH_H5AD( 
+                PUBLISH( 
                     CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1]) },
                     "BEC_HARMONY.output"
                 )
@@ -292,8 +292,8 @@ Steps:
                 // - Post batch effect correction
                 becDualDataPrePost = COMBINE_BY_PARAMS(
                     clusterIdentificationPreBatchEffectCorrection,
-                    // Use SC__PUBLISH_H5AD output to avoid "input file name collision"
-                    SC__PUBLISH_H5AD.out,
+                    // Use PUBLISH output to avoid "input file name collision"
+                    PUBLISH.out,
                     clusteringParams
                 )
                 harmony_report = GENERATE_DUAL_INPUT_REPORT(

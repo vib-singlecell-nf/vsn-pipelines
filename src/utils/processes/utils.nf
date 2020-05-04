@@ -251,10 +251,23 @@ process SC__STAR_CONCATENATOR() {
 
 }
 
-process SC__PUBLISH_H5AD {
 
-    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${params.global.outdir}/data", mode: 'link', overwrite: true, saveAs: { filename -> "${tag}.${fOutSuffix}.h5ad" }
+process SC__PUBLISH {
+
+    def getPublishDir = { outDir, toolName ->
+        if(isParamNull(toolName))
+            return "${outDir}/data"
+        return "${outDir}/data/${toolName.toLowerCase()}"
+    }
+
+    def getOutputFileName = { tag, f, fileOutputSuffix ->
+        if(isParamNull(fileOutputSuffix))
+            return "${tag}.${f.extension}"
+        return "${tag}.${fileOutputSuffix}.${f.extension}"
+    }
+
+    clusterOptions "-l nodes=1:ppn=2 -l pmem=3gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    publishDir "${getPublishDir(params.global.outdir,toolName)}", mode: 'link', overwrite: true, saveAs: { filename -> "${getOutputFileName(tag,f,fileOutputSuffix)}" }
     
 
     input:
@@ -262,17 +275,19 @@ process SC__PUBLISH_H5AD {
             val(tag), \
             path(f), \
             val(stashedParams)
-        val(fOutSuffix)
+        val(fileOutputSuffix)
+        val(toolName)
 
     output:
         tuple \
             val(tag), \
-            path("${tag}.${fOutSuffix}.h5ad"), \
+            path("${getOutputFileName(tag,f,fileOutputSuffix)}"), \
             val(stashedParams)
 
     script:
+        def fileOutputExtension = f.extension
         """
-        ln $f "${tag}.${fOutSuffix}.h5ad"
+        ln `readlink -f $f` "${getOutputFileName(tag,f,fileOutputSuffix)}"
         """
 
 }
