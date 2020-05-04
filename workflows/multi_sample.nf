@@ -73,11 +73,12 @@ workflow multi_sample {
         )
         
         // Publishing
-        SC__PUBLISH_H5AD( 
+        PUBLISH( 
             CLUSTER_IDENTIFICATION.out.marker_genes.map { 
                 it -> tuple(it[0], it[1], null)
             },
-            params.global.project_name+".single_sample.output"
+            params.global.project_name+".single_sample.output",
+            null
         )
 
         samples = data.map { it -> it[0] }

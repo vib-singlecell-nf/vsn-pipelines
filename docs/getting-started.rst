@@ -78,7 +78,7 @@ Example Output
     [04/ad44c6] process > single_sample:SINGLE_SAMPLE:SC__H5AD_TO_FILTERED_LOOM (2)                                                   [100%] 2 of 2 ✔
     [46/47cac6] process > single_sample:SINGLE_SAMPLE:FILE_CONVERTER:SC__H5AD_TO_LOOM (2)                                             [100%] 2 of 2 ✔
     [33/640ffa] process > single_sample:SINGLE_SAMPLE:FILE_CONVERTER:COMPRESS_HDF5 (2)                                                [100%] 2 of 2 ✔
-    [77/87b596] process > single_sample:SINGLE_SAMPLE:SC__PUBLISH_H5AD (2)                                                            [100%] 2 of 2 ✔
+    [77/87b596] process > single_sample:SINGLE_SAMPLE:PUBLISH (2)                                                            [100%] 2 of 2 ✔
     [61/82bf98] process > single_sample:SINGLE_SAMPLE:SC__SCANPY__MERGE_REPORTS (1)                                                   [100%] 2 of 2 ✔
     [5a/26ce75] process > single_sample:SINGLE_SAMPLE:SC__SCANPY__REPORT_TO_HTML (2)                                                  [100%] 2 of 2 ✔
 

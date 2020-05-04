@@ -5,10 +5,32 @@ import static groovy.json.JsonOutput.*
 //////////////////////////////////////////////////////
 //  process imports:
 
-// Imports
+include isParamNull from "./../processes/utils.nf" params(params)
+include SC__PUBLISH from "./../processes/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
+
+workflow PUBLISH {
+
+    take: 
+        data
+        fileOutputSuffix
+        toolName
+
+    main:
+        SC__PUBLISH(
+            data.map { 
+                it -> tuple(it[0], it[1], null)
+            },
+            isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
+            isParamNull(toolName) ? 'NULL' : toolName
+        )
+
+    emit:
+        SC__PUBLISH.out
+
+}
 
 workflow COMBINE_BY_PARAMS {
 
