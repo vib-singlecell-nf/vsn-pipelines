@@ -6,11 +6,23 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 include './utils.nf' params(params)
 
+def getPublishDir = { outDir, toolName ->
+    if(isParamNull(toolName))
+        return "${outDir}/data/intermediate"
+    return "${outDir}/data/${toolName.toLowerCase()}"
+}
+
+def getMode = { toolName ->
+    if(isParamNull(toolName))
+        return 'symlink'
+    return 'link'
+}
+
 
 process SC__ANNOTATE_BY_CELL_METADATA {
 
     container params.sc.scanpy.container
-    publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
+    publishDir "${getPublishDir(params.global.outdir,tool)}", mode: "${getMode(tool)}", overwrite: true
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
