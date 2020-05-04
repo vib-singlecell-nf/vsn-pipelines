@@ -5,7 +5,8 @@ import static groovy.json.JsonOutput.*
 //////////////////////////////////////////////////////
 //  Import sub-workflows
 
-include '../../utils/processes/utils.nf' params(params)
+include clean from '../../utils/processes/utils.nf' params(params)
+include PUBLISH from '../../utils/workflows/utils.nf' params(params)
 include SC__H5AD_TO_FILTERED_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
 include FILE_CONVERTER from '../../utils/workflows/fileConverter.nf' params(params)
 
@@ -95,11 +96,12 @@ workflow SINGLE_SAMPLE {
         }
 
         // Publishing
-        final_published_data = SC__PUBLISH_H5AD(
+        final_published_data = PUBLISH(
             CLUSTER_IDENTIFICATION.out.marker_genes.map { 
                 it -> tuple(it[0], it[1], null)
             },
-            params.global.project_name+".single_sample.output"
+            params.global.project_name+".single_sample.output",
+            null
         )
 
     emit:

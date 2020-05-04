@@ -72,11 +72,12 @@ workflow BEC_BBKNN {
             )
         )
 
-        SC__PUBLISH_H5AD( 
+        PUBLISH( 
             SC__SCANPY__DIM_REDUCTION__UMAP.out.map {
                 it -> tuple(it[0], it[1], it[2]) 
             },
-            "BEC_BBKNN.output"
+            "BEC_BBKNN.output",
+            null
         )
 
         // This will generate a dual report with results from
@@ -84,7 +85,7 @@ workflow BEC_BBKNN {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
-            SC__PUBLISH_H5AD.out,
+            PUBLISH.out,
             clusteringParams
         )
 

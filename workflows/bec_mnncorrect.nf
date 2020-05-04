@@ -67,11 +67,12 @@ workflow BEC_MNNCORRECT {
             )
         }
 
-        SC__PUBLISH_H5AD( 
+        PUBLISH( 
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
-            "BEC_MNNCORRECT.output"
+            "BEC_MNNCORRECT.output",
+            null
         )
 
         // This will generate a dual report with results from
@@ -79,7 +80,7 @@ workflow BEC_MNNCORRECT {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
-            SC__PUBLISH_H5AD.out,
+            PUBLISH.out,
             clusteringParams
         )
 
