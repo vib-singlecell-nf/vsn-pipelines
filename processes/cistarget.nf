@@ -41,7 +41,7 @@ process CISTARGET {
             if(!processParams.containsKey("walltime"))
                 throw new Exception("walltime is missing in params.sc.scenic.aucell")
         }
-        if(toolParams.numRuns > 2 && (!processParams.containsKey("labels") || processParams.labels.processExecutor == "local"))
+        if(toolParams.numRuns > 2 && toolParams.maxForks > 1 && (!processParams.containsKey("labels") || processParams.labels.processExecutor == "local"))
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
         """
