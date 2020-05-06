@@ -47,6 +47,15 @@ parser.add_argument(
          """
 )
 
+parser.add_argument(
+    "-s", "--seed",
+    type=int,
+    action="store",
+    dest="seed",
+    default=0,
+    help="Use this integer seed for reproducibility."
+)
+
 args = parser.parse_args()
 
 # Define the arguments properly
@@ -77,7 +86,8 @@ if args.method.lower() == "louvain":
     check_neighborhood_graph_exists(adata=adata)
     sc.tl.louvain(
         adata,
-        resolution=args.resolution
+        resolution=args.resolution,
+        random_state=args.seed
     )
 elif args.method.lower() == "leiden":
     # Run Leiden clustering
@@ -85,7 +95,8 @@ elif args.method.lower() == "leiden":
     check_neighborhood_graph_exists(adata=adata)
     sc.tl.leiden(
         adata,
-        resolution=args.resolution
+        resolution=args.resolution,
+        random_state=args.seed
     )
 else:
     raise Exception("VSN ERROR: The given clustering algorithm {} does not exist or is not implemeted.".format(args.method))
