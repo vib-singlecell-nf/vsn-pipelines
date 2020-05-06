@@ -262,7 +262,7 @@ process SC__PUBLISH {
 
     def getOutputFileName = { tag, f, fileOutputSuffix ->
         if(isParamNull(fileOutputSuffix))
-            return "${tag}.${f.extension}"
+            return "${f.baseName}.${f.extension}"
         return "${tag}.${fileOutputSuffix}.${f.extension}"
     }
 
@@ -287,7 +287,9 @@ process SC__PUBLISH {
     script:
         def fileOutputExtension = f.extension
         """
-        ln `readlink -f $f` "${getOutputFileName(tag,f,fileOutputSuffix)}"
+        mv $f tmp
+        ln `readlink -f tmp` "${getOutputFileName(tag,f,fileOutputSuffix)}"
+        rm tmp
         """
 
 }
