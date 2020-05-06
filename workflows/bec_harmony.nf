@@ -70,8 +70,9 @@ workflow BEC_HARMONY {
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
-            "BEC_HARMONY.output",
-            null
+            "BEC_HARMONY.final_output",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
         
         // This will generate a dual report with results from
