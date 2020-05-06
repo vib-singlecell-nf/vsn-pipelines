@@ -260,14 +260,16 @@ process SC__PUBLISH {
         return "${outDir}/data/${toolName.toLowerCase()}"
     }
 
-    def getOutputFileName = { tag, f, fileOutputSuffix ->
+    def getOutputFileName = { tag, f, fileOutputSuffix, isParameterExplorationModeOn ->
         if(isParamNull(fileOutputSuffix))
             return "${f.baseName}.${f.extension}"
+        if(isParameterExplorationModeOn)
+            return "${f.baseName}.${fileOutputSuffix}.${f.extension}"
         return "${tag}.${fileOutputSuffix}.${f.extension}"
     }
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=3gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${getPublishDir(params.global.outdir,toolName)}", mode: 'link', overwrite: true, saveAs: { filename -> "${getOutputFileName(tag,f,fileOutputSuffix)}" }
+    publishDir "${getPublishDir(params.global.outdir,toolName)}", mode: 'link', overwrite: true, saveAs: { filename -> "${getOutputFileName(tag,f,fileOutputSuffix,isParameterExplorationModeOn)}" }
     
 
     input:
@@ -277,18 +279,19 @@ process SC__PUBLISH {
             val(stashedParams)
         val(fileOutputSuffix)
         val(toolName)
+        val(isParameterExplorationModeOn)
 
     output:
         tuple \
             val(tag), \
-            path("${getOutputFileName(tag,f,fileOutputSuffix)}"), \
+            path("${getOutputFileName(tag,f,fileOutputSuffix,isParameterExplorationModeOn)}"), \
             val(stashedParams)
 
     script:
         def fileOutputExtension = f.extension
         """
         mv $f tmp
-        ln `readlink -f tmp` "${getOutputFileName(tag,f,fileOutputSuffix)}"
+        ln `readlink -f tmp` "${getOutputFileName(tag,f,fileOutputSuffix,isParameterExplorationModeOn)}"
         rm tmp
         """
 

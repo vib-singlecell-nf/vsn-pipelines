@@ -284,7 +284,9 @@ Steps:
 
                 PUBLISH( 
                     CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1]) },
-                    "BEC_HARMONY.output"
+                    "BEC_HARMONY.output",
+                    null,
+                    clusteringParams.isParameterExplorationModeOn()
                 )
 
                 // This will generate a dual report with results from
