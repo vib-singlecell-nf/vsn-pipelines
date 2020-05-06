@@ -71,8 +71,9 @@ workflow BEC_MNNCORRECT {
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
-            "BEC_MNNCORRECT.output",
-            null
+            "BEC_MNNCORRECT.final_output",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
 
         // This will generate a dual report with results from

@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 // utils
-include PUBLISH as PUBLISH_H5AD_HVG from "../../utils/workflows/utils.nf"
+include PUBLISH as PUBLISH_H5AD_HVG from "../../utils/workflows/utils.nf" params(params)
 
 // scanpy:
 include SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES from '../processes/feature_selection.nf' params(params)
@@ -26,9 +26,10 @@ workflow HVG_SELECTION {
             | SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES \
             | SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES
         PUBLISH_H5AD_HVG(
-            SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES.out
+            SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES.out,
             null,
-            "scanpy"
+            "scanpy",
+            false
         )
         scaled = SC__SCANPY__FEATURE_SCALING( hvg )
         report = GENERATE_REPORT(

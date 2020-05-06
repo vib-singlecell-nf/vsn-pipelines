@@ -100,8 +100,9 @@ workflow SINGLE_SAMPLE {
             CLUSTER_IDENTIFICATION.out.marker_genes.map { 
                 it -> tuple(it[0], it[1], null)
             },
-            params.global.project_name+".single_sample.output",
-            null
+            params.global.project_name+".single_sample.final_output",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
 
     emit:

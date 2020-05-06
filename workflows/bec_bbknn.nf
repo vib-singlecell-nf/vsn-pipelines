@@ -72,12 +72,13 @@ workflow BEC_BBKNN {
             )
         )
 
-        PUBLISH( 
+        PUBLISH(
             SC__SCANPY__DIM_REDUCTION__UMAP.out.map {
                 it -> tuple(it[0], it[1], it[2]) 
             },
-            "BEC_BBKNN.output",
-            null
+            "BEC_BBKNN.final_output",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
 
         // This will generate a dual report with results from
