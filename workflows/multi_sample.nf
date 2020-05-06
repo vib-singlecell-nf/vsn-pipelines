@@ -72,13 +72,17 @@ workflow multi_sample {
             SC__FILE_CONCATENATOR.out
         )
         
+        // Reporting:
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
         // Publishing
         PUBLISH( 
             CLUSTER_IDENTIFICATION.out.marker_genes.map { 
                 it -> tuple(it[0], it[1], null)
             },
-            params.global.project_name+".single_sample.output",
-            null
+            params.global.project_name+".multi_sample.final_output",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
 
         samples = data.map { it -> it[0] }
@@ -86,8 +90,6 @@ workflow multi_sample {
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
-        // Reporting:
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         ipynbs = QC_FILTER.out.report.map {
             it -> tuple(it[0], it[1])
         }.mix(

@@ -17,6 +17,7 @@ workflow PUBLISH {
         data
         fileOutputSuffix
         toolName
+        isParameterExplorationModeOn
 
     main:
         SC__PUBLISH(
@@ -24,7 +25,8 @@ workflow PUBLISH {
                 it -> tuple(it[0], it[1], null)
             },
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
-            isParamNull(toolName) ? 'NULL' : toolName
+            isParamNull(toolName) ? 'NULL' : toolName,
+            isParameterExplorationModeOn
         )
 
     emit:

@@ -59,17 +59,19 @@ workflow single_sample_star {
         QC_FILTER.out.filtered
     )
 
+    def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
     // Publishing
     PUBLISH( 
         CLUSTER_IDENTIFICATION.out.marker_genes.map {
             it -> tuple(it[0], it[1], null)
         },
-        "single_sample.output",
-        null
+        "single_sample_star.final_output",
+        null,
+        clusteringParams.isParameterExplorationModeOn()
     )
 
     // Reporting:
-    def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
     ipynbs = QC_FILTER.out.report.map {
         it -> tuple(it[0], it[1])
     }.mix(
