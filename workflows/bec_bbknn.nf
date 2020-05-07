@@ -63,7 +63,7 @@ workflow BEC_BBKNN {
         SC__SCANPY__DIM_REDUCTION__UMAP( 
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out.combine(
                 dimRedParams.$()
-            ).view()
+            )
         )
 
         PUBLISH_BEC_DIMRED_OUTPUT(
