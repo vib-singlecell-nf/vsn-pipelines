@@ -4,7 +4,10 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include '../../utils/processes/utils.nf' params(params)
-include '../../utils/workflows/utils.nf' params(params)
+include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT from "../../utils/workflows/utils.nf" params(params)
 
 include SC__HARMONY__HARMONY_MATRIX from './../processes/runHarmony.nf' params(params)
 include SC__H5AD_UPDATE_X_PCA from './../../utils/processes/h5adUpdate.nf' params(params)
@@ -39,15 +42,31 @@ workflow BEC_HARMONY {
                 it -> tuple(it[0], it[1]) 
             }.join(harmony_embeddings) 
         )
-        NEIGHBORHOOD_GRAPH( 
-            SC__H5AD_UPDATE_X_PCA.out.join( 
+
+        PUBLISH_BEC_OUTPUT(
+            SC__H5AD_UPDATE_X_PCA.out,
+            "BEC_HARMONY.output",
+            null,
+            false
+        )
+
+        NEIGHBORHOOD_GRAPH(
+            SC__H5AD_UPDATE_X_PCA.out.join(
                 dimReductionData.map { 
                     it -> tuple(it[0], it[2], *it[3..(it.size()-1)])
                 }
             )
         )
+
         // Run dimensionality reduction
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
+
+        PUBLISH_BEC_DIMRED_OUTPUT(
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
+            "BEC_HARMONY.dimred_output",
+            null,
+            false
+        )
 
         // Run clustering
         // Define the parameters for clustering
@@ -66,7 +85,7 @@ workflow BEC_HARMONY {
             )
         }
 
-        PUBLISH( 
+        PUBLISH_FINAL_HARMONY_OUTPUT( 
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
