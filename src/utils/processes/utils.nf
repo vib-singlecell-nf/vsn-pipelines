@@ -234,10 +234,14 @@ process SC__STAR_CONCATENATOR() {
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
     input:
-        tuple val(sampleId), path(f)
+        tuple \
+            val(sampleId), \
+            path(f)
 
     output:
-        tuple val(sampleId), path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
+        tuple \
+            val(sampleId), \
+            path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star_concatenator)
@@ -260,16 +264,24 @@ process SC__PUBLISH {
         return "${outDir}/data/${toolName.toLowerCase()}"
     }
 
-    def getOutputFileName = { tag, f, fileOutputSuffix, isParameterExplorationModeOn ->
+    def getOutputFileName = { tag, f, fileOutputSuffix, toolName, isParameterExplorationModeOn ->
         if(isParamNull(fileOutputSuffix))
             return "${f.baseName}.${f.extension}"
-        if(isParameterExplorationModeOn)
+        if(!isParamNull(fileOutputSuffix) && isParameterExplorationModeOn)
             return "${f.baseName}.${fileOutputSuffix}.${f.extension}"
+        if(!isParamNull(fileOutputSuffix))
+            return "${tag}.${fileOutputSuffix}.${f.extension}"
         return "${tag}.${fileOutputSuffix}.${f.extension}"
     }
 
     clusterOptions "-l nodes=1:ppn=2 -l pmem=3gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-    publishDir "${getPublishDir(params.global.outdir,toolName)}", mode: 'link', overwrite: true, saveAs: { filename -> "${getOutputFileName(tag,f,fileOutputSuffix,isParameterExplorationModeOn)}" }
+    publishDir \
+        "${getPublishDir(params.global.outdir,toolName)}", \
+        mode: 'link', \
+        overwrite: true, \
+        saveAs: { 
+            filename -> "${outputFileName}" 
+        }
     
 
     input:
@@ -284,14 +296,16 @@ process SC__PUBLISH {
     output:
         tuple \
             val(tag), \
-            path("${getOutputFileName(tag,f,fileOutputSuffix,isParameterExplorationModeOn)}"), \
+            path(outputFileName), \
             val(stashedParams)
 
     script:
-        def fileOutputExtension = f.extension
+        def compression_level = params.utils.containsKey("publish") &&
+            params.utils.publish.containsKey("compress_level") ? params.utils.publish.compress_level : 6
+        outputFileName = getOutputFileName(tag,f,fileOutputSuffix,toolName,isParameterExplorationModeOn)
         """
         mv $f tmp
-        ln `readlink -f tmp` "${getOutputFileName(tag,f,fileOutputSuffix,isParameterExplorationModeOn)}"
+        ln `readlink -f tmp` "${outputFileName}"
         rm tmp
         """
 
@@ -304,19 +318,37 @@ process COMPRESS_HDF5() {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-		tuple val(id), path(f)
+		tuple \
+            val(id), \
+            path(f), \
+            val(stashedParams)
+        val(fileOutputSuffix)
 
 	output:
-		tuple val(id), path("${id}.COMPRESS_HDF5.${f.extension}")
+		tuple \
+            val(id), \
+            path("${id}.${fileOutputSuffix}.${f.extension}"), \
+            val(stashedParams)
 
 	shell:
+        def _fileOutputSuffix = isParamNull(fileOutputSuffix) && 
+            params.utils.containsKey("publish") &&
+            params.utils.publish.containsKey("fileOutputSuffix") ? 
+            params.utils.publish.pipelineOutputSuffix : 
+            fileOutputSuffix
+        def compressionLevel = params.utils.containsKey("publish") &&
+            params.utils.publish.containsKey("compressionLevel") ? 
+            params.utils.publish.compressionLevel : 
+            6
+        if(_fileOutputSuffix.length() == 0)
+            throw new Exception("The parameter 'params.utils.publish.outputFileSuffix' cannot be empty.")
 		"""
-		GZIP_COMPRESSION_LEVEL=6
+		GZIP_COMPRESSION_LEVEL=${compressionLevel}
 		h5repack \
 		   -v \
 		   -f GZIP=\${GZIP_COMPRESSION_LEVEL} \
 		   $f \
-		   "${id}.COMPRESS_HDF5.${f.extension}"
+		   "${id}.${_fileOutputSuffix}.${f.extension}"
 		"""
 
 }
