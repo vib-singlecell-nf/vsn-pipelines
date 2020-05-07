@@ -11,15 +11,28 @@ include './src/channels/channels' params(params)
 workflow bbknn {
 
     include bbknn as BBKNN from './workflows/bbknn' params(params)
+    include PUBLISH as PUBLISH_BBKNN from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | BBKNN
-
+    PUBLISH_BBKNN(
+        BBKNN.out.scopeloom,
+        "BBKNN",
+        null,
+        false
+    )
 }
 
 // run multi-sample with mnncorrect, output a scope loom file
 workflow mnncorrect {
 
     include mnncorrect as MNNCORRECT from './workflows/mnncorrect' params(params)
+    include PUBLISH as PUBLISH_MNNCORRECT from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | MNNCORRECT
+    PUBLISH_MNNCORRECT(
+        MNNCORRECT.out.scopeloom,
+        "MNNCORRECT",
+        null,
+        false
+    )
 
 }
 
@@ -27,7 +40,14 @@ workflow mnncorrect {
 workflow harmony {
 
     include harmony as HARMONY from './workflows/harmony' params(params)
+    include PUBLISH as PUBLISH_HARMONY from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | HARMONY
+    PUBLISH_HARMONY(
+        HARMONY.out.scopeloom,
+        "HARMONY",
+        null,
+        false
+    )
 
 }
 
@@ -36,10 +56,17 @@ workflow bbknn_scenic {
 
     include bbknn as BBKNN from './workflows/bbknn' params(params)
     include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+    include PUBLISH as PUBLISH_BBKNN_SCENIC from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | BBKNN
     SCENIC_APPEND(
         BBKNN.out.filteredloom,
         BBKNN.out.scopeloom
+    )
+    PUBLISH_BBKNN_SCENIC(
+        SCENIC_APPEND.out,
+        "BBKNN_SCENIC",
+        null,
+        false
     )
 
 }
@@ -49,10 +76,17 @@ workflow harmony_scenic {
 
     include harmony as HARMONY from './workflows/harmony' params(params)
     include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+    include PUBLISH as PUBLISH_HARMONY_SCENIC from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | HARMONY
     SCENIC_APPEND( 
         HARMONY.out.filteredloom,
         HARMONY.out.scopeloom 
+    )
+    PUBLISH_HARMONY_SCENIC(
+        SCENIC_APPEND.out,
+        "HARMONY_SCENIC",
+        null,
+        false
     )
 
 }
@@ -62,7 +96,14 @@ workflow harmony_scenic {
 workflow single_sample {
 
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    include PUBLISH as PUBLISH_SINGLE_SAMPLE from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | SINGLE_SAMPLE
+    PUBLISH_SINGLE_SAMPLE(
+        SINGLE_SAMPLE.out.scopeloom,
+        "SINGLE_SAMPLE",
+        null,
+        false
+    )    
 
 }
 
@@ -70,6 +111,13 @@ workflow multi_sample {
 
     include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
     getDataChannel | MULTI_SAMPLE
+    include PUBLISH as PUBLISH_MULTI_SAMPLE from "./src/utils/workflows/utils.nf" params(params)
+    PUBLISH_MULTI_SAMPLE(
+        MULTI_SAMPLE.out.scopeloom,
+        "MULTI_SAMPLE",
+        null,
+        false
+    ) 
 
 }
 
@@ -78,12 +126,18 @@ workflow single_sample_scenic {
 
     include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
     include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    include PUBLISH as PUBLISH_SINGLE_SAMPLE_SCENIC from "./src/utils/workflows/utils.nf" params(params)
     getDataChannel | SINGLE_SAMPLE
     SCENIC_APPEND(
         SINGLE_SAMPLE.out.filteredloom,
         SINGLE_SAMPLE.out.scopeloom
     )
-
+    PUBLISH_SINGLE_SAMPLE_SCENIC(
+        SCENIC_APPEND.out,
+        "SINGLE_SAMPLE_SCENIC",
+        null,
+        false
+    )
 }
 
 workflow single_sample_scrublet {
@@ -107,10 +161,17 @@ workflow pipe_single_sample_scenic {
     main:
         include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
         include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+        include PUBLISH as PUBLISH_P_SINGLE_SAMPLE_SCENIC from "./src/utils/workflows/utils.nf" params(params)
         data | SINGLE_SAMPLE
         SCENIC_APPEND(
             SINGLE_SAMPLE.out.filteredloom,
             SINGLE_SAMPLE.out.scopeloom
+        )
+        PUBLISH_P_SINGLE_SAMPLE_SCENIC(
+            SCENIC_APPEND.out,
+            "P_SINGLE_SAMPLE_SCENIC",
+            null,
+            false
         )
 
 }
@@ -120,7 +181,16 @@ workflow pipe_single_sample_scenic {
 workflow scenic {
 
     include scenic as SCENIC from './src/scenic/main.nf' params(params)
-    SCENIC( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) )
+    include PUBLISH as PUBLISH_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+    SCENIC( 
+        Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) 
+    )
+    PUBLISH_SCENIC(
+        SCENIC.out,
+        "SCENIC",
+        null,
+        false
+    )
 
 }
 
@@ -330,11 +400,18 @@ workflow sra_cellranger_bbknn {
 workflow sra_cellranger_bbknn_scenic {
 
     include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
+    include PUBLISH as PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC from "./src/utils/workflows/utils.nf" params(params)
     sra_cellranger_bbknn()
     SCENIC_APPEND(
         sra_cellranger_bbknn.out.filteredLoom,
         sra_cellranger_bbknn.out.scopeLoom
     )
+    PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC(
+        SCENIC_APPEND.out,
+        "SRA_CELLRANGER_BBKNN_SCENIC",
+        null,
+        false
+    )    
 
 }
 
