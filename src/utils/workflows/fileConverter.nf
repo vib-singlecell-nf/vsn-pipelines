@@ -12,7 +12,6 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include SC__H5AD_TO_LOOM from './../processes/h5adToLoom.nf' params(params)
-include COMPRESS_HDF5 from './../processes/utils.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

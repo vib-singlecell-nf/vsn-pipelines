@@ -264,13 +264,13 @@ process SC__PUBLISH {
         return "${outDir}/data/${toolName.toLowerCase()}"
     }
 
-    def getOutputFileName = { tag, f, fileOutputSuffix, toolName, isParameterExplorationModeOn ->
+    def getOutputFileName = { tag, f, fileOutputSuffix, toolName, isParameterExplorationModeOn, stashedParams ->
+        if(isParameterExplorationModeOn && !isParamNull(stashedParams))
+            return isParamNull(fileOutputSuffix) ? 
+                "${tag}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}" :
+                "${tag}.${fileOutputSuffix}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}"
         if(isParamNull(fileOutputSuffix))
             return "${f.baseName}.${f.extension}"
-        if(!isParamNull(fileOutputSuffix) && isParameterExplorationModeOn)
-            return "${f.baseName}.${fileOutputSuffix}.${f.extension}"
-        if(!isParamNull(fileOutputSuffix))
-            return "${tag}.${fileOutputSuffix}.${f.extension}"
         return "${tag}.${fileOutputSuffix}.${f.extension}"
     }
 
@@ -302,7 +302,14 @@ process SC__PUBLISH {
     script:
         def compression_level = params.utils.containsKey("publish") &&
             params.utils.publish.containsKey("compress_level") ? params.utils.publish.compress_level : 6
-        outputFileName = getOutputFileName(tag,f,fileOutputSuffix,toolName,isParameterExplorationModeOn)
+        outputFileName = getOutputFileName(
+            tag,
+            f,
+            fileOutputSuffix,
+            toolName,
+            isParameterExplorationModeOn,
+            stashedParams
+        )
         """
         mv $f tmp
         ln `readlink -f tmp` "${outputFileName}"
@@ -317,38 +324,54 @@ process COMPRESS_HDF5() {
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
+    def getFileOutputSuffix = { params, fileOutputSuffix, toolName ->
+        if(isParamNull(fileOutputSuffix) && isParamNull(toolName) && 
+            params.utils.containsKey("publish") && params.utils.publish.containsKey("fileOutputSuffix")) {
+            if(params.utils.publish.pipelineOutputSuffix.length() == 0)
+                throw new Exception("The parameter 'params.utils.publish.outputFileSuffix' cannot be empty.")
+            return params.utils.publish.pipelineOutputSuffix
+        }
+        if(isParamNull(fileOutputSuffix) && !isParamNull(toolName))
+            return null
+        return fileOutputSuffix
+    }
+
 	input:
 		tuple \
             val(id), \
             path(f), \
             val(stashedParams)
         val(fileOutputSuffix)
+        val(toolName)
 
 	output:
 		tuple \
             val(id), \
-            path("${id}.${fileOutputSuffix}.${f.extension}"), \
+            path("${outputFileName}"), \
             val(stashedParams)
 
 	shell:
-        def _fileOutputSuffix = isParamNull(fileOutputSuffix) && 
-            params.utils.containsKey("publish") &&
-            params.utils.publish.containsKey("fileOutputSuffix") ? 
-            params.utils.publish.pipelineOutputSuffix : 
-            fileOutputSuffix
+        if(!isParamNull(stashedParams))
+			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
+        def _fileOutputSuffix = getFileOutputSuffix(
+            params,
+            fileOutputSuffix,
+            toolName
+        )
         def compressionLevel = params.utils.containsKey("publish") &&
             params.utils.publish.containsKey("compressionLevel") ? 
             params.utils.publish.compressionLevel : 
             6
-        if(_fileOutputSuffix.length() == 0)
-            throw new Exception("The parameter 'params.utils.publish.outputFileSuffix' cannot be empty.")
+        outputFileName =  "${isParamNull(_fileOutputSuffix) ? f.baseName : _fileOutputSuffix}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${f.extension}"
 		"""
 		GZIP_COMPRESSION_LEVEL=${compressionLevel}
+        mv $f tmp
 		h5repack \
 		   -v \
 		   -f GZIP=\${GZIP_COMPRESSION_LEVEL} \
-		   $f \
-		   "${id}.${_fileOutputSuffix}.${f.extension}"
+		   tmp \
+		   "${outputFileName}"
+        rm tmp
 		"""
 
 }
