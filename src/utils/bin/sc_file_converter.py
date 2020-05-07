@@ -120,6 +120,14 @@ def add_sample_id(adata, args):
     return adata
 
 
+def tag_cell(adata, tag):
+    # Check if cell is tagged
+    num_tagged_cells = sum(list(map(lambda x: len(re.findall(r"[ACGT]*-[0-9]+$", x)), adata.obs.index)))
+    if num_tagged_cells == 0:
+        adata.obs.index = list(map(lambda x: re.sub(r"([ACGT]*)-.*", rf'\1-{tag}', x), adata.obs.index))
+    return adata
+
+
 if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     check_10x_cellranger_mex_path(path=FILE_PATH_IN)
     # Convert
@@ -135,7 +143,10 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
@@ -162,7 +173,10 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
@@ -192,7 +206,10 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
@@ -214,7 +231,10 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
@@ -236,7 +256,10 @@ elif INPUT_FORMAT == 'loom' and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
