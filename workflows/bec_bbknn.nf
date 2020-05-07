@@ -18,7 +18,9 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include '../../utils/processes/utils.nf' params(params)
-include '../../utils/workflows/utils.nf' params(params)
+include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_FINAL_BBKNN_OUTPUT from "../../utils/workflows/utils.nf" params(params)
 
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
@@ -48,33 +50,36 @@ workflow BEC_BBKNN {
                 it -> tuple(it[0], it[1], it[2]) 
             } 
         )
+        PUBLISH_BEC_OUTPUT(
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
+            "BEC_BBKNN.output",
+            null,
+            false
+        )
+
+        // Define the parameters for dimensionality reduction
+        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.sc.scanpy.dim_reduction.umap) )
+        SC__SCANPY__DIM_REDUCTION__UMAP( 
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out.combine(
+                dimRedParams.$()
+            ).view()
+        )
 
         // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
-            SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
+            SC__SCANPY__DIM_REDUCTION__UMAP.out,
             "Post Batch Effect Correction (BBKNN)"
         )
 
-        // Define the parameters for dimensionality reduction
-        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.sc.scanpy.dim_reduction.umap) )
-
-        SC__SCANPY__DIM_REDUCTION__UMAP( 
+        PUBLISH_FINAL_BBKNN_OUTPUT(
             CLUSTER_IDENTIFICATION.out.marker_genes.map {
                 it -> tuple(
                     it[0], // sampleId
                     it[1], // data
                     !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
                 )
-            }.combine(
-                dimRedParams.$()
-            )
-        )
-
-        PUBLISH(
-            SC__SCANPY__DIM_REDUCTION__UMAP.out.map {
-                it -> tuple(it[0], it[1], it[2]) 
             },
             "BEC_BBKNN.final_output",
             null,
@@ -86,7 +91,8 @@ workflow BEC_BBKNN {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
-            PUBLISH.out,
+            // Use PUBLISH output to avoid "input file name collision"
+            PUBLISH_FINAL_BBKNN_OUTPUT.out,
             clusteringParams
         )
 
@@ -98,7 +104,7 @@ workflow BEC_BBKNN {
         )
 
     emit:
-        data = SC__SCANPY__DIM_REDUCTION__UMAP.out
+        data = CLUSTER_IDENTIFICATION.out.marker_genes
         cluster_report = CLUSTER_IDENTIFICATION.out.report
         bbknn_report
 

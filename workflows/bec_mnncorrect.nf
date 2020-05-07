@@ -38,8 +38,16 @@ workflow BEC_MNNCORRECT {
         clusterIdentificationPreBatchEffectCorrection
 
     main:
-        SC__SCANPY__BATCH_EFFECT_CORRECTION( data.map { it -> tuple(it[0], it[1], null) } )
-        SC__SCANPY__FEATURE_SCALING( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
+        SC__SCANPY__BATCH_EFFECT_CORRECTION( 
+            data.map { 
+                it -> tuple(it[0], it[1], null) 
+            }
+        )
+        SC__SCANPY__FEATURE_SCALING( 
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out.map { 
+                it -> tuple(it[0], it[1]) 
+            }
+        )
         if(params.sc.scanpy.containsKey("regress_out")) {
             preprocessed_data = SC__SCANPY__REGRESS_OUT( SC__SCANPY__FEATURE_SCALING.out )
         } else {
@@ -81,6 +89,7 @@ workflow BEC_MNNCORRECT {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
+            // Use PUBLISH output to avoid "input file name collision"
             PUBLISH.out,
             clusteringParams
         )
