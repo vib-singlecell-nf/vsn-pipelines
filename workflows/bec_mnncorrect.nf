@@ -9,7 +9,10 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include '../../utils/processes/utils.nf' params(params)
-include '../../utils/workflows/utils.nf' params(params)
+include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT from "../../utils/workflows/utils.nf" params(params)
 
 // scanpy:
 include '../processes/batch_effect_correct.nf' params(params)
@@ -43,6 +46,14 @@ workflow BEC_MNNCORRECT {
                 it -> tuple(it[0], it[1], null) 
             }
         )
+
+        PUBLISH_BEC_OUTPUT(
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
+            "BEC_MNNCORRECT.output",
+            null,
+            false
+        )
+
         SC__SCANPY__FEATURE_SCALING( 
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out.map { 
                 it -> tuple(it[0], it[1]) 
@@ -58,6 +69,13 @@ workflow BEC_MNNCORRECT {
 
         // Run dimensionality reduction
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
+
+        PUBLISH_BEC_DIMRED_OUTPUT(
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
+            "BEC_HARMONY.dimred_output",
+            null,
+            false
+        )
 
         // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
@@ -75,7 +93,7 @@ workflow BEC_MNNCORRECT {
             )
         }
 
-        PUBLISH( 
+        PUBLISH_FINAL_HARMONY_OUTPUT( 
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
@@ -90,7 +108,7 @@ workflow BEC_MNNCORRECT {
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
             // Use PUBLISH output to avoid "input file name collision"
-            PUBLISH.out,
+            PUBLISH_FINAL_HARMONY_OUTPUT.out,
             clusteringParams
         )
 

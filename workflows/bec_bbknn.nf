@@ -20,6 +20,7 @@ nextflow.preview.dsl=2
 include '../../utils/processes/utils.nf' params(params)
 include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
 include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT from "../../utils/workflows/utils.nf" params(params)
 include PUBLISH as PUBLISH_FINAL_BBKNN_OUTPUT from "../../utils/workflows/utils.nf" params(params)
 
 // scanpy:
@@ -63,6 +64,13 @@ workflow BEC_BBKNN {
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out.combine(
                 dimRedParams.$()
             ).view()
+        )
+
+        PUBLISH_BEC_DIMRED_OUTPUT(
+            SC__SCANPY__DIM_REDUCTION__UMAP.out,
+            "BEC_BBKNN.dimred_output",
+            null,
+            false
         )
 
         // Define the parameters for clustering
