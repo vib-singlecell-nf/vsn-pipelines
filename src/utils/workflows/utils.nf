@@ -6,6 +6,7 @@ import static groovy.json.JsonOutput.*
 //  process imports:
 
 include isParamNull from "./../processes/utils.nf" params(params)
+include COMPRESS_HDF5 from "./../processes/utils.nf" params(params)
 include SC__PUBLISH from "./../processes/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
@@ -20,11 +21,15 @@ workflow PUBLISH {
         isParameterExplorationModeOn
 
     main:
-        SC__PUBLISH(
+        COMPRESS_HDF5(
             data.map {
-                // stashedParams not there, just put null 3rd arg
+                // if stashedParams not there, just put null 3rd arg
                 it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
             },
+            "COMPRESS_HDF5"
+        )
+        SC__PUBLISH(
+            COMPRESS_HDF5.out,
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
             isParamNull(toolName) ? 'NULL' : toolName,
             isParameterExplorationModeOn
