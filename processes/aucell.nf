@@ -42,8 +42,12 @@ process AUCELL {
         if(toolParams.numRuns > 2 && toolParams.maxForks > 1 && (!processParams.containsKey("labels") || processParams.labels.processExecutor == "local"))
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
 
-        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__auc_" + type + ".loom": sampleId + "__auc_" + type + ".loom"
-        seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.global.seed + runId) : params.global.seed
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? 
+            sampleId + "__run_" + runId +"__auc_" + type + ".loom": 
+            sampleId + "__auc_" + type + ".loom"
+        seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? 
+            (params.global.seed + runId) : 
+            params.global.seed
         """
         pyscenic aucell \
             $filteredLoom \

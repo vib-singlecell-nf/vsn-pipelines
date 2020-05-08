@@ -160,7 +160,8 @@ workflow scenic_append {
             scenicLoom = getChannelFromFilePath(
                 params.sc.scenic.existingScenicLoom,
                 params.sc.scenic.sampleSuffixWithExtension
-            ).view {
+            )
+            Channel.from('').view {
             """
 ---------------------------------------------------------------------------
 \u001B[32m Existing SCENIC loom detected \u001B[0m
@@ -171,7 +172,12 @@ workflow scenic_append {
         } else {
             scenicLoom = scenic( filteredLoom ).out
         }
-        APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
+
+        APPEND_SCENIC_LOOM(
+            scopeLoom.join(scenicLoom).ifEmpty{
+                throw new Exception("Cannot append SCENIC loom to SCope loom because the IDs do not match.")
+            }
+        )
         report_notebook = GENERATE_REPORT(
             file(workflow.projectDir + params.sc.scenic.report_ipynb),
             APPEND_SCENIC_LOOM.out,
