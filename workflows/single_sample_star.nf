@@ -55,6 +55,7 @@ workflow single_sample_star {
     filteredloom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
     scopeloom = FILE_CONVERTER(
         CLUSTER_IDENTIFICATION.out.marker_genes,
+        'SINGLE_SAMPLE_STAR.final_output',
         'loom',
         QC_FILTER.out.filtered
     )
