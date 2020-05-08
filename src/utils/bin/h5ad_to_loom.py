@@ -142,14 +142,26 @@ col_attrs = {
 attrs_metadata["metrics"] = []
 attrs_metadata["annotations"] = []
 
+
+def is_annotation(adata, column_attr_key):
+    if type(adata.obs[column_attr_key].dtype) == pd.core.dtypes.dtypes.CategoricalDtype and column_attr_key != adata.uns["rank_genes_groups"]["params"]["groupby"]:
+        return True
+    if column_attr_key.startswith('n_') or column_attr_key.startswith('num_') or column_attr_key.startswith('pct_') or column_attr_key.startswith('percent_'):
+        return False
+    unique_values = np.unique(adata.obs[column_attr_key].values)
+    if len(unique_values) < 500:
+        return True
+    return False
+
+
 # Populate
 for column_attr_key in adata.obs.keys():
     # Don't store the clustering as annotation
-    if type(adata.obs[column_attr_key].dtype) == pd.core.dtypes.dtypes.CategoricalDtype and column_attr_key != adata.uns["rank_genes_groups"]["params"]["groupby"]:
+    if is_annotation(adata=adata, column_attr_key=column_attr_key):
         attrs_metadata["annotations"].append(
             {
                 "name": column_attr_key,
-                "values": list(set(adata.obs[column_attr_key].values))
+                "values": np.unique(adata.obs[column_attr_key].values).astype(str).tolist()
             }
         )
     else:
