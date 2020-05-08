@@ -82,6 +82,7 @@ workflow bbknn {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
             scopeloom = FILE_CONVERTER(
                 BEC_BBKNN.out.data.groupTuple(),
+                'BBKNN.final_output',
                 'loom',
                 SC__FILE_CONCATENATOR.out
             )
@@ -89,6 +90,7 @@ workflow bbknn {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
             scopeloom = FILE_CONVERTER(
                 BEC_BBKNN.out.data.groupTuple(),
+                'BBKNN.final_output',
                 'loom',
                 SC__FILE_CONVERTER.out
             )
