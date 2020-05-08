@@ -53,7 +53,7 @@ workflow SINGLE_SAMPLE {
 
 
         // Reporting
-        samples = data.map { it -> it[0] }.view()
+        samples = data.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
@@ -82,6 +82,7 @@ workflow SINGLE_SAMPLE {
             // In parameter exploration mode, this automatically merge all the results into the resulting loom
             final_processed_scope_loom = FILE_CONVERTER(
                 CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
+                'SINGLE_SAMPLE.final_output',
                 'loom',
                 QC_FILTER.out.filtered
             )
@@ -90,6 +91,7 @@ workflow SINGLE_SAMPLE {
             filtered_loom = SC__H5AD_TO_FILTERED_LOOM( data )
             final_processed_scope_loom = FILE_CONVERTER(
                 CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
+                'SINGLE_SAMPLE.final_output',
                 'loom',
                 data
             )
