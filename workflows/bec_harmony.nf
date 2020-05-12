@@ -100,7 +100,7 @@ workflow BEC_HARMONY {
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
             // Use PUBLISH output to avoid "input file name collision"
-            PUBLISH.out,
+            PUBLISH_FINAL_HARMONY_OUTPUT.out,
             clusteringParams
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
