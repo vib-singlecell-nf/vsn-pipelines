@@ -121,9 +121,12 @@ def add_sample_id(adata, args):
 
 
 def tag_cell(adata, tag):
-    # Check if cell is tagged
-    num_tagged_cells = sum(list(map(lambda x: len(re.findall(r"[ACGT]*-[0-9]+$", x)), adata.obs.index)))
-    if num_tagged_cells == 0:
+    # Check the number of untagged cells
+    # We consider an untagged cell as matching the following pattern: [barcode-id]-[sample-index] where
+    # - [barcode-id] is sequence of A,C,G,T letters
+    # - [sample-index] is a natural number
+    num_untagged_cells = sum(list(map(lambda x: len(re.findall(r"[ACGT]*-[0-9]+$", x)), adata.obs.index)))
+    if num_untagged_cells != 0:
         adata.obs.index = list(map(lambda x: re.sub(r"([ACGT]*)-.*", rf'\1-{tag}', x), adata.obs.index))
     return adata
 
