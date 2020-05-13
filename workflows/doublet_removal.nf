@@ -30,7 +30,13 @@ workflow DOUBLET_REMOVAL {
         )
         // Publish *.ScrubletObject.pklz
         PUBLISH_SCRUBLET_OBJECT(
-            SC__SCRUBLET__DOUBLET_DETECTION.out.map { it -> tuple(it[0], it[2])}, null, "scrublet", false
+            SC__SCRUBLET__DOUBLET_DETECTION.out.map { 
+                it -> tuple(it[0], it[2])
+            },
+            null,
+            "h5ad",
+            "scrublet",
+            false
         )
 
         ANNOTATE_BY_CELL_METADATA(
@@ -44,7 +50,11 @@ workflow DOUBLET_REMOVAL {
         )
         // Publish
         PUBLISH_H5AD_DOUBLETS_ANNOTATED(
-            ANNOTATE_BY_CELL_METADATA.out, null, "scrublet", false
+            ANNOTATE_BY_CELL_METADATA.out,
+            null,
+            "h5ad",
+            "scrublet",
+            false
         )
 
         FILTER_BY_CELL_METADATA(
@@ -53,7 +63,11 @@ workflow DOUBLET_REMOVAL {
         )
         // Publish
         PUBLISH_H5AD_DOUBLETS_REMOVED(
-            FILTER_BY_CELL_METADATA.out, null, "scrublet", false
+            FILTER_BY_CELL_METADATA.out,
+            null,
+            "h5ad",
+            "scrublet",
+            false
         )
         
 
