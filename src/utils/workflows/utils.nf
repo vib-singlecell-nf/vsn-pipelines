@@ -8,6 +8,11 @@ import static groovy.json.JsonOutput.*
 include isParamNull from "./../processes/utils.nf" params(params)
 include COMPRESS_HDF5 from "./../processes/utils.nf" params(params)
 include SC__PUBLISH from "./../processes/utils.nf" params(params)
+include SC__PUBLISH as SC__PUBLISH_PROXY from "./../processes/utils.nf" params(params)
+include SC__H5AD_CLEAN from "./../processes/h5adUpdate.nf" params(params)
+
+formatsAllowed = ['h5ad', 'loom']
+taggedFilesToClean = ['final_output']
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -17,18 +22,48 @@ workflow PUBLISH {
     take: 
         data
         fileOutputSuffix
+        fileOutputFormat
         toolName
         isParameterExplorationModeOn
 
     main:
+        // Clean
+        if(taggedFilesToClean.any { fileOutputSuffix.contains(it) } && isParameterExplorationModeOn) {
+            if(!formatsAllowed.contains(fileOutputFormat))
+                throw new Exception("The format " + fileOutputFormat + " is currently not allowed to be published.")
+            if(fileOutputFormat == "h5ad") {
+                out = SC__H5AD_CLEAN(
+                    data
+                )
+            } else {
+                out = data
+            }
+        } else {
+            out = data
+        }
+
+        // Compress
         COMPRESS_HDF5(
-            data.map {
+            out.map {
                 // if stashedParams not there, just put null 3rd arg
                 it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
             },
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
             isParamNull(toolName) ? 'NULL' : toolName,
         )
+
+        // Proxy to avoid file name collision
+        SC__PUBLISH_PROXY(
+            data.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
+            isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
+            isParamNull(toolName) ? 'NULL' : toolName,
+            isParameterExplorationModeOn
+        )
+
+        // Publish
         SC__PUBLISH(
             COMPRESS_HDF5.out,
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
@@ -37,7 +72,7 @@ workflow PUBLISH {
         )
 
     emit:
-        SC__PUBLISH.out
+        SC__PUBLISH_PROXY.out
 
 }
 

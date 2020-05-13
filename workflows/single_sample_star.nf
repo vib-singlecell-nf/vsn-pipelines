@@ -68,6 +68,7 @@ workflow single_sample_star {
             it -> tuple(it[0], it[1], null)
         },
         "single_sample_star.final_output",
+        "h5ad",
         null,
         clusteringParams.isParameterExplorationModeOn()
     )

@@ -82,6 +82,7 @@ workflow multi_sample {
                 it -> tuple(it[0], it[1], null)
             },
             params.global.project_name+".multi_sample.final_output",
+            "h5ad",
             null,
             clusteringParams.isParameterExplorationModeOn()
         )

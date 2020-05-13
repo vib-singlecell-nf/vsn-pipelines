@@ -279,7 +279,7 @@ process SC__PUBLISH {
         "${getPublishDir(params.global.outdir,toolName)}", \
         mode: 'link', \
         overwrite: true, \
-        saveAs: { 
+        saveAs: {
             filename -> "${outputFileName}" 
         }
     
