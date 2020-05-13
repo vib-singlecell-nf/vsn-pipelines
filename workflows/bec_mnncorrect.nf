@@ -5,28 +5,51 @@
 
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  process imports:
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    COMBINE_BY_PARAMS;
+} from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_BEC_OUTPUT;
+    PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT;
+     PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT;
+} from "../../utils/workflows/utils.nf" params(params)
 
-include '../../utils/processes/utils.nf' params(params)
-include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-
-// scanpy:
-include '../processes/batch_effect_correct.nf' params(params)
-include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params)
-include SC__SCANPY__REGRESS_OUT from '../processes/regress_out.nf' params(params)
-include DIM_REDUCTION_PCA from './dim_reduction_pca' params(params + [method: "pca"])
-include NEIGHBORHOOD_GRAPH from './neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_TSNE_UMAP from './dim_reduction' params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCANPY__BATCH_EFFECT_CORRECTION;
+} from '../processes/batch_effect_correct.nf' params(params)
+include {
+    SC__SCANPY__FEATURE_SCALING;
+} from '../processes/transform.nf' params(params)
+include {
+    SC__SCANPY__REGRESS_OUT;
+} from '../processes/regress_out.nf' params(params)
+include {
+    DIM_REDUCTION_PCA;
+} from './dim_reduction_pca' params(params + [method: "pca"])
+include {
+    NEIGHBORHOOD_GRAPH;
+} from './neighborhood_graph.nf' params(params)
+include {
+    DIM_REDUCTION_TSNE_UMAP;
+} from './dim_reduction' params(params)
 include '../processes/dim_reduction.nf' params(params)
-include '../processes/cluster.nf' params(params)
-include './cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
-
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from '../processes/cluster.nf' params(params)
+include [
+    CLUSTER_IDENTIFICATION;
+} from './cluster_identification.nf' params(params)
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + params.global)
+include {
+    GENERATE_DUAL_INPUT_REPORT;
+} from './create_report.nf' params(params + params.global)
 
 
 //////////////////////////////////////////////////////

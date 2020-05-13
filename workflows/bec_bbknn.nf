@@ -2,37 +2,47 @@
  * BEC__BBKNN workflow 
  * Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
  * 
- * Steps considered: 
- * - normalize
- * - concatenate the batches
- * - feature selection
- * - log transform
- * - feature scaling
- * - dimensionality reduction (PCA)
  * - batch effect correction using python package bbknn (Park et al. (2018), Fast Batch Alignment of Single Cell Transcriptomes Unifies Multiple Mouse Cell Atlases into an Integrated Landscape)
  */ 
 
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  process imports:
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    COMBINE_BY_PARAMS;
+} from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_BEC_OUTPUT;
+ } from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT;
+} from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_FINAL_BBKNN_OUTPUT;
+} from "../../utils/workflows/utils.nf" params(params)
 
-include '../../utils/processes/utils.nf' params(params)
-include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_FINAL_BBKNN_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-
-// scanpy:
-include '../processes/batch_effect_correct.nf' params(params)
-
-include '../processes/dim_reduction.nf' params(params)
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP from '../processes/dim_reduction.nf' params(params + [method: "umap"])
-include '../processes/cluster.nf' params(params)
-include './cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
-
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCANPY__BATCH_EFFECT_CORRECTION;
+} from '../processes/batch_effect_correct.nf' params(params)
+include {
+    SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP;
+} from '../processes/dim_reduction.nf' params(params + [method: "umap"])
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from '../processes/cluster.nf' params(params)
+include {
+    CLUSTER_IDENTIFICATION;
+} from './cluster_identification.nf' params(params)
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + params.global)
+include {
+    GENERATE_DUAL_INPUT_REPORT;
+} from './create_report.nf' params(params + params.global)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

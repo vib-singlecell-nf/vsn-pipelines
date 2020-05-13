@@ -3,7 +3,9 @@ nextflow.preview.dsl=2
 import static groovy.json.JsonOutput.*
 import org.yaml.snakeyaml.Yaml
 
-include '../../utils/processes/utils.nf'
+include {
+	isParamNull;
+} from '../../utils/processes/utils.nf'
 
 /* 
  * STATIC VERSION GENERATE REPORT
