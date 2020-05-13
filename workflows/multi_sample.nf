@@ -68,6 +68,7 @@ workflow multi_sample {
         // In parameter exploration mode, this automatically merge all the results into the resulting loom
         scopeloom = FILE_CONVERTER(
             CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
+            'MULTI_SAMPLE.final_output',
             'loom',
             SC__FILE_CONCATENATOR.out
         )
@@ -81,6 +82,7 @@ workflow multi_sample {
                 it -> tuple(it[0], it[1], null)
             },
             params.global.project_name+".multi_sample.final_output",
+            "h5ad",
             null,
             clusteringParams.isParameterExplorationModeOn()
         )

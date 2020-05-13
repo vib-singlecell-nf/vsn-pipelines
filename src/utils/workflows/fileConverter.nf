@@ -12,7 +12,7 @@ nextflow.preview.dsl=2
 //  process imports:
 
 include SC__H5AD_TO_LOOM from './../processes/h5adToLoom.nf' params(params)
-include COMPRESS_HDF5 from './../processes/utils.nf' params(params)
+include PUBLISH from "./utils.nf" params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -25,7 +25,9 @@ workflow FILE_CONVERTER {
     take:
         // Expects (sampleId, data[])
         data
-        // Expects (sampleId, outputFormat)
+        // Expects outputSuffix: string
+        outputSuffix
+        // Expects outputFormat: string
         outputFormat
         // Expects (sampleId, rawFilteredData)
         rawFilteredData
@@ -41,7 +43,7 @@ workflow FILE_CONVERTER {
             if(it[1].size() > 1) {
                 """
 ------------------------------------------------------------------
-\u001B[32m Aggregating multiple .h5ad files to ${it[1][0].baseName}.loom 
+\u001B[32m Aggregating multiple .h5ad files to ${it[1][0].baseName.split('\\.')[0]}.loom 
 (w/ additional compression)...\u001B[0m
 ------------------------------------------------------------------
                 """
@@ -54,13 +56,20 @@ workflow FILE_CONVERTER {
 """
             }
         }
-        out = SC__H5AD_TO_LOOM(
+        SC__H5AD_TO_LOOM(
             rawFilteredData.combine(
                 convert.h5adToLoom.map {
                     it -> tuple(it[0], it[1]) 
                 }, 
                 by: 0
             ).ifEmpty('Channel empty: no h5ad files were converted to the loom format.')
+        )
+        out = PUBLISH(
+            SC__H5AD_TO_LOOM.out,
+            outputSuffix,
+            "h5ad",
+            null,
+            false
         )
         convert.none.view { 
 """
