@@ -67,6 +67,7 @@ workflow FILE_CONVERTER {
         out = PUBLISH(
             SC__H5AD_TO_LOOM.out,
             outputSuffix,
+            "h5ad",
             null,
             false
         )

@@ -285,6 +285,7 @@ Steps:
                 PUBLISH( 
                     CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1]) },
                     "BEC_HARMONY.output",
+                    "h5ad",
                     null,
                     clusteringParams.isParameterExplorationModeOn()
                 )

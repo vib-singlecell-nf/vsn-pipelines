@@ -6,6 +6,7 @@ import argparse
 import pandas as pd
 import scanpy as sc
 import numpy as np
+from scipy.sparse import csr_matrix
 
 parser = argparse.ArgumentParser(description='')
 
@@ -28,6 +29,13 @@ parser.add_argument(
     required=False,
     help='The path the (compressed) TSV file containing the new PCA embeddings.'
 )
+parser.add_argument(
+    '-r', "--empty-x",
+    action="store_true",
+    dest="remove_x",
+    default=False,
+    help="Empty X in the given h5ad file."
+)
 
 args = parser.parse_args()
 
@@ -44,6 +52,13 @@ except IOError:
 #
 # Update the feature/observation-based metadata with all the columns present within the look-up table.
 #
+
+if args.remove_x:
+    print("Emptying X slot of the given AnnData...")
+    adata.X = csr_matrix(
+        (adata.shape[0], adata.shape[1]),
+        dtype=np.uint8
+    )
 
 if args.x_pca is not None:
     print("Updating X_pca slot of the given AnnData...")

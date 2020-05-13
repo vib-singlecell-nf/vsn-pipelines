@@ -16,6 +16,7 @@ workflow bbknn {
     PUBLISH_BBKNN(
         BBKNN.out.scopeloom,
         "BBKNN",
+        "loom",
         null,
         false
     )
@@ -30,6 +31,7 @@ workflow mnncorrect {
     PUBLISH_MNNCORRECT(
         MNNCORRECT.out.scopeloom,
         "MNNCORRECT",
+        "loom",
         null,
         false
     )
@@ -45,6 +47,7 @@ workflow harmony {
     PUBLISH_HARMONY(
         HARMONY.out.scopeloom,
         "HARMONY",
+        "loom",
         null,
         false
     )
@@ -65,6 +68,7 @@ workflow bbknn_scenic {
     PUBLISH_BBKNN_SCENIC(
         SCENIC_APPEND.out,
         "BBKNN_SCENIC",
+        "loom",
         null,
         false
     )
@@ -85,6 +89,7 @@ workflow harmony_scenic {
     PUBLISH_HARMONY_SCENIC(
         SCENIC_APPEND.out,
         "HARMONY_SCENIC",
+        "loom",
         null,
         false
     )
@@ -101,6 +106,7 @@ workflow single_sample {
     PUBLISH_SINGLE_SAMPLE(
         SINGLE_SAMPLE.out.scopeloom,
         "SINGLE_SAMPLE",
+        "loom",
         null,
         false
     )    
@@ -115,6 +121,7 @@ workflow multi_sample {
     PUBLISH_MULTI_SAMPLE(
         MULTI_SAMPLE.out.scopeloom,
         "MULTI_SAMPLE",
+        "loom",
         null,
         false
     ) 
@@ -135,6 +142,7 @@ workflow single_sample_scenic {
     PUBLISH_SINGLE_SAMPLE_SCENIC(
         SCENIC_APPEND.out,
         "SINGLE_SAMPLE_SCENIC",
+        "loom",
         null,
         false
     )
@@ -170,6 +178,7 @@ workflow pipe_single_sample_scenic {
         PUBLISH_P_SINGLE_SAMPLE_SCENIC(
             SCENIC_APPEND.out,
             "P_SINGLE_SAMPLE_SCENIC",
+            "loom",
             null,
             false
         )
@@ -188,6 +197,7 @@ workflow scenic {
     PUBLISH_SCENIC(
         SCENIC.out,
         "SCENIC",
+        "loom",
         null,
         false
     )
@@ -409,6 +419,7 @@ workflow sra_cellranger_bbknn_scenic {
     PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC(
         SCENIC_APPEND.out,
         "SRA_CELLRANGER_BBKNN_SCENIC",
+        "loom",
         null,
         false
     )    
