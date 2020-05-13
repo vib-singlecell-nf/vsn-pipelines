@@ -285,6 +285,7 @@ Steps:
                 PUBLISH( 
                     CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> tuple(it[0], it[1]) },
                     "BEC_HARMONY.output",
+                    "h5ad",
                     null,
                     clusteringParams.isParameterExplorationModeOn()
                 )
@@ -377,6 +378,7 @@ Steps:
                 filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
                 scopeloom = FILE_CONVERTER(
                     BEC_HARMONY.out.data.groupTuple(),
+                    'HARMONY.final_output'
                     'loom',
                     SC__FILE_CONCATENATOR.out
                 )

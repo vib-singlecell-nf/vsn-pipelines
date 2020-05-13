@@ -79,6 +79,7 @@ workflow mnncorrect {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
             scopeloom = FILE_CONVERTER(
                 BEC_MNNCORRECT.out.data.groupTuple(),
+                'MNNCORRECT.final_output',
                 'loom',
                 SC__FILE_CONCATENATOR.out
             )
@@ -86,6 +87,7 @@ workflow mnncorrect {
             filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
             scopeloom = FILE_CONVERTER(
                 BEC_MNNCORRECT.out.data.groupTuple(),
+                'MNNCORRECT.final_output',
                 'loom',
                 SC__FILE_CONVERTER.out
             )
