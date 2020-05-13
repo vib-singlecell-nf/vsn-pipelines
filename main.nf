@@ -35,22 +35,37 @@ if(!isAppendOnlyMode && !(params.global.genome.assembly in ALLOWED_GENOME_ASSEMB
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include './../channels/file.nf' params(params)
+include {
+    getChannelFromFilePath
+} from './../channels/file.nf' params(params)
 
-include ARBORETO_WITH_MULTIPROCESSING                             from './processes/arboreto_with_multiprocessing'  params(params)
-include CISTARGET as CISTARGET__MOTIF                             from './processes/cistarget'             params(params)
-include CISTARGET as CISTARGET__TRACK                             from './processes/cistarget'             params(params)
-include AUCELL as AUCELL__MOTIF                                   from './processes/aucell'                params(params)
-include AUCELL as AUCELL__TRACK                                   from './processes/aucell'                params(params)
-include AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__MOTIF from './workflows/aggregateMultiRuns'    params(params)
-include AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__TRACK from './workflows/aggregateMultiRuns'    params(params)
-include PUBLISH_LOOM                                              from './processes/loomHandler'     params(params)
-include MERGE_MOTIF_TRACK_LOOMS                                   from './processes/loomHandler'     params(params)
-include APPEND_SCENIC_LOOM                                        from './processes/loomHandler'     params(params)
-include VISUALIZE                                                 from './processes/loomHandler'     params(params)
+include {
+    ARBORETO_WITH_MULTIPROCESSING
+} from './processes/arboreto_with_multiprocessing' params(params)
+include {
+    CISTARGET as CISTARGET__MOTIF;
+    CISTARGET as CISTARGET__TRACK;
+} from './processes/cistarget' params(params)
+include {
+    AUCELL as AUCELL__MOTIF;
+    AUCELL as AUCELL__TRACK;
+} from './processes/aucell' params(params)
+include {
+    AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__MOTIF;
+    AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__TRACK;
+} from './workflows/aggregateMultiRuns' params(params)
+include {
+    PUBLISH_LOOM;
+    MERGE_MOTIF_TRACK_LOOMS;
+    APPEND_SCENIC_LOOM;
+    VISUALIZE;
+} from './processes/loomHandler' params(params)
 
 // reporting:
-include './processes/reports.nf' params(params)
+include {
+    GENERATE_REPORT;
+    REPORT_TO_HTML;
+} from './processes/reports.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
