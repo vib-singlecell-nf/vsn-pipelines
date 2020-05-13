@@ -204,6 +204,6 @@ workflow {
     main:
         if(!("filteredLoom" in params.sc.scenic))
             throw new Exception("The given filteredLoom required parameter does not exist in the params.sc.scenic scope.")
-        scenic( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
+        scenic( Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom)) ) )
 
 }
