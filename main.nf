@@ -1,21 +1,12 @@
-//
-// Version:
-// Test:
-// Command: 
-//
-/*
- * SCENIC workflow 
- * Source:
- * 
- * Steps considered: 
-
- */ 
 nextflow.preview.dsl=2
-include './../utils/processes/config'
+
+include {
+    resolveParams;
+} from './../utils/processes/config'
+
 resolveParams(params, true)
 
-isAppendOnlyMode = params.sc.scenic.containsKey("existingScenicLoom")
-
+def isAppendOnlyMode = params.sc.scenic.containsKey("existingScenicLoom")
 def ALLOWED_GENOME_ASSEMBLIES = ['dm6','hg19','hg38', 'mm10']
 
 //////////////////////////////////////////////////////
