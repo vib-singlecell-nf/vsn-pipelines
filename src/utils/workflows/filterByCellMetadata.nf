@@ -1,10 +1,16 @@
 nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
-//  process imports:
-include './../processes/utils.nf' params(params)
-include SC__PREPARE_OBS_FILTER from './../processes/h5adSubset' params(params)
-include SC__APPLY_OBS_FILTER from './../processes/h5adSubset' params(params)
+//  Process imports:
+include {
+    isParamNull
+} from './../processes/utils.nf' params(params)
+include {
+    SC__PREPARE_OBS_FILTER
+} from './../processes/h5adSubset' params(params)
+include {
+    SC__APPLY_OBS_FILTER
+} from './../processes/h5adSubset' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
