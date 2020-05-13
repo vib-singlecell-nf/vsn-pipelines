@@ -183,7 +183,7 @@ workflow scenic {
     include scenic as SCENIC from './src/scenic/main.nf' params(params)
     include PUBLISH as PUBLISH_SCENIC from "./src/utils/workflows/utils.nf" params(params)
     SCENIC( 
-        Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom))) 
+        Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
     )
     PUBLISH_SCENIC(
         SCENIC.out,
