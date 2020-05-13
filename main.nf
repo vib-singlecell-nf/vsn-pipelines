@@ -172,9 +172,16 @@ workflow scenic_append {
         } else {
             scenicLoom = scenic( filteredLoom ).out
         }
-
         APPEND_SCENIC_LOOM(
-            scopeLoom.join(scenicLoom).ifEmpty{
+            scopeLoom.map {
+                // Extract only sampleId, path
+                it -> tuple(it[0], it[1])
+            }.join(
+                scenicLoom.map {
+                    // Extract only sampleId, path
+                    it -> tuple(it[0], it[1])
+                }
+            ).ifEmpty{
                 throw new Exception("Cannot append SCENIC loom to SCope loom because the IDs do not match.")
             }
         )
