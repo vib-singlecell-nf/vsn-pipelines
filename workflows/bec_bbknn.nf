@@ -54,6 +54,7 @@ workflow BEC_BBKNN {
         PUBLISH_BEC_OUTPUT(
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
             "BEC_BBKNN.output",
+            "h5ad",
             null,
             false
         )
@@ -69,6 +70,7 @@ workflow BEC_BBKNN {
         PUBLISH_BEC_DIMRED_OUTPUT(
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
             "BEC_BBKNN.dimred_output",
+            "h5ad",
             null,
             false
         )
@@ -81,15 +83,18 @@ workflow BEC_BBKNN {
             "Post Batch Effect Correction (BBKNN)"
         )
 
+        marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map {
+            it -> tuple(
+                it[0], // sampleId
+                it[1], // data
+                !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
+            )
+        }
+
         PUBLISH_FINAL_BBKNN_OUTPUT(
-            CLUSTER_IDENTIFICATION.out.marker_genes.map {
-                it -> tuple(
-                    it[0], // sampleId
-                    it[1], // data
-                    !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
-                )
-            },
+            marker_genes,
             "BEC_BBKNN.final_output",
+            "h5ad",
             null,
             clusteringParams.isParameterExplorationModeOn()
         )

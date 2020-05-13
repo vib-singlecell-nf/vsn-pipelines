@@ -29,6 +29,7 @@ workflow HVG_SELECTION {
         PUBLISH_H5AD_HVG_SCALED(
             scaled,
             "SCANPY.hvg_scaled_output",
+            "h5ad",
             "scanpy",
             false
         )

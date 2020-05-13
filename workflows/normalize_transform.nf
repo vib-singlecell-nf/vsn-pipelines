@@ -22,6 +22,7 @@ workflow NORMALIZE_TRANSFORM {
         PUBLISH_H5AD_NORMALIZED(
             SC__SCANPY__NORMALIZATION.out,
             "SCANPY.normalized_output",
+            "h5ad",
             "scanpy",
             false
         )

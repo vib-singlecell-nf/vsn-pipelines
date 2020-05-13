@@ -50,6 +50,7 @@ workflow BEC_MNNCORRECT {
         PUBLISH_BEC_OUTPUT(
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
             "BEC_MNNCORRECT.output",
+            "h5ad",
             null,
             false
         )
@@ -73,6 +74,7 @@ workflow BEC_MNNCORRECT {
         PUBLISH_BEC_DIMRED_OUTPUT(
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "BEC_HARMONY.dimred_output",
+            "h5ad",
             null,
             false
         )
@@ -98,6 +100,7 @@ workflow BEC_MNNCORRECT {
                 it -> tuple(it[0], it[1], it[2])
             },
             "BEC_MNNCORRECT.final_output",
+            "h5ad",
             null,
             clusteringParams.isParameterExplorationModeOn()
         )

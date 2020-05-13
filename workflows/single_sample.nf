@@ -97,12 +97,15 @@ workflow SINGLE_SAMPLE {
             )
         }
 
+        marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map { 
+            it -> tuple(it[0], it[1], null)
+        }
+
         // Publishing
         final_published_data = PUBLISH(
-            CLUSTER_IDENTIFICATION.out.marker_genes.map { 
-                it -> tuple(it[0], it[1], null)
-            },
+            marker_genes,
             params.global.project_name+".single_sample.final_output",
+            "h5ad",
             null,
             clusteringParams.isParameterExplorationModeOn()
         )
@@ -112,7 +115,7 @@ workflow SINGLE_SAMPLE {
         filtered_loom
         hvg_data = HVG_SELECTION.out.hvg
         dr_pca_data = DIM_REDUCTION_PCA.out
-        final_processed_data = CLUSTER_IDENTIFICATION.out.marker_genes
+        final_processed_data = marker_genes
         final_published_data
         final_processed_scope_loom
         reports = ipynbs
