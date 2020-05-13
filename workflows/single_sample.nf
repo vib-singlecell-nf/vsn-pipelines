@@ -2,29 +2,61 @@ nextflow.preview.dsl=2
 
 import static groovy.json.JsonOutput.*
 
-//////////////////////////////////////////////////////
-//  Import sub-workflows
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    clean;
+    UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    PUBLISH;
+} from '../../utils/workflows/utils.nf' params(params)
+include {
+    SC__H5AD_TO_FILTERED_LOOM;
+} from '../../utils/processes/h5adToLoom.nf' params(params)
+include {
+    FILE_CONVERTER;
+} from '../../utils/workflows/fileConverter.nf' params(params)
 
-include clean from '../../utils/processes/utils.nf' params(params)
-include PUBLISH from '../../utils/workflows/utils.nf' params(params)
-include SC__H5AD_TO_FILTERED_LOOM from '../../utils/processes/h5adToLoom.nf' params(params)
-include FILE_CONVERTER from '../../utils/workflows/fileConverter.nf' params(params)
-
-include QC_FILTER from './qc_filter.nf' params(params)
-include NORMALIZE_TRANSFORM from './normalize_transform.nf' params(params)
-include HVG_SELECTION from './hvg_selection.nf' params(params)
-include SC__SCANPY__REGRESS_OUT from '../processes/regress_out.nf' params(params)
-include NEIGHBORHOOD_GRAPH from './neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_PCA from './dim_reduction_pca.nf' params(params)
-include './dim_reduction.nf' params(params)
-include '../processes/cluster.nf' params(params)
-include CLUSTER_IDENTIFICATION from './cluster_identification.nf' params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    QC_FILTER;
+} from './qc_filter.nf' params(params)
+include {
+    NORMALIZE_TRANSFORM;
+} from './normalize_transform.nf' params(params)
+include {
+    HVG_SELECTION;
+} from './hvg_selection.nf' params(params)
+include {
+    SC__SCANPY__REGRESS_OUT;
+} from '../processes/regress_out.nf' params(params)
+include {
+    NEIGHBORHOOD_GRAPH;
+} from './neighborhood_graph.nf' params(params)
+include {
+    DIM_REDUCTION_PCA;
+} from './dim_reduction_pca.nf' params(params)
+include {
+    DIM_REDUCTION_TSNE_UMAP;
+} from './dim_reduction.nf' params(params)
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from '../processes/cluster.nf' params(params)
+include {
+    CLUSTER_IDENTIFICATION;
+} from './cluster_identification.nf' params(params)
 
 // reporting:
-include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../../utils/processes/reports.nf' params(params)
-include SC__SCANPY__MERGE_REPORTS from '../processes/reports.nf' params(params)
-include SC__SCANPY__REPORT_TO_HTML from '../processes/reports.nf' params(params)
-include COMBINE_REPORTS from './combine_reports.nf' params(params)
+include {
+    SC__SCANPY__MERGE_REPORTS;
+    SC__SCANPY__REPORT_TO_HTML;
+} from '../processes/reports.nf' params(params)
+include {
+    COMBINE_REPORTS;
+} from './combine_reports.nf' params(params)
+
 
 workflow SINGLE_SAMPLE {
 

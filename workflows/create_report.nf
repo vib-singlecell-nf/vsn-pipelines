@@ -1,22 +1,14 @@
-//
-// Version: 
-// Test: 
-// Command: 
-//
-/*
- * QC workflow 
- * Source:
- * 
- * Steps considered: 
- * - filter (cell, gene) + qc report
- */ 
-
 nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  process imports:
 
-include '../processes/reports.nf' params(params)
+include {
+    SC__SCANPY__GENERATE_DUAL_INPUT_REPORT;
+    SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT;
+    SC__SCANPY__GENERATE_REPORT;
+    SC__SCANPY__REPORT_TO_HTML;
+} from '../processes/reports.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
