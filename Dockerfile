@@ -4,10 +4,10 @@ RUN apt-get -y update && \
     apt-get install -y libcurl4-openssl-dev libxml2-dev zlib1g-dev libhdf5-dev && \
     apt-get install -y libssl-dev && \
     # png.h: No such file or directory
-    apt-get install -y libpng-dev && \ 
+    apt-get install -y libpng-dev && \
+    R -e "install.packages('doFuture')" && \
+    R -e "install.packages('doRNG')" && \
     R -e "install.packages('optparse')" && \
-    R -e "install.packages('foreach')" && \
-    R -e "install.packages('doMC')" && \
     R -e "install.packages('dismo')" && \
     R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')" && \
     # Need to run ps
