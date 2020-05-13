@@ -46,6 +46,7 @@ workflow BEC_HARMONY {
         PUBLISH_BEC_OUTPUT(
             SC__H5AD_UPDATE_X_PCA.out,
             "BEC_HARMONY.output",
+            "h5ad",
             null,
             false
         )
@@ -64,6 +65,7 @@ workflow BEC_HARMONY {
         PUBLISH_BEC_DIMRED_OUTPUT(
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
             "BEC_HARMONY.dimred_output",
+            "h5ad",
             null,
             false
         )
@@ -90,6 +92,7 @@ workflow BEC_HARMONY {
                 it -> tuple(it[0], it[1], it[2])
             },
             "BEC_HARMONY.final_output",
+            "h5ad",
             null,
             clusteringParams.isParameterExplorationModeOn()
         )
