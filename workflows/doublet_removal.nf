@@ -1,20 +1,31 @@
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  Import sub-workflows from the modules:
-include SC__SCRUBLET__DOUBLET_DETECTION from "../processes/doublet_detection" params(params)
-include SC__SCRUBLET__DOUBLET_DETECTION_REPORT from "../processes/reports" params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    ANNOTATE_BY_CELL_METADATA
+} from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
+include {
+    FILTER_BY_CELL_METADATA
+} from '../../utils/workflows/filterByCellMetadata' params(params)
+include {
+    UTILS__REPORT_TO_HTML
+} from '../../utils/processes/reports.nf' params(params)
+include {
+    PUBLISH as PUBLISH_SCRUBLET_OBJECT;
+    PUBLISH as PUBLISH_H5AD_DOUBLETS_ANNOTATED;
+    PUBLISH as PUBLISH_H5AD_DOUBLETS_REMOVED;
+ } from '../../utils/workflows/utils.nf' params(params)
 
-//////////////////////////////////////////////////////
-//  Import from external modules:
-include ANNOTATE_BY_CELL_METADATA from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
-include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata' params(params)
-include UTILS__REPORT_TO_HTML from '../../utils/processes/reports.nf' params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCRUBLET__DOUBLET_DETECTION
+} from "../processes/doublet_detection" params(params)
+include {
+    SC__SCRUBLET__DOUBLET_DETECTION_REPORT
+} from "../processes/reports" params(params)
 
-// Publish
-include PUBLISH as PUBLISH_SCRUBLET_OBJECT from '../../utils/workflows/utils.nf' params(params)
-include PUBLISH as PUBLISH_H5AD_DOUBLETS_ANNOTATED from '../../utils/workflows/utils.nf' params(params)
-include PUBLISH as PUBLISH_H5AD_DOUBLETS_REMOVED from '../../utils/workflows/utils.nf' params(params)
 
 workflow DOUBLET_REMOVAL {
 
