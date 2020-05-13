@@ -67,7 +67,7 @@ parser <- add_option(
   parser, 
   c("-s", "--seed"), 
   action = "store", 
-  default = 617,
+  default = NULL,
   help="Seed. [default %default]"
 )
 parser <- add_option(
@@ -149,7 +149,7 @@ RunPCACV <- function(
   if(!is.null(seed)) {
     set.seed(seed)
   } else {
-    warnings("No seed is set, this will likely give none reproducible results.")
+    stop("No seed is set, this will likely give none reproducible results. Please set one.")
   }
 
   # Setup the parallelization
