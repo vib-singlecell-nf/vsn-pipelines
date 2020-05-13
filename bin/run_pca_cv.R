@@ -62,7 +62,10 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
-  c("-m", "--max-iters"), action="store", default = 500, help="Maximum number of iteration. [default %default]")
+  c("-m", "--max-iters"), 
+  action="store", 
+  default = 500, 
+  help="Maximum number of iteration. [default %default]")
 parser <- add_option(
   parser, 
   c("-s", "--seed"), 
@@ -141,22 +144,22 @@ RunPCACV <- function(
   verbose = T,
   default.svd = F) {
 
+
   # Load the libraries required for parallelization
   library(doFuture)
   library(doRNG)
 
-  # Required by irlba::irlba for reproducibility
-  if(!is.null(seed)) {
-    set.seed(seed)
-  } else {
+  if(is.null(seed))
     stop("No seed is set, this will likely give none reproducible results. Please set one.")
-  }
+
+  # Required by irlba::irlba for reproducibility
+  set.seed(seed)
 
   # Setup the parallelization
   print(paste0("Number of workers used: ", n.cores))
   registerDoFuture()
   plan(multiprocess, workers = n.cores)
-  registerDoRNG(seed)
+  registerDoRNG(as.numeric(seed))
 
   if(default.svd) {
     print("Default singular value decomposition (SVD) is used for estimating the number PCs.") 
