@@ -20,6 +20,7 @@ process SC__HARMONY__HARMONY_MATRIX {
         varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
         """
         ${binDir}run_harmony.R \
+            --seed ${params.global.seed} \
             --input-file ${f} \
             ${varsUseAsArguments} \
             --output-prefix "${sampleId}.SC__HARMONY__HARMONY_MATRIX"
