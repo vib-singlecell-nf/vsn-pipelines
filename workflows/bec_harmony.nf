@@ -3,21 +3,41 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 
-include '../../utils/processes/utils.nf' params(params)
-include COMBINE_BY_PARAMS from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_BEC_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT from "../../utils/workflows/utils.nf" params(params)
-include PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT from "../../utils/workflows/utils.nf" params(params)
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    COMBINE_BY_PARAMS;
+} from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_BEC_OUTPUT;
+    PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT;
+    PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT;
+} from "../../utils/workflows/utils.nf" params(params)
 
-include SC__HARMONY__HARMONY_MATRIX from './../processes/runHarmony.nf' params(params)
-include SC__H5AD_UPDATE_X_PCA from './../../utils/processes/h5adUpdate.nf' params(params)
-include NEIGHBORHOOD_GRAPH from './../../scanpy/workflows/neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_TSNE_UMAP from './../../scanpy/workflows/dim_reduction.nf' params(params)
-include './../../scanpy/processes/cluster.nf' params(params)
-include './../../scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
+include {
+    SC__HARMONY__HARMONY_MATRIX;
+} from './../processes/runHarmony.nf' params(params)
+include {
+    SC__H5AD_UPDATE_X_PCA;
+} from './../../utils/processes/h5adUpdate.nf' params(params)
+include {
+    NEIGHBORHOOD_GRAPH;
+} from './../../scanpy/workflows/neighborhood_graph.nf' params(params)
+include {
+    DIM_REDUCTION_TSNE_UMAP;
+} from './../../scanpy/workflows/dim_reduction.nf' params(params)
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from './../../scanpy/processes/cluster.nf' params(params)
+include {
+    CLUSTER_IDENTIFICATION;
+} from './../../scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
 
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './../../scanpy/workflows/create_report.nf' params(params)
+include {
+    GENERATE_DUAL_INPUT_REPORT
+} from './../../scanpy/workflows/create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
