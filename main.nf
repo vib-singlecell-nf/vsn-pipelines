@@ -4,7 +4,7 @@ nextflow.preview.dsl=2
 
 include { 
     INIT
-} from '../utils/workflows/utils' params(params)
+} from './src/utils/workflows/utils' params(params)
 INIT()
 
 // include './src/utils/processes/utils' params(params)
@@ -502,9 +502,11 @@ workflow sra_cellranger_bbknn {
         include {
             getChannel as getSRAChannel
         } from './src/channels/sra' params(params)
-        include DOWNLOAD_FROM_SRA from './src/utils/workflows/downloadFromSRA' params(params)
         include {
-            SC__CELLRANGER__PREPARE_FOLDER,
+            DOWNLOAD_FROM_SRA
+        } from './src/utils/workflows/downloadFromSRA' params(params)
+        include {
+            SC__CELLRANGER__PREPARE_FOLDER;
             SC__CELLRANGER__COUNT
         } from './src/cellranger/processes/utils' params(params)
         include {
