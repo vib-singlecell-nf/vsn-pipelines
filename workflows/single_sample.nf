@@ -2,8 +2,8 @@ nextflow.preview.dsl=2
 
 // Utils
 include {
-    FILE_CONVERTER;
-} from '../src/utils/workflows/fileConverter.nf' params(params)
+    SC__FILE_CONVERTER;
+} from '../src/utils/processes/utils.nf' params(params)
 
 // Pipeline
 include {
