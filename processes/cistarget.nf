@@ -34,13 +34,15 @@ process CISTARGET {
 
     script:
         if(!processParams.containsKey("numWorkers"))
-            throw new Exception("numWorkers is missing in params.sc.scenic.aucell")
+            throw new Exception("numWorkers is missing in params.sc.scenic.cistarget")
         if(processParams.labels && processParams.labels.processExecutor == 'qsub') {
             if(!processParams.containsKey("pmem"))
-                throw new Exception("pmem is missing in params.sc.scenic.aucell")
+                throw new Exception("pmem is missing in params.sc.scenic.cistarget")
             if(!processParams.containsKey("walltime"))
-                throw new Exception("walltime is missing in params.sc.scenic.aucell")
+                throw new Exception("walltime is missing in params.sc.scenic.cistarget")
         }
+        if(toolParams.numRuns > 2 && toolParams.maxForks > 1 && (!processParams.containsKey("labels") || processParams.labels.processExecutor == "local"))
+            throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
         """
         pyscenic ctx \

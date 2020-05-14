@@ -45,22 +45,38 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
-include GRNBOOST2_WITHOUT_DASK from './processes/grnboost2withoutDask' params(params)
-include CISTARGET as CISTARGET__MOTIF   from './processes/cistarget'             params(params)
-include CISTARGET as CISTARGET__TRACK   from './processes/cistarget'             params(params)
-include AUCELL as AUCELL__MOTIF         from './processes/aucell'                params(params)
-include AUCELL as AUCELL__TRACK         from './processes/aucell'                params(params)
-include AGGR_MULTI_RUNS_FEATURES as AGGR_MULTI_RUNS_FEATURES__MOTIF from './processes/multiruns/aggregateFeatures' params(params)
-include AGGR_MULTI_RUNS_FEATURES as AGGR_MULTI_RUNS_FEATURES__TRACK from './processes/multiruns/aggregateFeatures' params(params)
-include AGGR_MULTI_RUNS_REGULONS as AGGR_MULTI_RUNS_REGULONS__MOTIF from './processes/multiruns/aggregateMultiRunsRegulons' params(params)
-include AGGR_MULTI_RUNS_REGULONS as AGGR_MULTI_RUNS_REGULONS__TRACK from './processes/multiruns/aggregateMultiRunsRegulons' params(params)
-include AUCELL_FROM_FOLDER as AUCELL_FROM_FOLDER__MOTIF from './processes/aucellFromFolder' params(params)
-include AUCELL_FROM_FOLDER as AUCELL_FROM_FOLDER__TRACK from './processes/aucellFromFolder' params(params)
-include SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF from './processes/saveScenicMultiRunsToLoom' params(params)
-include SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK from './processes/saveScenicMultiRunsToLoom' params(params)
-include MERGE_MOTIF_TRACK_LOOMS from './processes/loomHandler'     params(params)
-include PUBLISH_LOOM            from './processes/loomHandler'     params(params)
-include VISUALIZE               from './processes/loomHandler'     params(params)
+include {
+    GRNBOOST2_WITHOUT_DASK;
+} from './processes/grnboost2withoutDask' params(params)
+include {
+    CISTARGET as CISTARGET__MOTIF;
+    CISTARGET as CISTARGET__TRACK;
+}   from './processes/cistarget'             params(params)
+include {
+    AUCELL as AUCELL__MOTIF;
+    AUCELL as AUCELL__TRACK;
+} from './processes/aucell'                params(params)
+include {
+    AGGR_MULTI_RUNS_FEATURES as AGGR_MULTI_RUNS_FEATURES__MOTIF;
+    AGGR_MULTI_RUNS_FEATURES as AGGR_MULTI_RUNS_FEATURES__TRACK;
+} from './processes/multiruns/aggregateFeatures' params(params)
+include {
+    AGGR_MULTI_RUNS_REGULONS as AGGR_MULTI_RUNS_REGULONS__MOTIF;
+    AGGR_MULTI_RUNS_REGULONS as AGGR_MULTI_RUNS_REGULONS__TRACK;
+} from './processes/multiruns/aggregateMultiRunsRegulons' params(params)
+include {
+    AUCELL_FROM_FOLDER as AUCELL_FROM_FOLDER__MOTIF;
+    AUCELL_FROM_FOLDER as AUCELL_FROM_FOLDER__TRACK;
+} from './processes/aucellFromFolder' params(params)
+include {
+    SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SAVE_SCENIC_MULTI_RUNS_TO_LOOM_MOTIF;
+    SAVE_SCENIC_MULTI_RUNS_TO_LOOM as SAVE_SCENIC_MULTI_RUNS_TO_LOOM_TRACK;
+} from './processes/saveScenicMultiRunsToLoom' params(params)
+include {
+    MERGE_MOTIF_TRACK_LOOMS;
+    PUBLISH_LOOM;
+    VISUALIZE;
+} from './processes/loomHandler'     params(params)
 
 // Create channel for the different runs
 runs = Channel.from( 1..params.sc.scenic.numRuns )

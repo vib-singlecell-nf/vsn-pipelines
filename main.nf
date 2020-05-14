@@ -1,20 +1,13 @@
-//
-// Version:
-// Test:
-// Command: 
-//
-/*
- * SCENIC workflow 
- * Source:
- * 
- * Steps considered: 
-
- */ 
 nextflow.preview.dsl=2
-include './../utils/processes/config'
+
+include {
+    resolveParams;
+} from './../utils/processes/config'
+
 resolveParams(params, true)
 
-isAppendOnlyMode = params.sc.scenic.containsKey("existingScenicLoom")
+def isAppendOnlyMode = params.sc.scenic.containsKey("existingScenicLoom")
+def ALLOWED_GENOME_ASSEMBLIES = ['dm6','hg19','hg38', 'mm10']
 
 //////////////////////////////////////////////////////
 //  Sanity checks
@@ -22,33 +15,48 @@ if(!isAppendOnlyMode && !params.global.containsKey("genome"))
     throw new Exception("params.global.genome is required.")
 
 if(!isAppendOnlyMode && !params.global.genome.containsKey("assembly"))
-    throw new Exception("params.global.genome.assembly is required. Choose of the profiles: dm6, hg38.")
+    throw new Exception("params.global.genome.assembly is required. Choose of the profiles: " + ALLOWED_GENOME_ASSEMBLIES.join(', '))
 
 if(!isAppendOnlyMode && params.global.genome.assembly == '')
-    throw new Exception("params.global.genome.assembly cannot be empty. Choose of the profiles: dm6, hg38.")
+    throw new Exception("params.global.genome.assembly cannot be empty. Choose of the profiles: " + ALLOWED_GENOME_ASSEMBLIES.join(', '))
 
-if(!isAppendOnlyMode && !(params.global.genome.assembly in ['dm6','hg38']))
-    throw new Exception("The given genome assembly "+ params.global.genome.assembly + " is not implemented. Choose of the profiles: dm6, hg38.")
+if(!isAppendOnlyMode && !(params.global.genome.assembly in ALLOWED_GENOME_ASSEMBLIES))
+    throw new Exception("The given genome assembly "+ params.global.genome.assembly + " is not implemented. Choose of the profiles: " + ALLOWED_GENOME_ASSEMBLIES.join(', '))
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include './../channels/file.nf' params(params)
+include {
+    getChannelFromFilePath
+} from './../channels/file.nf' params(params)
 
-include ARBORETO_WITH_MULTIPROCESSING                             from './processes/arboreto_with_multiprocessing'  params(params)
-include CISTARGET as CISTARGET__MOTIF                             from './processes/cistarget'             params(params)
-include CISTARGET as CISTARGET__TRACK                             from './processes/cistarget'             params(params)
-include AUCELL as AUCELL__MOTIF                                   from './processes/aucell'                params(params)
-include AUCELL as AUCELL__TRACK                                   from './processes/aucell'                params(params)
-include AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__MOTIF from './workflows/aggregateMultiRuns'    params(params)
-include AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__TRACK from './workflows/aggregateMultiRuns'    params(params)
-include PUBLISH_LOOM                                              from './processes/loomHandler'     params(params)
-include MERGE_MOTIF_TRACK_LOOMS                                   from './processes/loomHandler'     params(params)
-include APPEND_SCENIC_LOOM                                        from './processes/loomHandler'     params(params)
-include VISUALIZE                                                 from './processes/loomHandler'     params(params)
+include {
+    ARBORETO_WITH_MULTIPROCESSING
+} from './processes/arboreto_with_multiprocessing' params(params)
+include {
+    CISTARGET as CISTARGET__MOTIF;
+    CISTARGET as CISTARGET__TRACK;
+} from './processes/cistarget' params(params)
+include {
+    AUCELL as AUCELL__MOTIF;
+    AUCELL as AUCELL__TRACK;
+} from './processes/aucell' params(params)
+include {
+    AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__MOTIF;
+    AGGREGATE_MULTI_RUNS_TO_LOOM as MULTI_RUNS_TO_LOOM__TRACK;
+} from './workflows/aggregateMultiRuns' params(params)
+include {
+    PUBLISH_LOOM;
+    MERGE_MOTIF_TRACK_LOOMS;
+    APPEND_SCENIC_LOOM;
+    VISUALIZE;
+} from './processes/loomHandler' params(params)
 
 // reporting:
-include './processes/reports.nf' params(params)
+include {
+    GENERATE_REPORT;
+    REPORT_TO_HTML;
+} from './processes/reports.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -158,7 +166,8 @@ workflow scenic_append {
             scenicLoom = getChannelFromFilePath(
                 params.sc.scenic.existingScenicLoom,
                 params.sc.scenic.sampleSuffixWithExtension
-            ).view {
+            )
+            Channel.from('').view {
             """
 ---------------------------------------------------------------------------
 \u001B[32m Existing SCENIC loom detected \u001B[0m
@@ -169,7 +178,19 @@ workflow scenic_append {
         } else {
             scenicLoom = scenic( filteredLoom ).out
         }
-        APPEND_SCENIC_LOOM( scopeLoom.join(scenicLoom) )
+        APPEND_SCENIC_LOOM(
+            scopeLoom.map {
+                // Extract only sampleId, path
+                it -> tuple(it[0], it[1])
+            }.join(
+                scenicLoom.map {
+                    // Extract only sampleId, path
+                    it -> tuple(it[0], it[1])
+                }
+            ).ifEmpty{
+                throw new Exception("Cannot append SCENIC loom to SCope loom because the IDs do not match.")
+            }
+        )
         report_notebook = GENERATE_REPORT(
             file(workflow.projectDir + params.sc.scenic.report_ipynb),
             APPEND_SCENIC_LOOM.out,
@@ -189,6 +210,6 @@ workflow {
     main:
         if(!("filteredLoom" in params.sc.scenic))
             throw new Exception("The given filteredLoom required parameter does not exist in the params.sc.scenic scope.")
-        scenic( Channel.of( tuple("foobar", file(params.sc.scenic.filteredLoom)) ) )
+        scenic( Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom)) ) )
 
 }

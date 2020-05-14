@@ -1,26 +1,23 @@
-//
-// Version: 
-// Test: 
-// Command: 
-//
-/*
- * QC workflow 
- * Source:
- * 
- * Steps considered: 
- * - Aggregating data from multiple motifs (or tracks) SCENIC runs to loom
- */ 
-
 nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  process imports:
 
-include AGGR_MULTI_RUNS_FEATURES as AGGR_FEATURES from './../processes/multiruns/aggregateFeatures' params(params)
-include AGGR_MULTI_RUNS_REGULONS as AGGR_REGULONS from './../processes/multiruns/aggregateRegulons' params(params)
-include AUCELL_FROM_FOLDER as AUCELL from './../processes/multiruns/aucellFromFolder' params(params)
-include CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS as FEATURES_TO_REGULONS from './../processes/multiruns/convertMotifsToRegulons' params(params)
-include SAVE_MULTI_RUNS_TO_LOOM as SAVE_TO_LOOM from './../processes/multiruns/saveToLoom' params(params)
+include {
+    AGGR_MULTI_RUNS_FEATURES as AGGR_FEATURES;
+ } from './../processes/multiruns/aggregateFeatures' params(params)
+include {
+    AGGR_MULTI_RUNS_REGULONS as AGGR_REGULONS;
+} from './../processes/multiruns/aggregateRegulons' params(params)
+include {
+    AUCELL_FROM_FOLDER as AUCELL;
+} from './../processes/multiruns/aucellFromFolder' params(params)
+include {
+    CONVERT_MULTI_RUNS_FEATURES_TO_REGULONS as FEATURES_TO_REGULONS;
+} from './../processes/multiruns/convertMotifsToRegulons' params(params)
+include {
+    SAVE_MULTI_RUNS_TO_LOOM as SAVE_TO_LOOM;
+} from './../processes/multiruns/saveToLoom' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
