@@ -2,16 +2,28 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
-include './src/utils/workflows/utils.nf' params(params)
+include { 
+    INIT;
+} from './src/utils/workflows/utils' params(params)
 INIT()
-include './src/utils/processes/utils.nf' params(params)
-include './src/channels/channels' params(params)
+include {
+    SC__FILE_CONVERTER;
+}'./src/utils/processes/utils' params(params)
+
+include {
+    getDataChannel;
+} from './src/channels/channels' params(params)
 
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
 
-    include bbknn as BBKNN from './workflows/bbknn' params(params)
-    include PUBLISH as PUBLISH_BBKNN from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        bbknn as BBKNN
+    } from './workflows/bbknn' params(params)
+    include {
+        PUBLISH as PUBLISH_BBKNN
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | BBKNN
     PUBLISH_BBKNN(
         BBKNN.out.scopeloom,
@@ -25,8 +37,13 @@ workflow bbknn {
 // run multi-sample with mnncorrect, output a scope loom file
 workflow mnncorrect {
 
-    include mnncorrect as MNNCORRECT from './workflows/mnncorrect' params(params)
-    include PUBLISH as PUBLISH_MNNCORRECT from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        mnncorrect as MNNCORRECT
+    } from './workflows/mnncorrect' params(params)
+    include {
+        PUBLISH as PUBLISH_MNNCORRECT
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | MNNCORRECT
     PUBLISH_MNNCORRECT(
         MNNCORRECT.out.scopeloom,
@@ -41,8 +58,13 @@ workflow mnncorrect {
 // run multi-sample with bbknn, output a scope loom file
 workflow harmony {
 
-    include harmony as HARMONY from './workflows/harmony' params(params)
-    include PUBLISH as PUBLISH_HARMONY from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        harmony as HARMONY 
+    } from './workflows/harmony' params(params)
+    include {
+        PUBLISH as PUBLISH_HARMONY 
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | HARMONY
     PUBLISH_HARMONY(
         HARMONY.out.scopeloom,
@@ -57,9 +79,16 @@ workflow harmony {
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
 
-    include bbknn as BBKNN from './workflows/bbknn' params(params)
-    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
-    include PUBLISH as PUBLISH_BBKNN_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        bbknn as BBKNN
+    } from './workflows/bbknn' params(params)
+    include {
+        scenic_append as SCENIC_APPEND 
+    } from './src/scenic/main' params(params)
+    include {
+        PUBLISH as PUBLISH_BBKNN_SCENIC
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | BBKNN
     SCENIC_APPEND(
         BBKNN.out.filteredloom,
@@ -78,9 +107,16 @@ workflow bbknn_scenic {
 // run multi-sample with harmony, then scenic from the filtered output:
 workflow harmony_scenic {
 
-    include harmony as HARMONY from './workflows/harmony' params(params)
-    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
-    include PUBLISH as PUBLISH_HARMONY_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        harmony as HARMONY
+    } from './workflows/harmony' params(params)
+    include {
+        scenic_append as SCENIC_APPEND
+    } from './src/scenic/main' params(params)
+    include {
+        PUBLISH as PUBLISH_HARMONY_SCENIC
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | HARMONY
     SCENIC_APPEND( 
         HARMONY.out.filteredloom,
@@ -100,8 +136,13 @@ workflow harmony_scenic {
 // run single_sample, output a scope loom file
 workflow single_sample {
 
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    include PUBLISH as PUBLISH_SINGLE_SAMPLE from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        single_sample as SINGLE_SAMPLE
+    } from './workflows/single_sample' params(params)
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | SINGLE_SAMPLE
     PUBLISH_SINGLE_SAMPLE(
         SINGLE_SAMPLE.out.scopeloom,
@@ -115,9 +156,12 @@ workflow single_sample {
 
 workflow multi_sample {
 
-    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    include {
+        multi_sample as MULTI_SAMPLE
+    } from './workflows/multi_sample' params(params)
+
     getDataChannel | MULTI_SAMPLE
-    include PUBLISH as PUBLISH_MULTI_SAMPLE from "./src/utils/workflows/utils.nf" params(params)
+    include PUBLISH as PUBLISH_MULTI_SAMPLE from "./src/utils/workflows/utils" params(params)
     PUBLISH_MULTI_SAMPLE(
         MULTI_SAMPLE.out.scopeloom,
         "MULTI_SAMPLE",
@@ -131,9 +175,16 @@ workflow multi_sample {
 // run single_sample, then scenic from the filtered output:
 workflow single_sample_scenic {
 
-    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-    include PUBLISH as PUBLISH_SINGLE_SAMPLE_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        scenic_append as SCENIC_APPEND
+    } from './src/scenic/main' params(params)
+    include {
+        single_sample as SINGLE_SAMPLE
+    } from './workflows/single_sample' params(params)
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCENIC
+    } from "./src/utils/workflows/utils" params(params)
+
     getDataChannel | SINGLE_SAMPLE
     SCENIC_APPEND(
         SINGLE_SAMPLE.out.filteredloom,
@@ -150,8 +201,13 @@ workflow single_sample_scenic {
 
 workflow single_sample_scrublet {
 
-    include SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE from './src/scanpy/workflows/single_sample.nf' params(params)
-    include DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL from "./src/scrublet/workflows/doublet_removal.nf" params(params)
+    include {
+        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE
+    } from './src/scanpy/workflows/single_sample' params(params)
+    include {
+        DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL
+    } from "./src/scrublet/workflows/doublet_removal" params(params)
+
     data = getDataChannel | SC__FILE_CONVERTER
     SCANPY__SINGLE_SAMPLE( data )
     SCRUBLET__DOUBLET_REMOVAL(
@@ -167,9 +223,16 @@ workflow pipe_single_sample_scenic {
     take:
         data
     main:
-        include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
-        include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
-        include PUBLISH as PUBLISH_P_SINGLE_SAMPLE_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+        include {
+            scenic_append as SCENIC_APPEND
+        } from './src/scenic/main' params(params)
+        include {
+            single_sample as SINGLE_SAMPLE
+        } from './workflows/single_sample' params(params)
+        include {
+            PUBLISH as PUBLISH_P_SINGLE_SAMPLE_SCENIC
+        } from "./src/utils/workflows/utils" params(params)
+
         data | SINGLE_SAMPLE
         SCENIC_APPEND(
             SINGLE_SAMPLE.out.filteredloom,
@@ -189,8 +252,13 @@ workflow pipe_single_sample_scenic {
 // run scenic directly from an existing loom file:
 workflow scenic {
 
-    include scenic as SCENIC from './src/scenic/main.nf' params(params)
-    include PUBLISH as PUBLISH_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        scenic as SCENIC
+    } from './src/scenic/main' params(params)
+    include {
+        PUBLISH as PUBLISH_SCENIC
+    } from "./src/utils/workflows/utils" params(params)
+
     SCENIC( 
         Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
     )
@@ -208,7 +276,10 @@ workflow scenic {
 // runs mkfastq, then CellRanger count:
 workflow cellranger {
 
-    include CELLRANGER from './src/cellranger/main.nf' params(params)
+    include {
+        CELLRANGER
+    } from './src/cellranger/main' params(params)
+
     CELLRANGER(
         file(params.sc.cellranger.mkfastq.csv),
         file(params.sc.cellranger.mkfastq.runFolder),
@@ -221,7 +292,10 @@ workflow cellranger {
 
 workflow cellranger_libraries {
 
-    include CELLRANGER_LIBRARIES from './src/cellranger/workflows/cellranger_libraries.nf' params(params)
+    include {
+        CELLRANGER_LIBRARIES
+    } from './src/cellranger/workflows/cellranger_libraries' params(params)
+
     CELLRANGER_LIBRARIES(
         file(params.sc.cellranger.mkfastq.csv),
         file(params.sc.cellranger.mkfastq.runFolder),
@@ -236,7 +310,10 @@ workflow cellranger_libraries {
 
 workflow cellranger_metadata {
 
-    include CELLRANGER_COUNT_WITH_METADATA from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
+    include {
+        CELLRANGER_COUNT_WITH_METADATA
+    } from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
+
     CELLRANGER_COUNT_WITH_METADATA(
         file(params.sc.cellranger.count.transcriptome),
         file(params.sc.cellranger.count.metadata)
@@ -258,7 +335,10 @@ workflow cellranger_metadata_single_sample_scenic {
 
 workflow cellranger_count_libraries {
 
-    include CELLRANGER_COUNT_WITH_LIBRARIES from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
+    include {
+        CELLRANGER_COUNT_WITH_LIBRARIES
+    } from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
+
     CELLRANGER_COUNT_WITH_LIBRARIES(
         file(params.sc.cellranger.count.transcriptome),
         file(params.sc.cellranger.count.featureRef),
@@ -271,19 +351,28 @@ workflow cellranger_count_libraries {
 }
 
 workflow freemuxlet {
-    include freemuxlet as FREEMUXLET from './workflows/popscle' params(params)
+    include {
+        freemuxlet as FREEMUXLET
+    } from './workflows/popscle' params(params)
+    
     getDataChannel | FREEMUXLET
 }
 
 workflow demuxlet {
-    include demuxlet as DEMUXLET from './workflows/popscle' params(params)
+    include { 
+        demuxlet as DEMUXLET 
+    } from './workflows/popscle' params(params)
+
     getDataChannel | DEMUXLET
 }
 
 // runs mkfastq, CellRanger count, then single_sample:
 workflow single_sample_cellranger {
 
-    include single_sample as SINGLE_SAMPLE from './workflows/single_sample' params(params)
+    include {
+        single_sample as SINGLE_SAMPLE
+    } from './workflows/single_sample' params(params)
+
     data = cellranger()
     SINGLE_SAMPLE(
         data.map {
@@ -295,7 +384,10 @@ workflow single_sample_cellranger {
 
 workflow cellranger_multi_sample {
 
-    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    include { 
+        multi_sample as MULTI_SAMPLE
+    } from './workflows/multi_sample' params(params)
+
     data = cellranger()
     MULTI_SAMPLE(
         data.map {
@@ -307,8 +399,13 @@ workflow cellranger_multi_sample {
 
 workflow cellranger_multi_sample_demuxlet {
 
-    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
-    include demuxlet as DEMUXLET from './workflows/popscle' params(params)
+    include {
+        multi_sample as MULTI_SAMPLE 
+    } from './workflows/multi_sample' params(params)
+    include {
+        demuxlet as DEMUXLET
+    } from './workflows/popscle' params(params)
+
     data = cellranger()
     MULTI_SAMPLE(        
         data.map {
@@ -321,7 +418,10 @@ workflow cellranger_multi_sample_demuxlet {
 
 workflow cellranger_libraries_multi_sample {
 
-    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
+    include {
+        multi_sample as MULTI_SAMPLE
+    } from './workflows/multi_sample' params(params)
+
     data = cellranger_libraries()
     MULTI_SAMPLE(        
         data.map {
@@ -332,8 +432,13 @@ workflow cellranger_libraries_multi_sample {
 
 workflow cellranger_libraries_freemuxlet_multi_sample {
 
-    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
-    include freemuxlet as FREEMUXLET from './workflows/popscle' params(params)
+    include {
+        multi_sample as MULTI_SAMPLE
+    } from './workflows/multi_sample' params(params)
+    include {
+        freemuxlet as FREEMUXLET
+    } from './workflows/popscle' params(params)
+
     data = cellranger_libraries()
     MULTI_SAMPLE(
         data.map {
@@ -346,8 +451,13 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
 
 workflow cellranger_libraries_demuxlet_multi_sample {
 
-    include multi_sample as MULTI_SAMPLE from './workflows/multi_sample' params(params)
-    include demuxlet as DEMUXLET from './workflows/popscle' params(params)
+    include {
+        multi_sample as MULTI_SAMPLE
+    } from './workflows/multi_sample' params(params)
+    include {
+        demuxlet as DEMUXLET
+    } from './workflows/popscle' params(params)
+
     data = cellranger_libraries()
     MULTI_SAMPLE(
         data.map {
@@ -359,7 +469,9 @@ workflow cellranger_libraries_demuxlet_multi_sample {
 
 workflow star {
 
-    include star as STAR from './workflows/star' params(params)
+    include {
+        star as STAR
+    } from './workflows/star' params(params)
     STAR()
 
 }
@@ -367,14 +479,20 @@ workflow star {
 
 workflow single_sample_star {
 
-    include single_sample_star as SINGLE_SAMPLE_STAR from './workflows/single_sample_star' params(params)
+    include {
+        single_sample_star as SINGLE_SAMPLE_STAR
+    } from './workflows/single_sample_star' params(params)
+
     SINGLE_SAMPLE_STAR()
 
 }
 
 workflow nemesh {
 
-    include nemesh as NEMESH from './workflows/nemesh' params(params)
+    include {
+        nemesh as NEMESH
+    } from './workflows/nemesh' params(params)
+
     NEMESH()
 
 }
@@ -382,11 +500,19 @@ workflow nemesh {
 workflow sra_cellranger_bbknn {
 
     main: 
-        include getChannel as getSRAChannel from './src/channels/sra' params(params)
-        include DOWNLOAD_FROM_SRA from './src/utils/workflows/downloadFromSRA' params(params)
-        include SC__CELLRANGER__PREPARE_FOLDER from './src/cellranger/processes/utils.nf' params(params)
-        include SC__CELLRANGER__COUNT from './src/cellranger/processes/count' params(params)
-        include bbknn as BBKNN from './workflows/bbknn' params(params)
+        include {
+            getChannel as getSRAChannel
+        } from './src/channels/sra' params(params)
+        include {
+            DOWNLOAD_FROM_SRA
+        } from './src/utils/workflows/downloadFromSRA' params(params)
+        include {
+            SC__CELLRANGER__PREPARE_FOLDER;
+            SC__CELLRANGER__COUNT
+        } from './src/cellranger/processes/utils' params(params)
+        include {
+            bbknn as BBKNN
+        } from './workflows/bbknn' params(params)
         
         // Run 
         DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
@@ -409,8 +535,13 @@ workflow sra_cellranger_bbknn {
 
 workflow sra_cellranger_bbknn_scenic {
 
-    include scenic_append as SCENIC_APPEND from './src/scenic/main.nf' params(params)
-    include PUBLISH as PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC from "./src/utils/workflows/utils.nf" params(params)
+    include {
+        scenic_append as SCENIC_APPEND
+    } from './src/scenic/main' params(params)
+    include {
+        PUBLISH as PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC
+    } from "./src/utils/workflows/utils" params(params)
+
     sra_cellranger_bbknn()
     SCENIC_APPEND(
         sra_cellranger_bbknn.out.filteredLoom,

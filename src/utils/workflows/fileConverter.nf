@@ -1,18 +1,16 @@
-/*
- * Conversion workflow 
- * Source:
- * 
- */
-
- import nextflow.util.ArrayBag
+import nextflow.util.ArrayBag
 
 nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 //  process imports:
 
-include SC__H5AD_TO_LOOM from './../processes/h5adToLoom.nf' params(params)
-include PUBLISH from "./utils.nf" params(params)
+include {
+    SC__H5AD_TO_LOOM;
+} from './../processes/h5adToLoom.nf' params(params)
+include {
+    PUBLISH;
+} from "./utils.nf" params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

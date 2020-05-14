@@ -3,13 +3,17 @@ nextflow.preview.dsl=2
 import static groovy.json.JsonOutput.*
 
 //////////////////////////////////////////////////////
-//  process imports:
+//  Process imports:
 
-include isParamNull from "./../processes/utils.nf" params(params)
-include COMPRESS_HDF5 from "./../processes/utils.nf" params(params)
-include SC__PUBLISH from "./../processes/utils.nf" params(params)
-include SC__PUBLISH as SC__PUBLISH_PROXY from "./../processes/utils.nf" params(params)
-include SC__H5AD_CLEAN from "./../processes/h5adUpdate.nf" params(params)
+include {
+    isParamNull;
+    COMPRESS_HDF5;
+    SC__PUBLISH;
+    SC__PUBLISH as SC__PUBLISH_PROXY;
+} from "./../processes/utils.nf" params(params)
+include {
+    SC__H5AD_CLEAN
+} from "./../processes/h5adUpdate.nf" params(params)
 
 formatsAllowed = ['h5ad', 'loom']
 taggedFilesToClean = ['final_output']
