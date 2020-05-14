@@ -5,7 +5,9 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__CELLRANGER__MKFASTQ             from './../processes/mkfastq'  params(params)
+include {
+    SC__CELLRANGER__MKFASTQ;
+} from './../processes/mkfastq' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
