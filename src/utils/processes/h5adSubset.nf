@@ -4,7 +4,9 @@ import java.nio.file.Paths
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
-include './utils.nf' params(params)
+include {
+    isParamNull
+} from './utils.nf' params(params)
 
 process SC__PREPARE_OBS_FILTER {
 

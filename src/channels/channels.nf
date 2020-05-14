@@ -1,8 +1,10 @@
 nextflow.preview.dsl=2
 
-include getOutsChannel as getTenXCellRangerOutsChannel from './tenx' params(params)
-include getH5Channel as getTenXCellRangerH5Channel from './tenx' params(params)
-include getMEXChannel as getTenXCellRangerMEXChannel from './tenx' params(params)
+include {
+    getOutsChannel as getTenXCellRangerOutsChannel;
+    getH5Channel as getTenXCellRangerH5Channel;
+    getMEXChannel as getTenXCellRangerMEXChannel;
+} from './tenx' params(params)
 include getChannel as getFileChannel from './file' params(params)
 
 boolean isCollectionOrArray(object) {    
