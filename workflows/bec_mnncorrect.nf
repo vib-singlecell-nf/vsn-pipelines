@@ -42,7 +42,7 @@ include {
 include {
     SC__SCANPY__CLUSTERING_PARAMS;
 } from '../processes/cluster.nf' params(params)
-include [
+include {
     CLUSTER_IDENTIFICATION;
 } from './cluster_identification.nf' params(params)
 // reporting:
