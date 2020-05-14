@@ -31,6 +31,7 @@ include {
     SC__SCANPY__BATCH_EFFECT_CORRECTION;
 } from '../processes/batch_effect_correct.nf' params(params)
 include {
+    SC__SCANPY__DIM_REDUCTION_PARAMS;
     SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__UMAP;
 } from '../processes/dim_reduction.nf' params(params + [method: "umap"])
 include {
