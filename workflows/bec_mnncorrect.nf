@@ -39,7 +39,6 @@ include {
 include {
     DIM_REDUCTION_TSNE_UMAP;
 } from './dim_reduction' params(params)
-include '../processes/dim_reduction.nf' params(params)
 include {
     SC__SCANPY__CLUSTERING_PARAMS;
 } from '../processes/cluster.nf' params(params)
