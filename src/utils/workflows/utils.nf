@@ -46,15 +46,17 @@ workflow PUBLISH {
             out = data
         }
 
-        // Compress
-        COMPRESS_HDF5(
-            out.map {
-                // if stashedParams not there, just put null 3rd arg
-                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
-            },
-            isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
-            isParamNull(toolName) ? 'NULL' : toolName,
-        )
+        // Compress only if part of formatsAllowed
+        if(taggedFilesToClean.any { fileOutputSuffix.contains(it) }) {
+            out = COMPRESS_HDF5(
+                out.map {
+                    // if stashedParams not there, just put null 3rd arg
+                    it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+                },
+                isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
+                isParamNull(toolName) ? 'NULL' : toolName,
+            )
+        }
 
         // Proxy to avoid file name collision
         SC__PUBLISH_PROXY(
@@ -69,7 +71,7 @@ workflow PUBLISH {
 
         // Publish
         SC__PUBLISH(
-            COMPRESS_HDF5.out,
+            out,
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
             isParamNull(toolName) ? 'NULL' : toolName,
             isParameterExplorationModeOn
