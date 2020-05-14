@@ -5,25 +5,50 @@
 
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  process imports:
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    COMBINE_BY_PARAMS;
+} from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_BEC_OUTPUT;
+    PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT;
+     PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT;
+} from "../../utils/workflows/utils.nf" params(params)
 
-include '../../utils/processes/utils.nf' params(params)
-include '../../utils/workflows/utils.nf' params(params)
-
-// scanpy:
-include '../processes/batch_effect_correct.nf' params(params)
-include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params)
-include SC__SCANPY__REGRESS_OUT from '../processes/regress_out.nf' params(params)
-include DIM_REDUCTION_PCA from './dim_reduction_pca' params(params + [method: "pca"])
-include NEIGHBORHOOD_GRAPH from './neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_TSNE_UMAP from './dim_reduction' params(params)
-include '../processes/dim_reduction.nf' params(params)
-include '../processes/cluster.nf' params(params)
-include './cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
-
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCANPY__BATCH_EFFECT_CORRECTION;
+} from '../processes/batch_effect_correct.nf' params(params)
+include {
+    SC__SCANPY__FEATURE_SCALING;
+} from '../processes/transform.nf' params(params)
+include {
+    SC__SCANPY__REGRESS_OUT;
+} from '../processes/regress_out.nf' params(params)
+include {
+    DIM_REDUCTION_PCA;
+} from './dim_reduction_pca' params(params + [method: "pca"])
+include {
+    NEIGHBORHOOD_GRAPH;
+} from './neighborhood_graph.nf' params(params)
+include {
+    DIM_REDUCTION_TSNE_UMAP;
+} from './dim_reduction' params(params)
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from '../processes/cluster.nf' params(params)
+include {
+    CLUSTER_IDENTIFICATION;
+} from './cluster_identification.nf' params(params)
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params + params.global)
+include {
+    GENERATE_DUAL_INPUT_REPORT;
+} from './create_report.nf' params(params + params.global)
 
 
 //////////////////////////////////////////////////////
@@ -38,8 +63,25 @@ workflow BEC_MNNCORRECT {
         clusterIdentificationPreBatchEffectCorrection
 
     main:
-        SC__SCANPY__BATCH_EFFECT_CORRECTION( data.map { it -> tuple(it[0], it[1], null) } )
-        SC__SCANPY__FEATURE_SCALING( SC__SCANPY__BATCH_EFFECT_CORRECTION.out )
+        SC__SCANPY__BATCH_EFFECT_CORRECTION( 
+            data.map { 
+                it -> tuple(it[0], it[1], null) 
+            }
+        )
+
+        PUBLISH_BEC_OUTPUT(
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out,
+            "BEC_MNNCORRECT.output",
+            "h5ad",
+            null,
+            false
+        )
+
+        SC__SCANPY__FEATURE_SCALING( 
+            SC__SCANPY__BATCH_EFFECT_CORRECTION.out.map { 
+                it -> tuple(it[0], it[1]) 
+            }
+        )
         if(params.sc.scanpy.containsKey("regress_out")) {
             preprocessed_data = SC__SCANPY__REGRESS_OUT( SC__SCANPY__FEATURE_SCALING.out )
         } else {
@@ -50,6 +92,14 @@ workflow BEC_MNNCORRECT {
 
         // Run dimensionality reduction
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
+
+        PUBLISH_BEC_DIMRED_OUTPUT(
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
+            "BEC_HARMONY.dimred_output",
+            "h5ad",
+            null,
+            false
+        )
 
         // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
@@ -67,11 +117,14 @@ workflow BEC_MNNCORRECT {
             )
         }
 
-        SC__PUBLISH_H5AD( 
+        PUBLISH_FINAL_HARMONY_OUTPUT( 
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
-            "BEC_MNNCORRECT.output"
+            "BEC_MNNCORRECT.final_output",
+            "h5ad",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
 
         // This will generate a dual report with results from
@@ -79,7 +132,8 @@ workflow BEC_MNNCORRECT {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
-            SC__PUBLISH_H5AD.out,
+            // Use PUBLISH output to avoid "input file name collision"
+            PUBLISH_FINAL_HARMONY_OUTPUT.out,
             clusteringParams
         )
 

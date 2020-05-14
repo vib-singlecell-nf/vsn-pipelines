@@ -8,7 +8,9 @@ import nextflow.script.ScriptBinding
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
-include '../../utils/processes/utils.nf'
+include {
+	isParamNull;
+} from '../../utils/processes/utils.nf'
 
 @TupleConstructor()
 class SC__SCANPY__DIM_REDUCTION_PARAMS {

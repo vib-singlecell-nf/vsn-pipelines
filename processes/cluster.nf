@@ -6,7 +6,9 @@ import groovyx.gpars.dataflow.DataflowBroadcast
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
-include '../../utils/processes/utils.nf'
+include {
+	isParamNull;
+} from '../../utils/processes/utils.nf'
 
 @TupleConstructor()
 class SC__SCANPY__CLUSTERING_PARAMS {
@@ -109,6 +111,7 @@ process SC__SCANPY__CLUSTERING {
 		processParams = sampleParams.local
 		"""
 		${binDir}/cluster/sc_clustering.py \
+			--seed ${params.global.seed} \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${(processParams.containsKey('resolution')) ? '--resolution ' + processParams.resolution : ''} \
 			$f \
@@ -149,6 +152,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}/cluster/sc_clustering.py \
+			--seed ${params.global.seed} \
 			${_processParams.getMethodAsArgument(method)} \
 			${_processParams.getResolutionAsArgument(resolution)} \
 			$f \

@@ -15,7 +15,10 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 			val(stashedParams)
 
   	output:
-    	tuple val(sampleId), path("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}")
+    	tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__SCANPY__BATCH_EFFECT_CORRECTION.${processParams.off}"), \
+			val(stashedParams)
 
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.batch_effect_correct)

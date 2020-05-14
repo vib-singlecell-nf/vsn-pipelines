@@ -3,7 +3,9 @@
 import argparse
 import os
 import scanpy as sc
+import numpy as np
 import warnings
+import textwrap
 
 parser = argparse.ArgumentParser(description='')
 
@@ -84,6 +86,24 @@ if args.ngenes == 0:
         warnings.warn(
             "There is no raw attribute in your anndata object. Using the shape of the main matrix as the number of genes to report."
         )
+
+print("Checking for singlets...")
+num_cell_by_clusters = adata.obs[args.groupby].value_counts()
+num_singlet_clusters = np.sum(num_cell_by_clusters == 1)
+if num_singlet_clusters > 0:
+    raise Exception(
+        textwrap.fill(
+            textwrap.dedent(
+                f"""
+                Abort.
+                There were {num_singlet_clusters} singlet clusters detected in the clustering ({args.groupby}, resolution {adata.uns[args.groupby]['params']['resolution']}).
+                Avoid this resolution or higher ones using {args.groupby} for this dataset or consider using the Leiden algorithm instead.
+                """
+            )
+        )
+    )
+
+print("No singlet clusters detected. Proceed...")
 
 print(f"Ranking genes for characterizing groups (aka sc.tl.rank_genes_groups) using {args.method} method...")
 sc.tl.rank_genes_groups(

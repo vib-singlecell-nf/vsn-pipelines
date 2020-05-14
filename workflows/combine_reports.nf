@@ -1,7 +1,11 @@
 nextflow.preview.dsl=2
 
-include '../../utils/processes/utils.nf' params(params)
-include '../processes/cluster.nf' params(params)
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from '../processes/cluster.nf' params(params)
 
 workflow COMBINE_REPORTS {
 

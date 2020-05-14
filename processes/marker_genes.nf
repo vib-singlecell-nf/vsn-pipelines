@@ -4,7 +4,9 @@ import java.nio.file.Paths
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" : Paths.get(workflow.scriptFile.getParent().toString(), "bin")
 
-include '../../utils/processes/utils.nf'
+include {
+	isParamNull;
+} from '../../utils/processes/utils.nf'
 
 /**
  * STATIC VERSION OF SCANPY MARKER GENES

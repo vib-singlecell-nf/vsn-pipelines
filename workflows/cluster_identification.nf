@@ -1,16 +1,26 @@
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  process imports:
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
 
-include '../../utils/processes/utils.nf' params(params)
-
-// scanpy:
-include '../processes/cluster' params(params)
-include '../processes/marker_genes.nf' params(params)
-
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCANPY__CLUSTERING;
+    SC__SCANPY__CLUSTERING_PARAMS;
+    SC__SCANPY__PARAM_EXPLORE_CLUSTERING;
+} from '../processes/cluster' params(params)
+include {
+    SC__SCANPY__PARAM_EXPLORE_MARKER_GENES;
+    SC__SCANPY__MARKER_GENES;
+} from '../processes/marker_genes.nf' params(params)
 // reporting:
-include GENERATE_REPORT from './create_report.nf' params(params)
+include {
+    GENERATE_REPORT
+} from './create_report.nf' params(params)
 
 workflow CLUSTER_IDENTIFICATION {
 

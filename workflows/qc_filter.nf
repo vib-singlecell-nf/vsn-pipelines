@@ -1,28 +1,32 @@
-/*
- * QC workflow 
- * Source:
- * 
- * Steps considered: 
- * - filter (cell, gene) + qc report
- */ 
-
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  process imports:
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    UPDATE_FEATURE_NOMENCLATURE
+} from '../../utils/workflows/updateFeatureNomenclature.nf' params(params)
+include {
+    FILTER_BY_CELL_METADATA
+} from '../../utils/workflows/filterByCellMetadata.nf' params(params)
+include {
+    STATIC__ANNOTATE_BY_CELL_METADATA
+} from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
+include {
+    SC__ANNOTATE_BY_SAMPLE_METADATA
+} from '../../utils/processes/h5adAnnotate.nf' params(params)
 
-// utils:
-include '../../channels/file.nf' params(params)
-include STATIC__ANNOTATE_BY_CELL_METADATA from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
-include UPDATE_FEATURE_NOMENCLATURE from '../../utils/workflows/updateFeatureNomenclature.nf' params(params)
-include SC__ANNOTATE_BY_SAMPLE_METADATA from '../../utils/processes/h5adAnnotate.nf' params(params)
-include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata.nf' params(params)
-
-// scanpy:
-include '../processes/filter.nf' params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCANPY__COMPUTE_QC_STATS;
+    SC__SCANPY__CELL_FILTER;
+    SC__SCANPY__GENE_FILTER
+} from '../processes/filter.nf' params(params)
 
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './create_report.nf' params(params)
+include {
+    GENERATE_DUAL_INPUT_REPORT
+} from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

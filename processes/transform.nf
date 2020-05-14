@@ -60,10 +60,14 @@ process SC__SCANPY__FEATURE_SCALING {
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
 
 	input:
-		tuple val(sampleId), path(f)
+		tuple \
+			val(sampleId), \
+			path(f)
 	
 	output:
-		tuple val(sampleId), path("${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
+		tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__SCANPY__FEATURE_SCALING.${processParams.off}")
 	
 	script:
 		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.feature_scaling)
