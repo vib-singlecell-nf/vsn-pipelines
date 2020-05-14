@@ -3,7 +3,9 @@ nextflow.preview.dsl=2
 ///////////////////////////////////////////
 //  Define the parameters for all processes
 
-include './main.nf' params(params)
+include {
+    single_sample
+} from './main.nf' params(params)
 include {
     SC__FILE_CONVERTER;
 } from '../utils/processes/utils.nf' params(params)
