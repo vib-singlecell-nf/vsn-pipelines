@@ -1,6 +1,8 @@
 nextflow.preview.dsl=2
 
-include EDIRECT__SRAID_TO_SAMPLENAME from '../processes/sra_fastq_urls.nf'
+include {
+    EDIRECT__SRAID_TO_SAMPLENAME
+} from '../processes/sra_fastq_urls.nf'
 
 workflow SRA_FASTQ_URLS {
 
