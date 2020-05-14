@@ -3,13 +3,13 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Process imports:
 include {
-    isParamNull
+    isParamNull;
 } from './../processes/utils.nf' params(params)
 include {
-    SC__PREPARE_OBS_FILTER
+    SC__PREPARE_OBS_FILTER;
 } from './../processes/h5adSubset' params(params)
 include {
-    SC__APPLY_OBS_FILTER
+    SC__APPLY_OBS_FILTER;
 } from './../processes/h5adSubset' params(params)
 
 //////////////////////////////////////////////////////

@@ -9,7 +9,7 @@ include {
     isParamNull;
     COMPRESS_HDF5;
     SC__PUBLISH;
-    SC__PUBLISH as SC__PUBLISH_PROXY
+    SC__PUBLISH as SC__PUBLISH_PROXY;
 } from "./../processes/utils.nf" params(params)
 include {
     SC__H5AD_CLEAN
