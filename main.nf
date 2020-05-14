@@ -8,7 +8,7 @@ include {
 INIT()
 include {
     SC__FILE_CONVERTER;
-}'./src/utils/processes/utils' params(params)
+} from './src/utils/processes/utils' params(params)
 
 include {
     getDataChannel;
