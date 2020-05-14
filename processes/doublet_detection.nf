@@ -7,7 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scrublet/bin"
 
 include {
 	isParamNull;
-} from; '../../utils/processes/utils.nf'
+} from '../../utils/processes/utils.nf'
 
 @TupleConstructor()
 class SC__SCRUBLET__DOUBLET_DETECTION_PARAMS {
