@@ -3,13 +3,13 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Process imports:
 include {
-    isParamNull
+    isParamNull;
 } from './../processes/utils.nf' params(params)
 include {
-    getChannel
+    getChannel;
 } from './../../channels/file' params(params)
 include {
-    SC__ANNOTATE_BY_CELL_METADATA
+    SC__ANNOTATE_BY_CELL_METADATA;
 } from './../processes/h5adAnnotate.nf' params(params)
 
 //////////////////////////////////////////////////////
