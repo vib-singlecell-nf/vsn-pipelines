@@ -6,6 +6,8 @@ import static groovy.json.JsonOutput.*
 //  Import sub-workflows/processes from the utils module:
 include {
     clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
 } from '../../utils/processes/reports.nf' params(params)
 include {
