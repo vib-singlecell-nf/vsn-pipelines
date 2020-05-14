@@ -28,7 +28,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION_REPORT {
 			-p SCRUBLET_OBJECT_FILE $scrubletObjectFile \
             -p H5AD_WITH_SCRUBLET_INFO $adataWithScrubletInfo \
             -p H5AD_WITH_DIM_RED $adataWithDimRed \
-			-p WORKFLOW_MANIFEST '${params.misc.paramsAsJSON}' \
+			-p WORKFLOW_MANIFEST '${params.misc.manifestAsJSON}' \
 			-p WORKFLOW_PARAMETERS '${params.misc.paramsAsJSON}'
 		"""
 

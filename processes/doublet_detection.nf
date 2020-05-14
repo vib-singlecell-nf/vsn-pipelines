@@ -5,7 +5,9 @@ import groovy.transform.TupleConstructor
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scrublet/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "scrublet/bin")
 
-include '../../utils/processes/utils.nf'
+include {
+	isParamNull;
+} from '../../utils/processes/utils.nf'
 
 @TupleConstructor()
 class SC__SCRUBLET__DOUBLET_DETECTION_PARAMS {

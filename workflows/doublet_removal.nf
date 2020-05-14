@@ -1,16 +1,31 @@
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  Import sub-workflows from the modules:
-include SC__SCRUBLET__DOUBLET_DETECTION from "../processes/doublet_detection" params(params)
-include SC__SCRUBLET__DOUBLET_DETECTION_REPORT from "../processes/reports" params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    ANNOTATE_BY_CELL_METADATA
+} from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
+include {
+    FILTER_BY_CELL_METADATA
+} from '../../utils/workflows/filterByCellMetadata' params(params)
+include {
+    UTILS__REPORT_TO_HTML
+} from '../../utils/processes/reports.nf' params(params)
+include {
+    PUBLISH as PUBLISH_SCRUBLET_OBJECT;
+    PUBLISH as PUBLISH_H5AD_DOUBLETS_ANNOTATED;
+    PUBLISH as PUBLISH_H5AD_DOUBLETS_REMOVED;
+ } from '../../utils/workflows/utils.nf' params(params)
 
-//////////////////////////////////////////////////////
-//  Import from external modules:
-include ANNOTATE_BY_CELL_METADATA from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
-include FILTER_BY_CELL_METADATA from '../../utils/workflows/filterByCellMetadata' params(params)
-include UTILS__REPORT_TO_HTML from '../../utils/processes/reports.nf' params(params)
-include SC__PUBLISH_H5AD from '../../utils/processes/utils.nf' params(params)
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    SC__SCRUBLET__DOUBLET_DETECTION
+} from "../processes/doublet_detection" params(params)
+include {
+    SC__SCRUBLET__DOUBLET_DETECTION_REPORT
+} from "../processes/reports" params(params)
+
 
 workflow DOUBLET_REMOVAL {
 
@@ -24,6 +39,16 @@ workflow DOUBLET_REMOVAL {
         SC__SCRUBLET__DOUBLET_DETECTION(
             data
         )
+        // Publish *.ScrubletObject.pklz
+        PUBLISH_SCRUBLET_OBJECT(
+            SC__SCRUBLET__DOUBLET_DETECTION.out.map { 
+                it -> tuple(it[0], it[2])
+            },
+            null,
+            "h5ad",
+            "scrublet",
+            false
+        )
 
         ANNOTATE_BY_CELL_METADATA(
             data.map {
@@ -34,17 +59,28 @@ workflow DOUBLET_REMOVAL {
             },
             "scrublet"
         )
+        // Publish
+        PUBLISH_H5AD_DOUBLETS_ANNOTATED(
+            ANNOTATE_BY_CELL_METADATA.out,
+            null,
+            "h5ad",
+            "scrublet",
+            false
+        )
 
         FILTER_BY_CELL_METADATA(
             ANNOTATE_BY_CELL_METADATA.out,
             "scrublet"
         )
-        SC__PUBLISH_H5AD(
-            FILTER_BY_CELL_METADATA.out.map {
-                it -> tuple(it[0], it[1], null)
-            },
-            params.global.project_name + '.Scrublet.doublets_removed'
+        // Publish
+        PUBLISH_H5AD_DOUBLETS_REMOVED(
+            FILTER_BY_CELL_METADATA.out,
+            null,
+            "h5ad",
+            "scrublet",
+            false
         )
+        
 
         SC__SCRUBLET__DOUBLET_DETECTION_REPORT(
             file(workflow.projectDir + params.sc.scrublet.doublet_detection.report_ipynb),
