@@ -9,19 +9,27 @@ process PCACV__FIND_OPTIMAL_NPCS {
     
     container params.pcacv.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    clusterOptions "-l nodes=1:ppn=${processParams.nCores} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(sampleId), path(f)
+        tuple \
+            val(sampleId), \
+            path(f)
 
     output:
-        tuple val(sampleId), stdout, emit: optimalNumberPC
-        tuple val(sampleId), path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*")
+        tuple \
+            val(sampleId), \
+            stdout, \
+            emit: optimalNumberPC
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.pcacv.find_optimal_npcs)
         processParams = sampleParams.local
         """
+        export OPENBLAS_NUM_THREADS=${processParams.nCores}
         ${binDir}/run_pca_cv.R \
             --input-file ${f} \
             --seed ${params.global.seed} \

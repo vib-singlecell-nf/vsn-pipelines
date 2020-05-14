@@ -4,10 +4,8 @@ print("##################################################")
 print("# Calculating Optimal Number of PCs using PCA CV #")
 print("##################################################")
 
-# Loading dependencies scripts
-
-# matrix <- GetDataFromS4ObjectByAccessPath(object = combined, path = "@assays$integrated@scale.data")
-# e.g.: Rscript /ddn1/vol1/staging/leuven/stg_00002/lcb/dwmax/documents/aertslab/scripts/src_dwmax/ngs_digest/bin/scrna_seq/dim_reduction_pca_cv.R -i 10x_REW_Seurat_v3_Integrate_MaxFeatures.Rds -a "@assays\$integrated@scale.data"
+# This a R implementation of the algorithm described at:
+# - https://stats.stackexchange.com/questions/93845/how-to-perform-leave-one-out-cross-validation-for-pca-to-determine-the-number-of
 
 library("optparse")
 parser <- OptionParser(
@@ -64,12 +62,15 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
-  c("-m", "--max-iters"), action="store", default = 500, help="Maximum number of iteration. [default %default]")
+  c("-m", "--max-iters"), 
+  action="store", 
+  default = 500, 
+  help="Maximum number of iteration. [default %default]")
 parser <- add_option(
   parser, 
   c("-s", "--seed"), 
   action = "store", 
-  default = 617,
+  default = NULL,
   help="Seed. [default %default]"
 )
 parser <- add_option(
@@ -142,46 +143,68 @@ RunPCACV <- function(
   n.cores = 1,
   verbose = T,
   default.svd = F) {
+
+
+  # Load the libraries required for parallelization
+  library(doFuture)
+  library(doRNG)
+
+  if(is.null(seed))
+    stop("No seed is set, this will likely give none reproducible results. Please set one.")
+
   # Required by irlba::irlba for reproducibility
-  if(!is.null(seed)) {
-    set.seed(seed)
-  } else {
-    warnings("No seed is set!")
-  }
-  library(foreach)
-  library(doMC)
-  registerDoMC(cores = n.cores) 
-  library(irlba)
-  
+  set.seed(seed)
+
+  # Setup the parallelization
+  print(paste0("Number of workers used: ", n.cores))
+  registerDoFuture()
+  plan(multiprocess, workers = n.cores)
+  registerDoRNG(as.numeric(seed))
+
   if(default.svd) {
-    print("Default SVD is using for estimating the number PCs.") 
+    print("Default singular value decomposition (SVD) is used for estimating the number PCs.") 
   }
   
   pc <- seq(from = from, to = to, by = by)
+
   # Init the error matrices
   error <- matrix(0, nrow = length(c(1:k)), ncol = length(x = pc))
 
+  # Partition the data into K-folds
   print(paste0(k,"-fold paritioning..."))
-  # K-Fold Partitioning
   data_kfold <- dismo::kfold(x = Matrix::t(x = data), k=k)
-  
-  # Reference: https://stats.stackexchange.com/questions/93845/how-to-perform-leave-one-out-cross-validation-for-pca-to-determine-the-number-of
+
+  # Perform PCA cross-validation
   for(i in c(1:k)) {
-    print(paste0("k:",i))
+    print(paste0("Processing ", i, "th fold..."))
     data_train <- Matrix::t(x = data[, data_kfold!=i])
     data_test <- Matrix::t(x = data[, data_kfold==i])
     print("Running SVD...")
     if(!default.svd) {
-      pca_results <- irlba::irlba(A = data_train, nv = to, maxit = maxit, verbose = verbose)
+      print("...fast truncated SVD")
+      pca_results <- irlba::irlba(
+        A = data_train
+        , nv = to
+        , maxit = maxit
+        , verbose = verbose
+      )
     } else {
-      pca_results <- base::svd(x = data_train, nv = to)
+      print("...regular SVD")
+      pca_results <- base::svd(
+        x = data_train
+        , nv = to
+      )
     }
+    print("==========================================")
     gl <- pca_results$v
-    res <- foreach(j=1:length(x = pc), .combine='rbind') %dopar% {
-      print(paste0("Ndims:", pc[j]))
+    res <- foreach(j=1:length(x = pc), .combine='rbind') %do% {
+    # for(j in 1:length(x = pc)) {
+      print(paste0("...with ", pc[j], " PCs."))
       P <- gl[,1:pc[j]]%*%Matrix::t(gl[,1:pc[j]])
       err <- data_test %*% (diag(x = dim(x = P)[1]) - P + diag(x = diag(x = P)))
-      data.frame("i"=i, "j"=j, err=sum(err^2))
+      return (
+        data.frame("i"=i, "j"=j, err=sum(err^2))
+      )
     }
     apply(X = res, MARGIN = 1, FUN = function(r) {
       error[r[["i"]],r[["j"]]] <<- r[["err"]]
@@ -190,7 +213,6 @@ RunPCACV <- function(
   errors <- colSums(x = error)
   return (data.frame("PC"=pc,"error"=log(x = errors)))
 }
-
 cat("Parameters: \n")
 print(args)
 
@@ -199,7 +221,7 @@ input_ext <- tools::file_ext(args$`input-file`)
 if(input_ext == "loom") {
   print("Input type: Loom...")
   # Get the data matrix from loom 
-  warnings("Assumption: Expecting a scaled data matrix in the main layer of the loom file!")
+  warnings("ASSUMPTION: Expecting a scaled data matrix in the main layer of the loom file!")
   loom  <- SCopeLoomR::open_loom(file.path = args$`input-file`)
   data <- SCopeLoomR::get_dgem(loom = loom)
 } else if(input_ext == "Rds") {
