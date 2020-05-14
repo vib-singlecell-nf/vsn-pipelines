@@ -3,9 +3,13 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include DSC_PILEUP_FILTERED from './dsc_pileup.nf' params(params)
-include SC__POPSCLE__FREEMUXLET from '../processes/demuxlet.nf' params(params)
-include SC__POPSCLE__DEMUXLET from '../processes/demuxlet.nf' params(params)
+include {
+    DSC_PILEUP_FILTERED
+} from './dsc_pileup.nf' params(params)
+include {
+    SC__POPSCLE__FREEMUXLET;
+    SC__POPSCLE__DEMUXLET;
+} from '../processes/demuxlet.nf' params(params)
 
 //////////////////////////////////////////////////////
 // Define the workflow
