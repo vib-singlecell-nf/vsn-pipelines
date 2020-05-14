@@ -312,7 +312,7 @@ process SC__PUBLISH {
         )
         """
         mv $f tmp
-        ln `readlink -f tmp` "${outputFileName}"
+        ln tmp "${outputFileName}"
         rm tmp
         """
 
