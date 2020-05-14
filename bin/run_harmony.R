@@ -39,6 +39,13 @@ parser <- add_option(
   default = "foo",
   help="Prefix path to save output files. [default %default]"
 )
+parser <- add_option(
+  parser, 
+  c("-s", "--seed"), 
+  action = "store", 
+  default = 617,
+  help="Seed. [default %default]"
+)
 
 args <- parse_args(parser)
 
@@ -49,13 +56,20 @@ if(is.null(args$`vars-use`)) {
 	stop("The parameter --vars-use has to be set.")
 }
 
+# Required by irlba::irlba (which harmony depends on) for reproducibility
+if(!is.null(args$seed)) {
+  set.seed(args$seed)
+} else {
+  warnings("No seed is set, this will likely give none reproducible results.")
+}
+
 input_ext <- tools::file_ext(args$`input-file`)
 
 if(input_ext == "h5ad") {
   # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
   file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
   if(!("X_pca" %in% names(x = file[["obsm"]]))) {
-    stop("HI")
+    stop("X_pca slot is not found in the AnnData (h5ad).")
   }
   obs <- file[['obs']][]
   pca_embeddings <- t(x = file[["obsm"]][["X_pca"]][,])
@@ -80,11 +94,12 @@ if(sum(args$`vars-use` %in% colnames(x = metadata)) != length(x = args$`vars-use
 
 # Run Harmony
 # Expects PCA matrix (Cells as rows and PCs as columns.)
-harmony_embeddings <- harmony::HarmonyMatrix(data_mat = pca_embeddings
-                                             , meta_data = metadata
-                                             , vars_use = args$`vars-use`
-                                             , do_pca = args$`do-pca`
-                                             , verbose = FALSE
+harmony_embeddings <- harmony::HarmonyMatrix(
+  data_mat = pca_embeddings
+  , meta_data = metadata
+  , vars_use = args$`vars-use`
+  , do_pca = args$`do-pca`
+  , verbose = FALSE
 )
 
 # Save the results

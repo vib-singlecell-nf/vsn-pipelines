@@ -3,18 +3,41 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 
-include '../../utils/processes/utils.nf' params(params)
-include '../../utils/workflows/utils.nf' params(params)
+include {
+    clean;
+} from '../../utils/processes/utils.nf' params(params)
+include {
+    COMBINE_BY_PARAMS;
+} from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_BEC_OUTPUT;
+    PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT;
+    PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT;
+} from "../../utils/workflows/utils.nf" params(params)
 
-include SC__HARMONY__HARMONY_MATRIX from './../processes/runHarmony.nf' params(params)
-include SC__H5AD_UPDATE_X_PCA from './../../utils/processes/h5adUpdate.nf' params(params)
-include NEIGHBORHOOD_GRAPH from './../../scanpy/workflows/neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_TSNE_UMAP from './../../scanpy/workflows/dim_reduction.nf' params(params)
-include './../../scanpy/processes/cluster.nf' params(params)
-include './../../scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
+include {
+    SC__HARMONY__HARMONY_MATRIX;
+} from './../processes/runHarmony.nf' params(params)
+include {
+    SC__H5AD_UPDATE_X_PCA;
+} from './../../utils/processes/h5adUpdate.nf' params(params)
+include {
+    NEIGHBORHOOD_GRAPH;
+} from './../../scanpy/workflows/neighborhood_graph.nf' params(params)
+include {
+    DIM_REDUCTION_TSNE_UMAP;
+} from './../../scanpy/workflows/dim_reduction.nf' params(params)
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from './../../scanpy/processes/cluster.nf' params(params)
+include {
+    CLUSTER_IDENTIFICATION;
+} from './../../scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
 
 // reporting:
-include GENERATE_DUAL_INPUT_REPORT from './../../scanpy/workflows/create_report.nf' params(params)
+include {
+    GENERATE_DUAL_INPUT_REPORT
+} from './../../scanpy/workflows/create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -39,15 +62,33 @@ workflow BEC_HARMONY {
                 it -> tuple(it[0], it[1]) 
             }.join(harmony_embeddings) 
         )
-        NEIGHBORHOOD_GRAPH( 
-            SC__H5AD_UPDATE_X_PCA.out.join( 
+
+        PUBLISH_BEC_OUTPUT(
+            SC__H5AD_UPDATE_X_PCA.out,
+            "BEC_HARMONY.output",
+            "h5ad",
+            null,
+            false
+        )
+
+        NEIGHBORHOOD_GRAPH(
+            SC__H5AD_UPDATE_X_PCA.out.join(
                 dimReductionData.map { 
                     it -> tuple(it[0], it[2], *it[3..(it.size()-1)])
                 }
             )
         )
+
         // Run dimensionality reduction
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
+
+        PUBLISH_BEC_DIMRED_OUTPUT(
+            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
+            "BEC_HARMONY.dimred_output",
+            "h5ad",
+            null,
+            false
+        )
 
         // Run clustering
         // Define the parameters for clustering
@@ -66,11 +107,14 @@ workflow BEC_HARMONY {
             )
         }
 
-        SC__PUBLISH_H5AD( 
+        PUBLISH_FINAL_HARMONY_OUTPUT( 
             marker_genes.map {
                 it -> tuple(it[0], it[1], it[2])
             },
-            "BEC_HARMONY.output"
+            "BEC_HARMONY.final_output",
+            "h5ad",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
         
         // This will generate a dual report with results from
@@ -78,8 +122,8 @@ workflow BEC_HARMONY {
         // - Post batch effect correction
         becDualDataPrePost = COMBINE_BY_PARAMS(
             clusterIdentificationPreBatchEffectCorrection,
-            // Use SC__PUBLISH_H5AD output to avoid "input file name collision"
-            SC__PUBLISH_H5AD.out,
+            // Use PUBLISH output to avoid "input file name collision"
+            PUBLISH_FINAL_HARMONY_OUTPUT.out,
             clusteringParams
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
