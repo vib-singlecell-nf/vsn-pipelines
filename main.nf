@@ -18,10 +18,10 @@ include {
 workflow bbknn {
 
     include {
-        bbknn as BBKNN
+        bbknn as BBKNN;
     } from './workflows/bbknn' params(params)
     include {
-        PUBLISH as PUBLISH_BBKNN
+        PUBLISH as PUBLISH_BBKNN;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | BBKNN
@@ -38,10 +38,10 @@ workflow bbknn {
 workflow mnncorrect {
 
     include {
-        mnncorrect as MNNCORRECT
+        mnncorrect as MNNCORRECT;
     } from './workflows/mnncorrect' params(params)
     include {
-        PUBLISH as PUBLISH_MNNCORRECT
+        PUBLISH as PUBLISH_MNNCORRECT;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | MNNCORRECT
@@ -59,10 +59,10 @@ workflow mnncorrect {
 workflow harmony {
 
     include {
-        harmony as HARMONY 
+        harmony as HARMONY;
     } from './workflows/harmony' params(params)
     include {
-        PUBLISH as PUBLISH_HARMONY 
+        PUBLISH as PUBLISH_HARMONY;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | HARMONY
@@ -80,13 +80,13 @@ workflow harmony {
 workflow bbknn_scenic {
 
     include {
-        bbknn as BBKNN
+        bbknn as BBKNN;
     } from './workflows/bbknn' params(params)
     include {
-        scenic_append as SCENIC_APPEND 
+        scenic_append as SCENIC_APPEND; 
     } from './src/scenic/main' params(params)
     include {
-        PUBLISH as PUBLISH_BBKNN_SCENIC
+        PUBLISH as PUBLISH_BBKNN_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | BBKNN
@@ -108,13 +108,13 @@ workflow bbknn_scenic {
 workflow harmony_scenic {
 
     include {
-        harmony as HARMONY
+        harmony as HARMONY;
     } from './workflows/harmony' params(params)
     include {
-        scenic_append as SCENIC_APPEND
+        scenic_append as SCENIC_APPEND;
     } from './src/scenic/main' params(params)
     include {
-        PUBLISH as PUBLISH_HARMONY_SCENIC
+        PUBLISH as PUBLISH_HARMONY_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | HARMONY
@@ -137,10 +137,10 @@ workflow harmony_scenic {
 workflow single_sample {
 
     include {
-        single_sample as SINGLE_SAMPLE
+        single_sample as SINGLE_SAMPLE;
     } from './workflows/single_sample' params(params)
     include {
-        PUBLISH as PUBLISH_SINGLE_SAMPLE
+        PUBLISH as PUBLISH_SINGLE_SAMPLE;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | SINGLE_SAMPLE
@@ -157,7 +157,7 @@ workflow single_sample {
 workflow multi_sample {
 
     include {
-        multi_sample as MULTI_SAMPLE
+        multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
 
     getDataChannel | MULTI_SAMPLE
@@ -176,13 +176,13 @@ workflow multi_sample {
 workflow single_sample_scenic {
 
     include {
-        scenic_append as SCENIC_APPEND
+        scenic_append as SCENIC_APPEND;
     } from './src/scenic/main' params(params)
     include {
-        single_sample as SINGLE_SAMPLE
+        single_sample as SINGLE_SAMPLE;
     } from './workflows/single_sample' params(params)
     include {
-        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCENIC
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | SINGLE_SAMPLE
@@ -202,10 +202,10 @@ workflow single_sample_scenic {
 workflow single_sample_scrublet {
 
     include {
-        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE
+        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
     } from './src/scanpy/workflows/single_sample' params(params)
     include {
-        DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL
+        DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL;
     } from "./src/scrublet/workflows/doublet_removal" params(params)
 
     data = getDataChannel | SC__FILE_CONVERTER
@@ -224,10 +224,10 @@ workflow pipe_single_sample_scenic {
         data
     main:
         include {
-            scenic_append as SCENIC_APPEND
+            scenic_append as SCENIC_APPEND;
         } from './src/scenic/main' params(params)
         include {
-            single_sample as SINGLE_SAMPLE
+            single_sample as SINGLE_SAMPLE;
         } from './workflows/single_sample' params(params)
         include {
             PUBLISH as PUBLISH_P_SINGLE_SAMPLE_SCENIC
@@ -253,10 +253,10 @@ workflow pipe_single_sample_scenic {
 workflow scenic {
 
     include {
-        scenic as SCENIC
+        scenic as SCENIC;
     } from './src/scenic/main' params(params)
     include {
-        PUBLISH as PUBLISH_SCENIC
+        PUBLISH as PUBLISH_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
     SCENIC( 
@@ -277,7 +277,7 @@ workflow scenic {
 workflow cellranger {
 
     include {
-        CELLRANGER
+        CELLRANGER;
     } from './src/cellranger/main' params(params)
 
     CELLRANGER(
@@ -293,7 +293,7 @@ workflow cellranger {
 workflow cellranger_libraries {
 
     include {
-        CELLRANGER_LIBRARIES
+        CELLRANGER_LIBRARIES;
     } from './src/cellranger/workflows/cellranger_libraries' params(params)
 
     CELLRANGER_LIBRARIES(
@@ -311,7 +311,7 @@ workflow cellranger_libraries {
 workflow cellranger_metadata {
 
     include {
-        CELLRANGER_COUNT_WITH_METADATA
+        CELLRANGER_COUNT_WITH_METADATA;
     } from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
 
     CELLRANGER_COUNT_WITH_METADATA(
@@ -336,7 +336,7 @@ workflow cellranger_metadata_single_sample_scenic {
 workflow cellranger_count_libraries {
 
     include {
-        CELLRANGER_COUNT_WITH_LIBRARIES
+        CELLRANGER_COUNT_WITH_LIBRARIES;
     } from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
 
     CELLRANGER_COUNT_WITH_LIBRARIES(
@@ -352,7 +352,7 @@ workflow cellranger_count_libraries {
 
 workflow freemuxlet {
     include {
-        freemuxlet as FREEMUXLET
+        freemuxlet as FREEMUXLET;
     } from './workflows/popscle' params(params)
     
     getDataChannel | FREEMUXLET
@@ -360,7 +360,7 @@ workflow freemuxlet {
 
 workflow demuxlet {
     include { 
-        demuxlet as DEMUXLET 
+        demuxlet as DEMUXLET;
     } from './workflows/popscle' params(params)
 
     getDataChannel | DEMUXLET
@@ -370,7 +370,7 @@ workflow demuxlet {
 workflow single_sample_cellranger {
 
     include {
-        single_sample as SINGLE_SAMPLE
+        single_sample as SINGLE_SAMPLE;
     } from './workflows/single_sample' params(params)
 
     data = cellranger()
@@ -385,7 +385,7 @@ workflow single_sample_cellranger {
 workflow cellranger_multi_sample {
 
     include { 
-        multi_sample as MULTI_SAMPLE
+        multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
 
     data = cellranger()
@@ -400,10 +400,10 @@ workflow cellranger_multi_sample {
 workflow cellranger_multi_sample_demuxlet {
 
     include {
-        multi_sample as MULTI_SAMPLE 
+        multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        demuxlet as DEMUXLET
+        demuxlet as DEMUXLET;
     } from './workflows/popscle' params(params)
 
     data = cellranger()
@@ -419,7 +419,7 @@ workflow cellranger_multi_sample_demuxlet {
 workflow cellranger_libraries_multi_sample {
 
     include {
-        multi_sample as MULTI_SAMPLE
+        multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
 
     data = cellranger_libraries()
@@ -433,10 +433,10 @@ workflow cellranger_libraries_multi_sample {
 workflow cellranger_libraries_freemuxlet_multi_sample {
 
     include {
-        multi_sample as MULTI_SAMPLE
+        multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        freemuxlet as FREEMUXLET
+        freemuxlet as FREEMUXLET;
     } from './workflows/popscle' params(params)
 
     data = cellranger_libraries()
@@ -452,10 +452,10 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
 workflow cellranger_libraries_demuxlet_multi_sample {
 
     include {
-        multi_sample as MULTI_SAMPLE
+        multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        demuxlet as DEMUXLET
+        demuxlet as DEMUXLET;
     } from './workflows/popscle' params(params)
 
     data = cellranger_libraries()
@@ -470,7 +470,7 @@ workflow cellranger_libraries_demuxlet_multi_sample {
 workflow star {
 
     include {
-        star as STAR
+        star as STAR;
     } from './workflows/star' params(params)
     STAR()
 
@@ -480,7 +480,7 @@ workflow star {
 workflow single_sample_star {
 
     include {
-        single_sample_star as SINGLE_SAMPLE_STAR
+        single_sample_star as SINGLE_SAMPLE_STAR;
     } from './workflows/single_sample_star' params(params)
 
     SINGLE_SAMPLE_STAR()
@@ -490,7 +490,7 @@ workflow single_sample_star {
 workflow nemesh {
 
     include {
-        nemesh as NEMESH
+        nemesh as NEMESH;
     } from './workflows/nemesh' params(params)
 
     NEMESH()
@@ -501,17 +501,17 @@ workflow sra_cellranger_bbknn {
 
     main: 
         include {
-            getChannel as getSRAChannel
+            getChannel as getSRAChannel;
         } from './src/channels/sra' params(params)
         include {
-            DOWNLOAD_FROM_SRA
+            DOWNLOAD_FROM_SRA;
         } from './src/utils/workflows/downloadFromSRA' params(params)
         include {
             SC__CELLRANGER__PREPARE_FOLDER;
-            SC__CELLRANGER__COUNT
+            SC__CELLRANGER__COUNT;
         } from './src/cellranger/processes/utils' params(params)
         include {
-            bbknn as BBKNN
+            bbknn as BBKNN;
         } from './workflows/bbknn' params(params)
         
         // Run 
@@ -536,10 +536,10 @@ workflow sra_cellranger_bbknn {
 workflow sra_cellranger_bbknn_scenic {
 
     include {
-        scenic_append as SCENIC_APPEND
+        scenic_append as SCENIC_APPEND;
     } from './src/scenic/main' params(params)
     include {
-        PUBLISH as PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC
+        PUBLISH as PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
     sra_cellranger_bbknn()
