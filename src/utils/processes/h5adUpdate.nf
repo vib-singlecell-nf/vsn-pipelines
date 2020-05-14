@@ -30,3 +30,30 @@ process SC__H5AD_UPDATE_X_PCA {
 		"""
 
 }
+
+process SC__H5AD_CLEAN {
+
+	container params.sc.scanpy.container
+	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+
+	input:
+		tuple \
+            val(sampleId), \
+		    path(data), \
+			val(stashedParams)
+
+	output:
+		tuple \
+            val(sampleId), \
+		    path("${sampleId}.SC__H5AD_CLEAN.h5ad"), \
+			val(stashedParams)
+
+	script:
+		"""
+		${binDir}/sc_h5ad_update.py \
+			--empty-x \
+			$data \
+			"${sampleId}.SC__H5AD_CLEAN.h5ad"
+		"""
+
+}

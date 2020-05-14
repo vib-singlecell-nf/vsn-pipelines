@@ -1,14 +1,3 @@
-//
-// Version: 
-// Test: 
-// Command: 
-//
-/*
- * QC workflow 
- * Source:
- * 
- */ 
-
 nextflow.preview.dsl=2
 
 import java.nio.file.Files
@@ -17,10 +6,18 @@ import java.nio.file.Paths
 //////////////////////////////////////////////////////
 //  process imports:
 
-include GET_SRA_DB from './../processes/sra' params(params)
-include SRA_TO_METADATA from './../processes/sra' params(params)
-include DOWNLOAD_FASTQS_FROM_SRA_ACC_ID from './../../sratoolkit/processes/downloadFastQ' params(params)
-include NORMALIZE_SRA_FASTQS from './../processes/sra' params(params)
+include {
+    GET_SRA_DB;
+} from './../processes/sra' params(params)
+include {
+    SRA_TO_METADATA;
+} from './../processes/sra' params(params)
+include {
+    DOWNLOAD_FASTQS_FROM_SRA_ACC_ID;
+} from './../../sratoolkit/processes/downloadFastQ' params(params)
+include {
+    NORMALIZE_SRA_FASTQS;
+} from './../processes/sra' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

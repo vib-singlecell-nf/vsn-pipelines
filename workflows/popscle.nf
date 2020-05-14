@@ -3,8 +3,10 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include FREEMUXLET from '../src/popscle/workflows/demuxlet.nf' params(params)
-include DEMUXLET from '../src/popscle/workflows/demuxlet.nf' params(params)
+include {
+    FREEMUXLET;
+    DEMUXLET;
+} from '../src/popscle/workflows/demuxlet.nf' params(params)
 
 workflow freemuxlet {
 

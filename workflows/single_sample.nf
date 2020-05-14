@@ -1,11 +1,14 @@
 nextflow.preview.dsl=2
 
 // Utils
-include '../src/utils/processes/utils.nf' params(params)
-include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
+include {
+    SC__FILE_CONVERTER;
+} from '../src/utils/processes/utils.nf' params(params)
 
 // Pipeline
-include SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE from '../src/scanpy/workflows/single_sample.nf' params(params)
+include {
+    SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
+} from '../src/scanpy/workflows/single_sample.nf' params(params)
 
 workflow single_sample {
 

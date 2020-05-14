@@ -1,10 +1,16 @@
 nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
-//  process imports:
-include './../processes/utils.nf' params(params)
-include './../../channels/file' params(params)
-include './../processes/h5adAnnotate.nf' params(params)
+//  Process imports:
+include {
+    isParamNull;
+} from './../processes/utils.nf' params(params)
+include {
+    getChannel;
+} from './../../channels/file' params(params)
+include {
+    SC__ANNOTATE_BY_CELL_METADATA;
+} from './../processes/h5adAnnotate.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
