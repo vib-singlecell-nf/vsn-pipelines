@@ -7,7 +7,7 @@ import static groovy.json.JsonOutput.*
 include {
     clean;
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
-} from '../../utils/processes/utils.nf' params(params)
+} from '../../utils/processes/reports.nf' params(params)
 include {
     PUBLISH;
 } from '../../utils/workflows/utils.nf' params(params)
