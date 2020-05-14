@@ -3,12 +3,84 @@ nextflow.preview.dsl=2
 import static groovy.json.JsonOutput.*
 
 //////////////////////////////////////////////////////
-//  process imports:
+//  Process imports:
 
-// Imports
+include {
+    isParamNull;
+    COMPRESS_HDF5;
+    SC__PUBLISH;
+    SC__PUBLISH as SC__PUBLISH_PROXY;
+} from "./../processes/utils.nf" params(params)
+include {
+    SC__H5AD_CLEAN
+} from "./../processes/h5adUpdate.nf" params(params)
+
+formatsAllowed = ['h5ad', 'loom']
+taggedFilesToClean = ['final_output']
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
+
+workflow PUBLISH {
+
+    take: 
+        data
+        fileOutputSuffix
+        fileOutputFormat
+        toolName
+        isParameterExplorationModeOn
+
+    main:
+        // Clean
+        if(fileOutputSuffix != null && taggedFilesToClean.any { fileOutputSuffix.contains(it) } && isParameterExplorationModeOn) {
+            if(!formatsAllowed.contains(fileOutputFormat))
+                throw new Exception("The format " + fileOutputFormat + " is currently not allowed to be published.")
+            if(fileOutputFormat == "h5ad") {
+                out = SC__H5AD_CLEAN(
+                    data
+                )
+            } else {
+                out = data
+            }
+        } else {
+            out = data
+        }
+
+        // Compress only if part of formatsAllowed
+        if(fileOutputSuffix != null && taggedFilesToClean.any { fileOutputSuffix.contains(it) }) {
+            out = COMPRESS_HDF5(
+                out.map {
+                    // if stashedParams not there, just put null 3rd arg
+                    it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+                },
+                isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
+                isParamNull(toolName) ? 'NULL' : toolName,
+            )
+        }
+
+        // Proxy to avoid file name collision
+        SC__PUBLISH_PROXY(
+            data.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
+            isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
+            isParamNull(toolName) ? 'NULL' : toolName,
+            isParameterExplorationModeOn
+        )
+
+        // Publish
+        SC__PUBLISH(
+            out,
+            isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
+            isParamNull(toolName) ? 'NULL' : toolName,
+            isParameterExplorationModeOn
+        )
+
+    emit:
+        SC__PUBLISH_PROXY.out
+
+}
 
 workflow COMBINE_BY_PARAMS {
 

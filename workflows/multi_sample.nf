@@ -1,28 +1,65 @@
 nextflow.preview.dsl=2
 
-//////////////////////////////////////////////////////
-//  Import sub-workflows from the modules:
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the utils module:
+include {
+    getBaseName;
+} from '../src/utils/processes/files.nf'
+include {
+    clean;
+    SC__FILE_CONVERTER;
+    SC__FILE_CONCATENATOR;
+} from '../src/utils/processes/utils.nf' params(params)
+include {
+    COMBINE_BY_PARAMS;
+} from '../src/utils/workflows/utils.nf' params(params)
+include {
+    SC__H5AD_TO_FILTERED_LOOM;
+} from '../src/utils/processes/h5adToLoom.nf' params(params)
+include {
+    FILE_CONVERTER;
+} from '../src/utils/workflows/fileConverter.nf' params(params)
+include {
+    UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
+} from '../src/utils/processes/reports.nf' params(params)
 
-include '../src/utils/processes/files.nf' params(params)
-include '../src/utils/processes/utils.nf' params(params)
-include '../src/utils/workflows/utils.nf' params(params)
-
-include QC_FILTER from '../src/scanpy/workflows/qc_filter.nf' params(params)
-include NORMALIZE_TRANSFORM from '../src/scanpy/workflows/normalize_transform.nf' params(params)
-include HVG_SELECTION from '../src/scanpy/workflows/hvg_selection.nf' params(params)
-include SC__SCANPY__REGRESS_OUT from '../src/scanpy/processes/regress_out.nf' params(params)
-include NEIGHBORHOOD_GRAPH from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
-include DIM_REDUCTION_PCA from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
-include '../src/scanpy/workflows/dim_reduction.nf' params(params)
-include '../src/scanpy/processes/cluster.nf' params(params)
-include CLUSTER_IDENTIFICATION from '../src/scanpy/workflows/cluster_identification.nf' params(params)
-include SC__H5AD_TO_FILTERED_LOOM from '../src/utils/processes/h5adToLoom.nf' params(params)
-include FILE_CONVERTER from '../src/utils/workflows/fileConverter.nf' params(params)
-
+////////////////////////////////////////////////////////
+//  Import sub-workflows/processes from the tool module:
+include {
+    QC_FILTER;
+} from '../src/scanpy/workflows/qc_filter.nf' params(params)
+include {
+    NORMALIZE_TRANSFORM;
+} from '../src/scanpy/workflows/normalize_transform.nf' params(params)
+include {
+    HVG_SELECTION;
+} from '../src/scanpy/workflows/hvg_selection.nf' params(params)
+include {
+    SC__SCANPY__REGRESS_OUT;
+} from '../src/scanpy/processes/regress_out.nf' params(params)
+include {
+    NEIGHBORHOOD_GRAPH;
+} from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
+include {
+    DIM_REDUCTION_PCA;
+} from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
+include {
+    DIM_REDUCTION_TSNE_UMAP;
+} from '../src/scanpy/workflows/dim_reduction.nf' params(params)
+include {
+    SC__SCANPY__CLUSTERING_PARAMS;
+} from '../src/scanpy/processes/cluster.nf' params(params)
+include {
+    CLUSTER_IDENTIFICATION;
+} from '../src/scanpy/workflows/cluster_identification.nf' params(params)
 // reporting:
-include UTILS__GENERATE_WORKFLOW_CONFIG_REPORT from '../src/utils/processes/reports.nf' params(params)
-include SC__SCANPY__MERGE_REPORTS from '../src/scanpy/processes/reports.nf' params(params)
-include SC__SCANPY__REPORT_TO_HTML from '../src/scanpy/processes/reports.nf' params(params)
+include {
+    SC__SCANPY__MERGE_REPORTS;
+} from '../src/scanpy/processes/reports.nf' params(params)
+include {
+    SC__SCANPY__REPORT_TO_HTML;
+} from '../src/scanpy/processes/reports.nf' params(params)
+
 
 workflow multi_sample {
 
@@ -68,16 +105,23 @@ workflow multi_sample {
         // In parameter exploration mode, this automatically merge all the results into the resulting loom
         scopeloom = FILE_CONVERTER(
             CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
+            'MULTI_SAMPLE.final_output',
             'loom',
             SC__FILE_CONCATENATOR.out
         )
         
+        // Reporting:
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
         // Publishing
-        SC__PUBLISH_H5AD( 
+        PUBLISH( 
             CLUSTER_IDENTIFICATION.out.marker_genes.map { 
                 it -> tuple(it[0], it[1], null)
             },
-            params.global.project_name+".single_sample.output"
+            params.global.project_name+".multi_sample.final_output",
+            "h5ad",
+            null,
+            clusteringParams.isParameterExplorationModeOn()
         )
 
         samples = data.map { it -> it[0] }
@@ -85,8 +129,6 @@ workflow multi_sample {
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
-        // Reporting:
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         ipynbs = QC_FILTER.out.report.map {
             it -> tuple(it[0], it[1])
         }.mix(
