@@ -5,8 +5,12 @@ import java.nio.file.Paths
 //////////////////////////////////////////////////////
 //  process imports:
 
-include MKFASTQ                                     from './mkfastq'  params(params)
-include SC__CELLRANGER__COUNT_WITH_LIBRARIES        from './../processes/count'    params(params)
+include {
+    MKFASTQ
+} from './mkfastq' params(params)
+include {
+    SC__CELLRANGER__COUNT_WITH_LIBRARIES
+} from './../processes/count' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

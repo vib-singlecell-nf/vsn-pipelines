@@ -5,7 +5,9 @@ import java.nio.file.Paths
 //////////////////////////////////////////////////////
 //  process imports:
 
-include SC__CELLRANGER__COUNT_WITH_METADATA   from './../processes/count'    params(params)
+include {
+    SC__CELLRANGER__COUNT_WITH_METADATA;
+} from './../processes/count' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
