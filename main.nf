@@ -3,13 +3,15 @@ import static groovy.json.JsonOutput.*
 nextflow.preview.dsl=2
 
 include { 
-    INIT
+    INIT;
 } from './src/utils/workflows/utils' params(params)
 INIT()
-// include './src/utils/processes/utils' params(params)
+include {
+    SC__FILE_CONVERTER;
+}'./src/utils/processes/utils' params(params)
 
 include {
-    getDataChannel
+    getDataChannel;
 } from './src/channels/channels' params(params)
 
 // run multi-sample with bbknn, output a scope loom file
