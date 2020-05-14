@@ -4,8 +4,12 @@ nextflow.preview.dsl=2
 //  process imports:
 
 // scanpy:
-include SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA from '../processes/dim_reduction.nf' params(params + [method: "pca"])
-include PCACV__FIND_OPTIMAL_NPCS from './../../pcacv/processes/runPCACV' params(params)
+include {
+    SC__SCANPY__DIM_REDUCTION as SC__SCANPY__DIM_REDUCTION__PCA;
+ } from '../processes/dim_reduction.nf' params(params + [method: "pca"])
+include {
+    PCACV__FIND_OPTIMAL_NPCS;
+} from './../../pcacv/processes/runPCACV' params(params)
 
 //////////////////////////////////////////////////////
 

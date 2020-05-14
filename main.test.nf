@@ -4,8 +4,12 @@ nextflow.preview.dsl=2
 //  Define the parameters for all processes
 
 include './main.nf' params(params)
-include SC__FILE_CONVERTER from '../utils/processes/utils.nf' params(params)
-include getDataChannel from '../channels/channels.nf' params(params)
+include {
+    SC__FILE_CONVERTER;
+} from '../utils/processes/utils.nf' params(params)
+include {
+    getDataChannel
+} from '../channels/channels.nf' params(params)
 
 // Make the test workflow 
 workflow test_single_sample {

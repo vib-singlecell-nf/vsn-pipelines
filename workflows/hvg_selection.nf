@@ -3,15 +3,23 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 // utils
-include PUBLISH as PUBLISH_H5AD_HVG_SCALED from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_H5AD_HVG_SCALED;
+} from "../../utils/workflows/utils.nf" params(params)
 
 // scanpy:
-include SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES from '../processes/feature_selection.nf' params(params)
-include SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES from '../processes/feature_selection.nf' params(params)
-include SC__SCANPY__FEATURE_SCALING from '../processes/transform.nf' params(params)
+include {
+    SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES;
+    SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES;
+} from '../processes/feature_selection.nf' params(params)
+include {
+    SC__SCANPY__FEATURE_SCALING;
+} from '../processes/transform.nf' params(params)
 
 // reporting:
-include GENERATE_REPORT from './create_report.nf' params(params)
+include {
+    GENERATE_REPORT;
+} from './create_report.nf' params(params)
 
 
 //////////////////////////////////////////////////////

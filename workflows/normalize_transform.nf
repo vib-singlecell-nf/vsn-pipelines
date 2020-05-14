@@ -3,12 +3,16 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 // utils
-include PUBLISH as PUBLISH_H5AD_NORMALIZED from "../../utils/workflows/utils.nf" params(params)
+include {
+    PUBLISH as PUBLISH_H5AD_NORMALIZED;
+} from "../../utils/workflows/utils.nf" params(params)
 
 
 // scanpy:
-include SC__SCANPY__DATA_TRANSFORMATION from '../processes/transform.nf' params(params)
-include SC__SCANPY__NORMALIZATION from '../processes/transform.nf' params(params)
+include {
+    SC__SCANPY__DATA_TRANSFORMATION;
+    SC__SCANPY__NORMALIZATION;
+} from '../processes/transform.nf' params(params)
 
 //////////////////////////////////////////////////////
 
