@@ -35,7 +35,10 @@ workflow HVG_SELECTION {
             | SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES
         scaled = SC__SCANPY__FEATURE_SCALING( hvg )
         PUBLISH_H5AD_HVG_SCALED(
-            scaled,
+            scaled.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
             "SCANPY.hvg_scaled_output",
             "h5ad",
             "scanpy",

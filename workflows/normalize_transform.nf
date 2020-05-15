@@ -24,7 +24,10 @@ workflow NORMALIZE_TRANSFORM {
     main:
         SC__SCANPY__NORMALIZATION( filtered )
         PUBLISH_H5AD_NORMALIZED(
-            SC__SCANPY__NORMALIZATION.out,
+            SC__SCANPY__NORMALIZATION.out.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
             "SCANPY.normalized_output",
             "h5ad",
             "scanpy",
