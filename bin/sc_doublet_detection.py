@@ -230,5 +230,5 @@ final_adata.to_csv(
     header=True
 )
 f = gzip.open(f"{FILE_PATH_OUT_BASENAME}.ScrubletObject.pklz", 'wb')
-pickle.dump(scrub, f)
+pickle.dump(scrub, f, protocol=4)
 f.close()
