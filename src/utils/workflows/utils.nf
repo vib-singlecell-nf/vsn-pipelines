@@ -71,7 +71,10 @@ workflow PUBLISH {
 
         // Publish
         SC__PUBLISH(
-            out,
+            out.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
             isParamNull(toolName) ? 'NULL' : toolName,
             isParameterExplorationModeOn
