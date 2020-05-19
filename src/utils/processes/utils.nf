@@ -300,8 +300,6 @@ process SC__PUBLISH {
             val(stashedParams)
 
     script:
-        def compression_level = params.utils.containsKey("publish") &&
-            params.utils.publish.containsKey("compress_level") ? params.utils.publish.compress_level : 6
         outputFileName = getOutputFileName(
             tag,
             f,
@@ -311,7 +309,7 @@ process SC__PUBLISH {
             stashedParams
         )
         """
-        mv $f tmp
+        cp -rL $f tmp
         ln tmp "${outputFileName}"
         rm tmp
         """
