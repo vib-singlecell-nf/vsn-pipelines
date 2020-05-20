@@ -191,12 +191,14 @@ workflow scenic_append {
                 throw new Exception("Cannot append SCENIC loom to SCope loom because the IDs do not match.")
             }
         )
-        report_notebook = GENERATE_REPORT(
-            file(workflow.projectDir + params.sc.scenic.report_ipynb),
-            APPEND_SCENIC_LOOM.out,
-            "SCENIC_report"
-        )
-        REPORT_TO_HTML(report_notebook)
+        if(!params.sc.scenic.skipReports) {
+            report_notebook = GENERATE_REPORT(
+                file(workflow.projectDir + params.sc.scenic.report_ipynb),
+                APPEND_SCENIC_LOOM.out,
+                "SCENIC_report"
+            )
+            REPORT_TO_HTML(report_notebook)
+        }
 
     emit:
         APPEND_SCENIC_LOOM.out
