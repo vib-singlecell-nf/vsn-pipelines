@@ -47,7 +47,7 @@ workflow PUBLISH {
         }
 
         // Compress only if part of formatsAllowed
-        if(fileOutputSuffix != null && taggedFilesToClean.any { fileOutputSuffix.contains(it) }) {
+        if(fileOutputSuffix != null && formatsAllowed.any { fileOutputFormat.contains(it) }) {
             out = COMPRESS_HDF5(
                 out.map {
                     // if stashedParams not there, just put null 3rd arg
