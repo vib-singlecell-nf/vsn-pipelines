@@ -310,6 +310,7 @@ process SC__PUBLISH {
         )
         """
         cp -rL $f tmp
+        rm $f
         ln tmp "${outputFileName}"
         rm tmp
         """
