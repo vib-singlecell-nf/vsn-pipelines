@@ -33,7 +33,7 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
             sep: '\t'
         ).map {
             row -> tuple(
-                row.processing_date + "__" + row.sample_name + "__" + row.short_uuid,
+                row.short_uuid + "__" + row.sample_name,
                 row.fastqs_sample_prefix,
                 getFastQsFilePath(row.fastqs_parent_dir_path, row.fastqs_dir_name),
                 // Begin CellRanger parameters
