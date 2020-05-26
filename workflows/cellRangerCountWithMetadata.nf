@@ -14,6 +14,12 @@ include {
 
 workflow CELLRANGER_COUNT_WITH_METADATA {
 
+    def getFastQsFilePath = { fastqsParentDirPath, fastqsDirName ->
+        if(fastqsDirName == "n/a" || fastqsDirName == "n.a." || fastqsDirName == "none" || fastqsDirName == "null")
+            return file(fastqsParentDirPath)
+        return file(Paths.get(fastqsParentDirPath, fastqsDirName))
+    }
+
     take:
         transcriptome
         metadata
@@ -29,7 +35,7 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
             row -> tuple(
                 row.processing_date + "__" + row.sample_name + "__" + row.short_uuid,
                 row.fastqs_sample_prefix,
-                file(Paths.get(row.fastqs_parent_dir_path, row.fastqs_dir_name)),
+                getFastQsFilePath(row.fastqs_parent_dir_path, row.fastqs_dir_name),
                 // Begin CellRanger parameters
                 row.expect_cells
             )
