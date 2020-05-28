@@ -56,6 +56,9 @@ include {
 include {
     BEC_HARMONY;
 } from '../src/harmony/workflows/bec_harmony.nf' params(params)
+include {
+    SC__DIRECTS__SELECT_DEFAULT_CLUSTERING
+} from '../src/directs/processes/selectDefaultClustering.nf'
 // reporting:
 include {
     SC__SCANPY__MERGE_REPORTS;
