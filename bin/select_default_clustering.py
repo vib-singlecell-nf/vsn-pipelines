@@ -110,9 +110,7 @@ grid_res_df = pd.DataFrame(
 
 # Get optimal clustering
 vc = grid_res_df['clustering_id'].value_counts()
-print(vc)
 opt_clustering_id = vc.head(1).index[0]
-
 
 # Update the clusterings metadata
 def set_default_md_clustering(md_clustering):
