@@ -10,12 +10,14 @@ process SC__DIRECTS__SELECT_DEFAULT_CLUSTERING {
     input:
         tuple \
             val(sampleId), \
-            path(f)
+            path(f), \
+            val(stashedParams)
 
     output:
         tuple \
             val(sampleId), \
-            path("${sampleId}.SC__DIRECTS__SELECT_DEFAULT_CLUSTERING.loom")
+            path("${sampleId}.SC__DIRECTS__SELECT_DEFAULT_CLUSTERING.loom"), \
+            val(stashedParams)
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.directs.select_default_clustering)
