@@ -82,26 +82,30 @@ clusterings = loom.ca.Clusterings
 
 grid_res = []
 for min_cluster_size in range(args.from_min_cluster_size, args.to_min_cluster_size + args.by_min_cluster_size, args.by_min_cluster_size):
-    clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=min_cluster_size,
-        gen_min_span_tree=True
-    )
-    clusterer.fit(cell_embeddings)
-    res = []
-    for i in loom.ca.Clusterings.dtype.names:
-        clustering_name = list(filter(lambda x: x["id"] == int(i), md["clusterings"]))[0]['name']
-        resolution = re.sub(r'.* resolution ', '', clustering_name)
-        ars = adjusted_rand_score(clusterer.labels_, clusterings[i])
-        res = res + [(i, resolution, ars)]
-    opt_res = sorted(res, key=lambda tup: tup[2], reverse=True)[0]
-    grid_res = grid_res + [(min_cluster_size, ) + opt_res]
-    print(f"Optimal clustering resolution for HDBSCAN with min_cluster_size={min_cluster_size} => {opt_res}")
+    for min_samples in range(args.from_min_cluster_size, args.to_min_cluster_size + args.by_min_cluster_size, args.by_min_cluster_size):
+        clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=min_cluster_size,
+            min_samples=min_samples,
+            gen_min_span_tree=True
+        )
+        clusterer.fit(cell_embeddings)
+        res = []
+        for i in loom.ca.Clusterings.dtype.names:
+            clustering_name = list(filter(lambda x: x["id"] == int(i), md["clusterings"]))[0]['name']
+            resolution = re.sub(r'.* resolution ', '', clustering_name)
+            ars = adjusted_rand_score(clusterer.labels_, clusterings[i])
+            res = res + [(clustering_name, i, resolution, ars)]
+        opt_res = sorted(res, key=lambda tup: tup[3], reverse=True)[0]
+        grid_res = grid_res + [(min_cluster_size, min_samples) + opt_res]
+        print(f"Optimal clustering resolution for HDBSCAN with min_cluster_size={min_cluster_size}, min_samples={min_samples} => {opt_res}")
 
 # Aggregating the results
 grid_res_df = pd.DataFrame(
     grid_res,
     columns=[
         "min_cluster_size",
+        "min_samples",
+        "clustering_name",
         "clustering_id",
         "opt_clustering_resolution",
         "opt_clustering_adjusted_rand_score"
@@ -110,24 +114,58 @@ grid_res_df = pd.DataFrame(
 
 # Get optimal clustering
 vc = grid_res_df['clustering_id'].value_counts()
+print(f"")
+print(f"============================")
+print(f"Clustering Occurrence Table.")
+print(f"============================")
+print(f"")
+print(f"Clustering Name => Occurrence")
+for idx in range(0, len(vc.index)):
+    clustering_id = vc.index[idx]
+    clustering_name = md["clusterings"][int(clustering_id)]["name"]
+    occurrence = vc.values[idx]
+    print(f"{clustering_name} => {occurrence}")
 opt_clustering_id = vc.head(1).index[0]
-
-
-# Update the clusterings metadata
-def set_default_md_clustering(md_clustering):
-    mc_clustering_copy = md_clustering.copy()
-    mc_clustering_copy["name"] = mc_clustering_copy["name"] + " (default)"
-    return mc_clustering_copy
+opt_clustering_name = md["clusterings"][int(opt_clustering_id)]["name"]
+print(f"Optimal clustering: {opt_clustering_name}")
 
 
 md_clusterings_sorted_by_resolution = sorted(
     md["clusterings"],
     key=lambda k: float(re.sub(r'.* resolution ', '', k['name']))
 )
-new_md_clusterings = list(map(
-    lambda x: set_default_md_clustering(md_clustering=x) if x["id"] == int(opt_clustering_id) else x,
-    md_clusterings_sorted_by_resolution
-))
+
+
+# Update the clustering metadata
+def update_md_clustering(md_clustering, idx, occurrence):
+    md_clustering_copy = md_clustering.copy()
+    if idx == 0:
+        md_clustering_copy["name"] = md_clustering_copy["name"] + f" (default, {occurrence})"
+    else:
+        md_clustering_copy["name"] = md_clustering_copy["name"] + f" ({occurrence})"
+    return md_clustering_copy
+
+
+# Update the clusterings metadata
+def update_md_clusterings(md_clusterings, idx, clustering_id, occurrence):
+    md_clusterings_copy = md_clusterings.copy()
+    new_md_clusterings = list(map(
+        lambda x: update_md_clustering(md_clustering=x, idx=idx, occurrence=occurrence) if x["id"] == int(clustering_id) else x,
+        md_clusterings_copy
+    ))
+    return new_md_clusterings
+
+
+new_md_clusterings = md_clusterings_sorted_by_resolution.copy()
+
+for idx in range(0, len(vc.index)):
+    new_md_clusterings = update_md_clusterings(
+        md_clusterings=new_md_clusterings,
+        idx=idx,
+        clustering_id=vc.index[idx],
+        occurrence=vc.values[idx]
+    )
+
 md["clusterings"] = new_md_clusterings
 loom.attrs.MetaData = json.dumps(md)
 
