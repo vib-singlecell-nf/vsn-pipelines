@@ -47,3 +47,7 @@
 	path = src/scrublet
 	url = https://github.com/vib-singlecell-nf/scrublet.git
 	branch = develop
+[submodule "src/directs"]
+	path = src/directs
+	url = https://github.com/vib-singlecell-nf/directs.git
+	branch = develop
