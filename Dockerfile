@@ -17,7 +17,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir loompy==3.0.6 && \
     pip install --no-cache-dir hdbscan==0.8.26 && \
     pip install --no-cache-dir numpy==1.17.2 && \
-    pip install --no-cache-dir pandas==0.23.4
+    pip install --no-cache-dir pandas==0.23.4 && \
+    pip install --no-cache-dir numba==0.46.0
 
 FROM python:3.7.4-slim AS build-image
 
@@ -26,7 +27,7 @@ RUN apt-get -y update && \
     apt-get -y --no-install-recommends install \
         # Need to run ps
         procps \
-        libxml2 \
+        libxml2 && \
     rm -rf /var/cache/apt/* && \
     rm -rf /var/lib/apt/lists/*
 
