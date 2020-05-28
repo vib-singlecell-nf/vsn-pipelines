@@ -112,6 +112,7 @@ grid_res_df = pd.DataFrame(
 vc = grid_res_df['clustering_id'].value_counts()
 opt_clustering_id = vc.head(1).index[0]
 
+
 # Update the clusterings metadata
 def set_default_md_clustering(md_clustering):
     mc_clustering_copy = md_clustering.copy()
