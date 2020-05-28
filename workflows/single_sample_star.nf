@@ -52,7 +52,9 @@ include {
 include {
     CLUSTER_IDENTIFICATION;
 } from '../src/scanpy/workflows/cluster_identification.nf' params(params)
-
+include {
+    SC__DIRECTS__SELECT_DEFAULT_CLUSTERING
+} from '../src/directs/processes/selectDefaultClustering.nf'
 
 // reporting:
 include {
@@ -64,7 +66,9 @@ include {
 
 workflow single_sample_star {
     
-    // run the pipeline
+    /*******************************************
+     * Data processing
+     */
     data = STAR()
     samples = data.map { it -> it[0] }
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
@@ -97,7 +101,13 @@ workflow single_sample_star {
         QC_FILTER.out.filtered
     )
 
+    // Define the parameters for clustering
     def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
+    // Select a default clustering when in parameter exploration mode
+    if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+        scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( scopeloom )
+    }
 
     // Publishing
     PUBLISH( 
@@ -110,7 +120,10 @@ workflow single_sample_star {
         clusteringParams.isParameterExplorationModeOn()
     )
 
-    // Reporting:
+    /*******************************************
+     * Reporting
+     */
+
     ipynbs = QC_FILTER.out.report.map {
         it -> tuple(it[0], it[1])
     }.mix(

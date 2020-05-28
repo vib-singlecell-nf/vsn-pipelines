@@ -56,6 +56,9 @@ include {
 include {
     BEC_HARMONY;
 } from '../src/harmony/workflows/bec_harmony.nf' params(params)
+include {
+    SC__DIRECTS__SELECT_DEFAULT_CLUSTERING
+} from '../src/directs/processes/selectDefaultClustering.nf'
 // reporting:
 include {
     SC__SCANPY__MERGE_REPORTS;
@@ -71,7 +74,9 @@ workflow harmony {
         data
 
     main:
-        // run the pipeline
+        /*******************************************
+        * Data processing
+        */
         out = data
         out = SC__FILE_CONVERTER( data )
         if(params.sc.scanpy.containsKey("filter")) {
@@ -133,6 +138,18 @@ workflow harmony {
                 SC__FILE_CONVERTER.out
             )
         }
+
+        // Define the parameters for clustering
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
+        // Select a default clustering when in parameter exploration mode
+        if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( scopeloom )
+        }
+
+        /*******************************************
+        * Reporting
+        */
         
         project = CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
@@ -140,8 +157,6 @@ workflow harmony {
         )
 
         // Collect the reports:
-        // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         // Pairing clustering reports with bec reports
         if(!clusteringParams.isParameterExplorationModeOn()) {
             clusteringBECReports = BEC_HARMONY.out.cluster_report.map {

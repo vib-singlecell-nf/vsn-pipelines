@@ -52,6 +52,9 @@ include {
 include {
     CLUSTER_IDENTIFICATION;
 } from '../src/scanpy/workflows/cluster_identification.nf' params(params)
+include {
+    SC__DIRECTS__SELECT_DEFAULT_CLUSTERING
+} from '../src/directs/processes/selectDefaultClustering.nf'
 // reporting:
 include {
     SC__SCANPY__MERGE_REPORTS;
@@ -67,7 +70,9 @@ workflow multi_sample {
         data
 
     main:
-        // run the pipeline
+        /*******************************************
+        * Data processing
+        */
         out = SC__FILE_CONVERTER( data )
         if(params.sc.scanpy.containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
@@ -110,8 +115,13 @@ workflow multi_sample {
             SC__FILE_CONCATENATOR.out
         )
         
-        // Reporting:
+        // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
+        // Select a default clustering when in parameter exploration mode
+        if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( scopeloom )
+        }
 
         // Publishing
         PUBLISH( 
@@ -123,6 +133,10 @@ workflow multi_sample {
             null,
             clusteringParams.isParameterExplorationModeOn()
         )
+
+        /*******************************************
+        * Reporting
+        */
 
         samples = data.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
