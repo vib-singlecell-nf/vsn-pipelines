@@ -242,6 +242,29 @@ Since ``v0.9.0``, it is possible to explore several combinations of parameters. 
 
         resolutions = [0.4, 0.8]
 
+Select default clustering
+*************************
+
+In case the parameter exploration mode is used within the ``params.sc.scanpy.clustering`` parameter, it will generated a range of different clusterings. 
+For non-expert, it's often difficult to know which clustering to pick. It's however possible to use the ``DIRECTS`` module in order to select a default clustering. In order, to use 
+this automated clustering selection method, add the ``directs`` profile when generating the main config using ``nextflow config``. The config will get populated with:
+
+.. code:: groovy
+
+    directs {
+        container = 'vibsinglecellnf/directs:0.1.0'
+        labels {
+            processExecutor = 'local'
+        }
+        select_default_clustering {
+            fromMinClusterSize = 5
+            toMinClusterSize = 100
+            byMinClusterSize = 5
+        }
+    }
+
+Currently, only the Scanpy related pipelines have this feature implemented.
+
 Regress out variables
 ---------------------
 
