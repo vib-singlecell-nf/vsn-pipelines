@@ -56,6 +56,9 @@ include {
 include {
     BEC_BBKNN;
 } from '../src/scanpy/workflows/bec_bbknn.nf' params(params)
+include {
+    SC__DIRECTS__SELECT_DEFAULT_CLUSTERING
+} from '../src/directs/processes/selectDefaultClustering.nf'
 // tool reporting:
 include {
     SC__SCANPY__MERGE_REPORTS;
@@ -69,7 +72,9 @@ workflow bbknn {
         data
 
     main:
-        // run the pipeline
+        /*******************************************
+        * Data processing
+        */
         out = data
         out = SC__FILE_CONVERTER( data )
         if(params.sc.scanpy.containsKey("filter")) {
@@ -132,14 +137,24 @@ workflow bbknn {
             )
         }
 
+        // Define the parameters for clustering
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
+        // Select a default clustering when in parameter exploration mode
+        if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( scopeloom )
+        }
+
+        /*******************************************
+        * Reporting
+        */
+
         project = BEC_BBKNN.out.data.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
         // Collect the reports:
-        // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
         // Pairing clustering reports with bec reports
         if(!clusteringParams.isParameterExplorationModeOn()) {
             clusteringBECReports = BEC_BBKNN.out.cluster_report.map {
