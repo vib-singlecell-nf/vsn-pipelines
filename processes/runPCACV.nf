@@ -29,7 +29,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
         def sampleParams = params.parseConfig(sampleId, params.global, params.pcacv.find_optimal_npcs)
         processParams = sampleParams.local
         """
-        export OPENBLAS_NUM_THREADS=${processParams.nCores}
+        export OPENBLAS_NUM_THREADS=1
         ${binDir}/run_pca_cv.R \
             --input-file ${f} \
             --seed ${params.global.seed} \
