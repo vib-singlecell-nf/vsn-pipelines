@@ -76,6 +76,26 @@ workflow harmony {
 
 }
 
+workflow harmony_only {
+
+    include {
+        BEC_HARMONY as HARMONY;
+    } from './src/harmony/workflows/harmony_only' params(params)
+    include {
+        PUBLISH as PUBLISH_HARMONY;
+    } from "./src/utils/workflows/utils" params(params)
+
+    getDataChannel | HARMONY
+    PUBLISH_HARMONY(
+        HARMONY.out,
+        "HARMONY",
+        "h5ad",
+        null,
+        false
+    )
+
+}
+
 // run multi-sample with bbknn, then scenic from the filtered output:
 workflow bbknn_scenic {
 
@@ -566,4 +586,3 @@ workflow sra_cellranger_bbknn_scenic {
     )    
 
 }
-
