@@ -63,7 +63,14 @@ if 'id' not in metadata.columns:
     raise Exception("VSN ERROR: The meta data TSV file expects a header with a required 'id' column.")
 
 if args.type == "sample":
-    for (column_name, column_data) in metadata[metadata.id == SAMPLE_NAME].iteritems():
+    sample_info = metadata[metadata.id == SAMPLE_NAME]
+
+    if len(sample_info) == 0:
+        raise Exception(f"VSN ERROR: The meta data TSV file does not contain sample ID '{SAMPLE_NAME}'.")
+    elif len(sample_info) > 1:
+        raise Exception(f"VSN ERROR: The meta data TSV file contains more than one line with sample ID '{SAMPLE_NAME}'.")
+
+    for (column_name, column_data) in sample_info.iteritems():
         adata.obs[column_name] = column_data.values[0]
 else:
     raise Exception("VSN ERROR: This meta data type {} is not implemented".format(args.type))
