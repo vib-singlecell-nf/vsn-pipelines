@@ -97,8 +97,8 @@ def SC__SCANPY__CLUSTERING_PARAMS(params) {
 process SC__SCANPY__CLUSTERING {
 
   	container params.sc.scanpy.container
-  	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
   	input:
     	tuple val(sampleId), path(f)
@@ -126,8 +126,8 @@ process SC__SCANPY__CLUSTERING {
 process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 
   	container params.sc.scanpy.container
-  	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
   	publishDir "${params.global.outdir}/data/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "default" : "res_" + resolution}", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
   	input:
     	tuple \

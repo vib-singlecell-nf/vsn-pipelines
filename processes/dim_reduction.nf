@@ -83,8 +83,8 @@ def SC__SCANPY__DIM_REDUCTION_PARAMS(params) {
 process SC__SCANPY__DIM_REDUCTION {
 
 	container params.sc.scanpy.container
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
 	input:
 		tuple \
