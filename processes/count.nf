@@ -64,8 +64,7 @@ process SC__CELLRANGER__COUNT {
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
-	maxForks = toolParams.count.maxForks
+    label 'compute_resources__cellranger'
 
     input:
 		path(transcriptome)
@@ -95,12 +94,10 @@ process SC__CELLRANGER__COUNT {
 
 process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 
-	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
-	maxForks = toolParams.count.maxForks
+    label 'compute_resources__cellranger'
 
     input:
 		path(transcriptome)
@@ -143,12 +140,10 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 
 process SC__CELLRANGER__COUNT_WITH_METADATA {
 
-	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
-	maxForks = toolParams.count.maxForks
+    label 'compute_resources__cellranger'
 
     input:
 		path(transcriptome)

@@ -6,6 +6,7 @@ process SC__CELLRANGER__MKFASTQ {
 
 	publishDir "${params.global.outdir}/fastqs", saveAs: { outputF = file(it); "${outputF.getParent().getName()}/${outputF.name}" }, mode: 'link', overwrite: true
   	container toolParams.container
+    label 'compute_resources__cellranger'
 
   	input:
 		file(csv)
@@ -28,10 +29,9 @@ process SC__CELLRANGER__MKFASTQ {
 			${(toolParams.mkfastq.containsKey('deleteUndetermined')) ? '--delete-undetermined ' + toolParams.mkfastq.deleteUndetermined: ''} \
 			${(toolParams.mkfastq.containsKey('outputDir')) ? '--output-dir ' + toolParams.mkfastq.outputDir: ''} \
 			${(toolParams.mkfastq.containsKey('project')) ? '--project ' + toolParams.mkfastq.project: ''} \
-			${(toolParams.mkfastq.containsKey('jobMode')) ? '--jobmode ' + toolParams.mkfastq.jobMode: ''} \
-			${(toolParams.mkfastq.containsKey('localCores')) ? '--localcores ' + toolParams.mkfastq.localCores: ''} \
-			${(toolParams.mkfastq.containsKey('localMem')) ? '--localmem ' + toolParams.mkfastq.localMem: ''}
-	
+            --jobmode=local \
+            --localcores=${task.cpus} \
+            --localmem=${task.memory.toGiga()}
 		"""
 
 
