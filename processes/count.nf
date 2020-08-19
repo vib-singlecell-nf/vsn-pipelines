@@ -5,6 +5,7 @@ toolParams = params.sc.cellranger
 def generateCellRangerCountCommandDefaults = {
 	processParams,
 	transcriptome,
+    task,
 	expectCells ->
 	return (
 		"""
@@ -18,8 +19,8 @@ def generateCellRangerCountCommandDefaults = {
 			${(processParams.containsKey('r1Length')) ? '--r1-length ' + processParams.r1Length: ''} \
 			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
 			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
-			${(processParams.containsKey('localCores')) ? '--localcores ' + processParams.localCores: ''} \
-			${(processParams.containsKey('localMem')) ? '--localmem ' + processParams.localMem: ''} \
+            --localcores=${task.cpus} \
+            --localmem=${task.memory.toGiga()}
 		"""
 	)
 }
@@ -27,12 +28,13 @@ def generateCellRangerCountCommandDefaults = {
 def runCellRangerCount = {
 	processParams,
 	transcriptome,
+    task,
 	id,
 	sample,
 	fastqs,
 	expectCells = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, task, expectCells) + \
 		"""	\
 		--id=${id} \
 		--sample=${sample} \
@@ -44,12 +46,13 @@ def runCellRangerCount = {
 def runCellRangerCountLibraries = {
 	processParams,
 	transcriptome,
+    task,
 	id,
 	featureRef,
 	libraries = null,
 	expectCells = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, task, expectCells) + \
 		""" \
 		--id ${id} \
 		--libraries ${libraries} \
@@ -60,7 +63,6 @@ def runCellRangerCountLibraries = {
 
 process SC__CELLRANGER__COUNT {
 
-	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
@@ -85,6 +87,7 @@ process SC__CELLRANGER__COUNT {
 		runCellRangerCount(
 			processParams,
 			transcriptome,
+            task,
 			sampleId,
 			sampleId,
 			fastqs
@@ -131,6 +134,7 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 		""" + runCellRangerCountLibraries(
 			processParams,
 			transcriptome,
+            task,
 			sampleId,
 			featureRef,
 			"libraries.csv"
@@ -165,6 +169,7 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 		runCellRangerCount(
 			processParams,
 			transcriptome,
+            task,
 			sampleId,
 			samplePrefix,
 			fastqs,
