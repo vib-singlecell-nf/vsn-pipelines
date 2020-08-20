@@ -12,8 +12,8 @@ toolParams = params.sc.scenic
 process GENERATE_REPORT {
 
 	container toolParams.container
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
+    label 'compute_resources__mem'
 
 	input:
 		file ipynb
@@ -35,8 +35,8 @@ process GENERATE_REPORT {
 process REPORT_TO_HTML {
 
 	container toolParams.container
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
+    label 'compute_resources__minimal'
 
 	input:
 		tuple val(sampleId), path(ipynb)
@@ -50,3 +50,4 @@ process REPORT_TO_HTML {
 		"""
 
 }
+

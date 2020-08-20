@@ -7,13 +7,10 @@ processParams = params.sc.scenic.cistarget
 
 process CISTARGET {
 
-    // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label "${processParams.labels ? processParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/cistarget/${"numRuns" in toolParams && toolParams.numRuns > 1 ? "run_" + runId : ""}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${processParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=${processParams.walltime} -A ${params.global.qsubaccount}"
-    maxForks processParams.maxForks
+    label 'compute_resources__scenic_cistarget'
 
     input:
         tuple \
@@ -33,15 +30,7 @@ process CISTARGET {
             val(runId)
 
     script:
-        if(!processParams.containsKey("numWorkers"))
-            throw new Exception("numWorkers is missing in params.sc.scenic.cistarget")
-        if(processParams.labels && processParams.labels.processExecutor == 'qsub') {
-            if(!processParams.containsKey("pmem"))
-                throw new Exception("pmem is missing in params.sc.scenic.cistarget")
-            if(!processParams.containsKey("walltime"))
-                throw new Exception("walltime is missing in params.sc.scenic.cistarget")
-        }
-        if(toolParams.numRuns > 2 && toolParams.maxForks > 1 && (!processParams.containsKey("labels") || processParams.labels.processExecutor == "local"))
+        if(toolParams.numRuns > 2 && task.maxForks > 1 && task..processExecutor == "local")
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
         """
@@ -54,7 +43,7 @@ process CISTARGET {
             --gene_attribute ${toolParams.gene_attribute} \
             --mode "dask_multiprocessing" \
             --output ${outputFileName} \
-            --num_workers ${processParams.numWorkers} \
+            --num_workers ${task.cpus} \
         """
 
 }
