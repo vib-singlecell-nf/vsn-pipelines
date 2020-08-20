@@ -6,12 +6,10 @@ toolParams = params.sc.scenic
 
 process AGGR_MULTI_RUNS_REGULONS {
 
-    // Process will be submitted as job if toolParams.labels.processExecutor = 'qsub' (default)
-    label "${toolParams.labels ? toolParams.labels.processExecutor : "local"}"
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=2gb -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__scenic_multiruns'
 
     input:
 		tuple val(sampleId), path(f)
