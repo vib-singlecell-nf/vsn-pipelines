@@ -20,7 +20,7 @@ def generateCellRangerCountCommandDefaults = {
 			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
 			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
             --localcores=${task.cpus} \
-            --localmem=${task.memory.toGiga()}
+            --localmem=${task.memory.toGiga()} \
 		"""
 	)
 }
