@@ -110,9 +110,6 @@ workflow scenic {
 
         // multi-runs aggregation:
         if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
-            if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
-                throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
-            
             scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
                 filteredLoom,
                 ctx_mtf,
