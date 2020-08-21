@@ -105,7 +105,7 @@ def save_aggregated_feature_enrichment_table(feature_enrichment_table_fnames, ou
 def add_run_id_to_feature_enrichment_table(df, fname):
     # Add the run ID
     df[('', 'RunID')] = int(
-        re.search(r'run_([0-9]+)+__reg_(mtf|trk)\.csv$', str(fname)).group(1)
+        re.search(r'run_([0-9]+)+__reg_(mtf|trk)\.csv.gz$', str(fname)).group(1)
     )
     df[('', COLUMN_NAME_TYPE)] = df.apply(get_type, axis=1)
     return df

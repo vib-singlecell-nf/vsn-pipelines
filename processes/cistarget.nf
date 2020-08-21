@@ -43,7 +43,7 @@ process CISTARGET {
         }
         if(toolParams.numRuns > 2 && toolParams.maxForks > 1 && (!processParams.containsKey("labels") || processParams.labels.processExecutor == "local"))
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
-        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv.gz" : sampleId + "__reg_" + type + ".csv.gz"
         """
         pyscenic ctx \
             ${f} \
