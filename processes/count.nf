@@ -143,12 +143,25 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 }
 
 process SC__CELLRANGER__COUNT_WITH_METADATA {
+	
+	def getClusterOptions = { globalParams, processParams ->
+		clusterOptions = ""
+		clusterOptions += "-l nodes=${processParams.containsKey("nodes") ? processParams.nodes : 1}:ppn=${processParams.containsKey("ppn") ? processParams.ppn : 1} "
+		clusterOptions += "-l pmem=${processParams.containsKey("pmem") ? processParams.pmem : 1} "
+		clusterOptions += "-l walltime=${processParams.containsKey("walltime") ? processParams.walltime : '1:00:00'} "
+		if(!globalParams.containsKey("qsubaccount"))
+			throw new Exception("The param `qsubaccount` is not defined in the enclosing params.global config.")
+		clusterOptions += "-A ${globalParams.qsubaccount} "
+		clusterOptions += "-m abe "
+		clusterOptions += "${globalParams.containsKey("qsubemail") && globalParams.qsubemail != '' ? '-M '+ globalParams.qsubemail : ''}"
+		return clusterOptions
+	}
 
 	label toolParams.labels.processExecutor
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-	clusterOptions "-l nodes=1:ppn=${toolParams.count.ppn} -l pmem=${toolParams.count.pmem} -l walltime=${toolParams.count.walltime} -A ${params.global.qsubaccount} -m abe -M ${params.global.qsubemail}"
+	clusterOptions "${getClusterOptions(params.global,toolParams.count)}"
 	maxForks = toolParams.count.maxForks
 
     input:
