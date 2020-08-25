@@ -338,7 +338,7 @@ workflow cellranger_libraries {
 
 }
 
-workflow cellranger_metadata {
+workflow cellranger_count_metadata {
 
     include {
         CELLRANGER_COUNT_WITH_METADATA;
@@ -353,9 +353,9 @@ workflow cellranger_metadata {
 
 }
 
-workflow cellranger_metadata_single_sample_scenic {
+workflow cellranger_count_metadata_single_sample_scenic {
 
-    cellranger_metadata | \
+    cellranger_count_metadata | \
         map {
             it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         } | \
