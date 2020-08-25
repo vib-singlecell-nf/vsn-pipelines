@@ -82,6 +82,7 @@ process SC__CELLRANGER__COUNT {
 		if(processParams.sample == '') {
 			throw new Exception("Regards params.sc.cellranger.count: sample parameter cannot be empty")
 		}
+		// Check if the current sample has multiple sequencing runs
 		fastqs = fastqs instanceof List ? fastqs.join(',') : fastqs
 		runCellRangerCount(
 			processParams,

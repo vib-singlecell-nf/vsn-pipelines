@@ -14,9 +14,11 @@ include {
 
 workflow CELLRANGER_COUNT_WITH_METADATA {
 
-    def getFastQsFilePath = { fastqsParentDirPath, fastqsDirName ->
+    def getFastQsFilePaths = { fastqsParentDirPath, fastqsDirName ->
         if(fastqsDirName == "n/a" || fastqsDirName == "n.a." || fastqsDirName == "none" || fastqsDirName == "null")
-            return file(fastqsParentDirPath)
+            if(!fastqsParentDirPath.contains(','))
+                return file(fastqsParentDirPath)
+            return Arrays.asList(glob.split(',')).collect { file(it) }
         return file(Paths.get(fastqsParentDirPath, fastqsDirName))
     }
 
@@ -33,12 +35,24 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
             sep: '\t'
         ).map {
             row -> tuple(
-                row.short_uuid + "__" + row.sample_name,
+                row.containsKey("short_uuid") ? row.short_uuid + "__" + row.sample_name : row.sample_name,
                 row.fastqs_sample_prefix,
-                getFastQsFilePath(row.fastqs_parent_dir_path, row.fastqs_dir_name),
+                row.fastqs_parent_dir_path,
+                row.fastqs_dir_name,
                 // Begin CellRanger parameters
                 row.expect_cells
             )
+        }.groupTuple(
+            by: 0
+        ).map {
+            it -> tuple(
+                it[0],
+                *it[1].unique(), 
+                getFastQsFilePaths(
+                    it[2],
+                    it[3]
+                ),
+                *it[4].unique())
         }
         SC__CELLRANGER__COUNT_WITH_METADATA( transcriptome, data )
 
