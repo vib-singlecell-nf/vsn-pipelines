@@ -2,6 +2,8 @@ nextflow.preview.dsl=2
 
 import java.nio.file.Paths
 
+EMPTY_VALUES = ["n/a","n.a.","none","null"]
+
 //////////////////////////////////////////////////////
 //  process imports:
 
@@ -15,10 +17,12 @@ include {
 workflow CELLRANGER_COUNT_WITH_METADATA {
 
     def getFastQsFilePaths = { fastqsParentDirPath, fastqsDirName ->
-        if(fastqsDirName == "n/a" || fastqsDirName == "n.a." || fastqsDirName == "none" || fastqsDirName == "null")
+        if(fastqsParentDirPath instanceof List)
+            return fastqsParentDirPath
+        if(fastqsDirName in EMPTY_VALUES)
             if(!fastqsParentDirPath.contains(','))
                 return file(fastqsParentDirPath)
-            return Arrays.asList(glob.split(',')).collect { file(it) }
+            return Arrays.asList(fastqsParentDirPath.split(',')).collect { file(it) }
         return file(Paths.get(fastqsParentDirPath, fastqsDirName))
     }
 
