@@ -380,6 +380,40 @@ workflow cellranger_count_libraries {
 
 }
 
+workflow cellranger_count_demuxlet {
+    include {
+        demuxlet as DEMUXLET;
+    } from './workflows/popscle' params(params)
+    include {
+        SC__CELLRANGER__COUNT as CELLRANGER_COUNT;
+    } from './src/cellranger/processes/count'
+    if (params.sc.cellranger.count.fastqs instanceof Map) {
+        // Remove default key
+        Channel.from(params.sc.cellranger.count.fastqs.findAll {
+            it.key != 'default' 
+        }.collect { k, v -> 
+            // Split possible multiple file paths
+            if(v.contains(',')) {
+                v = Arrays.asList(v.split(',')).collect { fqs -> file(fqs) }
+            } else {
+                v = file(v)
+            }
+            tuple(k, v) 
+        })
+        // Group fastqs per sample
+        .groupTuple()
+        .map {
+            it -> tuple(it[0], *it[1])
+        }
+        .set { fastq_data }           
+    }
+    data = CELLRANGER_COUNT(
+        params.sc.cellranger.count.transcriptome,
+        fastq_data
+    )
+    DEMUXLET(data)
+}
+
 workflow freemuxlet {
     include {
         freemuxlet as FREEMUXLET;
