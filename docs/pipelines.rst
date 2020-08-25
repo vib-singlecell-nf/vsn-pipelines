@@ -156,6 +156,107 @@ Input parameters are specified within the config file:
 * ``params.sc.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
 * ``params.sc.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
 
+**cellranger_count_metadata**
+-----------------------------
+
+Given the data stored as:
+
+.. code:: bash
+
+    MKFASTQ_ID_SEQ_RUN1
+    |-- MAKE_FASTQS_CS
+     -- outs
+        |-- fastq_path
+            |-- HFLC5BBXX
+                |-- test_sample1
+                |   |-- sample1_S1_L001_I1_001.fastq.gz
+                |   |-- sample1_S1_L001_R1_001.fastq.gz
+                |   |-- sample1_S1_L001_R2_001.fastq.gz
+                |   |-- sample1_S1_L002_I1_001.fastq.gz
+                |   |-- sample1_S1_L002_R1_001.fastq.gz
+                |   |-- sample1_S1_L002_R2_001.fastq.gz
+                |   |-- sample1_S1_L003_I1_001.fastq.gz
+                |   |-- sample1_S1_L003_R1_001.fastq.gz
+                |   |-- sample1_S1_L003_R2_001.fastq.gz
+                |-- test_sample2
+                |   |-- sample2_S2_L001_I1_001.fastq.gz
+                |   |-- sample2_S2_L001_R1_001.fastq.gz
+                |   |-- ...
+            |-- Reports
+            |-- Stats
+            |-- Undetermined_S0_L001_I1_001.fastq.gz
+            ...
+            -- Undetermined_S0_L003_R2_001.fastq.gz
+    MKFASTQ_ID_SEQ_RUN2
+    |-- MAKE_FASTQS_CS
+     -- outs
+        |-- fastq_path
+            |-- HFLY8GGLL
+                |-- test_sample1
+                |   |-- ...
+                |-- test_sample2
+                |   |-- ...
+            |-- ...
+
+
+and a metadata table:
+
+.. list-table:: Minimally Required Metadata Table
+    :widths: 10 30 10 10 10
+    :header-rows: 1
+
+    * - sample_name
+      - fastqs_parent_dir_path
+      - fastqs_dir_name
+      - fastqs_sample_prefix
+      - expect_cells
+    * - Sample1_Bio_Rep1
+      - MKFASTQ_ID_SEQ_RUN1/outs/fastq_path/HFLY8GGLL
+      - test_sample1
+      - sample1
+      - 5000
+    * - Sample1_Bio_Rep1
+      - MKFASTQ_ID_SEQ_RUN2/outs/fastq_path/HFLC5BBXX
+      - test_sample1
+      - sample1
+      - 5000
+    * - Sample1_Bio_Rep2
+      - MKFASTQ_ID_SEQ_RUN1/outs/fastq_path/HFLY8GGLL
+      - test_sample2
+      - sample2
+      - 5000
+    * - Sample1_Bio_Rep2
+      - MKFASTQ_ID_SEQ_RUN2/outs/fastq_path/HFLC5BBXX
+      - test_sample2
+      - sample2
+      - 5000
+
+Optional columns:
+
+- ``short_uuid``: ``sample_name`` will be prefix by this value. This should be the same between sequencing runs of the same biological replicate 
+
+and a config:
+
+.. code:: bash
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile cellranger_count_metadata \
+       > nextflow.config
+
+and a workflow run command:
+
+.. code:: bash
+
+    nextflow run \
+        ~/vib-singlecell-nf/vsn-pipelines \
+        -entry cellranger_count_metadata
+
+The workflow will run Cell Ranger `count` on 2 samples, each using the 2 sequencing runs.
+
+NOTES:
+
+- If ``fastqs_dir_name`` does not exist, set it to ``none``
 
 ----
 
