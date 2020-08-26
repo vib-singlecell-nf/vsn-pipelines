@@ -28,7 +28,10 @@ process SC__DIRECTS__SELECT_DEFAULT_CLUSTERING {
             ${sampleId}.SC__DIRECTS__SELECT_DEFAULT_CLUSTERING.loom \
             ${(processParams.containsKey('fromMinClusterSize')) ? '--from-min-cluster-size ' + processParams.fromMinClusterSize : ''} \
             ${(processParams.containsKey('toMinClusterSize')) ? '--to-min-cluster-size ' + processParams.toMinClusterSize : ''} \
-            ${(processParams.containsKey('byMinClusterSize')) ? '--by-min-cluster-size ' + processParams.byMinClusterSize : ''}
+            ${(processParams.containsKey('byMinClusterSize')) ? '--by-min-cluster-size ' + processParams.byMinClusterSize : ''} \
+            ${(processParams.containsKey('fromMinSamples')) ? '--from-min-samples ' + processParams.fromMinSamples : ''} \
+            ${(processParams.containsKey('toMinSamples')) ? '--to-min-samples ' + processParams.toMinSamples : ''} \
+            ${(processParams.containsKey('byMinSamples')) ? '--by-min-samples ' + processParams.byMinSamples : ''}
         """
 }
 

@@ -49,6 +49,30 @@ parser.add_argument(
     help='The end value of the min_cluster_size to test'
 )
 
+parser.add_argument(
+    "-x", "--from-min-samples",
+    type=int,
+    dest="from_min_samples",
+    default=5,
+    help='The start value of the min_samples to test'
+)
+
+parser.add_argument(
+    "-y", "--to-min-samples",
+    type=int,
+    dest="to_min_samples",
+    default=100,
+    help='The end value of the min_samples to test'
+)
+
+parser.add_argument(
+    "-z", "--by-min-samples",
+    type=int,
+    dest="by_min_samples",
+    default=5,
+    help='The end value of the min_samples to test'
+)
+
 args = parser.parse_args()
 
 
@@ -82,7 +106,7 @@ clusterings = loom.ca.Clusterings
 
 grid_res = []
 for min_cluster_size in range(args.from_min_cluster_size, args.to_min_cluster_size + args.by_min_cluster_size, args.by_min_cluster_size):
-    for min_samples in range(args.from_min_cluster_size, args.to_min_cluster_size + args.by_min_cluster_size, args.by_min_cluster_size):
+    for min_samples in range(args.from_min_samples, args.to_min_samples + args.by_min_samples, args.by_min_samples):
         clusterer = hdbscan.HDBSCAN(
             min_cluster_size=min_cluster_size,
             min_samples=min_samples,
