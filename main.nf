@@ -253,7 +253,7 @@ workflow single_sample_scrublet {
         data.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
     )
-    // Annotate the final processed file with doublet information infered from Scrublet
+    // Annotate the final processed file with doublet information inferred from Scrublet
     ANNOTATE_BY_CELL_METADATA(
         SCANPY__SINGLE_SAMPLE.out.final_processed_data.map {
             it -> tuple(it[0], it[1])

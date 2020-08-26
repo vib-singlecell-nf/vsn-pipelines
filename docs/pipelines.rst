@@ -112,6 +112,13 @@ Runs the ``single_sample`` workflow above together with the Scrublet workflow.
 .. |Single-sample Scrublet Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample_scrublet.svg?sanitize=true
 
 
+The pipelines generate the following relevant files for each sample:
+
+- `out/data/*.SINGLE_SAMPLE_SCRUBLET.loom`: `SCope`-ready loom file containing resulting loom file from a `single_sample` workflow but with additional metadata (doublet scores and predicted doublet for the cells) based on Scrublet run.
+- `out/data/scrublet/*.SC__SCRUBLET__DOUBLET_DETECTION.ScrubletObject.pklz`: Pickled file containing the Scrublet object.
+- `out/data/scrublet/*.SCRUBLET.SC__ANNOTATE_BY_CELL_METADATA.h5ad`: H5ad file with raw data and doublets annotated.
+- `out/data/scrublet/*.SINGLE_SAMPLE_SCRUBLET.loom`: H5ad file resulting from a ``single_sample`` workflow run and with doublets (inferred from Scrublet) removed.
+
 ----
 
 **scenic** |scenic|
