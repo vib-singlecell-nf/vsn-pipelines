@@ -7,6 +7,7 @@ import loompy as lp
 import numpy as np
 import os
 import pandas as pd
+from pandas.core.dtypes.dtypes import CategoricalDtypeType
 import scanpy as sc
 import zlib
 
@@ -77,6 +78,8 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY = "rank_genes_groups"
+
 # Define the arguments properly
 FILE_PATHS_IN = args.input
 FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
@@ -114,6 +117,8 @@ try:
 except IOError:
     raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATHS_IN[0])[0]))
 
+CELL_IDS = adata.obs.sample_id.index
+
 #####################
 # Global Attributes #
 #####################
@@ -143,13 +148,32 @@ attrs_metadata["metrics"] = []
 attrs_metadata["annotations"] = []
 
 
-def is_annotation(adata, column_attr_key):
-    if type(adata.obs[column_attr_key].dtype) == pd.core.dtypes.dtypes.CategoricalDtype and column_attr_key != adata.uns["rank_genes_groups"]["params"]["groupby"]:
-        return True
+ANNOTATION_MAX_UNIQUE_VALUES = 1024
+
+
+def is_metric(column_attr_key, values):
+    uniq_values = np.unique(values)
     if column_attr_key.startswith('n_') or column_attr_key.startswith('num_') or column_attr_key.startswith('pct_') or column_attr_key.startswith('percent_'):
+        return True
+    if issubclass(values.dtype.type, np.integer):
+        if len(uniq_values) > ANNOTATION_MAX_UNIQUE_VALUES:
+            return True
+    if issubclass(values.dtype.type, np.floating):
+        return True
+    return False
+
+
+def is_annotation(column_attr_key, values):
+    uniq_values = np.unique(values)
+    if issubclass(values.dtype.type, CategoricalDtypeType):
+        return True
+    if issubclass(values.dtype.type, np.bool_):
+        return True
+    if issubclass(values.dtype.type, np.integer):
+        if len(uniq_values) < ANNOTATION_MAX_UNIQUE_VALUES:
+            return True
         return False
-    unique_values = np.unique(adata.obs[column_attr_key].values)
-    if len(unique_values) < 500:
+    if values.dtype == np.object and len(values.dtype) == 0 and len(uniq_values) < ANNOTATION_MAX_UNIQUE_VALUES:
         return True
     return False
 
@@ -157,45 +181,55 @@ def is_annotation(adata, column_attr_key):
 # Populate
 for column_attr_key in adata.obs.keys():
     # Don't store the clustering as annotation
-    if is_annotation(adata=adata, column_attr_key=column_attr_key):
-        attrs_metadata["annotations"].append(
-            {
-                "name": column_attr_key,
-                "values": np.unique(adata.obs[column_attr_key].values).astype(str).tolist()
-            }
-        )
-    else:
-        attrs_metadata["metrics"].append(
+    if column_attr_key.lower().startswith('cell_id') or column_attr_key.lower().startswith('cellid'):
+        continue
+
+    vals = adata.obs[column_attr_key].values
+    uniq_vals = np.unique(vals)
+
+    if is_metric(column_attr_key, vals):
+        attrs_metadata["metrics"] = attrs_metadata["metrics"] + [
             {
                 "name": column_attr_key
             }
-        )
-    col_attrs[column_attr_key] = np.array(adata.obs[column_attr_key].values)
+        ]
+    elif is_annotation(column_attr_key, vals):
+        # Convert boolean to [0,1] range so that it matches with values in column attribute
+        _uniq_vals = uniq_vals.astype(int) if issubclass(vals.dtype.type, np.bool_) else uniq_vals
+        attrs_metadata["annotations"] = attrs_metadata["annotations"] + [
+            {
+                "name": column_attr_key,
+                "values": list(map(lambda x: str(x), _uniq_vals.tolist()))
+            }
+        ]
+
+    col_attrs[column_attr_key] = np.array(vals)
 
 # EMBEDDINGS
 
 default_embedding = pd.DataFrame(
-    index=adata.raw.obs_names
+    index=CELL_IDS
 )
 embeddings_x = pd.DataFrame(
-    index=adata.raw.obs_names
+    index=CELL_IDS
 )
 embeddings_y = pd.DataFrame(
-    index=adata.raw.obs_names
+    index=CELL_IDS
 )
 
-default_embedding["_X"] = adata.obsm['X_umap'][:, 0]
-default_embedding["_Y"] = adata.obsm['X_umap'][:, 1]
+if 'X_umap' in adata.obsm.keys():
+    default_embedding["_X"] = adata.obsm['X_umap'][:, 0]
+    default_embedding["_Y"] = adata.obsm['X_umap'][:, 1]
 
-embeddings_x["-1"] = adata.obsm['X_umap'][:, 0]
-embeddings_y["-1"] = adata.obsm['X_umap'][:, 1]
+    embeddings_x["-1"] = adata.obsm['X_umap'][:, 0]
+    embeddings_y["-1"] = adata.obsm['X_umap'][:, 1]
 
-attrs_metadata['embeddings'] = [
-    {
-        "id": -1,
-        "name": f"HVG UMAP"
-    }
-]
+    attrs_metadata['embeddings'] = [
+        {
+            "id": -1,
+            "name": f"HVG UMAP"
+        }
+    ]
 
 if 'X_tsne' in adata.obsm.keys():
     embedding_id = embeddings_x.shape[1] - 1
@@ -230,16 +264,21 @@ col_attrs = {**col_attrs, **col_attrs_embeddings}
 # CLUSTERINGS
 
 clusterings = pd.DataFrame(
-    index=adata.raw.obs_names
+    index=CELL_IDS
 )
 attrs_metadata["clusterings"] = []
 
 for adata_idx in range(0, len(FILE_PATHS_IN)):
 
+    # Only add clustering information if rank_genes_group has been computed
+
+    if SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY not in adatas[adata_idx].uns:
+        continue
+
     clustering_id = adata_idx
-    clustering_algorithm = adatas[adata_idx].uns["rank_genes_groups"]["params"]["groupby"]
+    clustering_algorithm = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]["params"]["groupby"]
     clustering_resolution = adatas[adata_idx].uns[clustering_algorithm]["params"]["resolution"]
-    cluster_marker_method = adatas[adata_idx].uns['rank_genes_groups']["params"]["method"]
+    cluster_marker_method = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]["params"]["method"]
     num_clusters = len(np.unique(adatas[adata_idx].obs[clustering_algorithm]))
 
     # Data
@@ -288,6 +327,10 @@ row_attrs = {
 # CLUSTER MARKERS
 
 for adata_idx in range(0, len(FILE_PATHS_IN)):
+
+    if SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY not in adatas[adata_idx].uns:
+        continue
+
     clustering_id = attrs_metadata['clusterings'][adata_idx]["id"]
     num_clusters = len(attrs_metadata['clusterings'][adata_idx]["clusters"])
 
@@ -308,9 +351,9 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
     # Populate
     for i in range(0, num_clusters):
         i = str(i)
-        gene_names = adatas[adata_idx].uns['rank_genes_groups']['names'][i]
-        pvals_adj = adatas[adata_idx].uns['rank_genes_groups']['pvals_adj'][i]
-        logfoldchanges = adatas[adata_idx].uns['rank_genes_groups']['logfoldchanges'][i]
+        gene_names = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]['names'][i]
+        pvals_adj = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]['pvals_adj'][i]
+        logfoldchanges = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]['logfoldchanges'][i]
         num_genes = len(gene_names)
         sig_genes_mask = pvals_adj < args.markers_fdr_threshold
         deg_genes_mask = np.logical_and(
