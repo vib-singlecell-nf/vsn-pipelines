@@ -237,12 +237,45 @@ workflow single_sample_scrublet {
     include {
         DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL;
     } from "./src/scrublet/workflows/doublet_removal" params(params)
+    include {
+        ANNOTATE_BY_CELL_METADATA;
+    } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCRUBLET;
+    } from './src/utils/workflows/utils.nf' params(params)
+    include {
+        SC__H5AD_TO_LOOM
+    } from './src/utils/processes/h5adToLoom.nf' params(params)
 
     data = getDataChannel | SC__FILE_CONVERTER
     SCANPY__SINGLE_SAMPLE( data )
     SCRUBLET__DOUBLET_REMOVAL(
         data.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
+    )
+    // Annotate the final processed file with doublet information infered from Scrublet
+    ANNOTATE_BY_CELL_METADATA(
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data.map {
+            it -> tuple(it[0], it[1])
+        },
+        SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection.map {
+            it -> tuple(it[0], it[1])
+        },
+        "scrublet"
+    )
+    SC__H5AD_TO_LOOM(
+        SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
+            it -> tuple(it[0], it[1])
+        }.join(
+            ANNOTATE_BY_CELL_METADATA.out
+        )
+    )
+    PUBLISH_SINGLE_SAMPLE_SCRUBLET(
+        SC__H5AD_TO_LOOM.out,
+        "SINGLE_SAMPLE_SCRUBLET",
+        "loom",
+        null,
+        false
     )
 
 }
@@ -456,7 +489,7 @@ workflow cellranger_multi_sample {
     MULTI_SAMPLE(
         data.map {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
-            }
+        }
     )
 
 }
