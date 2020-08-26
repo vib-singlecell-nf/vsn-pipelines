@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the utils module:
 include {
-    ANNOTATE_BY_CELL_METADATA
+    ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA;
 } from '../../utils/workflows/annotateByCellMetadata.nf' params(params)
 include {
     FILTER_BY_CELL_METADATA
@@ -11,6 +11,7 @@ include {
 include {
     UTILS__REPORT_TO_HTML
 } from '../../utils/processes/reports.nf' params(params)
+
 include {
     PUBLISH as PUBLISH_SCRUBLET_OBJECT;
     PUBLISH as PUBLISH_H5AD_DOUBLETS_ANNOTATED;
@@ -32,7 +33,7 @@ workflow DOUBLET_REMOVAL {
     take:
         // Expects (sampleId, adataRaw, adataWithHvgInfo, stashedParams || null, nPrinComps || null)
         data
-        // Expects (sampleId, adataWithEmbeddings)
+        // Expects (sampleId, adataWithEmbeddings, stashedParams)
         finalProcessedData
 
     main:
@@ -59,6 +60,7 @@ workflow DOUBLET_REMOVAL {
             },
             "scrublet"
         )
+
         // Publish
         PUBLISH_H5AD_DOUBLETS_ANNOTATED(
             ANNOTATE_BY_CELL_METADATA.out,
@@ -72,6 +74,7 @@ workflow DOUBLET_REMOVAL {
             ANNOTATE_BY_CELL_METADATA.out,
             "scrublet"
         )
+
         // Publish
         PUBLISH_H5AD_DOUBLETS_REMOVED(
             FILTER_BY_CELL_METADATA.out,
@@ -99,6 +102,7 @@ workflow DOUBLET_REMOVAL {
         )
 
     emit:
+        doublet_detection = SC__SCRUBLET__DOUBLET_DETECTION.out
         data_annotated = ANNOTATE_BY_CELL_METADATA.out
         data_doublets_removed = FILTER_BY_CELL_METADATA.out
         report = SC__SCRUBLET__DOUBLET_DETECTION_REPORT.out
