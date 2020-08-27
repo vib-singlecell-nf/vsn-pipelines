@@ -118,7 +118,7 @@ elif args.method == 'aio':
                 metadata.index.isin(adata.obs.index.values))
         ]
         # Check if all elements from the metadata subset are present in the given input file (h5ad file)
-        if np.sum(np.isin(adata.obs.index, metadata_subset)) != len(adata.obs):
+        if np.sum(np.isin(adata.obs.index, metadata_subset.index)) != len(adata.obs):
             raise Exception(f"Make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
 
         # Annotate
