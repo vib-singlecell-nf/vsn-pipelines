@@ -151,8 +151,10 @@ Note: the file name of ``cellMetaDataFilePath`` is required to contain the sampl
 If ``aio`` used, the following additional params are required:
 
 - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **can** have unique values; if it's not the case, it's important that the combination of the values from the ``indexColumnName`` and the ``sampleColumnName`` are unique. 
-- ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information.
+- ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
 - ``annotationColumnNames`` is an array of columns names from ``cellMetaDataFilePath`` containing different annotation metadata to add.
+
+.. _`Input Data Formats`: https://vsn-pipelines.readthedocs.io/en/develop/pipelines.html#input-data-formats
 
 Sample-based metadata annotation
 --------------------------------
