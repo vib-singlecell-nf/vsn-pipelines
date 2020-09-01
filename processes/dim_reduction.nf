@@ -120,7 +120,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
 			${_processParams.getNCompsAsArgument(nComps)} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
-			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
+            --n-jobs ${task.cpus} \
 			${(processParams.containsKey('useFastTsne')) ? '--use-fast-tsne ' + processParams.useFastTsne : ''} \
 			$data \
 			"${sampleId}.SC__SCANPY__DIM_REDUCTION_${method}.${!isParamNull(stashedParams) ? uuid + '.' : ''}${processParams.off}"
