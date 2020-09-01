@@ -66,7 +66,7 @@ process SC__CELLRANGER__COUNT {
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-    label 'compute_resources__cellranger'
+    label 'compute_resources__cellranger_count'
 
     input:
 		path(transcriptome)

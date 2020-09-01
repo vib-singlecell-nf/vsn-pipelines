@@ -6,7 +6,7 @@ process SC__CELLRANGER__MKFASTQ {
 
 	publishDir "${params.global.outdir}/fastqs", saveAs: { outputF = file(it); "${outputF.getParent().getName()}/${outputF.name}" }, mode: 'link', overwrite: true
   	container toolParams.container
-    label 'compute_resources__cellranger'
+    label 'compute_resources__cellranger_mkfastq'
 
   	input:
 		file(csv)

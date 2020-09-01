@@ -8,8 +8,8 @@ if(!params.containsKey("test")) {
 
 process SC__CELLRANGER__PREPARE_FOLDER {
 
-    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.global.outdir}/data/raw/cellranger_fastq_folders", mode: 'symlink', overwrite: true
+    label 'compute_resources__minimal'
 
     input:
         tuple val(sampleId), val(fastqs)
