@@ -44,7 +44,8 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
                 row.fastqs_parent_dir_path,
                 row.fastqs_dir_name,
                 // Begin CellRanger parameters
-                row.expect_cells
+                row.containsKey("expect_cells") ? row.expect_cells : 'NULL',
+                row.containsKey("chemistry") ? row.chemistry : 'NULL'
             )
         }.groupTuple(
             by: 0
@@ -56,7 +57,14 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
                     it[2],
                     it[3]
                 ),
-                *it[4].unique())
+                *it[4..(it.size()-1)].collect { 
+                    arg -> 
+                    argBySample = arg.unique()
+                    if(argBySample.size() != 1)
+                        throw new Exception("Multiple values of a Cell Ranger parameter detected for sample: "+ it[0])
+                    return argBySample[0]
+                }
+            )
         }
         SC__CELLRANGER__COUNT_WITH_METADATA( transcriptome, data )
 
