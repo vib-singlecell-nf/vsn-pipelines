@@ -250,7 +250,9 @@ and a metadata table:
 
 Optional columns:
 
-- ``short_uuid``: ``sample_name`` will be prefix by this value. This should be the same between sequencing runs of the same biological replicate 
+- ``short_uuid``: ``sample_name`` will be prefix by this value. This should be the same between sequencing runs of the same biological replicate
+- ``expect_cells``: This number will be used as argument for the ``--expect-cells`` parameter in ``cellranger count`.
+- ``chemistry``: This chemistry will be used as argument for the ``--chemistry`` parameter in ``cellranger count`.
 
 and a config:
 
