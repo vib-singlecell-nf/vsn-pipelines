@@ -683,3 +683,48 @@ workflow cell_annotate {
     )
 
 }
+
+workflow cell_annotate_filter {
+
+    include {
+        STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA;
+    } from './src/utils/workflows/annotateByCellMetadata' params(params)
+    include {
+        FILTER_BY_CELL_METADATA
+    } from './src/utils/workflows/filterByCellMetadata' params(params)
+    include {
+        PUBLISH as PUBLISH_H5AD_CELL_ANNOTATED;
+        PUBLISH as PUBLISH_H5AD_CELL_FILTERED;
+    } from "./src/utils/workflows/utils" params(params)
+
+    // Run
+    getDataChannel | \
+        SC__FILE_CONVERTER
+
+    // Annotate & publish
+    ANNOTATE_BY_CELL_METADATA( 
+        SC__FILE_CONVERTER.out, 
+        null,
+    )
+    PUBLISH_H5AD_CELL_ANNOTATED(
+        ANNOTATE_BY_CELL_METADATA.out,
+        "ANNOTATE_BY_CELL_METADATA",
+        "h5ad",
+        "utils",
+        false
+    )
+
+    // Filter & publish
+    FILTER_BY_CELL_METADATA(
+        ANNOTATE_BY_CELL_METADATA.out,
+        null
+    )
+    PUBLISH_H5AD_CELL_FILTERED(
+        FILTER_BY_CELL_METADATA.out,
+        "FILTER_BY_CELL_METADATA",
+        "h5ad",
+        "utils",
+        false
+    )
+
+}

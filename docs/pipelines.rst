@@ -420,7 +420,73 @@ Now we can run it with the following command:
 
     nextflow -C nextflow.config \
        run ~/vib-singlecell-nf/vsn-pipelines \
-       -entry cell_annotate
+       -entry cell_annotate \
+       > nextflow.config
+
+**cell_annotate_filter**
+------------------------
+
+Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided TSV metadata files following by a cell-based filtering.
+We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
+about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section and `Cell-based metadata filtering`_ section.
+
+.. _`Cell-based metadata annotation`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-annotation
+.. _`Cell-based metadata filtering`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-filtering
+
+First, generate the config :
+
+.. code:: groovy
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile tenx,utils_cell_annotate,utils_cell_filter,singularity \
+       > nextflow.config
+
+Make sure the following parts of the generated config are properly set:
+
+.. code:: bash
+
+    [...]
+    data {
+      tenx {
+         cellranger_mex = '~/out/counts/*/outs/'
+      }
+    }
+    sc {
+        scanpy {
+            container = 'vibsinglecellnf/scanpy:0.5.0'
+        }
+        cell_annotate {
+            off = 'h5ad'
+            method = 'obo'
+            indexColumnName = 'BARCODE'
+            cellMetaDataFilePath = "~/out/data/*.best"
+            sampleSuffixWithExtension = '_demuxlet.best'
+            annotationColumnNames = ['DROPLET.TYPE', 'NUM.SNPS', 'NUM.READS', 'SNG.BEST.GUESS']
+        }
+        cell_filter {
+            off = 'h5ad'
+            method = 'internal'
+            filters = [
+                [
+                    id:'NO_DOUBLETS',
+                    sampleColumnName:'sample_id',
+                    filterColumnName:'DROPLET.TYPE',
+                    valuesToKeepFromFilterColumn: ['SNG']
+                ]
+            ]
+        }
+        [...]
+    }
+    [...]
+
+Now we can run it with the following command:
+
+.. code:: groovy
+
+    nextflow -C nextflow.config \
+       run ~/vib-singlecell-nf/vsn-pipelines \
+       -entry cell_filter
 
 Input Data Formats
 *******************

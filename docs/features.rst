@@ -175,7 +175,7 @@ If ``obo`` is used, the following params are required:
   - **Note**: the file name(s) of ``cellMetaDataFilePath`` is/are required to contain the sample ID(s).
 
 - ``sampleSuffixWithExtension`` is the suffix used to extract the sample ID from the file name(s) of ``cellMetaDataFilePath``. The suffix should be the part after the sample name in the file path.
-- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
+- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values.
 
 .. _`Input Data Formats`: https://vsn-pipelines.readthedocs.io/en/develop/pipelines.html#input-data-formats
 
@@ -217,6 +217,79 @@ Then, the following parameters should be updated to use the module feature:
         - ...
 
 Sample-annotating the samples using this system will allow any user to query all the annotation using the SCope portal. This is especially relevant when samples needs to be compared across specific annotations (check compare tab with SCope).
+
+Cell-based metadata filtering
+-----------------------------
+
+There are 2 ways of using this feature: either when running an end-to-end pipeline (e.g.: ``single_sample``, ``harmony``, ``bbknn``, ...) or on its own as a independent workflow.
+
+The ``utils_cell_filter`` profile is required when generating the config file. This profile will add the following part:
+
+.. code:: groovy
+
+    params {
+        sc {
+            cell_filter {
+                off = 'h5ad'
+                method = ''
+                filters = [
+                    [
+                        id: '',
+                        sampleColumnName: '',
+                        filterColumnName: '',
+                        valuesToKeepFromFilterColumn: ['']
+                    ]
+                ]
+            }
+        }
+    }
+
+Part of an end-to-end pipeline
+******************************
+
+For more detailed information about the parameters to set in ``params.sc.cell_filter``, please check the `cell_filter parameter details <Parameters of cell_filter>`_ section below.
+
+As an independent workflow
+**************************
+
+Please check the `cell_filter`_ workflow or `cell_annotate_filter`_ workflow to perform cell-based annotation and cell-based filtering sequentially.
+
+.. _`cell_filter`: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#cell_filter
+.. _`cell_annotate_filter`: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#cell_annotate_filter
+
+Parameters of cell_filter
+*************************
+
+Two methods (``params.sc.cell_filter.method``) are available:
+
+- ``internal``
+- ``external``
+
+If you have a single file containing the metadata information of all your samples, use ``external`` method otherwise use ``internal``.
+
+For both methods, here are the mandatory params to set:
+
+- ``off`` should be set to ``h5ad``
+- ``method`` choose either ``internal`` or ``external``
+- ``filters`` is a List of Maps where each Map is required to have the following parameters:
+  - ``id`` is a short identifier for the filter
+  - ``valuesToKeepFromFilterColumn`` is array of values from the ``filterColumnName`` that should be kept (other values will be filtered out).
+
+If ``internal`` used, the following additional params are required:
+
+- ``filters`` is a List of Maps where each Map is required to have the following parameters:
+  - ``sampleColumnName`` is the column name containing the sample ID/name information. It should exist in the ``obs`` column attribute of the h5ad.
+  - ``filterColumnName`` is the column name that will be used to filter out cells.  It should exist in the ``obs`` column attribute of the h5ad.
+
+If ``external`` used, the following additional params are required:
+
+- ``filters`` is a List of Maps where each Map is required to have the following parameters:
+
+  - ``cellMetaDataFilePath`` is a file path pointing to a single TSV file (with header) with at least 3 columns: a column containing all the cell IDs, another containing the sample ID/name information, and a column to use for the filtering.
+  - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
+  - ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
+  - ``filterColumnName`` is the column name from ``cellMetaDataFilePath`` which be used to filter out cells.
+
 
 Multi-sample parameters
 ------------------------
