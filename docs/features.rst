@@ -135,18 +135,30 @@ Two methods (``params.sc.cell_annotate.method``) are available:
 
 If you have a single file containing the metadata information of all your samples, use ``aio`` method otherwise use ``obo``.
 
-For both methods, here are the mandatory params to be set:
+For both methods, here are the mandatory params to set:
 
 - ``off`` should be set to ``h5ad``
 - ``method`` choose either ``obo`` or ``aio``
-- ``cellMetaDataFilePath`` is a TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+- ``annotationColumnNames`` is an array of columns names from ``cellMetaDataFilePath`` containing different annotation metadata to add.
+
+If ``aio`` used, the following additional params are required:
+
+- ``cellMetaDataFilePath`` is a file path pointing to a single TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **can** have unique values; if it's not the case, it's important that the combination of the values from the ``indexColumnName`` and the ``sampleColumnName`` are unique. 
+- ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
 
 If ``obo`` is used, the following params are required:
 
-- ``sampleSuffixWithExtension`` is the suffix used to extract the sample ID from the file name of ``cellMetaDataFilePath`` i.e.: it is the suffix after the sample name in the file path.
+- ``cellMetaDataFilePath``
+
+  - In multi-sample mode, is a file path containing a glob pattern. The target file paths should each pointing to a TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+  - In single-sample mode, is a file path pointing to a single TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+  - **Note**: the file name(s) of ``cellMetaDataFilePath`` is/are required to contain the sample ID(s).
+
+- ``sampleSuffixWithExtension`` is the suffix used to extract the sample ID from the file name(s) of ``cellMetaDataFilePath``. The suffix should be the part after the sample name in the file path.
 - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
 
-Note: the file name of ``cellMetaDataFilePath`` is required to contain the sample ID.
+.. _`Input Data Formats`: https://vsn-pipelines.readthedocs.io/en/develop/pipelines.html#input-data-formats
 
 If ``aio`` used, the following additional params are required:
 
