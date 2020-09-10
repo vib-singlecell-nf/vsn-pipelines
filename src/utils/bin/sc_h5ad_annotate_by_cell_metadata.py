@@ -105,6 +105,11 @@ if args.method == 'obo':
         )
     if args.annotation_column_names is not None:
         metadata = metadata.filter(items=args.annotation_column_names)
+
+    # Check if all elements from the metadata subset are present in the given input file (h5ad file)
+    if np.sum(np.isin(adata.obs.index, metadata.index)) != len(adata.obs):
+        raise Exception(f"Make sure the cell IDs from the given input h5ad {FILE_PATH_IN} exist in the column {args.index_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+
     adata.obs = adata.obs.join(
         other=metadata
     )
