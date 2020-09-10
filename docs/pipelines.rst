@@ -251,8 +251,8 @@ and a metadata table:
 Optional columns:
 
 - ``short_uuid``: ``sample_name`` will be prefix by this value. This should be the same between sequencing runs of the same biological replicate
-- ``expect_cells``: This number will be used as argument for the ``--expect-cells`` parameter in ``cellranger count`.
-- ``chemistry``: This chemistry will be used as argument for the ``--chemistry`` parameter in ``cellranger count`.
+- ``expect_cells``: This number will be used as argument for the ``--expect-cells`` parameter in ``cellranger count``.
+- ``chemistry``: This chemistry will be used as argument for the ``--chemistry`` parameter in ``cellranger count``.
 
 and a config:
 
@@ -365,6 +365,62 @@ The output is a loom file with the results embedded.
 .. |mnnCorrect Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/mnncorrect.svg?sanitize=true
 
 ----
+
+Utility Pipelines
+*****************
+
+Contrary to the aformentioned pipelines, these are not end-to-end. They are used to perfom small incremental processing steps.
+
+**cell_annotate**
+-----------------
+
+Runs the ``cell_annotate`` workflow which will perform a cell-based annotation of the data using a set of provided TSV metadata files.
+We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
+about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section.
+
+.. _`Cell-based metadata annotation`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-annotation
+
+First, generate the config :
+
+.. code:: groovy
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile tenx,utils_cell_annotate,singularity
+
+Make sure the following parts of the generated config are properly set:
+
+.. code:: bash
+
+    [...]
+    data {
+      tenx {
+         cellranger_mex = '~/out/counts/*/outs/'
+      }
+    }
+    sc {
+        scanpy {
+            container = 'vibsinglecellnf/scanpy:0.5.0'
+        }
+        cell_annotate {
+            off = 'h5ad'
+            method = 'obo'
+            indexColumnName = 'BARCODE'
+            cellMetaDataFilePath = "~/out/data/*.best"
+            sampleSuffixWithExtension = '_demuxlet.best'
+            annotationColumnNames = ['DROPLET.TYPE', 'NUM.SNPS', 'NUM.READS', 'SNG.BEST.GUESS']
+        }
+        [...]
+    }
+    [...]
+
+Now we can run it with the following command:
+
+.. code:: groovy
+
+    nextflow -C nextflow.config \
+       run ~/vib-singlecell-nf/vsn-pipelines \
+       -entry cell_annotate
 
 Input Data Formats
 *******************

@@ -110,7 +110,26 @@ Currently, only the Scanpy related pipelines have this feature implemented.
 Cell-based metadata annotation
 ------------------------------
 
-The profile ``utils_cell_annotate`` should be added when generating the main config using ``nextflow config``. This will add the following entry in the config:
+There are 2 ways of using this feature: either when running an end-to-end pipeline (e.g.: ``single_sample``, ``harmony``, ``bbknn``, ...) or on its own as a independent workflow.
+
+Part of an and-to-end pipeline
+******************************
+
+The profile ``utils_cell_annotate`` should be added along with the other profiles when generating the main config using the ``nextflow config`` command.
+
+For more detailed information about those parameters, please check the `cell_annotate parameter details <Parameters of cell_annotate_>`_ section below.
+
+As an independent workflow
+**************************
+
+Please check the `cell_annotate`_ workflow.
+
+.. _`cell_annotate`: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#nemesh
+
+Parameters of cell_annotate
+***************************
+
+The ``utils_cell_annotate`` profile is adding the following part to the config:
 
 .. code:: groovy
 
@@ -160,13 +179,6 @@ If ``obo`` is used, the following params are required:
 
 .. _`Input Data Formats`: https://vsn-pipelines.readthedocs.io/en/develop/pipelines.html#input-data-formats
 
-If ``aio`` used, the following additional params are required:
-
-- ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **can** have unique values; if it's not the case, it's important that the combination of the values from the ``indexColumnName`` and the ``sampleColumnName`` are unique. 
-- ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
-- ``annotationColumnNames`` is an array of columns names from ``cellMetaDataFilePath`` containing different annotation metadata to add.
-
-.. _`Input Data Formats`: https://vsn-pipelines.readthedocs.io/en/develop/pipelines.html#input-data-formats
 
 Sample-based metadata annotation
 --------------------------------

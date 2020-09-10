@@ -18,11 +18,18 @@ include {
 workflow ANNOTATE_BY_CELL_METADATA {
 
     take:
-        // Expects (sampleId, h5ad) [Channel]
+        // Expects (sampleId, h5ad) : Channel
         data
-        // Expects (sampleId, tsv) [Channel || null]
+        // Expects (sampleId, tsv) : (Channel || null)
         metadata
-        // Expects name of tool ([string] || null)
+        // Describes: name of tool
+        // Expects tool: (string || null)
+        // Values
+        // - tool != null:
+        //   - The given tool is performing itself a cell-based annotation
+        //   - params.sc[tool] should exist
+        // - tool == null:
+        //   - params.sc.cell_annotate should exist
         tool
 
     main:
