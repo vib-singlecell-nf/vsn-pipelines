@@ -653,3 +653,33 @@ workflow sra_cellranger_bbknn_scenic {
     )    
 
 }
+
+/**
+ * Utility workflows
+ */
+
+workflow cell_annotate {
+
+    include {
+        STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA;
+    } from './src/utils/workflows/annotateByCellMetadata' params(params)
+    include {
+        PUBLISH;
+    } from "./src/utils/workflows/utils" params(params)
+
+    // Run
+    getDataChannel | \
+        SC__FILE_CONVERTER
+    ANNOTATE_BY_CELL_METADATA( 
+        SC__FILE_CONVERTER.out, 
+        null,
+    )
+    PUBLISH(
+        ANNOTATE_BY_CELL_METADATA.out,
+        "ANNOTATE_BY_CELL_METADATA",
+        "h5ad",
+        "utils",
+        false
+    )
+
+}
