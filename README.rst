@@ -112,7 +112,7 @@ If VSN-Pipelines is useful for your research, consider citing:
     :target: https://vsn-pipelines.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |Nextflow| image:: https://img.shields.io/badge/nextflow-19.12.0-brightgreen.svg
+.. |Nextflow| image:: https://img.shields.io/badge/nextflow-20.04.1-brightgreen.svg
     :target: https://www.nextflow.io/
     :alt: Nextflow
 
