@@ -26,6 +26,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-e", "--cell-embeddings-index",
+    type=int,
+    dest="cell_embeddings_index",
+    default=0,
+    help='The index of the cell embeddings to use for the density-based spatial clustering.'
+)
+
+parser.add_argument(
     "-f", "--from-min-cluster-size",
     type=int,
     dest="from_min_cluster_size",
@@ -94,11 +102,16 @@ except IOError:
 ################################################################################
 # Process the data...
 
+CELL_EMBEDDINGS_INDEX = str(args.cell_embeddings_index)
+
+if CELL_EMBEDDINGS_INDEX not in loom.ca.Embeddings_X.dtype.names or CELL_EMBEDDINGS_INDEX not in loom.ca.Embeddings_Y.dtype.names:
+    raise Exception(f"The given cell embeddings index {args.cell_embeddings_index} does not exist in the embeddings of the given loom file {FILE_PATH_IN}.")
+
 # Get the cell embeddings
 md = json.loads(loom.attrs.MetaData)
 cell_embeddings = pd.DataFrame({
-    "_X": loom.ca.Embeddings_X['0'],
-    "_Y": loom.ca.Embeddings_Y['0']
+    "_X": loom.ca.Embeddings_X[CELL_EMBEDDINGS_INDEX],
+    "_Y": loom.ca.Embeddings_Y[CELL_EMBEDDINGS_INDEX]
 }, index=loom.ca.CellID)
 
 # Get the clusterings array
