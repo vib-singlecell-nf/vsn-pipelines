@@ -302,7 +302,7 @@ You'll just have to repeat the following structure for the parameters which you 
     params {
         sc {
             scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.0'
+            container = 'vibsinglecellnf/scanpy:0.5.2'
             filter {
                 report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
                 // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter
