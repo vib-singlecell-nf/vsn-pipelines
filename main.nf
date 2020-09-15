@@ -754,5 +754,46 @@ workflow cell_annotate_filter {
 
 }
 
+workflow cell_annotate_filter_and_sample_annotate {
+
+    main:
+        // Import
+        include {
+            SC__H5AD_BEAUTIFY;
+        } from './src/utils/processes/h5adUpdate.nf' params(params)
+        include {
+            hasMetadataFilePath;
+            SC__ANNOTATE_BY_SAMPLE_METADATA
+        } from './src/utils/processes/h5adAnnotate.nf' params(params)
+        include {
+            PUBLISH;
+        } from "./src/utils/workflows/utils" params(params)
+
+
+        // Run
+        out = cell_annotate_filter()
+
+        // Annotate cells based on an indexed sample-based metadata table
+        if(!params.sc.containsKey("sample_annotate"))
+            throw new Exception("VSN ERROR: The sample_annotate param is missing in params.sc.")
+
+        if (!hasMetadataFilePath(params.sc.sample_annotate)) {
+            throw new Exception("VSN ERROR: The metadataFilePath param is missing in sample_annotate.")
+        }
+        out = SC__ANNOTATE_BY_SAMPLE_METADATA( out )
+
+        if(params.sc.file_cleaner) {
+            out = SC__H5AD_BEAUTIFY( out )
+        }
+
+        PUBLISH(
+            out,
+            "CELL_ANNOTATE_FILTER_AND_SAMPLE_ANNOTATE",
+            "h5ad",
+            "utils",
+            false
+        )
+
+}
 
 }
