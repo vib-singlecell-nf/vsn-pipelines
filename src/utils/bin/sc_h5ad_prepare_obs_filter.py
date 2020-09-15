@@ -91,12 +91,12 @@ elif args.method == 'external':
         sep="\t"
     )
 else:
-    raise Exception(f"The given method {args.method} is invalid.")
+    raise Exception(f"VSN ERROR: The given method {args.method} is invalid.")
 
 if args.sample_column_name not in metadata.columns:
-    raise Exception(f"The meta data .tsv file expects a header with a required '{args.sample_column_name}' column.")
+    raise Exception(f"VSN ERROR: The meta data .tsv file expects a header with a required '{args.sample_column_name}' column.")
 if args.filter_column_name not in metadata.columns:
-    raise Exception(f"The meta data .tsv file expects a header with a required '{args.filter_column_name}' column.")
+    raise Exception(f"VSN ERROR: The meta data .tsv file expects a header with a required '{args.filter_column_name}' column.")
 
 
 def is_bool(s):
