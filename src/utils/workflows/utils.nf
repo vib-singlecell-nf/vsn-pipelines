@@ -6,6 +6,9 @@ import static groovy.json.JsonOutput.*
 //  Process imports:
 
 include {
+    includeConfig;
+} from "./../processes/config.nf" params(params)
+include {
     isParamNull;
     COMPRESS_HDF5;
     SC__PUBLISH;
@@ -114,12 +117,7 @@ workflow COMBINE_BY_PARAMS {
 
 }
 
-def INIT() {
-
-    def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-    params.misc.manifestAsJSON = toJson(workflow.manifest)
-    params.misc.paramsAsJSON = toJson(paramsCopy)
-
+def setSeed(params) {
     if(!params.global.containsKey('seed')) {
         params.global.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
 
@@ -141,5 +139,21 @@ def INIT() {
                 """
         }
     }
+}
+
+def INIT(params) {
+
+    // Set the seed
+    setSeed(params)
+    if(!params.containsKey("misc") || !params.misc.containsKey("test")) {
+        includeConfig(params, 'conf/test.config')
+        params.misc.test.enabled = false
+    }
+    // Save manifest and params for notebook
+    params.misc.manifestAsJSON = toJson(workflow.manifest)
+    params.misc.paramsAsJSON = toJson(params)
+    // Include helper functions
+    includeConfig(params, 'conf/generic.config')
+    return params
 
 }
