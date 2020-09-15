@@ -27,7 +27,7 @@ workflow FILTER_BY_CELL_METADATA {
         //   - The given tool is performing itself a cell-based annotation
         //   - params.sc[tool] should exist
         // - tool == null:
-        //   - params.sc.cell_annotate should exist
+        //   - params.sc.cell_filter should exist
         tool
 
     main:

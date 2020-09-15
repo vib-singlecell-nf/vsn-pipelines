@@ -1,7 +1,22 @@
 nextflow.preview.dsl=2
 
 ///////////////////////////////////////////
-//  Define the parameters for all processes
+// How to run ?
+// nextflow -C nextflow.config run [path-to-root-vsn]/src/utils/main.test.nf --test TEST
+// TEST:
+// - SC__FILE_CONVERTER
+// - SC__FILE_CONCATENATOR
+// - SC__ANNOTATE_BY_SAMPLE_METADATA
+// - ANNOTATE_BY_CELL_METADATA
+// - FILTER_BY_CELL_METADATA
+// - FILTER_AND_ANNOTATE_BY_CELL_METADATA
+// - GET_METADATA_FROM_SRA
+// - GET_METADATA_FROM_SRA_WEB
+// - DOWNLOAD_FROM_SRA_AND_RUN_CELLRANGER
+// - UPDATE_FEATURE_NOMENCLATURE
+
+///////////////////////////////////////////
+// Define the parameters for all processes
 
 include {
     SC__FILE_CONVERTER;

@@ -56,7 +56,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
             ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --index-column-name ${processParams.indexColumnName} \
             --sample-id ${sampleId} \
-            --sample-column-name ${processParams.sampleColumnName} \
+            ${processParams.containsKey('sampleColumnName') ? '--sample-column-name' + processParams.sampleColumnName : ''} \
             ${annotationColumnNamesAsArguments} \
             $f \
             ${metadata} \
@@ -65,25 +65,69 @@ process SC__ANNOTATE_BY_CELL_METADATA {
 
 }
 
-process SC__ANNOTATE_BY_SAMPLE_METADATA() {
+def getMetadataFilePath(processParams) {
+    metadataFilePathAsArgument = ''
+    if(processParams.containsKey("by")) {
+        metadataFilePathAsArgument = processParams.by.containsKey('metadataFilePath') ? processParams.by.metadataFilePath : ''
+    } else {
+        // make it backward compatible (see sample_annotate_v1.config)
+        metadataFilePathAsArgument = processParams.containsKey('metadataFilePath') ? processParams.metadataFilePath : metadataFilePathAsArgument
+    }
+    return metadataFilePathAsArgument
+}
+
+def hasMetadataFilePath(processParams) { 
+    return getMetadataFilePath(processParams) != ''
+}
+
+process SC__ANNOTATE_BY_SAMPLE_METADATA {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
-        tuple val(sampleId), path(f)
+        tuple \
+            val(sampleId), \
+            path(f)
 
     output:
-        tuple val(sampleId), path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.sample_annotate)
         processParams = sampleParams.local
+
+        // method / type param
+        methodAsArgument = ''
+        methodAsArgument = processParams.by.containsKey('method') ? processParams.by.method : ''
+        // make it backward compatible (see sample_annotate_v1.config)
+        methodAsArgument = processParams.containsKey('type') ? processParams.type : methodAsArgument
+
+        // metadata file path param
+        metadataFilePathAsArgument = getMetadataFilePath(processParams)
+
+        compIndexColumnNamesFromAdataAsArguments = processParams.by.containsKey('compIndexColumnNames') ?
+            processParams.by.compIndexColumnNames.collect { key, value -> return key }.collect({ '--adata-comp-index-column-name ' + ' ' + it }).join(' ') :
+            ''
+        compIndexColumnNamesFromMetadataAsArguments = processParams.by.containsKey('compIndexColumnNames') ?
+            processParams.by.compIndexColumnNames.collect { key, value -> return value }.collect({ '--metadata-comp-index-column-name ' + ' ' + it }).join(' ') :
+            ''
+        annotationColumnNamesAsArguments = processParams.by.containsKey('annotationColumnNames') ?
+            processParams.by.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ') :
+            ''
+
         """
         ${binDir}/sc_h5ad_annotate_by_sample_metadata.py \
-            ${(processParams.containsKey('type')) ? '--type ' + processParams.type : ''} \
-            ${(processParams.containsKey('metaDataFilePath')) ? '--meta-data-file-path ' + processParams.metaDataFilePath : ''} \
+            --sample-id ${sampleId} \
+            ${methodAsArgument != '' ? '--method ' + methodAsArgument : '' } \
+            ${metadataFilePathAsArgument != '' ? '--metadata-file-path ' + metadataFilePathAsArgument : '' } \
+            ${processParams.by.containsKey("sampleColumnName") ? '--sample-column-name ' + processParams.by.sampleColumnName : '' } \
+            ${compIndexColumnNamesFromAdataAsArguments} \
+            ${compIndexColumnNamesFromMetadataAsArguments} \
+            ${annotationColumnNamesAsArguments} \
             $f \
             "${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}"
         """
