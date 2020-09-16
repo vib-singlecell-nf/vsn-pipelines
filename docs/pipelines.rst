@@ -620,6 +620,25 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 
+In case, you want to use multiple .h5ad files that have different suffixes, use the following strategy to define the h5ad param::
+
+    [...]
+    data {
+        h5ad {
+            GROUP1 {
+                file_paths = "[path-to-group1-files]/*.SUFFIX1.h5ad"
+                suffix = ".SUFFIX1.h5ad"
+            }
+            GROUP2 {
+                file_paths = "[path-to-group1-files]/*.SUFFIX2.h5ad"
+                suffix = ".SUFFIX2.h5ad"
+            }
+        }
+    }
+    [...]
+
+Note: GROUP1, GROUP2 are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
+
 ----
 
 Loom
