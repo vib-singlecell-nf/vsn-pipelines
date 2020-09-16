@@ -150,8 +150,10 @@ def INIT(params) {
         params.misc.test.enabled = false
     }
     // Save manifest and params for notebook
+    // Remove any closure attached to the config (this is for backward compatibility)
+    def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
     params.misc.manifestAsJSON = toJson(workflow.manifest)
-    params.misc.paramsAsJSON = toJson(params)
+    params.misc.paramsAsJSON = toJson(paramsCopy)
     // Include helper functions
     includeConfig(params, 'conf/generic.config')
     return params
