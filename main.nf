@@ -27,13 +27,16 @@ workflow bbknn {
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | BBKNN
-    PUBLISH_BBKNN(
-        BBKNN.out.scopeloom,
-        "BBKNN",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_BBKNN(
+            BBKNN.out.scopeloom,
+            "BBKNN",
+            "loom",
+            null,
+            false
+        )
+    }
 }
 
 // run multi-sample with mnncorrect, output a scope loom file
@@ -47,13 +50,16 @@ workflow mnncorrect {
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | MNNCORRECT
-    PUBLISH_MNNCORRECT(
-        MNNCORRECT.out.scopeloom,
-        "MNNCORRECT",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_MNNCORRECT(
+            MNNCORRECT.out.scopeloom,
+            "MNNCORRECT",
+            "loom",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -68,13 +74,16 @@ workflow harmony {
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | HARMONY
-    PUBLISH_HARMONY(
-        HARMONY.out.scopeloom,
-        "HARMONY",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_HARMONY(
+            HARMONY.out.scopeloom,
+            "HARMONY",
+            "loom",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -88,13 +97,16 @@ workflow harmony_only {
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | HARMONY
-    PUBLISH_HARMONY(
-        HARMONY.out,
-        "HARMONY",
-        "h5ad",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_HARMONY(
+            HARMONY.out,
+            "HARMONY",
+            "h5ad",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -116,13 +128,16 @@ workflow bbknn_scenic {
         BBKNN.out.filteredloom,
         BBKNN.out.scopeloom
     )
-    PUBLISH_BBKNN_SCENIC(
-        SCENIC_APPEND.out,
-        "BBKNN_SCENIC",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_BBKNN_SCENIC(
+            SCENIC_APPEND.out,
+            "BBKNN_SCENIC",
+            "loom",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -144,13 +159,16 @@ workflow harmony_scenic {
         HARMONY.out.filteredloom,
         HARMONY.out.scopeloom 
     )
-    PUBLISH_HARMONY_SCENIC(
-        SCENIC_APPEND.out,
-        "HARMONY_SCENIC",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_HARMONY_SCENIC(
+            SCENIC_APPEND.out,
+            "HARMONY_SCENIC",
+            "loom",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -166,13 +184,18 @@ workflow single_sample {
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | SINGLE_SAMPLE
-    PUBLISH_SINGLE_SAMPLE(
-        SINGLE_SAMPLE.out.scopeloom,
-        "SINGLE_SAMPLE",
-        "loom",
-        null,
-        false
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_SINGLE_SAMPLE(
+            SINGLE_SAMPLE.out.scopeloom,
+            "SINGLE_SAMPLE",
+            "loom",
+            null,
+            false
+        )
     )    
+        )
+    }  
 
 }
 
@@ -184,13 +207,18 @@ workflow multi_sample {
 
     getDataChannel | MULTI_SAMPLE
     include PUBLISH as PUBLISH_MULTI_SAMPLE from "./src/utils/workflows/utils" params(params)
-    PUBLISH_MULTI_SAMPLE(
-        MULTI_SAMPLE.out.scopeloom,
-        "MULTI_SAMPLE",
-        "loom",
-        null,
-        false
+    
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_MULTI_SAMPLE(
+            MULTI_SAMPLE.out.scopeloom,
+            "MULTI_SAMPLE",
+            "loom",
+            null,
+            false
+        )
     ) 
+        )
+    }
 
 }
 
@@ -212,13 +240,17 @@ workflow single_sample_scenic {
         SINGLE_SAMPLE.out.filteredloom,
         SINGLE_SAMPLE.out.scopeloom
     )
-    PUBLISH_SINGLE_SAMPLE_SCENIC(
-        SCENIC_APPEND.out,
-        "SINGLE_SAMPLE_SCENIC",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_SINGLE_SAMPLE_SCENIC(
+            SCENIC_APPEND.out,
+            "SINGLE_SAMPLE_SCENIC",
+            "loom",
+            null,
+            false
+        )
+    }
+
 }
 
 workflow pcacv {
@@ -272,13 +304,16 @@ workflow single_sample_scrublet {
             ANNOTATE_BY_CELL_METADATA.out
         )
     )
-    PUBLISH_SINGLE_SAMPLE_SCRUBLET(
-        SC__H5AD_TO_LOOM.out,
-        "SINGLE_SAMPLE_SCRUBLET",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_SINGLE_SAMPLE_SCRUBLET(
+            SC__H5AD_TO_LOOM.out,
+            "SINGLE_SAMPLE_SCRUBLET",
+            "loom",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -303,13 +338,16 @@ workflow pipe_single_sample_scenic {
             SINGLE_SAMPLE.out.filteredloom,
             SINGLE_SAMPLE.out.scopeloom
         )
-        PUBLISH_P_SINGLE_SAMPLE_SCENIC(
-            SCENIC_APPEND.out,
-            "P_SINGLE_SAMPLE_SCENIC",
-            "loom",
-            null,
-            false
-        )
+
+        if(params.utils.containsKey("publish")) {
+            PUBLISH_P_SINGLE_SAMPLE_SCENIC(
+                SCENIC_APPEND.out,
+                "P_SINGLE_SAMPLE_SCENIC",
+                "loom",
+                null,
+                false
+            )
+        }
 
 }
 
@@ -327,13 +365,16 @@ workflow scenic {
     SCENIC( 
         Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
     )
-    PUBLISH_SCENIC(
-        SCENIC.out,
-        "SCENIC",
-        "loom",
-        null,
-        false
-    )
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_SCENIC(
+            SCENIC.out,
+            "SCENIC",
+            "loom",
+            null,
+            false
+        )
+    }
 
 }
 
@@ -598,7 +639,7 @@ workflow nemesh {
 
 workflow sra_cellranger_bbknn {
 
-    main: 
+    main:
         include {
             getChannel as getSRAChannel;
         } from './src/channels/sra' params(params)
@@ -646,13 +687,18 @@ workflow sra_cellranger_bbknn_scenic {
         sra_cellranger_bbknn.out.filteredLoom,
         sra_cellranger_bbknn.out.scopeLoom
     )
-    PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC(
-        SCENIC_APPEND.out,
-        "SRA_CELLRANGER_BBKNN_SCENIC",
-        "loom",
-        null,
-        false
+
+    if(params.utils.containsKey("publish")) {
+        PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC(
+            SCENIC_APPEND.out,
+            "SRA_CELLRANGER_BBKNN_SCENIC",
+            "loom",
+            null,
+            false
+        )
     )    
+        )
+    }  
 
 }
 
@@ -688,6 +734,9 @@ workflow cell_annotate {
 
 workflow cell_annotate_filter {
 
+    take:
+        // Expects publish : boolean
+        publish
     main:
         include {
             STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA;
@@ -709,10 +758,6 @@ workflow cell_annotate_filter {
 
         // Annotate & publish
         ANNOTATE_BY_CELL_METADATA( 
-    ANNOTATE_BY_CELL_METADATA( 
-        ANNOTATE_BY_CELL_METADATA( 
-            SC__FILE_CONVERTER.out, 
-        SC__FILE_CONVERTER.out, 
             SC__FILE_CONVERTER.out, 
             null,
         )
@@ -744,13 +789,15 @@ workflow cell_annotate_filter {
                 false
             )
         }
-        PUBLISH_H5AD_CELL_FILTERED(
-            FILTER_BY_CELL_METADATA.out,
-            "CELL_ANNOTATE_FILTER",
-            "h5ad",
-            "utils",
-            false
-        )
+        if(params.utils.containsKey("publish") && !publish) {
+            PUBLISH_H5AD_CELL_FILTERED(
+                FILTER_BY_CELL_METADATA.out,
+                "CELL_ANNOTATE_FILTER",
+                "h5ad",
+                "utils",
+                false
+            )
+        }
     emit:
         out = FILTER_BY_CELL_METADATA.out
 
@@ -773,7 +820,7 @@ workflow cell_annotate_filter_and_sample_annotate {
 
 
         // Run
-        out = cell_annotate_filter()
+        out = cell_annotate_filter(false)
 
         // Annotate cells based on an indexed sample-based metadata table
         if(!params.sc.containsKey("sample_annotate"))
@@ -788,13 +835,15 @@ workflow cell_annotate_filter_and_sample_annotate {
             out = SC__H5AD_BEAUTIFY( out )
         }
 
-        PUBLISH(
-            out,
-            "CELL_ANNOTATE_FILTER_AND_SAMPLE_ANNOTATE",
-            "h5ad",
-            "utils",
-            false
-        )
+        if(params.utils.containsKey("publish")) {
+            PUBLISH(
+                out,
+                "CELL_ANNOTATE_FILTER_AND_SAMPLE_ANNOTATE",
+                "h5ad",
+                "utils",
+                false
+            )
+        }
 
 }
 
