@@ -7,6 +7,20 @@ import pandas as pd
 import scanpy as sc
 import numpy as np
 
+
+def is_bool(s):
+    return s.lower() in ['true', 'false']
+
+
+def str_to_bool(s):
+    if s == 'True':
+        return True
+    elif s == 'False':
+        return False
+    else:
+        raise ValueError
+
+
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument(
@@ -84,6 +98,10 @@ if args.method == 'internal':
         raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 elif args.method == 'external':
+
+    if args.index_column_name is None:
+        raise Exception(f"VSN ERROR: Missing --index-column-name argument (indexColumnName param).")
+
     metadata = pd.read_csv(
         filepath_or_buffer=args.input,
         header=0,
@@ -93,34 +111,38 @@ elif args.method == 'external':
 else:
     raise Exception(f"VSN ERROR: The given method {args.method} is invalid.")
 
-if args.sample_column_name not in metadata.columns:
-    raise Exception(f"VSN ERROR: The meta data .tsv file expects a header with a required '{args.sample_column_name}' column.")
-if args.filter_column_name not in metadata.columns:
-    raise Exception(f"VSN ERROR: The meta data .tsv file expects a header with a required '{args.filter_column_name}' column.")
+filter_mask = None
+values_to_keep_from_filter_column_formatted = None
 
+if args.filter_column_name in metadata.columns:
+    if args.values_to_keep_from_filter_column is None:
+        raise Exception(f"VSN ERROR: Missing --value-to-keep-from-filter-column argument (valuesToKeepFromFilterColumn param).")
+    # Convert to boolean type if needed
+    values_to_keep_from_filter_column_formatted = [
+        value_to_keep if not is_bool(s=value_to_keep) else str_to_bool(s=value_to_keep) for value_to_keep in args.values_to_keep_from_filter_column
+    ]
 
-def is_bool(s):
-    return s.lower() in ['true', 'false']
+if args.method == 'internal' or len(np.unique(metadata.index)) != len(metadata.index):
 
+    if args.sample_column_name not in metadata.columns:
+        raise Exception(f"VSN ERROR: Missing '{args.sample_column_name}' column in obs slot of the given h5ad input file.")
 
-def str_to_bool(s):
-    if s == 'True':
-        return True
-    elif s == 'False':
-        return False
+    if values_to_keep_from_filter_column_formatted is None:
+        raise Exception(f"VSN ERROR: Missing --filter-column-name argument (filterColumnName param) and/or --value-to-keep-from-filter-column (valuesToKeepFromFilterColumn param). These are required since the '{args.index_column_name}' index column does not contain unique values.")
+
+    print(f"Creating a filter mask based on '{args.sample_column_name}' and '{args.filter_column_name}'...")
+    filter_mask = np.logical_and(
+        metadata[args.sample_column_name] == args.sample_id,
+        metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
+    )
+else:
+    if values_to_keep_from_filter_column_formatted is not None:
+        print(f"Creating a filter mask based only on '{args.filter_column_name}' filter column...")
+        filter_mask = metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
     else:
-        raise ValueError
+        print(f"No filter mask: use all the cells from the given cell-based metadata .tsv filter file...")
+        filter_mask = np.in1d(metadata.index, metadata.index)
 
-
-# Convert to boolean type if needed
-values_to_keep_from_filter_column_formatted = [
-    value_to_keep if not is_bool(s=value_to_keep) else str_to_bool(s=value_to_keep) for value_to_keep in args.values_to_keep_from_filter_column
-]
-
-filter_mask = np.logical_and(
-    metadata[args.sample_column_name] == args.sample_id,
-    metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
-)
 cells_to_keep = metadata.index[filter_mask]
 
 # I/O
