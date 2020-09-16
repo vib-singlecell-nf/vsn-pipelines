@@ -783,7 +783,7 @@ workflow cell_annotate_filter {
                 false
             )
         }
-        if(params.utils.containsKey("publish") && !publish) {
+        if(params.utils.containsKey("publish") && publish) {
             PUBLISH_H5AD_CELL_FILTERED(
                 FILTER_BY_CELL_METADATA.out,
                 "CELL_ANNOTATE_FILTER",
@@ -840,5 +840,27 @@ workflow cell_annotate_filter_and_sample_annotate {
         }
 
 }
+
+workflow filter_and_annotate_and_clean {
+
+    include {
+        FILTER_AND_ANNOTATE_AND_CLEAN
+    } from './src/utils/workflows/filterAnnotateClean' params(params)
+    include {
+        PUBLISH;
+    } from "./src/utils/workflows/utils" params(params)
+
+    // Run
+    getDataChannel | \
+        SC__FILE_CONVERTER | \
+        FILTER_AND_ANNOTATE_AND_CLEAN
+
+    PUBLISH(
+        FILTER_AND_ANNOTATE_AND_CLEAN.out,
+        "FILTER_AND_ANNOTATE_AND_CLEAN",
+        "h5ad",
+        "utils",
+        false
+    )
 
 }
