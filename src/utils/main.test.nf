@@ -1,5 +1,11 @@
 nextflow.preview.dsl=2
 
+include { 
+    INIT;
+} from './workflows/utils' params(params)
+
+INIT(params)
+
 ///////////////////////////////////////////
 // How to run ?
 // nextflow -C nextflow.config run [path-to-root-vsn]/src/utils/main.test.nf --test TEST
