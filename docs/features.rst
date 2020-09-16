@@ -272,12 +272,14 @@ For both methods, here are the mandatory params to set:
 - ``off`` should be set to ``h5ad``
 - ``method`` choose either ``internal`` or ``external``
 - ``filters`` is a List of Maps where each Map is required to have the following parameters:
+
   - ``id`` is a short identifier for the filter
   - ``valuesToKeepFromFilterColumn`` is array of values from the ``filterColumnName`` that should be kept (other values will be filtered out).
 
 If ``internal`` used, the following additional params are required:
 
 - ``filters`` is a List of Maps where each Map is required to have the following parameters:
+
   - ``sampleColumnName`` is the column name containing the sample ID/name information. It should exist in the ``obs`` column attribute of the h5ad.
   - ``filterColumnName`` is the column name that will be used to filter out cells.  It should exist in the ``obs`` column attribute of the h5ad.
 
@@ -287,8 +289,8 @@ If ``external`` used, the following additional params are required:
 
   - ``cellMetaDataFilePath`` is a file path pointing to a single TSV file (with header) with at least 3 columns: a column containing all the cell IDs, another containing the sample ID/name information, and a column to use for the filtering.
   - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
-  - ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
-  - ``filterColumnName`` is the column name from ``cellMetaDataFilePath`` which be used to filter out cells.
+  - `optional` ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
+  - `optional` ``filterColumnName`` is the column name from ``cellMetaDataFilePath`` which be used to filter out cells.
 
 
 Multi-sample parameters
