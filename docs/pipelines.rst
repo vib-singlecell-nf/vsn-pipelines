@@ -125,9 +125,9 @@ The pipelines generate the following relevant files for each sample:
     * - `out/data/scrublet/*.SC__SCRUBLET__DOUBLET_DETECTION.ScrubletObject.pklz`
       - Pickled file containing the Scrublet object.
     * - `out/data/scrublet/*.SCRUBLET.SC__ANNOTATE_BY_CELL_METADATA.h5ad`
-      - H5ad file with raw data and doublets annotated.
-    * - `out/data/scrublet/*.SINGLE_SAMPLE_SCRUBLET.loom`
-      - H5ad file resulting from a ``single_sample`` workflow run and with doublets (inferred from Scrublet) removed.
+      - h5ad file with raw data and doublets annotated.
+    * - `out/data/scrublet/*.SINGLE_SAMPLE_SCRUBLET.h5ad`
+      - h5ad file resulting from a ``single_sample`` workflow run and with doublets (inferred from Scrublet) removed.
 
 ----
 
@@ -620,7 +620,7 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 
-In case, you want to use multiple .h5ad files that have different suffixes, use the following strategy to define the h5ad param::
+In case there are multiple .h5ad files that need to be processed with different suffixes, the following strategy should be used to define the h5ad param::
 
     [...]
     data {
@@ -637,7 +637,7 @@ In case, you want to use multiple .h5ad files that have different suffixes, use 
     }
     [...]
 
-Note: GROUP1, GROUP2 are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
+Note: ``GROUP1``, ``GROUP2`` are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
 
 ----
 
