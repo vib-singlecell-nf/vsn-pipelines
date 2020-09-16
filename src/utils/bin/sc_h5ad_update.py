@@ -42,20 +42,20 @@ parser.add_argument(
     type=str,
     action="store",
     dest="obs_column_mapper",
-    help="Rename the columns in the obs slot of AnnData of the given input h5ad file using this mapper."
+    help="Rename the columns in the obs slot of AnnData of the given input h5ad file using this mapper. This will be performed 1st."
 )
 parser.add_argument(
     '-v', "--obs-column-value-mapper",
     type=str,
     action="store",
     dest="obs_column_value_mapper",
-    help="Rename the values in the obs slot of AnnData of the given input h5ad file using this mapper."
+    help="Rename the values in the obs slot of AnnData of the given input h5ad file using this mapper. This will be performed 2nd."
 )
 parser.add_argument(
     '-z', "--obs-column-to-remove",
     action="append",
     dest="obs_column_to_remove",
-    help="Remove that column from the obs slot of the AnnData of the given input h5ad file."
+    help="Remove that column from the obs slot of the AnnData of the given input h5ad file. This will be performed 3rd."
 )
 
 
@@ -95,13 +95,6 @@ if args.x_pca is not None:
         "location": "AnnData.obsm['X_pca']"
     }
 
-if args.obs_column_value_mapper is not None:
-    print("Renaming the values in the obs slot of the given AnnData...")
-    # Renaming will be performed as in https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.replace.html
-    # Mapper e.g.: {'ColumnA': {'OldValueToReplace_1': 'NewValue_1', 'OldValueToReplace_2': 'NewValue_2}
-    obs_column_value_mapper = json.loads(args.obs_column_value_mapper)
-    adata.obs = adata.obs.replace(to_replace=obs_column_value_mapper)
-
 if args.obs_column_mapper is not None:
     print("Renaming the columns in the obs slot of the given AnnData...")
     # Renaming will be performed as in https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.rename.html
@@ -109,8 +102,21 @@ if args.obs_column_mapper is not None:
     obs_column_mapper = json.loads(args.obs_column_mapper)
     adata.obs = adata.obs.rename(columns=obs_column_mapper)
 
+if args.obs_column_value_mapper is not None:
+    print("Renaming the values in the obs slot of the given AnnData...")
+    # Renaming will be performed as in https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.replace.html
+    # Mapper e.g.: {'ColumnA': {'OldValueToReplace_1': 'NewValue_1', 'OldValueToReplace_2': 'NewValue_2}
+    obs_column_value_mapper = json.loads(args.obs_column_value_mapper)
+    if type(obs_column_value_mapper) is dict:
+        print("...using dict-like approach.")
+        adata.obs = adata.obs.replace(to_replace=obs_column_value_mapper)
+    else:
+        print("...using RegExp-like approach.")
+        for mapping in obs_column_value_mapper:
+            adata.obs = adata.obs.replace(to_replace=rf'{mapping["from"]}', value=f'{mapping["to"]}', regex=True)
+
 if args.obs_column_to_remove is not None:
-    print("Removeng some columns in the obs slot of the given AnnData...")
+    print("Removing some columns in the obs slot of the given AnnData...")
     adata.obs = adata.obs.drop(args.obs_column_to_remove, axis=1)
 
 # I/O
