@@ -193,8 +193,6 @@ workflow single_sample {
             null,
             false
         )
-    )    
-        )
     }  
 
 }
@@ -215,8 +213,6 @@ workflow multi_sample {
             "loom",
             null,
             false
-        )
-    ) 
         )
     }
 
@@ -695,8 +691,6 @@ workflow sra_cellranger_bbknn_scenic {
             "loom",
             null,
             false
-        )
-    )    
         )
     }  
 
