@@ -4,6 +4,7 @@ import argparse
 import os
 import pandas as pd
 import scanpy as sc
+from difflib import SequenceMatcher
 
 parser = argparse.ArgumentParser(description='')
 
@@ -106,38 +107,48 @@ metadata = pd.read_csv(
     sep="\t"
 )
 
+
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+
+
 sample_info = metadata[metadata[args.sample_column_name] == SAMPLE_NAME]
+sample_scores = [similar(index_entry, SAMPLE_NAME) for index_entry in metadata[args.sample_column_name]]
 
-if len(sample_info) == 0:
-    raise Exception(f"VSN ERROR: The metadata .tsv file does not contain sample ID '{SAMPLE_NAME}'.")
-elif args.method == "sample" and len(sample_info) > 1:
-    raise Exception(f"VSN ERROR: The metadata .tsv file contains duplicate entries with the sample ID '{SAMPLE_NAME}'. Fix your metadata or use the 'sample+' method.")
-
-if args.method == "sample":
-    for (column_name, column_data) in sample_info.iteritems():
-        adata.obs[column_name] = column_data.values[0]
-elif args.method == "sample+":
-
-    if args.adata_comp_index_column_names is None or args.metadata_comp_index_column_names is None:
-        raise Exception("VSN ERROR: compIndexColumnNames param is missing in the sample_annotate config.")
-
-    new_obs = pd.merge(
-        adata.obs,
-        sample_info,
-        left_on=["sample_id"] + args.adata_comp_index_column_names,
-        right_on=[args.sample_column_name] + args.metadata_comp_index_column_names
-    )
-
-    if new_obs.isnull().values.any():
-        raise Exception("VSN ERROR: Merged adata.obs not complete, some NaN values detected.")
-
-    # Update the obs slot of the AnnData
-    adata.obs = new_obs
+if all(sample_score < 0.5 for sample_score in sample_scores):
+    # Skip annotation for this sample
+    print(f"Skipping annotation for {SAMPLE_NAME}.")
 else:
-    raise Exception(f"VSN ERROR: Unrecognized method {args.method}.")
+    if len(sample_info) == 0:
+        raise Exception(f"VSN ERROR: The metadata .tsv file does not contain sample ID '{SAMPLE_NAME}'.")
+    elif args.method == "sample" and len(sample_info) > 1:
+        raise Exception(f"VSN ERROR: The metadata .tsv file contains duplicate entries with the sample ID '{SAMPLE_NAME}'. Fix your metadata or use the 'sample+' method.")
 
-if args.annotation_column_names is not None and len(args.annotation_column_names) > 0:
-    adata.obs = adata.obs[args.annotation_column_names]
+    if args.method == "sample":
+        for (column_name, column_data) in sample_info.iteritems():
+            adata.obs[column_name] = column_data.values[0]
+    elif args.method == "sample+":
+
+        if args.adata_comp_index_column_names is None or args.metadata_comp_index_column_names is None:
+            raise Exception("VSN ERROR: compIndexColumnNames param is missing in the sample_annotate config.")
+
+        new_obs = pd.merge(
+            adata.obs,
+            sample_info,
+            left_on=["sample_id"] + args.adata_comp_index_column_names,
+            right_on=[args.sample_column_name] + args.metadata_comp_index_column_names
+        )
+
+        if new_obs.isnull().values.any():
+            raise Exception("VSN ERROR: Merged adata.obs not complete, some NaN values detected.")
+
+        # Update the obs slot of the AnnData
+        adata.obs = new_obs
+    else:
+        raise Exception(f"VSN ERROR: Unrecognized method {args.method}.")
+
+    if args.annotation_column_names is not None and len(args.annotation_column_names) > 0:
+        adata.obs = adata.obs[args.annotation_column_names]
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
