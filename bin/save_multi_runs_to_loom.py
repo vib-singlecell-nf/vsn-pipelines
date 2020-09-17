@@ -12,7 +12,7 @@ import export_to_loom
 import warnings
 import os
 
-parser = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
+parser = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as .tsv in folder.')
 
 parser.add_argument(
     'expression_mtx_fname',

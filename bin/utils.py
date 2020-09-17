@@ -14,7 +14,7 @@ from pyscenic.transform import COLUMN_NAME_CONTEXT, COLUMN_NAME_TARGET_GENES
 
 def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0, min_genes=0, show_warnings=False) -> List['GeneSignature']:
     """
-    Load gene signatures from a list of TSV files in directory. Requires TSV with 1 or 2 columns. First column should be genes, second (optional) are weight for genes.
+    Load gene signatures from a list of .tsv files in directory. Requires .tsv with 1 or 2 columns. First column should be genes, second (optional) are weight for genes.
     :param dpath: The filepath to directory.
     :return: A list of signatures.
     """
@@ -34,9 +34,9 @@ def read_signatures_from_tsv_dir(dpath: str, noweights=False, weight_threshold=0
 
             # Do some sanity checks
             if len(gene_sig.columns) == 0:
-                raise Exception(f"{gene_sig_file_path} has 0 columns. Requires TSV with 1 or 2 columns. First column should be genes (required), second (optional) are weight for the given genes.")
+                raise Exception(f"{gene_sig_file_path} has 0 columns. Requires .tsv with 1 or 2 columns. First column should be genes (required), second (optional) are weight for the given genes.")
             if len(gene_sig.columns) > 2:
-                raise Exception(f"{gene_sig_file_path} has more than 2 columns. Requires TSV with 1 or 2 columns. First column should be genes, second (optional) are weight for the given genes.")
+                raise Exception(f"{gene_sig_file_path} has more than 2 columns. Requires .tsv with 1 or 2 columns. First column should be genes, second (optional) are weight for the given genes.")
             if len(gene_sig.columns) == 1 or noweights:
                 gene2weight = gene_sig[0]
             if len(gene_sig.columns) == 2 and not noweights:

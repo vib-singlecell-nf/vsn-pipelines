@@ -33,7 +33,7 @@ parser_grn.add_argument('-m', '--method', choices=['genie3', 'grnboost2'],
         help='The algorithm for gene regulatory network reconstruction (default: grnboost2).')
 parser_grn.add_argument('-o', '--output',
         type=argparse.FileType('w'), default=sys.stdout,
-        help='Output file/stream, i.e. a table of TF-target genes (TSV).')
+        help='Output file/stream, i.e. a table of TF-target genes (.tsv).')
 parser_grn.add_argument('--num_workers',
         type=int, default=cpu_count(),
         help='The number of workers to use. (default: {}).'.format(cpu_count()))
