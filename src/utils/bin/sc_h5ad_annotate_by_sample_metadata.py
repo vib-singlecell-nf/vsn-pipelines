@@ -42,7 +42,7 @@ parser.add_argument(
     type=str,
     action="store",
     dest="metadata_file_path",
-    help="Path to the meta data. It expects a tabular separated file (.tsv) with header and a required 'id' column."
+    help="Path to the metadata. It expects a tabular separated file (.tsv) with header and a required 'id' column."
 )
 
 parser.add_argument(
@@ -99,7 +99,7 @@ if "sample_id" not in adata.obs.columns:
     raise Exception("VSN ERROR: Missing sample_id column in the obs slot of the AnnData of the given h5ad.")
 
 if args.sample_column_name is None:
-    raise Exception("VSN ERROR: sampleColumnName is missing in the sample_annotate config.")
+    raise Exception("VSN ERROR: Missing --sample-column-name argument (sampleColumnName param in sample_annotate config)")
 
 metadata = pd.read_csv(
     filepath_or_buffer=args.metadata_file_path,
@@ -109,9 +109,9 @@ metadata = pd.read_csv(
 sample_info = metadata[metadata[args.sample_column_name] == SAMPLE_NAME]
 
 if len(sample_info) == 0:
-    raise Exception(f"VSN ERROR: The meta data TSV file does not contain sample ID '{SAMPLE_NAME}'.")
+    raise Exception(f"VSN ERROR: The metadata .tsv file does not contain sample ID '{SAMPLE_NAME}'.")
 elif args.method == "sample" and len(sample_info) > 1:
-    raise Exception(f"VSN ERROR: The meta data TSV file contains duplicate entries with the sample ID '{SAMPLE_NAME}'. Fix your metadata or use the 'sample+' method.")
+    raise Exception(f"VSN ERROR: The metadata .tsv file contains duplicate entries with the sample ID '{SAMPLE_NAME}'. Fix your metadata or use the 'sample+' method.")
 
 if args.method == "sample":
     for (column_name, column_data) in sample_info.iteritems():
@@ -134,7 +134,7 @@ elif args.method == "sample+":
     # Update the obs slot of the AnnData
     adata.obs = new_obs
 else:
-    raise Exception("VSN ERROR: This meta data type {} is not implemented".format(args.type))
+    raise Exception(f"VSN ERROR: Unrecognized method {args.method}.")
 
 if args.annotation_column_names is not None and len(args.annotation_column_names) > 0:
     adata.obs = adata.obs[args.annotation_column_names]

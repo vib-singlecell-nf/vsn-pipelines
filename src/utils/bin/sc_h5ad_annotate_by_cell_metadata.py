@@ -18,7 +18,7 @@ parser.add_argument(
 parser.add_argument(
     "cell_meta_data_file_path",
     type=argparse.FileType('r'),
-    help='The file path to meta data (TSV with header) for each cell where values from a column could be used to annotate the cells.'
+    help='The file path to metadata (.tsv with header) for each cell where values from a column could be used to annotate the cells.'
 )
 
 parser.add_argument(
@@ -49,7 +49,7 @@ parser.add_argument(
     '-s', '--sample-column-name',
     type=str,
     dest="sample_column_name",
-    help="The column name containing the sample ID for each cell entry in the cell meta data."
+    help="The column name containing the sample ID for each cell entry in the cell metadata."
 )
 
 parser.add_argument(

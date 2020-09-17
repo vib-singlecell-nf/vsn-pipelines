@@ -28,7 +28,7 @@ parser.add_argument(
     type=argparse.FileType('r'),
     dest="x_pca",
     required=False,
-    help='The path the (compressed) TSV file containing the new PCA embeddings.'
+    help='The path the (compressed) .tsv file containing the new PCA embeddings.'
 )
 parser.add_argument(
     '-r', "--empty-x",
