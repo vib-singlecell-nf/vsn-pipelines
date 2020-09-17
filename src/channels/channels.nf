@@ -87,8 +87,8 @@ workflow getDataChannel {
             def filePaths = null
             def suffix = null
             if(!dataH5ad.containsKey("file_paths") && !dataH5ad.containsKey("suffix")) {
-                filePaths = dataH5ad.collect { k,v -> v["file_paths"] }
-                suffix = dataH5ad.collect { k,v -> v["suffix"] }
+                filePaths = dataH5ad.collect { k,v -> v["file_paths"] }.flatten()
+                suffix = dataH5ad.collect { k,v -> v["suffix"] }.flatten()
             } else {
                 filePaths = dataH5ad.file_paths
                 suffix = dataH5ad.suffix

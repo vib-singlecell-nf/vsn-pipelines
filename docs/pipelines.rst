@@ -620,7 +620,7 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 
-In case there are multiple .h5ad files that need to be processed with different suffixes, the following strategy should be used to define the h5ad param::
+In case there are multiple .h5ad files that need to be processed with different suffixes, the multi-labelled strategy should be used to define the h5ad param::
 
     [...]
     data {
@@ -637,7 +637,10 @@ In case there are multiple .h5ad files that need to be processed with different 
     }
     [...]
 
-Note: ``GROUP1``, ``GROUP2`` are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
+Notes: 
+
+- ``GROUP1``, ``GROUP2`` are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
+- ``file_paths`` and ``suffix`` do allow list of paths/globs in the multi-labelled strategy.
 
 ----
 
