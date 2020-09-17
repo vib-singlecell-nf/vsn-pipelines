@@ -102,29 +102,46 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA {
 
         // method / type param
         methodAsArgument = ''
-        methodAsArgument = processParams.by.containsKey('method') ? processParams.by.method : ''
-        // make it backward compatible (see sample_annotate_v1.config)
-        methodAsArgument = processParams.containsKey('type') ? processParams.type : methodAsArgument
+        if(processParams.containsKey("by")) {
+            methodAsArgument = processParams.by.containsKey('method') ? processParams.by.method : ''
+        } else {
+            // make it backward compatible (see sample_annotate_old_v1.config)
+            methodAsArgument = processParams.containsKey('type') ? processParams.type : methodAsArgument
+        }
 
-        // metadata file path param
+        // metadataFilePath param
         metadataFilePathAsArgument = getMetadataFilePath(processParams)
 
-        compIndexColumnNamesFromAdataAsArguments = processParams.by.containsKey('compIndexColumnNames') ?
-            processParams.by.compIndexColumnNames.collect { key, value -> return key }.collect({ '--adata-comp-index-column-name ' + ' ' + it }).join(' ') :
-            ''
-        compIndexColumnNamesFromMetadataAsArguments = processParams.by.containsKey('compIndexColumnNames') ?
-            processParams.by.compIndexColumnNames.collect { key, value -> return value }.collect({ '--metadata-comp-index-column-name ' + ' ' + it }).join(' ') :
-            ''
-        annotationColumnNamesAsArguments = processParams.by.containsKey('annotationColumnNames') ?
-            processParams.by.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ') :
-            ''
+        compIndexColumnNamesFromAdataAsArguments = ''
+        compIndexColumnNamesFromMetadataAsArguments = ''
+        annotationColumnNamesAsArguments = ''
+        if(processParams.containsKey("by")) {
+            compIndexColumnNamesFromAdataAsArguments = processParams.by.containsKey('compIndexColumnNames') ?
+                processParams.by.compIndexColumnNames.collect { key, value -> return key }.collect({ '--adata-comp-index-column-name ' + ' ' + it }).join(' ') :
+                ''
+            compIndexColumnNamesFromMetadataAsArguments = processParams.by.containsKey('compIndexColumnNames') ?
+                processParams.by.compIndexColumnNames.collect { key, value -> return value }.collect({ '--metadata-comp-index-column-name ' + ' ' + it }).join(' ') :
+                ''
+            annotationColumnNamesAsArguments = processParams.by.containsKey('annotationColumnNames') ?
+                processParams.by.annotationColumnNames.collect({ '--annotation-column-name' + ' ' + it }).join(' ') :
+                ''
+        }
+
+        //  samplecolumnName
+        sampleColumnName = ''
+        if(processParams.containsKey("by")) {
+            sampleColumnName = processParams.by.sampleColumnName
+        } else {
+            // make it backward compatible (see sample_annotate_old_v1.config)
+            sampleColumnName = processParams.sampleColumnName
+        }
 
         """
         ${binDir}/sc_h5ad_annotate_by_sample_metadata.py \
             --sample-id ${sampleId} \
             ${methodAsArgument != '' ? '--method ' + methodAsArgument : '' } \
             ${metadataFilePathAsArgument != '' ? '--metadata-file-path ' + metadataFilePathAsArgument : '' } \
-            ${processParams.by.containsKey("sampleColumnName") ? '--sample-column-name ' + processParams.by.sampleColumnName : '' } \
+            ${'--sample-column-name ' + sampleColumnName} \
             ${compIndexColumnNamesFromAdataAsArguments} \
             ${compIndexColumnNamesFromMetadataAsArguments} \
             ${annotationColumnNamesAsArguments} \

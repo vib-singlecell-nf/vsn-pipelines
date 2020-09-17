@@ -162,7 +162,7 @@ For both methods, here are the mandatory params to set:
 
 If ``aio`` used, the following additional params are required:
 
-- ``cellMetaDataFilePath`` is a file path pointing to a single TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+- ``cellMetaDataFilePath`` is a file path pointing to a single .tsv file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
 - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **can** have unique values; if it's not the case, it's important that the combination of the values from the ``indexColumnName`` and the ``sampleColumnName`` are unique. 
 - ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
 
@@ -170,8 +170,8 @@ If ``obo`` is used, the following params are required:
 
 - ``cellMetaDataFilePath``
 
-  - In multi-sample mode, is a file path containing a glob pattern. The target file paths should each pointing to a TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
-  - In single-sample mode, is a file path pointing to a single TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+  - In multi-sample mode, is a file path containing a glob pattern. The target file paths should each pointing to a .tsv file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+  - In single-sample mode, is a file path pointing to a single .tsv file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
   - **Note**: the file name(s) of ``cellMetaDataFilePath`` is/are required to contain the sample ID(s).
 
 - ``sampleSuffixWithExtension`` is the suffix used to extract the sample ID from the file name(s) of ``cellMetaDataFilePath``. The suffix should be the part after the sample name in the file path.
@@ -200,7 +200,7 @@ The profile ``utils_sample_annotate`` should be added when generating the main c
 
 Then, the following parameters should be updated to use the module feature:
 
-- ``metaDataFilePath`` is a TSV file (with header) with at least 2 columns where the first column need to match the sample IDs. Any other columns will be added as annotation in the final loom i.e.: all the cells related to their sample will get annotated with their given annotations.
+- ``metaDataFilePath`` is a .tsv file (with header) with at least 2 columns where the first column need to match the sample IDs. Any other columns will be added as annotation in the final loom i.e.: all the cells related to their sample will get annotated with their given annotations.
 
 .. list-table:: Sample-based Metadata Table
     :widths: 40 40 20
@@ -287,7 +287,7 @@ If ``external`` used, the following additional params are required:
 
 - ``filters`` is a List of Maps where each Map is required to have the following parameters:
 
-  - ``cellMetaDataFilePath`` is a file path pointing to a single TSV file (with header) with at least 3 columns: a column containing all the cell IDs, another containing the sample ID/name information, and a column to use for the filtering.
+  - ``cellMetaDataFilePath`` is a file path pointing to a single .tsv file (with header) with at least 3 columns: a column containing all the cell IDs, another containing the sample ID/name information, and a column to use for the filtering.
   - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
   - `optional` ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
   - `optional` ``filterColumnName`` is the column name from ``cellMetaDataFilePath`` which be used to filter out cells.

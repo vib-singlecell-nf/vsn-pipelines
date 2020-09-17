@@ -374,7 +374,7 @@ Contrary to the aformentioned pipelines, these are not end-to-end. They are used
 **cell_annotate**
 -----------------
 
-Runs the ``cell_annotate`` workflow which will perform a cell-based annotation of the data using a set of provided TSV metadata files.
+Runs the ``cell_annotate`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files.
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
 about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section.
 
@@ -426,7 +426,7 @@ Now we can run it with the following command:
 **cell_annotate_filter**
 ------------------------
 
-Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided TSV metadata files following by a cell-based filtering.
+Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files following by a cell-based filtering.
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
 about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section and `Cell-based metadata filtering`_ section.
 

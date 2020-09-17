@@ -41,7 +41,7 @@ parser.add_argument(
     dest="method",
     choices=['internal', 'external'],
     default='internal',
-    help="The method to prepare the filters. Internal means, the input is expected to be a .h5ad otherwise it expects a .tsv."
+    help="The method to prepare the filters. Internal means, the input is expected to be a .h5ad otherwise it expects a .tsv file."
 )
 
 parser.add_argument(
@@ -55,14 +55,14 @@ parser.add_argument(
     '-s', '--sample-column-name',
     type=str,
     dest="sample_column_name",
-    help="The column name containing the sample ID for each row in the cell meta data."
+    help="The column name containing the sample ID for each row in the cell metadata."
 )
 
 parser.add_argument(
     '-x', '--index-column-name',
     type=str,
     dest="index_column_name",
-    help="The column name containing the index (unique identifier) for each row in the cell meta data."
+    help="The column name containing the index (unique identifier) for each row in the cell metadata."
 )
 
 parser.add_argument(
