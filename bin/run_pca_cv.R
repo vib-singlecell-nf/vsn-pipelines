@@ -167,6 +167,8 @@ RunPCACV <- function(
 
   # Load the libraries required for parallelization
   library(doFuture)
+  # Increase max size of global objects passed to an item in the future package
+  options(future.globals.maxSize= 1000*1024^2)
   library(doRNG)
 
   if(is.null(seed))
