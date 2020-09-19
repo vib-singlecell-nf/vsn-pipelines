@@ -8,7 +8,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pcacv/bin" : 
 process PCACV__FIND_OPTIMAL_NPCS {
     
     container params.pcacv.container
-    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/pcacv", mode: 'link'
     clusterOptions "-l nodes=1:ppn=${processParams.nCores} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
     input:
@@ -23,7 +23,8 @@ process PCACV__FIND_OPTIMAL_NPCS {
             emit: optimalNumberPC
         tuple \
             val(sampleId), \
-            path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*")
+            path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*"), \
+            emit: files
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.pcacv.find_optimal_npcs)
