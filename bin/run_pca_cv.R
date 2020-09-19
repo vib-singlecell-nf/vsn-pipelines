@@ -217,7 +217,7 @@ RunPCACV <- function(
     }
     print("==========================================")
     gl <- pca_results$v
-    res <- foreach(j=1:length(x = pc), .combine='rbind') %do% {
+    res <- foreach(j=1:length(x = pc), .combine='rbind') %dopar% {
     # for(j in 1:length(x = pc)) {
       print(paste0("...with ", pc[j], " PCs."))
       P <- gl[,1:pc[j]]%*%Matrix::t(gl[,1:pc[j]])
