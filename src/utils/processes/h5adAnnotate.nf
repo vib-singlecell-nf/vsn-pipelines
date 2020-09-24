@@ -130,8 +130,14 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA {
         //  samplecolumnName
         sampleColumnName = ''
         if(processParams.containsKey("by")) {
+            if(!processParams.by.containsKey("sampleColumnName")) {
+                throw new Exception("VSN ERROR: Missing sampleColumnName param in params.sc.sample_annotate.by.")
+            }
             sampleColumnName = processParams.by.sampleColumnName
         } else {
+            if(!processParams.containsKey("sampleColumnName")) {
+                throw new Exception("VSN ERROR: Missing sampleColumnName param in params.sc.sample_annotate.")
+            }
             // make it backward compatible (see sample_annotate_old_v1.config)
             sampleColumnName = processParams.sampleColumnName
         }
