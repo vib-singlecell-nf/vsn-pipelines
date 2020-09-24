@@ -154,8 +154,9 @@ def INIT(params) {
     def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
     params.misc.manifestAsJSON = toJson(workflow.manifest)
     params.misc.paramsAsJSON = toJson(paramsCopy)
-    // Include helper functions
+    // Include generic configs
     includeConfig(params, 'conf/generic.config')
+    includeConfig(params, 'src/utils/conf/workflow_report.config')
     return params
 
 }
