@@ -33,7 +33,7 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 			${(processParams.containsKey('k')) ? '--k ' + processParams.k : ''} \
 			${(processParams.containsKey('varIndex')) ? '--var-index ' + processParams.varIndex : ''} \
 			${(processParams.containsKey('varSubset')) ? '--var-subset ' + processParams.varSubset : ''} \
-			${(processParams.containsKey('nJobs')) ? '--n-jobs ' + processParams.nJobs : ''} \
+            --n-jobs ${task.cpus} \
 			${(processParams.containsKey('neighborsWithinBatch')) ? '--neighbors-within-batch ' + processParams.neighborsWithinBatch : ''} \
 			${(processParams.containsKey('trim')) ? '--trim ' + processParams.trim : ''} \
 			$f
