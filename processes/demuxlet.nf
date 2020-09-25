@@ -6,6 +6,7 @@ process SC__POPSCLE__DEMUXLET {
 
     container params.sc.popscle.container
     publishDir "${params.global.outdir}/data", mode: 'symlink'
+    label 'compute_resources__cpu'
 
     input:
         tuple val(sampleId), path(f)
@@ -31,6 +32,7 @@ process SC__POPSCLE__FREEMUXLET {
 
     container params.sc.popscle.container
     publishDir "${params.global.outdir}/data", mode: 'symlink'
+    label 'compute_resources__cpu'
 
     input:
         tuple val(sampleId), path(f)
