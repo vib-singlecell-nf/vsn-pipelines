@@ -4,7 +4,7 @@ process SC__DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT {
     
     container params.sc.dropseqtools.container
     publishDir "${params.global.outdir}/00.refdata", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         file(annotation)

@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 process SC__DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON {
 
     publishDir "${params.global.outdir}/02.map", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
         tuple val(sample), path(bam)
