@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 process SC__STAR__SOLO_MAP_COUNT {
 
   container params.sc.star.container
-  maxForks 2
+  label 'compute_resources__star_map_count'
 
   input:
     file(transcriptome)
@@ -23,7 +23,7 @@ process SC__STAR__SOLO_MAP_COUNT {
       --genomeLoad LoadAndKeep \
       --soloType Droplet \
       --genomeDir ${transcriptome} \
-      ${(params.sc.star.map_count.containsKey('runThreadN')) ? '--runThreadN ' + params.sc.star.map_count.runThreadN: ''} \
+      --runThreadN ${task.cpus} \
       ${(params.sc.star.map_count.containsKey('limitBAMsortRAM')) ? '--limitBAMsortRAM ' + params.sc.star.map_count.limitBAMsortRAM: ''} \
       ${(params.sc.star.map_count.containsKey('outSAMtype')) ? '--outSAMtype ' + params.sc.star.map_count.outSAMtype: ''} \
       ${(params.sc.star.map_count.containsKey('quantMode')) ? '--quantMode ' + params.sc.star.map_count.quantMode: ''} \

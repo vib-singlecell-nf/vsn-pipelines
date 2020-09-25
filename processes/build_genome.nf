@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 process SC__STAR__BUILD_INDEX {
 
     container params.sc.star.container
-    clusterOptions "-l nodes=1:ppn=${processParams.runThreadN} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__star_build_genome'
 
     input:
         file(annotation)
@@ -18,7 +18,7 @@ process SC__STAR__BUILD_INDEX {
         """
         mkdir STAR_index
         STAR \
-            --runThreadN ${processParams.runThreadN} \
+            --runThreadN ${task.cpus} \
             --runMode genomeGenerate \
             --genomeDir STAR_index \
             --genomeFastaFiles ${genome} \

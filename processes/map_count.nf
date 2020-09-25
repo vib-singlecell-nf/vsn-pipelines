@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 process SC__STAR__MAP_COUNT {
 
 	container params.sc.star.container
-	maxForks 2
+    label 'compute_resources__star_map_count'
 
 	input:
 		file(starIndex)
@@ -23,7 +23,7 @@ process SC__STAR__MAP_COUNT {
 		STAR \
 			--genomeLoad LoadAndKeep \
 			--genomeDir ${starIndex} \
-			${(processParams.containsKey('runThreadN')) ? '--runThreadN ' + processParams.runThreadN: ''} \
+            --runThreadN ${task.cpus} \
 			${(processParams.containsKey('limitBAMsortRAM')) ? '--limitBAMsortRAM ' + processParams.limitBAMsortRAM: ''} \
 			${(processParams.containsKey('outSAMtype')) ? '--outSAMtype ' + processParams.outSAMtype: ''} \
 			${(processParams.containsKey('quantMode')) ? '--quantMode ' + processParams.quantMode: ''} \
