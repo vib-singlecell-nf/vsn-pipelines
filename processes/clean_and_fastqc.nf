@@ -7,7 +7,7 @@ process FASTP__CLEAN_AND_FASTQC {
 
     container params.fastp.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
         set val(sample), path(reads)
