@@ -6,6 +6,7 @@ process SC__DIRECTS__SELECT_DEFAULT_CLUSTERING {
 
     container params.sc.directs.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
+    label 'compute_resources__default'
 
     input:
         tuple \
