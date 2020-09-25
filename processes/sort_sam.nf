@@ -4,7 +4,7 @@ process PICARD__SORT_SAM {
 
     container params.picard.container
     publishDir "${params.global.outdir}/02.map", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
         tuple val(sample), path(bam)
