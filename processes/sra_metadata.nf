@@ -2,8 +2,9 @@ nextflow.preview.dsl=2
 
 process EDIRECT__SRAID_TO_SAMPLENAME {
     
-    maxForks 1
     container params.edirect.container
+    label 'compute_resources__default'
+    maxForks 1
 
     input:
         val(sraId)
