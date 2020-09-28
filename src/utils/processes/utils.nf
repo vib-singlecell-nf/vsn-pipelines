@@ -86,8 +86,8 @@ process SC__FILE_CONVERTER {
 		container "vibsinglecellnf/sceasy:0.0.5"
 	else
         container params.sc.scanpy.container
-    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
     input:
         tuple \
@@ -180,6 +180,7 @@ process SC__FILE_CONVERTER {
 process SC__FILE_CONVERTER_HELP {
 
     container params.sc.scanpy.container
+    label 'compute_resources__minimal'
 
     output:
         stdout()
@@ -195,8 +196,8 @@ process SC__FILE_CONCATENATOR {
 
     cache 'deep'
     container params.sc.scanpy.container
-    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
     input:
         file("*")
@@ -218,8 +219,8 @@ process SC__FILE_CONCATENATOR {
 process SC__STAR_CONCATENATOR() {
 
     container params.sc.scanpy.container
-    clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
     input:
         tuple \
@@ -285,7 +286,6 @@ process SC__PUBLISH {
         return "${outDir}/data/${toolName.toLowerCase()}"
     }
 
-    clusterOptions "-l nodes=1:ppn=2 -l pmem=3gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
         mode: 'link', \
@@ -294,6 +294,8 @@ process SC__PUBLISH {
             filename -> "${outputFileName}" 
         }
 
+    label 'compute_resources__minimal'
+    
     input:
         tuple \
             val(tag), \
@@ -330,8 +332,8 @@ process SC__PUBLISH {
 process COMPRESS_HDF5() {
 
 	container "vibsinglecellnf/hdf5:1.10.5-r2"
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    label 'compute_resources__mem'
 
 	input:
 		tuple \

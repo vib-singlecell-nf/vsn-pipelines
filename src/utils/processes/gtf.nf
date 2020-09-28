@@ -3,7 +3,7 @@ nextflow.preview.dsl=2
 process FORMAT_GTF {
 
     publishDir "${params.global.outdir}/00.refdata", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         file(annotation)
@@ -23,7 +23,7 @@ process FORMAT_GTF {
 process FORMAT_GTF_IGENOMES {
 
     publishDir "${params.global.outdir}/00.refdata", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         file(annotation)

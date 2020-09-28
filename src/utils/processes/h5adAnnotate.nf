@@ -25,7 +25,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
 
     container params.sc.scanpy.container
     publishDir "${getPublishDir(params.global.outdir,tool)}", mode: "${getMode(tool)}", overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple \
@@ -84,7 +84,7 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple \
