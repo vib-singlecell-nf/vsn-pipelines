@@ -18,7 +18,7 @@ parser.add_argument(
 parser.add_argument(
     "cell_meta_data_file_path",
     type=argparse.FileType('r'),
-    help='The file path to meta data (TSV with header) for each cell where values from a column could be used to annotate the cells.'
+    help='The file path to metadata (.tsv with header) for each cell where values from a column could be used to annotate the cells.'
 )
 
 parser.add_argument(
@@ -49,7 +49,7 @@ parser.add_argument(
     '-s', '--sample-column-name',
     type=str,
     dest="sample_column_name",
-    help="The column name containing the sample ID for each cell entry in the cell meta data."
+    help="The column name containing the sample ID for each cell entry in the cell metadata."
 )
 
 parser.add_argument(
@@ -105,6 +105,11 @@ if args.method == 'obo':
         )
     if args.annotation_column_names is not None:
         metadata = metadata.filter(items=args.annotation_column_names)
+
+    # Check if all elements from the metadata subset are present in the given input file (h5ad file)
+    if np.sum(np.isin(adata.obs.index, metadata.index)) != len(adata.obs):
+        raise Exception(f"Make sure the cell IDs from the given input h5ad {FILE_PATH_IN} exist in the column {args.index_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+
     adata.obs = adata.obs.join(
         other=metadata
     )
@@ -117,6 +122,10 @@ elif args.method == 'aio':
                 metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
                 metadata.index.isin(adata.obs.index.values))
         ]
+        # Check if all elements from the metadata subset are present in the given input file (h5ad file)
+        if np.sum(np.isin(adata.obs.index, metadata_subset.index)) != len(adata.obs):
+            raise Exception(f"Make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+
         # Annotate
         adata.obs[annotation_column_name] = None
         adata.obs.loc[metadata_subset.index, annotation_column_name] = metadata_subset[annotation_column_name]
