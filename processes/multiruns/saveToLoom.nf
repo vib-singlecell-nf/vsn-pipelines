@@ -3,14 +3,13 @@ nextflow.preview.dsl=2
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
 toolParams = params.sc.scenic
-processParams = params.sc.scenic.save_to_loom
 
 process SAVE_MULTI_RUNS_TO_LOOM {
 
     cache 'deep'
     container toolParams.container
     publishDir "${toolParams.scenicoutdir}/${sampleId}/multi_runs_looms/", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=${toolParams.numWorkers} -l pmem=${processParams.pmem} -l walltime=24:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__scenic_multiruns'
 
     input:
 		tuple val(sampleId), path(filteredLoom), path(multiRunsAggrRegulons), path(multiRunsAggrRegulonsAUC)

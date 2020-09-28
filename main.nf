@@ -110,9 +110,6 @@ workflow scenic {
 
         // multi-runs aggregation:
         if(params.sc.scenic.containsKey("numRuns") && params.sc.scenic.numRuns > 1) {
-            if(params.sc.scenic.numRuns > 2 && params.global.qsubaccount.length() == 0)
-                throw new Exception("Consider to run SCENIC in multi-runs mode as jobs. Specify the qsubaccount parameter accordingly.")
-            
             scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
                 filteredLoom,
                 ctx_mtf,
@@ -191,12 +188,14 @@ workflow scenic_append {
                 throw new Exception("Cannot append SCENIC loom to SCope loom because the IDs do not match.")
             }
         )
-        report_notebook = GENERATE_REPORT(
-            file(workflow.projectDir + params.sc.scenic.report_ipynb),
-            APPEND_SCENIC_LOOM.out,
-            "SCENIC_report"
-        )
-        REPORT_TO_HTML(report_notebook)
+        if(!params.sc.scenic.skipReports) {
+            report_notebook = GENERATE_REPORT(
+                file(workflow.projectDir + params.sc.scenic.report_ipynb),
+                APPEND_SCENIC_LOOM.out,
+                "SCENIC_report"
+            )
+            REPORT_TO_HTML(report_notebook)
+        }
 
     emit:
         APPEND_SCENIC_LOOM.out
