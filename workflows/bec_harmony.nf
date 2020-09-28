@@ -64,7 +64,10 @@ workflow BEC_HARMONY {
         )
 
         PUBLISH_BEC_OUTPUT(
-            SC__H5AD_UPDATE_X_PCA.out,
+            SC__H5AD_UPDATE_X_PCA.out.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
             "BEC_HARMONY.output",
             "h5ad",
             null,
