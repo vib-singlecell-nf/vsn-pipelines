@@ -18,9 +18,16 @@ include {
 workflow FILTER_BY_CELL_METADATA {
 
     take:
-        // Expects (sampleId, h5ad)
+        // Expects (sampleId, h5ad) : Channel
         data
-        // Expects name of tool ([string] || null)
+        // Describes: name of tool
+        // Expects tool: (string || null)
+        // Values
+        // - tool != null:
+        //   - The given tool is performing itself a cell-based annotation
+        //   - params.sc[tool] should exist
+        // - tool == null:
+        //   - params.sc.cell_filter should exist
         tool
 
     main:

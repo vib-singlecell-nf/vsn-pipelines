@@ -112,6 +112,23 @@ Runs the ``single_sample`` workflow above together with the Scrublet workflow.
 .. |Single-sample Scrublet Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample_scrublet.svg?sanitize=true
 
 
+The pipelines generate the following relevant files for each sample:
+
+.. list-table:: Output Files (not exhaustive list)
+    :widths: 10 40
+    :header-rows: 1
+
+    * - Output File
+      - Description
+    * - `out/data/*.SINGLE_SAMPLE_SCRUBLET.loom`
+      - `SCope`-ready loom file containing resulting loom file from a `single_sample` workflow but with additional metadata (doublet scores and predicted doublet for the cells) based on Scrublet run.
+    * - `out/data/scrublet/*.SC__SCRUBLET__DOUBLET_DETECTION.ScrubletObject.pklz`
+      - Pickled file containing the Scrublet object.
+    * - `out/data/scrublet/*.SCRUBLET.SC__ANNOTATE_BY_CELL_METADATA.h5ad`
+      - h5ad file with raw data and doublets annotated.
+    * - `out/data/scrublet/*.SINGLE_SAMPLE_SCRUBLET.h5ad`
+      - h5ad file resulting from a ``single_sample`` workflow run and with doublets (inferred from Scrublet) removed.
+
 ----
 
 **scenic** |scenic|
@@ -156,6 +173,109 @@ Input parameters are specified within the config file:
 * ``params.sc.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
 * ``params.sc.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
 
+**cellranger_count_metadata**
+-----------------------------
+
+Given the data stored as:
+
+.. code:: bash
+
+    MKFASTQ_ID_SEQ_RUN1
+    |-- MAKE_FASTQS_CS
+     -- outs
+        |-- fastq_path
+            |-- HFLC5BBXX
+                |-- test_sample1
+                |   |-- sample1_S1_L001_I1_001.fastq.gz
+                |   |-- sample1_S1_L001_R1_001.fastq.gz
+                |   |-- sample1_S1_L001_R2_001.fastq.gz
+                |   |-- sample1_S1_L002_I1_001.fastq.gz
+                |   |-- sample1_S1_L002_R1_001.fastq.gz
+                |   |-- sample1_S1_L002_R2_001.fastq.gz
+                |   |-- sample1_S1_L003_I1_001.fastq.gz
+                |   |-- sample1_S1_L003_R1_001.fastq.gz
+                |   |-- sample1_S1_L003_R2_001.fastq.gz
+                |-- test_sample2
+                |   |-- sample2_S2_L001_I1_001.fastq.gz
+                |   |-- sample2_S2_L001_R1_001.fastq.gz
+                |   |-- ...
+            |-- Reports
+            |-- Stats
+            |-- Undetermined_S0_L001_I1_001.fastq.gz
+            ...
+            -- Undetermined_S0_L003_R2_001.fastq.gz
+    MKFASTQ_ID_SEQ_RUN2
+    |-- MAKE_FASTQS_CS
+     -- outs
+        |-- fastq_path
+            |-- HFLY8GGLL
+                |-- test_sample1
+                |   |-- ...
+                |-- test_sample2
+                |   |-- ...
+            |-- ...
+
+
+and a metadata table:
+
+.. list-table:: Minimally Required Metadata Table
+    :widths: 10 30 10 10 10
+    :header-rows: 1
+
+    * - sample_name
+      - fastqs_parent_dir_path
+      - fastqs_dir_name
+      - fastqs_sample_prefix
+      - expect_cells
+    * - Sample1_Bio_Rep1
+      - MKFASTQ_ID_SEQ_RUN1/outs/fastq_path/HFLY8GGLL
+      - test_sample1
+      - sample1
+      - 5000
+    * - Sample1_Bio_Rep1
+      - MKFASTQ_ID_SEQ_RUN2/outs/fastq_path/HFLC5BBXX
+      - test_sample1
+      - sample1
+      - 5000
+    * - Sample1_Bio_Rep2
+      - MKFASTQ_ID_SEQ_RUN1/outs/fastq_path/HFLY8GGLL
+      - test_sample2
+      - sample2
+      - 5000
+    * - Sample1_Bio_Rep2
+      - MKFASTQ_ID_SEQ_RUN2/outs/fastq_path/HFLC5BBXX
+      - test_sample2
+      - sample2
+      - 5000
+
+Optional columns:
+
+- ``short_uuid``: ``sample_name`` will be prefix by this value. This should be the same between sequencing runs of the same biological replicate
+- ``expect_cells``: This number will be used as argument for the ``--expect-cells`` parameter in ``cellranger count``.
+- ``chemistry``: This chemistry will be used as argument for the ``--chemistry`` parameter in ``cellranger count``.
+
+and a config:
+
+.. code:: bash
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile cellranger_count_metadata \
+       > nextflow.config
+
+and a workflow run command:
+
+.. code:: bash
+
+    nextflow run \
+        ~/vib-singlecell-nf/vsn-pipelines \
+        -entry cellranger_count_metadata
+
+The workflow will run Cell Ranger `count` on 2 samples, each using the 2 sequencing runs.
+
+NOTES:
+
+- If ``fastqs_dir_name`` does not exist, set it to ``none``
 
 ----
 
@@ -245,6 +365,128 @@ The output is a loom file with the results embedded.
 .. |mnnCorrect Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/mnncorrect.svg?sanitize=true
 
 ----
+
+Utility Pipelines
+*****************
+
+Contrary to the aformentioned pipelines, these are not end-to-end. They are used to perfom small incremental processing steps.
+
+**cell_annotate**
+-----------------
+
+Runs the ``cell_annotate`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files.
+We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
+about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section.
+
+.. _`Cell-based metadata annotation`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-annotation
+
+First, generate the config :
+
+.. code:: groovy
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile tenx,utils_cell_annotate,singularity
+
+Make sure the following parts of the generated config are properly set:
+
+.. code:: bash
+
+    [...]
+    data {
+      tenx {
+         cellranger_mex = '~/out/counts/*/outs/'
+      }
+    }
+    sc {
+        scanpy {
+            container = 'vibsinglecellnf/scanpy:0.5.2'
+        }
+        cell_annotate {
+            off = 'h5ad'
+            method = 'obo'
+            indexColumnName = 'BARCODE'
+            cellMetaDataFilePath = "~/out/data/*.best"
+            sampleSuffixWithExtension = '_demuxlet.best'
+            annotationColumnNames = ['DROPLET.TYPE', 'NUM.SNPS', 'NUM.READS', 'SNG.BEST.GUESS']
+        }
+        [...]
+    }
+    [...]
+
+Now we can run it with the following command:
+
+.. code:: groovy
+
+    nextflow -C nextflow.config \
+       run ~/vib-singlecell-nf/vsn-pipelines \
+       -entry cell_annotate \
+       > nextflow.config
+
+**cell_annotate_filter**
+------------------------
+
+Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files following by a cell-based filtering.
+We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
+about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section and `Cell-based metadata filtering`_ section.
+
+.. _`Cell-based metadata annotation`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-annotation
+.. _`Cell-based metadata filtering`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-filtering
+
+First, generate the config :
+
+.. code:: groovy
+
+    nextflow config \
+       ~/vib-singlecell-nf/vsn-pipelines \
+       -profile tenx,utils_cell_annotate,utils_cell_filter,singularity \
+       > nextflow.config
+
+Make sure the following parts of the generated config are properly set:
+
+.. code:: bash
+
+    [...]
+    data {
+      tenx {
+         cellranger_mex = '~/out/counts/*/outs/'
+      }
+    }
+    sc {
+        scanpy {
+            container = 'vibsinglecellnf/scanpy:0.5.2'
+        }
+        cell_annotate {
+            off = 'h5ad'
+            method = 'obo'
+            indexColumnName = 'BARCODE'
+            cellMetaDataFilePath = "~/out/data/*.best"
+            sampleSuffixWithExtension = '_demuxlet.best'
+            annotationColumnNames = ['DROPLET.TYPE', 'NUM.SNPS', 'NUM.READS', 'SNG.BEST.GUESS']
+        }
+        cell_filter {
+            off = 'h5ad'
+            method = 'internal'
+            filters = [
+                [
+                    id:'NO_DOUBLETS',
+                    sampleColumnName:'sample_id',
+                    filterColumnName:'DROPLET.TYPE',
+                    valuesToKeepFromFilterColumn: ['SNG']
+                ]
+            ]
+        }
+        [...]
+    }
+    [...]
+
+Now we can run it with the following command:
+
+.. code:: groovy
+
+    nextflow -C nextflow.config \
+       run ~/vib-singlecell-nf/vsn-pipelines \
+       -entry cell_filter
 
 Input Data Formats
 *******************
@@ -377,6 +619,28 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
     [...]
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
+
+In case there are multiple .h5ad files that need to be processed with different suffixes, the multi-labelled strategy should be used to define the h5ad param::
+
+    [...]
+    data {
+        h5ad {
+            GROUP1 {
+                file_paths = "[path-to-group1-files]/*.SUFFIX1.h5ad"
+                suffix = ".SUFFIX1.h5ad"
+            }
+            GROUP2 {
+                file_paths = "[path-to-group1-files]/*.SUFFIX2.h5ad"
+                suffix = ".SUFFIX2.h5ad"
+            }
+        }
+    }
+    [...]
+
+Notes: 
+
+- ``GROUP1``, ``GROUP2`` are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
+- ``file_paths`` and ``suffix`` do allow list of paths/globs in the multi-labelled strategy.
 
 ----
 
