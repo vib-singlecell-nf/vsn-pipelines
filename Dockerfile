@@ -1,4 +1,4 @@
-FROM vibsinglecellnf/scanpy:0.5.1 AS compile-image
+FROM vibsinglecellnf/scanpy:0.5.2 AS compile-image
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN BUILDPKGS="build-essential apt-utils \
