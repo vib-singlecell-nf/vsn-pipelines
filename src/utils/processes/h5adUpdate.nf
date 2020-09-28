@@ -9,7 +9,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 process SC__H5AD_UPDATE_X_PCA {
 
 	container params.sc.scanpy.container
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__mem'
 
 	input:
 		tuple \
@@ -35,7 +35,7 @@ process SC__H5AD_UPDATE_X_PCA {
 process SC__H5AD_CLEAN {
 
 	container params.sc.scanpy.container
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__mem'
 
 	input:
 		tuple \
@@ -63,7 +63,7 @@ process SC__H5AD_BEAUTIFY {
 
 	container params.sc.scanpy.container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
-	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__mem'
 
 	input:
 		tuple \
@@ -94,3 +94,4 @@ process SC__H5AD_BEAUTIFY {
 		"""
 
 }
+
