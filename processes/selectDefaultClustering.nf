@@ -6,6 +6,7 @@ process SC__DIRECTS__SELECT_DEFAULT_CLUSTERING {
 
     container params.sc.directs.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
+    label 'compute_resources__default'
 
     input:
         tuple \
@@ -26,9 +27,13 @@ process SC__DIRECTS__SELECT_DEFAULT_CLUSTERING {
         ${binDir}select_default_clustering.py \
             ${f} \
             ${sampleId}.SC__DIRECTS__SELECT_DEFAULT_CLUSTERING.loom \
+            ${(processParams.containsKey('cellEmbeddingsIndex')) ? '--cell-embeddings-index ' + processParams.cellEmbeddingsIndex : ''} \
             ${(processParams.containsKey('fromMinClusterSize')) ? '--from-min-cluster-size ' + processParams.fromMinClusterSize : ''} \
             ${(processParams.containsKey('toMinClusterSize')) ? '--to-min-cluster-size ' + processParams.toMinClusterSize : ''} \
-            ${(processParams.containsKey('byMinClusterSize')) ? '--by-min-cluster-size ' + processParams.byMinClusterSize : ''}
+            ${(processParams.containsKey('byMinClusterSize')) ? '--by-min-cluster-size ' + processParams.byMinClusterSize : ''} \
+            ${(processParams.containsKey('fromMinSamples')) ? '--from-min-samples ' + processParams.fromMinSamples : ''} \
+            ${(processParams.containsKey('toMinSamples')) ? '--to-min-samples ' + processParams.toMinSamples : ''} \
+            ${(processParams.containsKey('byMinSamples')) ? '--by-min-samples ' + processParams.byMinSamples : ''}
         """
 }
 
