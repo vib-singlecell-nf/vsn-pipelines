@@ -8,8 +8,8 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pcacv/bin" : 
 process PCACV__FIND_OPTIMAL_NPCS {
     
     container params.pcacv.container
-    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=${processParams.nCores} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    publishDir "${params.global.outdir}/data/pcacv", mode: 'link'
+    label 'compute_resources__pcacv'
 
     input:
         tuple \
@@ -23,13 +23,14 @@ process PCACV__FIND_OPTIMAL_NPCS {
             emit: optimalNumberPC
         tuple \
             val(sampleId), \
-            path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*")
+            path("${sampleId}.PCACV__FIND_OPTIMAL_NPCS.*"), \
+            emit: files
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.pcacv.find_optimal_npcs)
         processParams = sampleParams.local
         """
-        export OPENBLAS_NUM_THREADS=${processParams.nCores}
+        export OPENBLAS_NUM_THREADS=1
         ${binDir}/run_pca_cv.R \
             --input-file ${f} \
             --seed ${params.global.seed} \
@@ -40,7 +41,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
             ${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
             ${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
             ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.libraries: ''} \
-            ${(processParams.containsKey('nCores')) ? '--n-cores ' + processParams.nCores: ''} \
+            --n_cores ${task.cpus} \
             ${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
             --output-prefix "${sampleId}.PCACV__FIND_OPTIMAL_NPCS" \

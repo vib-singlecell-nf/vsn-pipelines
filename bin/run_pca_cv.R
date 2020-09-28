@@ -118,6 +118,26 @@ GetDataFromS4ObjectByAccessPath <- function(object, path) {
   return (S4Parse(object = object, acc))
 }
 
+ConvertH5GroupToDataFrame <- function(h5.group) {
+  h5_external_names <- names(h5.group)[Vectorize(function(x) !startsWith(x = x, prefix = "_"))(names(x = h5.group))]
+  df <- do.call(what = "cbind", args = lapply(X = h5_external_names, FUN = function(h5_name) {
+    return (h5.group[[h5_name]][])
+  }))
+  colnames(x = df) <- h5_external_names
+  return (as.data.frame(x = df))
+}
+
+ExtractDataFromH5Object <- function(h5.object) {
+  if(h5.object$get_obj_type() == "H5I_DATASET")
+    return (h5.object[])
+  # Handle the case for H5AD build with python package anndata>=0.7.1
+  if(h5.object$get_obj_type() == "H5I_GROUP")
+    return (
+      ConvertH5GroupToDataFrame(h5.group = h5.object)
+    )
+  stop("Unrecognized H5 type.")
+}
+
 #'
 #' @title RunPCACV
 #' @description       Return the PRESS errors of the PCA cross-validation 
@@ -147,6 +167,8 @@ RunPCACV <- function(
 
   # Load the libraries required for parallelization
   library(doFuture)
+  # Increase max size of global objects passed to an item in the future package
+  options(future.globals.maxSize= 1000*1024^2)
   library(doRNG)
 
   if(is.null(seed))
@@ -197,7 +219,7 @@ RunPCACV <- function(
     }
     print("==========================================")
     gl <- pca_results$v
-    res <- foreach(j=1:length(x = pc), .combine='rbind') %do% {
+    res <- foreach(j=1:length(x = pc), .combine='rbind') %dopar% {
     # for(j in 1:length(x = pc)) {
       print(paste0("...with ", pc[j], " PCs."))
       P <- gl[,1:pc[j]]%*%Matrix::t(gl[,1:pc[j]])
@@ -244,8 +266,8 @@ if(input_ext == "loom") {
   }
   # x will be an S3 matrix if X was scaled, otherwise will be a dgCMatrix
   # Pull cell- and feature-level metadata
-  obs <- file[['obs']][]
-  meta_features <- file[['var']][]
+  obs <- ExtractDataFromH5Object(file[['obs']])
+  meta_features <- ExtractDataFromH5Object(file[['var']])
   rownames(x = data) <- rownames(x = meta_features) <- meta_features$index
   colnames(x = data) <- rownames(x = obs) <- obs$index
   file$close_all()
