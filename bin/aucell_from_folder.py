@@ -10,7 +10,7 @@ import utils
 ################################################################################
 ################################################################################
 
-parser_grn = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as TSV in folder.')
+parser_grn = argparse.ArgumentParser(description='Run AUCell on gene signatures saved as .tsv in folder.')
 
 parser_grn.add_argument(
     'expression_mtx_fname',
@@ -20,7 +20,7 @@ parser_grn.add_argument(
 )
 parser_grn.add_argument(
     'signatures_fname',
-    help='The name of the folder containing the signatures as TSV files.'
+    help='The name of the folder containing the signatures as .tsv files.'
 )
 parser_grn.add_argument(
     '-o', '--output',

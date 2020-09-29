@@ -36,7 +36,7 @@ parser.add_argument(
     type=str,
     dest="motif_regulons_folder",
     required=False,
-    help='Folder containing the track-based regulon TSV files.'
+    help='Folder containing the track-based regulon .tsv files.'
 )
 
 parser.add_argument(
@@ -44,7 +44,7 @@ parser.add_argument(
     type=str,
     dest="track_regulons_folder",
     required=False,
-    help='Folder containing the track-based regulon TSV files.'
+    help='Folder containing the track-based regulon .tsv files.'
 )
 
 parser.add_argument(

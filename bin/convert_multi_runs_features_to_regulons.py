@@ -28,7 +28,7 @@ parser_grn.add_argument(
 )
 parser_grn.add_argument(
     'signatures_fname',
-    help='The name of the folder containing the signatures as TSV files.'
+    help='The name of the folder containing the signatures as .tsv files.'
 )
 
 parser_grn.add_argument(
