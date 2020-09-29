@@ -56,7 +56,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
             ${processParams.containsKey('method') ? '--method ' + processParams.method : ''} \
             --index-column-name ${processParams.indexColumnName} \
             --sample-id ${sampleId} \
-            ${processParams.containsKey('sampleColumnName') ? '--sample-column-name' + processParams.sampleColumnName : ''} \
+            ${processParams.containsKey('sampleColumnName') ? '--sample-column-name ' + processParams.sampleColumnName : ''} \
             ${annotationColumnNamesAsArguments} \
             $f \
             ${metadata} \
