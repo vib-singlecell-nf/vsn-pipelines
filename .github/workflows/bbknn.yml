@@ -31,6 +31,6 @@ jobs:
         mv sample_data testdata/sample2
     - name: Run single_sample test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile bbknn,test__bbknn,docker -entry bbknn -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile bbknn,test__bbknn,test__compute_resources,docker -entry bbknn -ansi-log false
         cat .nextflow.log
 
