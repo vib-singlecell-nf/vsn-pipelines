@@ -6,6 +6,9 @@ import static groovy.json.JsonOutput.*
 //  Process imports:
 
 include {
+    includeConfig;
+} from "./../processes/config.nf" params(params)
+include {
     isParamNull;
     COMPRESS_HDF5;
     SC__PUBLISH;
@@ -47,7 +50,7 @@ workflow PUBLISH {
         }
 
         // Compress only if part of formatsAllowed
-        if(fileOutputSuffix != null && taggedFilesToClean.any { fileOutputSuffix.contains(it) }) {
+        if(fileOutputSuffix != null && formatsAllowed.any { fileOutputFormat.contains(it) }) {
             out = COMPRESS_HDF5(
                 out.map {
                     // if stashedParams not there, just put null 3rd arg
@@ -71,7 +74,10 @@ workflow PUBLISH {
 
         // Publish
         SC__PUBLISH(
-            out,
+            out.map {
+                // if stashedParams not there, just put null 3rd arg
+                it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+            },
             isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
             isParamNull(toolName) ? 'NULL' : toolName,
             isParameterExplorationModeOn
@@ -111,12 +117,7 @@ workflow COMBINE_BY_PARAMS {
 
 }
 
-def INIT() {
-
-    def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
-    params.misc.manifestAsJSON = toJson(workflow.manifest)
-    params.misc.paramsAsJSON = toJson(paramsCopy)
-
+def setSeed(params) {
     if(!params.global.containsKey('seed')) {
         params.global.seed = workflow.manifest.version.replaceAll("\\.","").toInteger()
 
@@ -138,5 +139,24 @@ def INIT() {
                 """
         }
     }
+}
+
+def INIT(params) {
+
+    // Set the seed
+    setSeed(params)
+    if(!params.containsKey("misc") || !params.misc.containsKey("test")) {
+        includeConfig(params, 'conf/test.config')
+        params.misc.test.enabled = false
+    }
+    // Save manifest and params for notebook
+    // Remove any closure attached to the config (this is for backward compatibility)
+    def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})
+    params.misc.manifestAsJSON = toJson(workflow.manifest)
+    params.misc.paramsAsJSON = toJson(paramsCopy)
+    // Include generic configs
+    includeConfig(params, 'conf/generic.config')
+    includeConfig(params, 'src/utils/conf/workflow_report.config')
+    return params
 
 }

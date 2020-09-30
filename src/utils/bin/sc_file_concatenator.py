@@ -78,6 +78,7 @@ if args.format == 'h5ad':
     )
     adata.var.index = adata.var.index.astype(str)
     adata = adata[:, np.sort(adata.var.index)]
+    print(f"Total number of cells: {adata.obs.shape[0]}, genes: {adata.var.shape[0]}.")
 else:
     raise Exception("VSN ERROR: Concatenation of .{} files is not implemented.".format(args.format))
 

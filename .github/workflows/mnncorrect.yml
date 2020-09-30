@@ -31,5 +31,5 @@ jobs:
         mv sample_data testdata/sample2
     - name: Run single_sample test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile mnncorrect,test__mnncorrect,docker -entry mnncorrect -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile mnncorrect,test__mnncorrect,test__compute_resources,docker -entry mnncorrect -ansi-log false
         cat .nextflow.log

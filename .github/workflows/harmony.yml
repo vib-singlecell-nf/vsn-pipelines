@@ -31,5 +31,5 @@ jobs:
         mv sample_data testdata/sample2
     - name: Run single_sample test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile harmony,test__harmony,docker -entry harmony -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile harmony,test__harmony,test__compute_resources,docker -entry harmony -ansi-log false
         cat .nextflow.log

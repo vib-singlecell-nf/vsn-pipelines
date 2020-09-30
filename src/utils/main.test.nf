@@ -1,7 +1,28 @@
 nextflow.preview.dsl=2
 
+include { 
+    INIT;
+} from './workflows/utils' params(params)
+
+INIT(params)
+
 ///////////////////////////////////////////
-//  Define the parameters for all processes
+// How to run ?
+// nextflow -C nextflow.config run [path-to-root-vsn]/src/utils/main.test.nf --test TEST
+// TEST:
+// - SC__FILE_CONVERTER
+// - SC__FILE_CONCATENATOR
+// - SC__ANNOTATE_BY_SAMPLE_METADATA
+// - ANNOTATE_BY_CELL_METADATA
+// - FILTER_BY_CELL_METADATA
+// - FILTER_AND_ANNOTATE_BY_CELL_METADATA
+// - GET_METADATA_FROM_SRA
+// - GET_METADATA_FROM_SRA_WEB
+// - DOWNLOAD_FROM_SRA_AND_RUN_CELLRANGER
+// - UPDATE_FEATURE_NOMENCLATURE
+
+///////////////////////////////////////////
+// Define the parameters for all processes
 
 include {
     SC__FILE_CONVERTER;
@@ -49,6 +70,20 @@ workflow {
             case "SC__FILE_CONCATENATOR":
                 getDataChannel | test_SC__FILE_CONCATENATOR
             break;
+            case "SC__ANNOTATE_BY_SAMPLE_METADATA":
+                // Imports
+                include {
+                    SC__ANNOTATE_BY_SAMPLE_METADATA;
+                } from './processes/h5adAnnotate' params(params)
+                // Run
+                if(params.sc.sample_annotate) {
+                    getDataChannel | \
+                        SC__FILE_CONVERTER | \
+                        SC__ANNOTATE_BY_SAMPLE_METADATA
+                } else {
+                    throw new Exception("Missing sample_annotate params in config.")
+                }
+                break;
             case "ANNOTATE_BY_CELL_METADATA":
                 // Imports
                 include {
@@ -62,6 +97,8 @@ workflow {
                         SC__FILE_CONVERTER.out, 
                         null
                     )
+                } else {
+                    throw new Exception("Missing cell_annotate params in config.")
                 }
             break;
             case "FILTER_BY_CELL_METADATA":
@@ -173,11 +210,27 @@ workflow {
                     SC__UTILS__UPDATE_FEATURE_METADATA_INDEX;
                 } from './processes/h5adUpdateMetadata' params(params)
                 // Run
-                test = Channel.of(tuple('FCA4_Male_Adult_Head1', '/ddn1/vol1/staging/leuven/stg_00002/lcb/lcb_projects/fca/analysis/20200110__head_adult__9602f660-33be-11ea-b78b-0dac43a2c3c3/out/data/intermediate/FCA4_Male_Adult_Head1.SC__FILE_CONVERTER.h5ad'))
+                test = Channel.of(tuple('sample-id', 'path-to-h5ad'))
                 SC__UTILS__EXTRACT_FEATURE_METADATA( test )
                 FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL( SC__UTILS__EXTRACT_FEATURE_METADATA.out )
                 SC__UTILS__UPDATE_FEATURE_METADATA_INDEX( test.join(FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL.out) )
             break;
+            case "SC__H5AD_BEAUTIFY":
+                // Imports
+                include {
+                    SC__H5AD_BEAUTIFY;
+                } from './processes/h5adUpdate' params(params)
+                // Run
+                if(params.sc.file_cleaner) {
+                    getDataChannel | \
+                    map {
+                        it -> tuple(it[0], it[1], null)
+                    } | \
+                        SC__H5AD_BEAUTIFY 
+                } else {
+                    throw new Exception("Missing file_cleaner params in config.")
+                }
+                break;
             default:
                 throw new Exception("The test parameters should be specified.")
             break;

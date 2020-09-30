@@ -20,7 +20,7 @@ params {
 ```
 Then, the following parameters should be updated to use the module feature:
 
-- `cellMetaDataFilePath` is a TSV file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
+- `cellMetaDataFilePath` is a .tsv file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
 - `indexColumnName` is the column name from `cellMetaDataFilePath` containing the cell IDs information.
 - `sampleColumnName` is the column name from `cellMetaDataFilePath` containing the sample ID/name information.
 - `annotationColumnNames` is an array of columns names from `cellMetaDataFilePath` containing different annotation metadata to add.
@@ -35,14 +35,14 @@ params {
             iff = '10x_cellranger_mex'
             off = 'h5ad' 
             type = 'sample' 
-            metaDataFilePath = 'data/10x/1k_pbmc/metadata.tsv'
+            metadataFilePath = 'data/10x/1k_pbmc/metadata.tsv'
         }
     }
 }
 ```
 Then, the following parameters should be updated to use the module feature:
 
-- `metaDataFilePath` is a TSV file (with header) with at least 2 columns where the first column need to match the sample IDs. Any other columns will be added as annotation in the final loom i.e.: all the cells related to their sample will get annotated with their given annotations.
+- `metadataFilePath` is a .tsv file (with header) with at least 2 columns where the first column need to match the sample IDs. Any other columns will be added as annotation in the final loom i.e.: all the cells related to their sample will get annotated with their given annotations.
 
 | id  | chemistry | ... |
 | ------------- | ------------- | ------------- |
