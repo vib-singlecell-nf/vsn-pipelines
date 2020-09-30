@@ -49,6 +49,7 @@ parser.add_argument(
     '-s', '--sample-column-name',
     type=str,
     dest="sample_column_name",
+    required=False,
     help="The column name containing the sample ID for each cell entry in the cell metadata."
 )
 
@@ -108,13 +109,16 @@ if args.method == 'obo':
 
     # Check if all elements from the metadata subset are present in the given input file (h5ad file)
     if np.sum(np.isin(adata.obs.index, metadata.index)) != len(adata.obs):
-        raise Exception(f"Make sure the cell IDs from the given input h5ad {FILE_PATH_IN} exist in the column {args.index_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+        raise Exception(f"VSN ERROR: Make sure the cell IDs from the given input h5ad {FILE_PATH_IN} exist in the column {args.index_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
 
     adata.obs = adata.obs.join(
         other=metadata
     )
 elif args.method == 'aio':
     print("Annotating using the AIO method...")
+    if args.sample_column_name is None:
+        raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")
+
     for annotation_column_name in args.annotation_column_names:
         # Extract the metadata for the cells from the adata
         metadata_subset = metadata[
@@ -124,13 +128,13 @@ elif args.method == 'aio':
         ]
         # Check if all elements from the metadata subset are present in the given input file (h5ad file)
         if np.sum(np.isin(adata.obs.index, metadata_subset.index)) != len(adata.obs):
-            raise Exception(f"Make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+            raise Exception(f"VSN ERROR: Make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
 
         # Annotate
         adata.obs[annotation_column_name] = None
         adata.obs.loc[metadata_subset.index, annotation_column_name] = metadata_subset[annotation_column_name]
 else:
-    raise Exception(f"The given method '{args.method}' is not valid.")
+    raise Exception(f"VSN ERROR: The given method '{args.method}' is not valid.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
