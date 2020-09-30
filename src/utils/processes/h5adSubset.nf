@@ -12,7 +12,7 @@ process SC__PREPARE_OBS_FILTER {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple \
@@ -37,7 +37,14 @@ process SC__PREPARE_OBS_FILTER {
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
 
-        input = processParams.method == 'internal' ? f : filterConfig.cellMetaDataFilePath
+        input = null
+        if(processParams.method == 'internal') {
+            input = f
+        } else if (processParams.method == 'external') {
+            input = filterConfig.cellMetaDataFilePath
+        } else {
+            throw new Exception("The given method" + args.method + " is not implemented. Choose either: internal or external.")
+        }
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
         ${binDir}/sc_h5ad_prepare_obs_filter.py \
@@ -57,7 +64,7 @@ process SC__APPLY_OBS_FILTER {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple \

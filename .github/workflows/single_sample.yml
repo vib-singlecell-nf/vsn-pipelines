@@ -28,6 +28,6 @@ jobs:
         tar xzvf sample_data_tiny.tar.gz
     - name: Run single_sample test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile single_sample,test__single_sample,docker -entry single_sample -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile single_sample,test__single_sample,test__compute_resources,docker -entry single_sample -ansi-log false
         cat .nextflow.log
 

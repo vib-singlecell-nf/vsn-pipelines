@@ -3,12 +3,15 @@ import static groovy.json.JsonOutput.*
 nextflow.preview.dsl=2
 
 include { 
-    INIT
-} from '../utils/workflows/utils.nf' params(params)
+    INIT;
+} from './src/utils/workflows/utils' params(params)
 INIT()
+include {
+    SC__FILE_CONVERTER;
+} from './src/utils/processes/utils' params(params)
 
 include {
-    getDataChannel
+    getDataChannel;
 } from './src/channels/channels' params(params)
 
 /* 

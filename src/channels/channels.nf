@@ -83,10 +83,20 @@ workflow getDataChannel {
             }
         }
         if(params.data.containsKey("h5ad")) {
+            dataH5ad = params.data.h5ad
+            def filePaths = null
+            def suffix = null
+            if(!dataH5ad.containsKey("file_paths") && !dataH5ad.containsKey("suffix")) {
+                filePaths = dataH5ad.collect { k,v -> v["file_paths"] }.flatten()
+                suffix = dataH5ad.collect { k,v -> v["suffix"] }.flatten()
+            } else {
+                filePaths = dataH5ad.file_paths
+                suffix = dataH5ad.suffix
+            }
             data = data.concat(
-                getFileChannel( 
-                    params.data.h5ad.file_paths,
-                    params.data.h5ad.suffix
+                getFileChannel(
+                    filePaths,
+                    suffix
                 ).map {
                     it -> tuple(it[0], it[1], "h5ad", "h5ad")
                 }

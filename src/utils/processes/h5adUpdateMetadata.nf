@@ -9,7 +9,7 @@ process SC__UTILS__UPDATE_FEATURE_METADATA_INDEX {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId), path(f), path(additionalMetadata)
