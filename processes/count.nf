@@ -1,21 +1,39 @@
 nextflow.preview.dsl=2
 
+include {
+    isParamNull;
+} from './../../utils/processes/utils.nf' params(params)
+
 toolParams = params.sc.cellranger
+
 
 def generateCellRangerCountCommandDefaults = {
 	processParams,
 	transcriptome,
-    task,
-	expectCells ->
+	expectCells,
+	chemistry ->
+	_expectCells = null
+	// --expect-cells argument
+	if(!isParamNull(expectCells)) {
+		_expectCells = expectCells
+	} else if (processParams.containsKey('expectCells')) {
+		_expectCells = processParams.expectCells
+	}
+	_chemistry = null
+	// --chemistry argument
+	if(!isParamNull(chemistry)) {
+		_chemistry = chemistry
+	} else if (processParams.containsKey('chemistry')) {
+		_chemistry = processParams.chemistry
+	}
 	return (
 		"""
 		cellranger count \
 			--transcriptome=${transcriptome} \
-			${(processParams.containsKey('expectCells')) ? '--expect-cells ' + processParams.expectCells: ''} \
-			${(expectCells && !processParams.containsKey('expectCells')) ? '--expect-cells ' + expectCells: ''} \
+			${_expectCells ? '--expect-cells ' + _expectCells: ''} \
+			${_chemistry ? '--chemistry ' + _chemistry: ''} \
 			${(processParams.containsKey('forceCells')) ? '--force-cells ' + processParams.forceCells: ''} \
 			${(processParams.containsKey('nosecondary')) ? '--nosecondary ' + processParams.nosecondary: ''} \
-			${(processParams.containsKey('chemistry')) ? '--chemistry ' + processParams.chemistry: ''} \
 			${(processParams.containsKey('r1Length')) ? '--r1-length ' + processParams.r1Length: ''} \
 			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
 			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
@@ -32,9 +50,10 @@ def runCellRangerCount = {
 	id,
 	sample,
 	fastqs,
-	expectCells = null ->
+	expectCells = null,
+	chemistry = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, task, expectCells) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry) + \
 		"""	\
 		--id=${id} \
 		--sample=${sample} \
@@ -50,9 +69,10 @@ def runCellRangerCountLibraries = {
 	id,
 	featureRef,
 	libraries = null,
-	expectCells = null ->
+	expectCells = null,
+	chemistry = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, task, expectCells) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry) + \
 		""" \
 		--id ${id} \
 		--libraries ${libraries} \
@@ -83,6 +103,7 @@ process SC__CELLRANGER__COUNT {
 		if(processParams.sample == '') {
 			throw new Exception("Regards params.sc.cellranger.count: sample parameter cannot be empty")
 		}
+		// Check if the current sample has multiple sequencing runs
 		fastqs = fastqs instanceof List ? fastqs.join(',') : fastqs
 		runCellRangerCount(
 			processParams,
@@ -155,7 +176,8 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 			val(sampleId), \
 			val(samplePrefix), \
 			path(fastqs, stageAs: "fastqs_??/*"), \
-			val(expectCells)
+			val(expectCells), \
+			val(chemistry)
 
   	output:
     	tuple \
@@ -166,6 +188,7 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 	  	def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
 		processParams = sampleParams.local
 		fastqs = fastqs instanceof List ? fastqs.join(',') : fastqs
+
 		runCellRangerCount(
 			processParams,
 			transcriptome,
@@ -173,7 +196,8 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 			sampleId,
 			samplePrefix,
 			fastqs,
-			expectCells
+			expectCells,
+			chemistry
 		)
 
 }

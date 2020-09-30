@@ -2,6 +2,8 @@ nextflow.preview.dsl=2
 
 import java.nio.file.Paths
 
+EMPTY_VALUES = ["n/a","n.a.","none","null"]
+
 //////////////////////////////////////////////////////
 //  process imports:
 
@@ -13,6 +15,16 @@ include {
 //  Define the workflow 
 
 workflow CELLRANGER_COUNT_WITH_METADATA {
+
+    def getFastQsFilePaths = { fastqsParentDirPath, fastqsDirName ->
+        if(fastqsParentDirPath instanceof List)
+            return fastqsParentDirPath
+        if(fastqsDirName in EMPTY_VALUES)
+            if(!fastqsParentDirPath.contains(','))
+                return file(fastqsParentDirPath)
+            return Arrays.asList(fastqsParentDirPath.split(',')).collect { file(it) }
+        return file(Paths.get(fastqsParentDirPath, fastqsDirName))
+    }
 
     take:
         transcriptome
@@ -27,11 +39,31 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
             sep: '\t'
         ).map {
             row -> tuple(
-                row.processing_date + "__" + row.sample_name + "__" + row.short_uuid,
+                row.containsKey("short_uuid") ? row.short_uuid + "__" + row.sample_name : row.sample_name,
                 row.fastqs_sample_prefix,
-                file(Paths.get(row.fastqs_parent_dir_path, row.fastqs_dir_name)),
+                row.fastqs_parent_dir_path,
+                row.fastqs_dir_name,
                 // Begin CellRanger parameters
-                row.expect_cells
+                row.containsKey("expect_cells") ? row.expect_cells : 'NULL',
+                row.containsKey("chemistry") ? row.chemistry : 'NULL'
+            )
+        }.groupTuple(
+            by: 0
+        ).map {
+            it -> tuple(
+                it[0],
+                *it[1].unique(), 
+                getFastQsFilePaths(
+                    it[2],
+                    it[3]
+                ),
+                *it[4..(it.size()-1)].collect { 
+                    arg -> 
+                    argBySample = arg.unique()
+                    if(argBySample.size() != 1)
+                        throw new Exception("Multiple values of a Cell Ranger parameter detected for sample: "+ it[0])
+                    return argBySample[0]
+                }
             )
         }
         SC__CELLRANGER__COUNT_WITH_METADATA( transcriptome, data )
