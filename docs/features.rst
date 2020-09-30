@@ -193,14 +193,14 @@ The profile ``utils_sample_annotate`` should be added when generating the main c
                 iff = '10x_cellranger_mex'
                 off = 'h5ad' 
                 type = 'sample' 
-                metaDataFilePath = 'data/10x/1k_pbmc/metadata.tsv'
+                metadataFilePath = 'data/10x/1k_pbmc/metadata.tsv'
             }
         }
     }
 
 Then, the following parameters should be updated to use the module feature:
 
-- ``metaDataFilePath`` is a .tsv file (with header) with at least 2 columns where the first column need to match the sample IDs. Any other columns will be added as annotation in the final loom i.e.: all the cells related to their sample will get annotated with their given annotations.
+- ``metadataFilePath`` is a .tsv file (with header) with at least 2 columns where the first column need to match the sample IDs. Any other columns will be added as annotation in the final loom i.e.: all the cells related to their sample will get annotated with their given annotations.
 
 .. list-table:: Sample-based Metadata Table
     :widths: 40 40 20
