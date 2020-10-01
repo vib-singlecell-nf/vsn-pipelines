@@ -9,7 +9,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
     
     container params.pcacv.container
     publishDir "${params.global.outdir}/data/pcacv", mode: 'link'
-    clusterOptions "-l nodes=1:ppn=${processParams.nCores} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__pcacv'
 
     input:
         tuple \
@@ -41,7 +41,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
             ${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
             ${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
             ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.libraries: ''} \
-            ${(processParams.containsKey('nCores')) ? '--n-cores ' + processParams.nCores: ''} \
+            --n_cores ${task.cpus} \
             ${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
             --output-prefix "${sampleId}.PCACV__FIND_OPTIMAL_NPCS" \
