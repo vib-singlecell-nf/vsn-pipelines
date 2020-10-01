@@ -231,6 +231,13 @@ RunPCACV <- function(
     apply(X = res, MARGIN = 1, FUN = function(r) {
       error[r[["i"]],r[["j"]]] <<- r[["err"]]
     })
+    # Free memory
+    rm(data_train)
+    rm(data_test)
+    rm(pca_results)
+    rm(gl)
+    rm(res)
+    gc()
   }
   errors <- colSums(x = error)
   return (data.frame("PC"=pc,"error"=log(x = errors)))
