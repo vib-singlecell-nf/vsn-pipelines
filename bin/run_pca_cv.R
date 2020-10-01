@@ -232,6 +232,7 @@ RunPCACV <- function(
       error[r[["i"]],r[["j"]]] <<- r[["err"]]
     })
     # Free memory
+    # https://stat.ethz.ch/R-manual/R-patched/library/base/html/gc.html
     rm(data_train)
     rm(data_test)
     rm(pca_results)
