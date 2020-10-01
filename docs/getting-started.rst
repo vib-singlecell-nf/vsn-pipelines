@@ -1,8 +1,24 @@
 Getting Started
 ================
 
+Prerequisite
+------------
+
+Make sure that ``LANG`` and ``LC_ALL`` environment variables have been set. You can use the following command to check this:
+
+.. code:: shell
+
+    locale
+
+If some are not set, you can set them to the default language for instance:
+
+.. code:: shell
+
+    export LANG="C" 
+    export LC_ALL="C"
+
 Dependencies
--------------
+^^^^^^^^^^^^
 Make sure you have the following software installed,
 
 - Nextflow_
