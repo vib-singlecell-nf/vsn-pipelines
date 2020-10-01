@@ -41,7 +41,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
             ${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
             ${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
             ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.libraries: ''} \
-            --n_cores ${task.cpus} \
+            --n-cores ${task.cpus} \
             ${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
             --output-prefix "${sampleId}.PCACV__FIND_OPTIMAL_NPCS" \
