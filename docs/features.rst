@@ -328,7 +328,7 @@ You'll just have to repeat the following structure for the parameters which you 
         }
     }
 
-If you want to specify custom paramers for some samples and have a "general" parameter for the rest of the samples, you should use a 'default' key as follows:
+If you want to apply custom parameters for some specific samples and have a "general" parameter for the rest of the samples, you should use the 'default' key as follows:
 
 .. code:: groovy
 
