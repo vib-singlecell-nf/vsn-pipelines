@@ -83,7 +83,7 @@ process SC__FILE_CONVERTER {
 	else if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
         container params.sc.cistopic.container
     else if(params.data.containsKey("seurat_rds"))
-		container "vibsinglecellnf/sceasy:0.0.5"
+		container "vibsinglecellnf/sceasy:0.0.5-cfdd85e"
 	else
         container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
