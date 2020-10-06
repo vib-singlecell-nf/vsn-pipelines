@@ -128,6 +128,21 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     metadata = as.character(x = args$`sample-id`),
     col.name = 'sample_id'
   )
+  # Check if all meta.data columns are 1-dimensional (i.e.: dim(x = ...) should not return NULL)
+  are_metadata_cols_dim_not_null <- do.call(
+    what="c", 
+    args=lapply(
+      X=colnames(x = seurat@meta.data),
+      FUN=function(x) { 
+        !is.null(x=dim(x = seurat@meta.data[[x]]))
+      }
+    )
+  )
+  if(any(!are_metadata_cols_dim_not_null)) {
+    metadata_cols_dim_not_null_colnames <- colnames(x = seurat@meta.data[, which(x = are_metadata_cols_dim_not_null)])
+    stop(paste0("Some columns (", paste(metadata_cols_dim_not_null_colnames, collapse=" and "),") from the given Seurat object in the meta.data slot are not 1-dimensional."))
+  }
+  
   sceasy::convertFormat(
     seurat,
     from="seurat",
