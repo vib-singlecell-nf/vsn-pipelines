@@ -122,13 +122,20 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     print(paste0("Resetting @assays$",args$`seurat-assay`,"@scale.data in seurat object..."))
     seurat@assays[[args$`seurat-assay`]]@scale.data<-matrix(ncol = 0, nrow = 0)
   }
+  # Add sample ID as obs entry
+  seurat <- AddMetaData(
+    object = seurat,
+    metadata = as.character(x = args$`sample-id`),
+    col.name = 'sample_id'
+  )
   sceasy::convertFormat(
     seurat,
     from="seurat",
     to="anndata",
-    assay = args$`seurat-assay`,
+    outFile=paste0(FILE_PATH_OUT_BASENAME, ".h5ad"),
     main_layer = args$`seurat-main-layer`,
-    outFile=paste0(FILE_PATH_OUT_BASENAME, ".h5ad")
+    assay = args$`seurat-assay`,
+    drop_single_values = FALSE
   )
 } else {
   stop(paste0("File format conversion ", INPUT_FORMAT," --> ", OUTPUT_FORMAT," hasn't been implemented yet.)"))
