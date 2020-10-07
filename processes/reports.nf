@@ -5,7 +5,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION_REPORT {
 	container params.sc.scrublet.container
 	clusterOptions "-l nodes=1:ppn=2 -l pmem=30gb -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
-	maxForks 2
+	label 'compute_resources__report'
 
   	input:
 		file(ipynb)
