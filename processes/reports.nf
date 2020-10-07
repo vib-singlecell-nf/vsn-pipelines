@@ -18,8 +18,7 @@ process SC__SCANPY__GENERATE_REPORT {
 
   	container params.sc.scanpy.container
   	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
-    label 'compute_resources__mem'
-	maxForks 2
+    label 'compute_resources__report'
 
 	input:
 		file ipynb
@@ -54,8 +53,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 
   	container params.sc.scanpy.container
   	publishDir "${params.global.outdir}/notebooks/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "res_": resolution}", mode: 'symlink', overwrite: true
-    label 'compute_resources__mem'
-	maxForks 2
+    label 'compute_resources__report'
 
 	input:
 		file ipynb
@@ -97,8 +95,7 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
 	container params.sc.scanpy.container
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
-    label 'compute_resources__mem'
-	maxForks 2
+    label 'compute_resources__report'
 
   	input:
 		file(ipynb)
@@ -138,8 +135,7 @@ process SC__SCANPY__REPORT_TO_HTML {
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	// copy final "merged_report" to notbooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
-    label 'compute_resources__minimal'
-	maxForks 2
+    label 'compute_resources__report'
 
 	input:
 		tuple val(sampleId), path(ipynb)
@@ -160,8 +156,7 @@ process SC__SCANPY__MERGE_REPORTS {
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	// copy final "merged_report" to notebooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
-    label 'compute_resources__minimal'
-	maxForks 2
+    label 'compute_resources__report'
 
 	input:
 		tuple \
