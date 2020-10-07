@@ -84,7 +84,7 @@ process SC__SCANPY__DIM_REDUCTION {
 
 	container params.sc.scanpy.container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
-    label 'compute_resources__mem'
+    label 'compute_resources__cpu'
 
 	input:
 		tuple \
