@@ -37,6 +37,7 @@ process CISTARGET {
         pyscenic ctx \
             ${f} \
             ${featherDB} \
+            ${processParams.containsKey('allModules') && processParams.allModules ? '--all_modules': ''} \
             --annotations_fname ${annotation} \
             --expression_mtx_fname ${filteredLoom} \
             --cell_id_attribute ${toolParams.cell_id_attribute} \
