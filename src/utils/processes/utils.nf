@@ -74,6 +74,15 @@ def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
     }
 }
 
+def getConverter = { iff, off ->
+    if(iff == "10x_atac_cellranger_mex_outs" && off == "cistopic_rds")
+        return "cistopic"
+    if(iff == "seurat_rds" && off == "h5ad" 
+        || iff = "10x_cellranger_mex" && off == "sce_rds")
+        return "r"
+    return "python"
+}
+
 process SC__FILE_CONVERTER {
 
     echo false
@@ -144,36 +153,42 @@ process SC__FILE_CONVERTER {
             break;
         }
 
-        if(inputDataType == "10x_atac_cellranger_mex_outs" && outputDataType == "cistopic_rds")
-            """
-            ${binDir}/create_cistopic_object.R \
-                --tenx_path ${f} \
-                --sampleId ${sampleId} \
-                --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
-            """
-        else if(inputDataType.toLowerCase().contains("rds"))
-			"""
-			${binDir}/sc_file_converter.R \
-                --sample-id "${sampleId}" \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
-                ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
-                --input-format $inputDataType \
-                --output-format $outputDataType \
-                --input-file ${f} \
-                --output-file "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
-			"""
-		else
-            """
-            ${binDir}/sc_file_converter.py \
-                --sample-id "${sampleId}" \
-                ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                --input-format $inputDataType \
-                --output-format $outputDataType \
-                ${f} \
-                "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
-            """
+        // Get the converter based on input file format and output file format
+        converterToUse = getConverter(inputDataType, outputDataType)
+
+        switch(converterToUse) {
+            case "cistopic":
+                """
+                ${binDir}/create_cistopic_object.R \
+                    --tenx_path ${f} \
+                    --sampleId ${sampleId} \
+                    --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
+                """
+            case "r":
+                """
+                ${binDir}/sc_file_converter.R \
+                    --sample-id "${sampleId}" \
+                    ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+                    ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
+                    ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
+                    --input-format $inputDataType \
+                    --output-format $outputDataType \
+                    --input-file ${f} \
+                    --output-file "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
+                """
+            case "python":
+                """
+                ${binDir}/sc_file_converter.py \
+                    --sample-id "${sampleId}" \
+                    ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
+                    ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+                    --input-format $inputDataType \
+                    --output-format $outputDataType \
+                    ${f} \
+                    "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
+                """
+            break;
+        }
 
 }
 
