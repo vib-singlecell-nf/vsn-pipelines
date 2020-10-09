@@ -60,7 +60,7 @@ parser$add_argument(
     dest='seurat_assay',
     action = "store",
     default = "RNA",
-    help = "The assay name which the --seurat-layer will get it from."
+    help = "[Seurat] The assay name which the --seurat-layer will get it from."
 )
 parser$add_argument(
     '--seurat-main-layer',
@@ -68,7 +68,7 @@ parser$add_argument(
     dest='seurat_main_layer',
     action = "store",
     default = "counts",
-    help = "The layer name of array to put as main matrix."
+    help = "[Seurat] The layer name of array to put as main matrix."
 )
 parser$add_argument(
     '--seurat-reset',
@@ -76,10 +76,19 @@ parser$add_argument(
     type="character",
     action = "store",
     default = TRUE,
-    help = "If true, the following slots will be removed: @graphs, @neighbors, @reductions, $[[args$`seurat-assay`]]@data, $[[args$`seurat-assay`]]@scale.data."
+    help = "[Seurat] If true, the following slots will be removed: @graphs, @neighbors, @reductions, $[[args$`seurat-assay`]]@data, $[[args$`seurat-assay`]]@scale.data."
+)
+parser$add_argument(
+    '--sce-main-layer',
+    type="character",
+    dest='sce_main_layer',
+    action = "store",
+    default = "counts",
+    help = "[SingleCellExperiment] The layer name of array to put as main matrix. Used only when --input-format sce_rds."
 )
 
 args <- parser$parse_args()
+print(args)
 
 isTrue <- function(x) {
 	x <- tolower(x = x)
@@ -103,11 +112,11 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
       	readRDS(file = FILE_PATH_IN)
     }, warning = function(w) {
     }, error = function(e) {
-      	stop("Cannot read the given Rds file.")
+      	stop("VSN ERROR: Cannot read the given Rds file.")
     }, finally = {})
 
     if(class(x = seurat) != "Seurat") {
-      	stop("The object contained in the Rds file is not a Seurat object.")
+      	stop("VSN ERROR: The object contained in the Rds file is not a Seurat object.")
     }
     # Tag cell with sample ID
     if(isTrue(x = args$`tag_cell_with_sample_id`)) {
@@ -152,7 +161,7 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     )
     if(any(!are_metadata_cols_dim_not_null)) {
         metadata_cols_dim_not_null_colnames <- colnames(x = seurat@meta.data[, which(x = are_metadata_cols_dim_not_null)])
-        stop(paste0("Some columns (", paste(metadata_cols_dim_not_null_colnames, collapse=" and "),") from the given Seurat object in the meta.data slot are not 1-dimensional."))
+        stop(paste0("VSN ERROR: Some columns (", paste(metadata_cols_dim_not_null_colnames, collapse=" and "),") from the given Seurat object in the meta.data slot are not 1-dimensional."))
     }
     # Sort genes
     seurat <- seurat[sort(x = row.names(x = seurat)),]
@@ -166,12 +175,43 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
 		assay = args$`seurat_assay`,
 		drop_single_values = FALSE
     )
+} else if(INPUT_FORMAT == 'sce_rds' & OUTPUT_FORMAT == 'h5ad') {
+    sce <- tryCatch({
+      	readRDS(file = FILE_PATH_IN)
+    }, warning = function(w) {
+    }, error = function(e) {
+      	stop("VSN ERROR: Cannot read the given Rds file.")
+    }, finally = {})
+
+    if(class(x = sce) != "SingleCellExperiment") {
+      	stop("VSN ERROR: The object contained in the Rds file is not a SingleCellExperiment object.")
+    }
+    # Add sample ID as colData entry
+	col_data <- SummarizedExperiment::colData(x = sce)
+    col_data$sample_id <- args$`sample_id`
+    SummarizedExperiment::colData(x = sce) <- col_data
+	# Update row.names with gene symbols
+	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
+    # Sort genes
+    sce <- sce[sort(x = row.names(x = sce)),]
+    sceasy::convertFormat(
+		sce,
+		from="sce",
+		to="anndata",
+		outFile=paste0(FILE_PATH_OUT_BASENAME, ".h5ad"),
+		main_layer = args$`sce_main_layer`,
+		drop_single_values = FALSE
+    )
 } else if(INPUT_FORMAT == '10x_cellranger_mex' & OUTPUT_FORMAT == 'sce_rds') {
     sce <- DropletUtils::read10xCounts(
       	samples = FILE_PATH_IN
     )
+    # Add sample ID as colData entry
+	col_data <- SummarizedExperiment::colData(x = sce)
+    col_data$sample_id <- args$`sample_id`
+    SummarizedExperiment::colData(x = sce) <- col_data
 	# Update row.names with gene symbols
-	row.names(x = sce) <- SingleCellExperiment::rowData(x = sce)$Symbol
+	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     saveRDS(
@@ -180,7 +220,7 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
 		compress = TRUE
     )
 } else {
-    stop(paste0("File format conversion ", INPUT_FORMAT," --> ", OUTPUT_FORMAT," hasn't been implemented yet.)"))
+    stop(paste0("VSN ERROR: File format conversion ", INPUT_FORMAT," --> ", OUTPUT_FORMAT," hasn't been implemented yet.)"))
 }
 
 print("Done!")

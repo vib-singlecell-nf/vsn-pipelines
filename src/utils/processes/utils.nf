@@ -89,11 +89,71 @@ def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
     }
 }
 
+def runPythonConverter = {
+    processParams,
+    sampleId,
+    inputDataType,
+    outputDataType,
+    outputExtension,
+    f ->
+    return (
+        """
+        ${binDir}/sc_file_converter.py \
+            --sample-id "${sampleId}" \
+            ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
+            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            --input-format $inputDataType \
+            --output-format $outputDataType \
+            ${f} \
+            "${sampleId}.SC__FILE_CONVERTER.${outputExtension}"
+        """
+    )
+}
+
+def runRConverter = {
+    processName,
+    processParams,
+    sampleId,
+    inputDataType,
+    outputDataType,
+    outputExtension,
+    f,
+    sceMainLayer = null ->
+    
+    return (
+        """
+        ${binDir}/sc_file_converter.R \
+            --sample-id "${sampleId}" \
+            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
+            ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
+            ${sceMainLayer != null ? '--sce-main-layer '+ sceMainLayer : ''} \
+            --input-format $inputDataType \
+            --output-format $outputDataType \
+            ${f} \
+            "${sampleId}.${processName}.${outputExtension}"
+        """
+    )
+}
+
+def getConverterContainer = { params, type ->
+    switch(type) {
+        case "cistopic":
+            return params.sc.cistopic.container
+        case "r":
+            return "vibsinglecellnf/scconverter:0.0.1"
+        break;
+        case "python":
+            return params.sc.scanpy.container
+    }
+}
+
 def getConverter = { iff, off ->
     if(iff == "10x_atac_cellranger_mex_outs" && off == "cistopic_rds")
         return "cistopic"
     if((iff == "seurat_rds" && off == "h5ad")
-        || (iff = "10x_cellranger_mex" && off == "sce_rds"))
+        || (iff == "10x_cellranger_mex" && off == "sce_rds")
+        || (iff == "sce_rds" && off == "h5ad"))
         return "r"
     return "python"
 }
@@ -114,21 +174,9 @@ def getOutputExtension = { off ->
 
 process SC__FILE_CONVERTER {
 
-    def getContainer = { params, type ->
-        switch(type) {
-            case "cistopic":
-                return params.sc.cistopic.container
-            case "r":
-                return "vibsinglecellnf/scconverter:0.0.1"
-            break;
-            case "python":
-                return params.sc.scanpy.container
-        }
-    }
-
     cache 'deep'
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
-    container "${getContainer(params,converterToUse)}"
+    container "${getConverterContainer(params,converterToUse)}"
     label 'compute_resources__mem'
 
     input:
@@ -146,7 +194,6 @@ process SC__FILE_CONVERTER {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
         processParams = sampleParams.local
-        def _inputDataType = inputDataType
 
         switch(inputDataType) {
             case "10x_cellranger_mex":
@@ -159,7 +206,7 @@ process SC__FILE_CONVERTER {
                 cellranger_outs_v3_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix/")
                 cellRangerData = detectCellRangerVersionData(cellranger_outs_v2_mex, cellranger_outs_v3_mex)
                 f = cellRangerData.path
-                _inputDataType = "10x_cellranger_mex"
+                inputDataType = "10x_cellranger_mex"
             break;
             case "10x_cellranger_h5":
                 // Nothing to be done here
@@ -170,7 +217,7 @@ process SC__FILE_CONVERTER {
                 cellranger_outs_v3_h5 = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix.h5")
                 cellRangerData = detectCellRangerVersionData(cellranger_outs_v2_h5, cellranger_outs_v3_h5)
                 f = cellRangerData.path
-                _inputDataType = "10x_cellranger_h5"
+                inputDataType = "10x_cellranger_h5"
             case "10x_atac_cellranger_mex_outs":
                 // Nothing to be done here
             break;
@@ -183,12 +230,15 @@ process SC__FILE_CONVERTER {
             break;
             
             default:
-                throw new Exception("VSN ERROR: The given input format ${_inputDataType} is not recognized.")
+                throw new Exception("VSN ERROR: The given input format ${inputDataType} is not recognized.")
             break;
         }
 
         // Get the converter based on input file format and output file format
-        converterToUse = getConverter(_inputDataType, outputDataType)
+        converterToUse = getConverter(
+            inputDataType,
+            outputDataType
+        )
         outputExtension = getOutputExtension(outputDataType)
 
         switch(converterToUse) {
@@ -201,29 +251,25 @@ process SC__FILE_CONVERTER {
                 """
                 break;
             case "r":
-                """
-                ${binDir}/sc_file_converter.R \
-                    --sample-id "${sampleId}" \
-                    ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                    ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
-                    ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
-                    --input-format $_inputDataType \
-                    --output-format $outputDataType \
-                    ${f} \
-                    "${sampleId}.SC__FILE_CONVERTER.${outputExtension}"
-                """
+                runRConverter(
+                    "SC__FILE_CONVERTER",
+                    processParams,
+                    sampleId,
+                    inputDataType,
+                    outputDataType,
+                    outputExtension,
+                    f
+                )
                 break;
             case "python":
-                """
-                ${binDir}/sc_file_converter.py \
-                    --sample-id "${sampleId}" \
-                    ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
-                    ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                    --input-format $_inputDataType \
-                    --output-format $outputDataType \
-                    ${f} \
-                    "${sampleId}.SC__FILE_CONVERTER.${outputExtension}"
-                """
+                runPythonConverter(
+                    processParams,
+                    sampleId,
+                    inputDataType,
+                    outputDataType,
+                    outputExtension,
+                    f
+                )
                 break;
             default:
                 throw new Exception("VSN ERROR: Unrecognized file converter.")
@@ -231,18 +277,45 @@ process SC__FILE_CONVERTER {
 
 }
 
-process SC__FILE_CONVERTER_HELP {
+process SC__FILE_CONVERTER_FROM_SCE {
 
-    container params.sc.scanpy.container
-    label 'compute_resources__minimal'
+    cache 'deep'
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    container "${getConverterContainer(params,converterToUse)}"
+    label 'compute_resources__mem'
+
+    input:
+        tuple \
+            val(sampleId), \
+            path(f)
+        val(outputDataType)
+        val(mainLayer)
 
     output:
-        stdout()
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.SC__FILE_CONVERTER_FROM_SCE.${outputDataType}")
 
     script:
-        """
-        ${binDir}/sc_file_converter.py -h | awk '/-h/{y=1;next}y'
-        """
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+        processParams = sampleParams.local
+        def _outputDataType = outputDataType
+        converterToUse = getConverter(
+            "sce_rds",
+            _outputDataType
+        )
+        def outputExtension = getOutputExtension(_outputDataType)
+
+        runRConverter(
+            "SC__FILE_CONVERTER_FROM_SCE",
+            processParams,
+            sampleId,
+            "sce_rds",
+            _outputDataType,
+            outputExtension,
+            f,
+            mainLayer
+        )
 
 }
 
