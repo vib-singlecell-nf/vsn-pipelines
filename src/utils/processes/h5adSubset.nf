@@ -5,7 +5,8 @@ import java.nio.file.Paths
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
 include {
-    isParamNull
+    isParamNull;
+    getToolParams;
 } from './utils.nf' params(params)
 
 process SC__PREPARE_OBS_FILTER {
@@ -32,7 +33,7 @@ process SC__PREPARE_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : params.sc[tool].cell_filter
+            isParamNull(tool) ? params.sc.cell_filter : getToolParams(params.sc, tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -83,7 +84,7 @@ process SC__APPLY_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : params.sc[tool].cell_filter
+            isParamNull(tool) ? params.sc.cell_filter : getToolParams(params.sc, tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
