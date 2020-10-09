@@ -4,6 +4,15 @@ import java.nio.file.Paths
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
+def getToolParams(params, toolKey) {
+    if(!toolKey.contains(".")) {
+        return toolKey
+    }
+    def entry = params
+    toolKey.split('\\.').each { entry = entry?.get(it) }
+    return entry
+}
+
 def isParamNull(param) {
     return param == null || param == "NULL"
 }
