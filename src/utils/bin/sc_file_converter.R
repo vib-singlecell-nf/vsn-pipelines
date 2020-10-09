@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-in_formats = c("seurat_rds")
-out_formats = c("h5ad")
+in_formats = c("seurat_rds", "10x_cellranger_mex")
+out_formats = c("h5ad", "sce_rds")
 
 library("argparse")
 
@@ -167,8 +167,20 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
 		drop_single_values = FALSE
     )
 } else if(INPUT_FORMAT == '10x_cellranger_mex' & OUTPUT_FORMAT == 'sce_rds') {
+    sce <- DropletUtils::read10xCounts(
+      	samples = FILE_PATH_IN
+    )
+	# Update row.names with gene symbols
+	row.names(x = sce) <- SingleCellExperiment::rowData(x = sce)$Symbol
+    # Sort genes
+    sce <- sce[sort(x = row.names(x = sce)),]
+    saveRDS(
+		object = sce,
+		file = paste0(FILE_PATH_OUT_BASENAME, ".SCE.Rds"),
+		compress = TRUE
+    )
 } else {
-  stop(paste0("File format conversion ", INPUT_FORMAT," --> ", OUTPUT_FORMAT," hasn't been implemented yet.)"))
+    stop(paste0("File format conversion ", INPUT_FORMAT," --> ", OUTPUT_FORMAT," hasn't been implemented yet.)"))
 }
 
 print("Done!")

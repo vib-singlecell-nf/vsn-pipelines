@@ -77,25 +77,43 @@ def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
 def getConverter = { iff, off ->
     if(iff == "10x_atac_cellranger_mex_outs" && off == "cistopic_rds")
         return "cistopic"
-    if(iff == "seurat_rds" && off == "h5ad" 
-        || iff = "10x_cellranger_mex" && off == "sce_rds")
+    if((iff == "seurat_rds" && off == "h5ad")
+        || (iff = "10x_cellranger_mex" && off == "sce_rds"))
         return "r"
+    return "python"
+}
+
+def getOutputExtension = { off ->
+    switch(off) {
+        case "cistopic_rds":
+            return "cisTopic.Rds"
+        case "sce_rds":
+            return "SCE.Rds"
+        case "h5ad":
+            return "h5ad"
+        default:
+            throw new Exception("VSN ERROR: This output file format is not implemented.")
+    }
     return "python"
 }
 
 process SC__FILE_CONVERTER {
 
-    echo false
+    def getContainer = { type ->
+        switch(type) {
+            case "cistopic":
+                return params.sc.cistopic.container
+            case "r":
+                return "vibsinglecellnf/scconverter:0.0.1"
+            break;
+            case "python":
+                return params.sc.scanpy.container
+        }
+    }
+
     cache 'deep'
-    if(!params.containsKey("data"))
-        container params.sc.scanpy.container
-	else if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
-        container params.sc.cistopic.container
-    else if(params.data.containsKey("seurat_rds"))
-		container "vibsinglecellnf/sceasy:0.0.5-cfdd85e"
-	else
-        container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    container "${getContainer(converterToUse)}"
     label 'compute_resources__mem'
 
     input:
@@ -108,11 +126,12 @@ process SC__FILE_CONVERTER {
     output:
         tuple \
             val(sampleId), \
-            path("${sampleId}.SC__FILE_CONVERTER.${outputDataType}")
+            path("${sampleId}.SC__FILE_CONVERTER.${outputExtension}")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
         processParams = sampleParams.local
+        def _inputDataType = inputDataType
 
         switch(inputDataType) {
             case "10x_cellranger_mex":
@@ -125,7 +144,7 @@ process SC__FILE_CONVERTER {
                 cellranger_outs_v3_mex = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix/")
                 cellRangerData = detectCellRangerVersionData(cellranger_outs_v2_mex, cellranger_outs_v3_mex)
                 f = cellRangerData.path
-                inputDataType = "10x_cellranger_mex"
+                _inputDataType = "10x_cellranger_mex"
             break;
             case "10x_cellranger_h5":
                 // Nothing to be done here
@@ -136,7 +155,7 @@ process SC__FILE_CONVERTER {
                 cellranger_outs_v3_h5 = file("${f.toRealPath()}/${processParams.useFilteredMatrix ? "filtered" : "raw"}_feature_bc_matrix.h5")
                 cellRangerData = detectCellRangerVersionData(cellranger_outs_v2_h5, cellranger_outs_v3_h5)
                 f = cellRangerData.path
-                inputDataType = "10x_cellranger_h5"
+                _inputDataType = "10x_cellranger_h5"
             case "10x_atac_cellranger_mex_outs":
                 // Nothing to be done here
             break;
@@ -149,12 +168,13 @@ process SC__FILE_CONVERTER {
             break;
             
             default:
-                throw new Exception("VSN ERROR: The given input format ${inputDataType} is not recognized.")
+                throw new Exception("VSN ERROR: The given input format ${_inputDataType} is not recognized.")
             break;
         }
 
         // Get the converter based on input file format and output file format
-        converterToUse = getConverter(inputDataType, outputDataType)
+        converterToUse = getConverter(_inputDataType, outputDataType)
+        outputExtension = getOutputExtension(outputDataType)
 
         switch(converterToUse) {
             case "cistopic":
@@ -162,8 +182,9 @@ process SC__FILE_CONVERTER {
                 ${binDir}/create_cistopic_object.R \
                     --tenx_path ${f} \
                     --sampleId ${sampleId} \
-                    --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
+                    --output ${sampleId}.SC__FILE_CONVERTER.${outputExtension}
                 """
+                break;
             case "r":
                 """
                 ${binDir}/sc_file_converter.R \
@@ -171,23 +192,26 @@ process SC__FILE_CONVERTER {
                     ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
                     ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
                     ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
-                    --input-format $inputDataType \
+                    --input-format $_inputDataType \
                     --output-format $outputDataType \
-                    --input-file ${f} \
-                    --output-file "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
+                    ${f} \
+                    "${sampleId}.SC__FILE_CONVERTER.${outputExtension}"
                 """
+                break;
             case "python":
                 """
                 ${binDir}/sc_file_converter.py \
                     --sample-id "${sampleId}" \
                     ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
                     ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                    --input-format $inputDataType \
+                    --input-format $_inputDataType \
                     --output-format $outputDataType \
                     ${f} \
-                    "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
+                    "${sampleId}.SC__FILE_CONVERTER.${outputExtension}"
                 """
-            break;
+                break;
+            default:
+                throw new Exception("VSN ERROR: Unrecognized file converter.")
         }
 
 }
