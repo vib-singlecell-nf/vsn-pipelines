@@ -114,7 +114,7 @@ def getOutputExtension = { off ->
 
 process SC__FILE_CONVERTER {
 
-    def getContainer = { type ->
+    def getContainer = { params, type ->
         switch(type) {
             case "cistopic":
                 return params.sc.cistopic.container
@@ -128,7 +128,7 @@ process SC__FILE_CONVERTER {
 
     cache 'deep'
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
-    container "${getContainer(converterToUse)}"
+    container "${getContainer(params,converterToUse)}"
     label 'compute_resources__mem'
 
     input:
