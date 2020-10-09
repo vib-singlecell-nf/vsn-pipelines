@@ -30,7 +30,7 @@ workflow {
         switch(params.test) {
             case "DECONTX_FILTER":
                 include {
-                    DECONTX_FILTER
+                    DECONTX_FILTER;
                 } from "./workflows/decontXFilter"
                 getDataChannel \
                     | SC__FILE_CONVERTER \

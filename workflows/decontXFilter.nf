@@ -42,6 +42,6 @@ workflow DECONTX_FILTER {
         )
 
     emit:
-        decontx_filtered = FILTER_BY_CELL_METADATA.out
+        FILTER_BY_CELL_METADATA.out
 
 }
