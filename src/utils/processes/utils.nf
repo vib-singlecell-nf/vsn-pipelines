@@ -1,6 +1,8 @@
 nextflow.preview.dsl=2
 
 import java.nio.file.Paths
+import nextflow.config.ConfigParser
+import static groovy.json.JsonOutput.*
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
@@ -19,6 +21,10 @@ def isParamNull(param) {
 
 def clean(params) {
    return params.findAll { !it.key.contains('-') }
+}
+
+def printMap(map) {
+    prettyPrint(toJson(map))
 }
 
 def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
