@@ -26,10 +26,16 @@ workflow getDataChannel {
     main:
         data = Channel.empty()
         // Define the output file format
-        // We use by default h5ad
         outputFileFormat = "h5ad"
-        if(params.sc.file_converter.containsKey("off")) {
-            outputFileFormat = params.sc.file_converter.off
+        // This allows to use it dynamically (i.e.: addParams)
+        if(params.containsKey("off")) {
+            outputFileFormat = params.off
+        } else {
+            // If not dynamically set, we use h5ad by default
+            outputFileFormat = "h5ad"
+            if(params.sc.file_converter.containsKey("off")) {
+                outputFileFormat = params.sc.file_converter.off
+            }
         }
 
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_mex")) {
