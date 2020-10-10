@@ -8,7 +8,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 def getToolParams(params, toolKey) {
     if(!toolKey.contains(".")) {
-        return toolKey
+        return params[toolKey]
     }
     def entry = params
     toolKey.split('\\.').each { entry = entry?.get(it) }
