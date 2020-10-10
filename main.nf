@@ -1,8 +1,10 @@
 nextflow.preview.dsl=2
 
+// Should be set in case this pipeline is run with other pipelines (e.g.: single_sample)
+
 include {
     getDataChannel;
-} from './../channels/channels.nf' params(params)
+} from './../channels/channels.nf' addParams(off : "sce_rds")
 include {
     SC__FILE_CONVERTER;
 } from './../utils/processes/utils' params(params)
@@ -15,7 +17,7 @@ include {
 
 include {
     DECONTX_FILTER
-} from "./workflows/decontXFilter"
+} from "./workflows/decontXFilter" params(params)
 
 //////////////////////////////////////////////////////
 // Define the workflow
@@ -36,6 +38,7 @@ workflow decontx {
                 null,
                 false
             )
+        }
         
     emit:
         DECONTX_FILTER.out
