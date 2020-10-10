@@ -313,6 +313,61 @@ workflow single_sample_scrublet {
 
 }
 
+workflow single_sample_decontx_filter_scrublet {
+    include {
+        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
+    } from './src/scanpy/workflows/single_sample' params(params)
+    include {
+        decontx as CELDA__DECONTX_FILTER;
+    } from "./src/celda/main" params(params)
+    include {
+        DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL;
+    } from "./src/scrublet/workflows/doublet_removal" params(params)
+    include {
+        ANNOTATE_BY_CELL_METADATA_BY_PAIR;
+    } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
+    include {
+        PUBLISH;
+    } from './src/utils/workflows/utils.nf' params(params)
+    include {
+        SC__H5AD_TO_LOOM;
+    } from './src/utils/processes/h5adToLoom.nf' params(params)
+
+    data = getDataChannel \
+        | SC__FILE_CONVERTER
+    // Run Single-sample pipeline on the data
+    SCANPY__SINGLE_SAMPLE( data )
+    // Run DecontX on the data
+    CELDA__DECONTX_FILTER()
+    // Run Scrublet on the DecontX filtered data
+    SCRUBLET__DOUBLET_REMOVAL(
+        CELDA__DECONTX_FILTER.out.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data
+    )
+    // Annotate the final processed file with doublet information inferred from Scrublet
+    ANNOTATE_BY_CELL_METADATA_BY_PAIR(
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data,
+        SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection,
+        "scrublet"
+    )
+    SC__H5AD_TO_LOOM(
+        SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
+            it -> tuple(it[0], it[1])
+        }.join(
+            ANNOTATE_BY_CELL_METADATA_BY_PAIR.out
+        )
+    )
+    if(params.utils.containsKey("publish")) {
+        PUBLISH(
+            SC__H5AD_TO_LOOM.out,
+            "SINGLE_SAMPLE_DECONTX_FILTER_SCRUBLET",
+            "loom",
+            null,
+            false
+        )
+    }
+}
+
 // run single_sample, then scenic from the previous input (not standalone):
 workflow pipe_single_sample_scenic {
 
