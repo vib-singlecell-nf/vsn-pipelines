@@ -185,7 +185,10 @@ write.table(
 print("Saving outlier table...")
 col_data$Sample <- NULL
 write.table(
-	col_data,
+	cbind(
+		data.frame("index"=row.names(x = col_data), stringsAsFactors=FALSE),
+		col_data
+	),
 	paste0(args$`output_prefix`, ".Contamination_Outlier_Table.tsv"),
 	append = FALSE,
 	row.names = FALSE,
