@@ -341,13 +341,18 @@ workflow single_sample_decontx_filter_scrublet {
     CELDA__DECONTX_FILTER()
     // Run Scrublet on the DecontX filtered data
     SCRUBLET__DOUBLET_REMOVAL(
-        CELDA__DECONTX_FILTER.out.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        CELDA__DECONTX_FILTER.out.decontx_filtered.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
     )
+
     // Annotate the final processed file with doublet information inferred from Scrublet
     ANNOTATE_BY_CELL_METADATA_BY_PAIR(
         SCANPY__SINGLE_SAMPLE.out.final_processed_data,
-        SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection,
+        SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection.map {
+            it -> tuple(it[0], it[1])
+        }.mix(
+            CELDA__DECONTX_FILTER.out.outlier_table
+        ).groupTuple(),
         "scrublet"
     )
     SC__H5AD_TO_LOOM(
