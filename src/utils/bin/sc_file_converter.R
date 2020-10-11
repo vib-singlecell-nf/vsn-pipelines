@@ -206,12 +206,23 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     sce <- DropletUtils::read10xCounts(
       	samples = FILE_PATH_IN
     )
+    # Set/update row.names with gene symbols
+	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
+    # Set col.names with barcode ID
+    colnames(x = sce) <- SummarizedExperiment::colData(x = sce)$Barcode
+    # Tag cell with sample ID
+    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
+		new.names <- gsub(
+			pattern = "-([0-9]+)$",
+			replace = paste0("-", args$`sample_id`),
+			x = colnames(x = sce)
+		)
+		colnames(x = sce) <- new.names
+    }
     # Add sample ID as colData entry
 	col_data <- SummarizedExperiment::colData(x = sce)
     col_data$sample_id <- args$`sample_id`
     SummarizedExperiment::colData(x = sce) <- col_data
-	# Update row.names with gene symbols
-	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     saveRDS(
