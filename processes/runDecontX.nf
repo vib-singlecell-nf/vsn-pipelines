@@ -24,6 +24,10 @@ process SC__CELDA__DECONTX {
             emit: main
         tuple \
             val(sampleId), \
+            path("${sampleId}.CELDA__DECONTX.Contamination_Outlier_Table.tsv"), \
+            emit: outlier_table
+        tuple \
+            val(sampleId), \
             path("${sampleId}.CELDA__DECONTX.{*.pdf,*.tsv}"), \
             emit: other
 

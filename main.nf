@@ -32,7 +32,7 @@ workflow decontx {
 
         if(params.utils.containsKey("publish")) {
             PUBLISH(
-                DECONTX_FILTER.out,
+                DECONTX_FILTER.out.decontx_filtered,
                 "CELDA_DECONTX",
                 "h5ad",
                 null,
@@ -41,6 +41,7 @@ workflow decontx {
         }
         
     emit:
-        DECONTX_FILTER.out
+        decontx_filtered = DECONTX_FILTER.out.decontx_filtered
+        outlier_table = DECONTX_FILTER.out.outlier_table
 
 }

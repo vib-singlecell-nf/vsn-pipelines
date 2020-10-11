@@ -42,6 +42,7 @@ workflow DECONTX_FILTER {
         )
 
     emit:
-        FILTER_BY_CELL_METADATA.out
+        decontx_filtered = FILTER_BY_CELL_METADATA.out
+        outlier_table = SC__CELDA__DECONTX.out.outlier_table
 
 }
