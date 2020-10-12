@@ -1,5 +1,10 @@
-def getBaseName(file) {
-    (full, filename, process, ext) = ( file.getName() =~ /(.+)\.SC(.+)\.(.+)/)[0]
+
+def getBaseName(file, suffix = "SC") {
+    res = (file.getName() =~ /(.+)\.${suffix}(.+)\.(.+)/)
+    if(res.size() == 0) {
+        throw new Exception("VSN ERROR: Cannot get base name.")
+    }
+    (full, filename, process, ext) = res[0]
     return filename
 }
 
