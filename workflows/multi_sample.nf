@@ -12,6 +12,7 @@ include {
 } from '../src/utils/processes/utils.nf' params(params)
 include {
     COMBINE_BY_PARAMS;
+    PUBLISH;
 } from '../src/utils/workflows/utils.nf' params(params)
 include {
     SC__H5AD_TO_FILTERED_LOOM;
