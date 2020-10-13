@@ -49,9 +49,24 @@ parser$add_argument(
     default=NULL,
     help='Threshold to decide for outlier assignment. Should be float between 0 and 1.'
 )
+parser$add_argument(
+	'--round-to-int',
+	type="logical",
+	dest='round_to_int',
+	action="store",
+	default=FALSE,
+	help='Round the corrected matrix by DecontX.'
+)
 
 args <- parser$parse_args()
 print(args)
+
+isTrue <- function(x) {
+	x <- tolower(x = x)
+	return (
+		x == FALSE | x == F | x == 't' | x == 'true' | x == 'y' | x == 'yes'
+	)
+}
 
 # IO
 print("Reading SingleCellExperiment Rds...")
@@ -199,6 +214,18 @@ write.table(
 
 ## SingleCellExperiment with DecontX results
 print("Saving SingleCellExperiment with DecontX results as Rds...")
+if(isTrue(x = args$round_to_int)) {
+	print("Rounding the DecontX count matrix...")
+	mat <- celda::decontXcounts(object = sce)
+	mat <- round(
+		x = mat,
+		digits = 0
+	)
+	celda::decontXcounts(object = sce) <- mat
+	rm(mat)
+	gc()
+}
+
 SummarizedExperiment::colData(x = sce) <- col_data
 saveRDS(
 	object = sce,

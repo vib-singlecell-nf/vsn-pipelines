@@ -51,12 +51,18 @@ process SC__CELDA__DECONTX {
                 ''
         }
 
+        def roundToIntAsArgument = ''
+        if(processParams?.roundToInt) {
+            roundToIntAsArgument = '--round-to-int '+ processParams.roundToInt
+        }
+
         """
         ${binDir}/run_decontx.R \
             --sample-id ${sampleId} \
             --seed ${params.global.seed} \
             ${filterNumMadsThresholdsAsArguments} \
             ${filterContaminationScoreThresholdsAsArguments} \
+            ${roundToIntAsArgument} \
             --output-prefix "${sampleId}.CELDA__DECONTX" \
             $f
         """
