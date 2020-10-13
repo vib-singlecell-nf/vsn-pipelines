@@ -24,7 +24,7 @@ include {
 } from "../processes/utils" params(params)
 
 
-workflow DECONTX_FILTER {
+workflow DECONTX {
 
     take:
         // Expects (sampleId, sceRds)
@@ -43,9 +43,22 @@ workflow DECONTX_FILTER {
                 { a, b -> getBaseName(a, "CELDA__DECONTX") <=> getBaseName(b, "CELDA__DECONTX") }
             )
         )
+    emit:
+        SC__CELDA__DECONTX.out
+
+}
+
+workflow DECONTX_FILTER {
+
+    take:
+        // Expects (sampleId, sceRds)
+        data
+
+    main:
+        decontx = SC__CELDA__DECONTX( data )
 
         SC__FILE_CONVERTER_FROM_SCE(
-            SC__CELDA__DECONTX.out.main,
+            decontx.main,
             "h5ad",
             "counts"
         )
@@ -57,6 +70,27 @@ workflow DECONTX_FILTER {
 
     emit:
         decontx_filtered = FILTER_BY_CELL_METADATA.out
-        outlier_table = SC__CELDA__DECONTX.out.outlier_table
+        outlier_table = decontx.outlier_table
+
+}
+
+workflow DECONTX_CORRECT {
+
+    take:
+        // Expects (sampleId, sceRds)
+        data
+
+    main:
+        decontx = SC__CELDA__DECONTX( data )
+
+        SC__FILE_CONVERTER_FROM_SCE(
+            decontx.main,
+            "h5ad",
+            "decontXcounts"
+        )
+
+    emit:
+        decontx_corrected = FILTER_BY_CELL_METADATA.out
+        outlier_table = decontx.outlier_table
 
 }

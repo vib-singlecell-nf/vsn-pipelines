@@ -31,10 +31,18 @@ workflow {
             case "DECONTX_FILTER":
                 include {
                     DECONTX_FILTER;
-                } from "./workflows/decontXFilter"
+                } from "./workflows/decontX"
                 getDataChannel \
                     | SC__FILE_CONVERTER \
                     | DECONTX_FILTER
+            break;
+            case "DECONTX_CORRECT":
+                include {
+                    DECONTX_CORRECT;
+                } from "./workflows/decontX"
+                getDataChannel \
+                    | SC__FILE_CONVERTER \
+                    | DECONTX_CORRECT
             break;
             default:
                 throw new Exception("The test parameters should be specified.")

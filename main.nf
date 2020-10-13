@@ -16,8 +16,9 @@ include {
 //  Import sub-workflows from the modules:
 
 include {
-    DECONTX_FILTER
-} from "./workflows/decontXFilter" params(params)
+    DECONTX_FILTER;
+    DECONTX_CORRECT;
+} from "./workflows/decontX" params(params)
 
 //////////////////////////////////////////////////////
 // Define the workflow
@@ -26,9 +27,16 @@ include {
 workflow decontx {
 
     main:
-        getDataChannel \
-            | SC__FILE_CONVERTER \
-            | DECONTX_FILTER
+        data = getDataChannel \
+            | SC__FILE_CONVERTER
+
+        if(params.sc.celda.decontx.strategy == "filter") {
+            out = DECONTX_FILTER ( data )
+        } else if (params.sc.celda.decontx.strategy == "correct") {
+            out = DECONTX_CORRECT ( data )
+        } else {
+            throw new Exception("VSN ERROR: The given strategy in params.sc.celda.decontx is not valid. Choose: filter or correct.")
+        }
 
         if(params.utils.containsKey("publish")) {
             PUBLISH(

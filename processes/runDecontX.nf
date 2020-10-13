@@ -35,16 +35,21 @@ process SC__CELDA__DECONTX {
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.celda.decontx)
         processParams = sampleParams.local
         
-        def filterNumMadsThresholdsAsArguments = processParams.filters.containsKey('numMadsThresholds') ?
+        def filterNumMadsThresholdsAsArguments = ''
+        def filterContaminationScoreThresholdsAsArguments = ''
+
+        if(processParams?.filters) {
+            filterNumMadsThresholdsAsArguments = processParams.filters.containsKey('numMadsThresholds') ?
                 processParams.filters.numMadsThresholds.collect({
                     '--num-mads-threshold ' + ' ' + it 
                 }).join(' ') :
                 ''
-        def filterContaminationScoreThresholdsAsArguments = processParams.filters.containsKey('contaminationScoreThresholds') ?
+            filterContaminationScoreThresholdsAsArguments = processParams.filters.containsKey('contaminationScoreThresholds') ?
                 processParams.filters.contaminationScoreThresholds.collect({ 
                     '--custom-threshold ' + ' ' + it
                 }).join(' ') :
                 ''
+        }
 
         """
         ${binDir}/run_decontx.R \
