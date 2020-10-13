@@ -313,12 +313,12 @@ workflow single_sample_scrublet {
 
 }
 
-workflow single_sample_decontx_filter_scrublet {
+workflow single_sample_decontx_scrublet {
     include {
         SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
     } from './src/scanpy/workflows/single_sample' params(params)
     include {
-        decontx as CELDA__DECONTX_FILTER;
+        decontx as CELDA__DECONTX;
     } from "./src/celda/main" params(params)
     include {
         DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL;
@@ -338,10 +338,10 @@ workflow single_sample_decontx_filter_scrublet {
     // Run Single-sample pipeline on the data
     SCANPY__SINGLE_SAMPLE( data )
     // Run DecontX on the data
-    CELDA__DECONTX_FILTER()
+    CELDA__DECONTX()
     // Run Scrublet on the DecontX filtered data
     SCRUBLET__DOUBLET_REMOVAL(
-        CELDA__DECONTX_FILTER.out.decontx_filtered.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        CELDA__DECONTX.out.decontx_filtered.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
     )
 
@@ -351,7 +351,7 @@ workflow single_sample_decontx_filter_scrublet {
         SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection.map {
             it -> tuple(it[0], it[1])
         }.mix(
-            CELDA__DECONTX_FILTER.out.outlier_table
+            CELDA__DECONTX.out.outlier_table
         ).groupTuple(),
         "scrublet"
     )
