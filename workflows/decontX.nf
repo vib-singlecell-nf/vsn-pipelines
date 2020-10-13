@@ -44,7 +44,8 @@ workflow DECONTX {
             )
         )
     emit:
-        SC__CELDA__DECONTX.out
+        main = SC__CELDA__DECONTX.out.main
+        outlier_table = SC__CELDA__DECONTX.out.outlier_table
 
 }
 
@@ -55,7 +56,7 @@ workflow DECONTX_FILTER {
         data
 
     main:
-        decontx = SC__CELDA__DECONTX( data )
+        decontx = DECONTX( data )
 
         SC__FILE_CONVERTER_FROM_SCE(
             decontx.main,
@@ -81,7 +82,7 @@ workflow DECONTX_CORRECT {
         data
 
     main:
-        decontx = SC__CELDA__DECONTX( data )
+        decontx = DECONTX( data )
 
         SC__FILE_CONVERTER_FROM_SCE(
             decontx.main,
