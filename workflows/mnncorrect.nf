@@ -87,7 +87,7 @@ workflow mnncorrect {
                 out.map {
                     it -> it[1]
                 }.toSortedList( 
-                    { a, b -> getBaseName(a, "SC") <=> getBaseName(file, "SC") }
+                    { a, b -> getBaseName(a, "SC") <=> getBaseName(b, "SC") }
                 ) 
             )
         }
