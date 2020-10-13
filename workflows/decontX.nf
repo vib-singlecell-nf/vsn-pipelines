@@ -91,7 +91,7 @@ workflow DECONTX_CORRECT {
         )
 
     emit:
-        decontx_corrected = FILTER_BY_CELL_METADATA.out
+        decontx_corrected = SC__FILE_CONVERTER_FROM_SCE.out
         outlier_table = decontx.outlier_table
 
 }
