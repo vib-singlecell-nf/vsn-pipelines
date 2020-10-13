@@ -32,15 +32,17 @@ workflow decontx {
 
         if(params.sc.celda.decontx.strategy == "filter") {
             out = DECONTX_FILTER ( data )
+            processed = out.decontx_filtered
         } else if (params.sc.celda.decontx.strategy == "correct") {
             out = DECONTX_CORRECT ( data )
+            processed = out.decontx_corrected
         } else {
             throw new Exception("VSN ERROR: The given strategy in params.sc.celda.decontx is not valid. Choose: filter or correct.")
         }
 
         if(params.utils.containsKey("publish")) {
             PUBLISH(
-                DECONTX_FILTER.out.decontx_filtered,
+                processed,
                 "CELDA_DECONTX",
                 "h5ad",
                 null,
@@ -49,7 +51,7 @@ workflow decontx {
         }
         
     emit:
-        decontx_filtered = DECONTX_FILTER.out.decontx_filtered
-        outlier_table = DECONTX_FILTER.out.outlier_table
+        decontx_processed = processed
+        outlier_table = out.outlier_table
 
 }
