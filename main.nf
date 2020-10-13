@@ -341,7 +341,7 @@ workflow single_sample_decontx_scrublet {
     CELDA__DECONTX()
     // Run Scrublet on the DecontX filtered data
     SCRUBLET__DOUBLET_REMOVAL(
-        CELDA__DECONTX.out.decontx_filtered.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        CELDA__DECONTX.out.decontx_processed.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
     )
 
