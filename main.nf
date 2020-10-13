@@ -313,6 +313,56 @@ workflow single_sample_scrublet {
 
 }
 
+workflow single_sample_decontx {
+
+    include {
+        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
+    } from './src/scanpy/workflows/single_sample' params(params)
+    include {
+        decontx as CELDA__DECONTX;
+    } from "./src/celda/main" params(params)
+    include {
+        ANNOTATE_BY_CELL_METADATA_BY_PAIR;
+    } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
+    include {
+        PUBLISH;
+    } from './src/utils/workflows/utils.nf' params(params)
+    include {
+        SC__H5AD_TO_LOOM;
+    } from './src/utils/processes/h5adToLoom.nf' params(params)
+
+    data = getDataChannel \
+        | SC__FILE_CONVERTER
+    // Run Single-sample pipeline on the data
+    SCANPY__SINGLE_SAMPLE( data )
+    // Run DecontX on the data
+    CELDA__DECONTX()
+
+    // Annotate the final processed file with doublet information inferred from Scrublet
+    ANNOTATE_BY_CELL_METADATA_BY_PAIR(
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data,
+        CELDA__DECONTX.out.outlier_table,
+        "celda.decontx"
+    )
+    SC__H5AD_TO_LOOM(
+        SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
+            it -> tuple(it[0], it[1])
+        }.join(
+            ANNOTATE_BY_CELL_METADATA_BY_PAIR.out
+        )
+    )
+    if(params.utils.containsKey("publish")) {
+        PUBLISH(
+            SC__H5AD_TO_LOOM.out,
+            "SINGLE_SAMPLE_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
+            "loom",
+            null,
+            false
+        )
+    }
+
+}
+
 workflow single_sample_decontx_scrublet {
     include {
         SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
@@ -353,7 +403,7 @@ workflow single_sample_decontx_scrublet {
         }.mix(
             CELDA__DECONTX.out.outlier_table
         ).groupTuple(),
-        "scrublet"
+        "scrublet" // Works because decontx requires the same params in cell_annotate
     )
     SC__H5AD_TO_LOOM(
         SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
@@ -365,7 +415,7 @@ workflow single_sample_decontx_scrublet {
     if(params.utils.containsKey("publish")) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_DECONTX_FILTER_SCRUBLET",
+            "SINGLE_SAMPLE_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
             "loom",
             null,
             false
