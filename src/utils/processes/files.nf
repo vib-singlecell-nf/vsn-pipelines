@@ -1,5 +1,6 @@
 
-def getBaseName(file, suffix = "SC") {
+def getBaseName(file, suffix) {
+    // Default value suffix = "SC" does not work! Weird...
     res = (file.getName() =~ /(.+)\.${suffix}(.+)\.(.+)/)
     if(res.size() == 0) {
         throw new Exception("VSN ERROR: Cannot get base name.")
