@@ -496,7 +496,7 @@ Steps:
                         out.map {
                             it -> it[1]
                         }.toSortedList( 
-                            { a, b -> getBaseName(a) <=> getBaseName(b) }
+                            { a, b -> getBaseName(a, "SC") <=> getBaseName(b, "SC") }
                         ) 
                     )
                 }

@@ -34,7 +34,7 @@ workflow PUBLISH {
         isParameterExplorationModeOn
 
     main:
-        // Clean
+        // Clean tagged files
         if(fileOutputSuffix != null && taggedFilesToClean.any { fileOutputSuffix.contains(it) } && isParameterExplorationModeOn) {
             if(!formatsAllowed.contains(fileOutputFormat))
                 throw new Exception("The format " + fileOutputFormat + " is currently not allowed to be published.")
