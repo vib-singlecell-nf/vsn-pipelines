@@ -25,13 +25,26 @@ workflow getDataChannel {
 
     main:
         data = Channel.empty()
+        // Define the output file format
+        outputFileFormat = "h5ad"
+        // This allows to use it dynamically (i.e.: addParams)
+        if(params.containsKey("off")) {
+            outputFileFormat = params.off
+        } else {
+            // If not dynamically set, we use h5ad by default
+            outputFileFormat = "h5ad"
+            if(params.sc.file_converter.containsKey("off")) {
+                outputFileFormat = params.sc.file_converter.off
+            }
+        }
+
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_mex")) {
             if(isOuts(params.data.tenx.cellranger_mex)) {
                 data = data.concat(
                     getTenXCellRangerOutsChannel(
                         params.data.tenx.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", "h5ad")
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", outputFileFormat)
                     }
                 ).view()
             } else {
@@ -39,7 +52,7 @@ workflow getDataChannel {
                     getTenXCellRangerMEXChannel(
                         params.data.tenx.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex", outputFileFormat)
                     }
                 ).view()
             }
@@ -50,7 +63,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx_atac.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", "cistopic_rds")
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", outputFileFormat)
                     }
                 ).view()
             } else {
@@ -58,7 +71,7 @@ workflow getDataChannel {
                     getTenXCellRangerMEXChannel(
                         params.data.tenx_atac.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", "cistopic_rds")
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat)
                     }
                 ).view()
             }
@@ -69,7 +82,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx.cellranger_h5
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", "h5ad")
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", outputFileFormat)
                     }
                 ).view()
             } else {
@@ -77,7 +90,7 @@ workflow getDataChannel {
                     getTenXCellRangerH5Channel( 
                         params.data.tenx.cellranger_h5
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_h5", "h5ad")
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5", outputFileFormat)
                     }
                 ).view()
             }
@@ -98,7 +111,7 @@ workflow getDataChannel {
                     filePaths,
                     suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "h5ad", "h5ad")
+                    it -> tuple(it[0], it[1], "h5ad", outputFileFormat)
                 }
             ).view()
         }
@@ -108,7 +121,7 @@ workflow getDataChannel {
                     params.data.loom.file_paths,
                     params.data.loom.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "loom", "h5ad")
+                    it -> tuple(it[0], it[1], "loom", outputFileFormat)
                 }
             ).view()
         }
@@ -118,7 +131,7 @@ workflow getDataChannel {
                     params.data.tsv.file_paths,
                     params.data.tsv.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "tsv", "h5ad")
+                    it -> tuple(it[0], it[1], "tsv", outputFileFormat)
                 }
             ).view()
         }
@@ -128,7 +141,7 @@ workflow getDataChannel {
                     params.data.csv.file_paths,
                     params.data.csv.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "csv", "h5ad")
+                    it -> tuple(it[0], it[1], "csv", outputFileFormat)
                 }
             ).view()
         }
@@ -138,7 +151,7 @@ workflow getDataChannel {
                     params.data.seurat_rds.file_paths,
                     params.data.seurat_rds.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "seurat_rds", "h5ad")
+                    it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat)
                 }
             ).view()
         }

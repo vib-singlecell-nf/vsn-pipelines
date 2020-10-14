@@ -5,7 +5,8 @@ import java.nio.file.Paths
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
 include {
-    isParamNull
+    isParamNull;
+    getToolParams;
 } from './utils.nf' params(params)
 
 def getPublishDir = { outDir, toolName ->
@@ -44,7 +45,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_annotate : params.sc[tool].cell_annotate
+            isParamNull(tool) ? params.sc.cell_annotate : getToolParams(params.sc, tool)["cell_annotate"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
