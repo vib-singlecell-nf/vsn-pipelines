@@ -313,6 +313,16 @@ workflow single_sample_scrublet {
 
 }
 
+workflow decontx {
+
+    include {
+        decontx as CELDA__DECONTX;
+    } from "./src/celda/main" params(params)
+    // Run DecontX on the data
+    CELDA__DECONTX()
+
+}
+
 workflow single_sample_decontx {
 
     include {
@@ -354,7 +364,7 @@ workflow single_sample_decontx {
     if(params.utils.containsKey("publish")) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
+            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
             "loom",
             null,
             false
@@ -415,7 +425,7 @@ workflow single_sample_decontx_scrublet {
     if(params.utils.containsKey("publish")) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
             "loom",
             null,
             false
