@@ -43,7 +43,7 @@ workflow decontx {
         if(params.utils.containsKey("publish")) {
             PUBLISH(
                 processed,
-                "CELDA_DECONTX",
+                "CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
                 "h5ad",
                 null,
                 false
