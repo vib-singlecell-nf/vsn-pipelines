@@ -159,7 +159,7 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
 			}
 		)
     )
-    if(any(!are_metadata_cols_dim_not_null)) {
+    if(any(are_metadata_cols_dim_not_null)) {
         metadata_cols_dim_not_null_colnames <- colnames(x = seurat@meta.data[, which(x = are_metadata_cols_dim_not_null)])
         stop(paste0("VSN ERROR: Some columns (", paste(metadata_cols_dim_not_null_colnames, collapse=" and "),") from the given Seurat object in the meta.data slot are not 1-dimensional."))
     }
