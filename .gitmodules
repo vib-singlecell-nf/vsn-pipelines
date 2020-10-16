@@ -53,5 +53,5 @@
 	branch = develop
 [submodule "src/celda"]
 	path = src/celda
-	url = git@github.com:vib-singlecell-nf/celda.git
+	url = https://github.com/vib-singlecell-nf/celda.git
 	branch = develop
