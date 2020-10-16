@@ -191,7 +191,10 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     col_data$sample_id <- args$`sample_id`
     SummarizedExperiment::colData(x = sce) <- col_data
 	# Update row.names with gene symbols
-	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
+    row_data <- SummarizedExperiment::rowData(x = sce)
+    if("Symbol" %in% colnames(x = row_data)) {
+	    row.names(x = sce) <- row_data$Symbol
+    }
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     sceasy::convertFormat(
@@ -207,7 +210,10 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
       	samples = FILE_PATH_IN
     )
     # Set/update row.names with gene symbols
-	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
+    row_data <- SummarizedExperiment::rowData(x = sce)
+    if("Symbol" %in% colnames(x = row_data)) {
+	    row.names(x = sce) <- row_data$Symbol
+    }
     # Set col.names with barcode ID
     colnames(x = sce) <- SummarizedExperiment::colData(x = sce)$Barcode
     # Tag cell with sample ID
