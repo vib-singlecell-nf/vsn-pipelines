@@ -186,15 +186,24 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     if(class(x = sce) != "SingleCellExperiment") {
       	stop("VSN ERROR: The object contained in the Rds file is not a SingleCellExperiment object.")
     }
-    # Add sample ID as colData entry
-	col_data <- SummarizedExperiment::colData(x = sce)
-    col_data$sample_id <- args$`sample_id`
-    SummarizedExperiment::colData(x = sce) <- col_data
-	# Update row.names with gene symbols
+    # Set/update row.names with gene symbols
     row_data <- SummarizedExperiment::rowData(x = sce)
     if("Symbol" %in% colnames(x = row_data)) {
 	    row.names(x = sce) <- row_data$Symbol
     }
+    # Tag cell with sample ID
+    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
+		new.names <- gsub(
+			pattern = "-([0-9]+)$",
+			replace = paste0("-", args$`sample_id`),
+			x = colnames(x = sce)
+		)
+		colnames(x = sce) <- new.names
+    }
+    # Add sample ID as colData entry
+	col_data <- SummarizedExperiment::colData(x = sce)
+    col_data$sample_id <- args$`sample_id`
+    SummarizedExperiment::colData(x = sce) <- col_data
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     sceasy::convertFormat(
