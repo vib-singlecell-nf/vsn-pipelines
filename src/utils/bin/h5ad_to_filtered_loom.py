@@ -29,7 +29,7 @@ FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN.name)
 except IOError:
-    raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
+    raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(os.path.splitext(FILE_PATH_IN)[0]))
 
 row_attrs = {
     "Gene": np.array(adata.var.index),
@@ -40,9 +40,11 @@ col_attrs = {
     "nUMI": np.array(np.sum(adata.X.transpose(), axis=0)).flatten(),
 }
 
+matrix = (adata.X).T
+
 lp.create(
     filename=f"{FILE_PATH_OUT_BASENAME}.loom",
-    layers=(adata.X).T.toarray(),
+    layers=matrix if type(matrix) == np.ndarray else matrix.toarray(),
     row_attrs=row_attrs,
     col_attrs=col_attrs,
 )

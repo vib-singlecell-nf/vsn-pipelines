@@ -12,7 +12,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN python3 -m pip install ipykernel && \
     pip install --no-cache-dir papermill && \
-    pip install --no-cache-dir pysradb==0.9.9
+    pip install --no-cache-dir pysradb==0.10.2 && \
+    pip install --no-cache-dir nbconvert==5.6.0 && \
+    pip install --no-cache-dir nbmerge==0.0.4 && \
+    pip install --no-cache-dir nbformat==4.4.0
 
 FROM python:3.6.8-slim-stretch AS build-image
 RUN apt-get -y update && \

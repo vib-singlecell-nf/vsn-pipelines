@@ -23,6 +23,7 @@ data/10x/tiny
 work/
 out/
 tests/
+test/
 debug/
 *.swp
 *.swo

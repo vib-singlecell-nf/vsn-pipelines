@@ -1,12 +1,15 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+import java.nio.file.Paths
+
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
 
 process SC__UTILS__EXTRACT_FEATURE_METADATA {
 
     container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=2 -l walltime=1:00:00 -A ${params.global.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId), path(f)
@@ -19,7 +22,7 @@ process SC__UTILS__EXTRACT_FEATURE_METADATA {
 		processParams = sampleParams.local
         columnNamesAsArguments = processParams.columnNames.collect({ '--column-name' + ' ' + it }).join(' ')
         """
-        ${binDir}sc_h5ad_extract_metadata.py \
+        ${binDir}/sc_h5ad_extract_metadata.py \
             --axis feature \
             ${columnNamesAsArguments} \
             $f \

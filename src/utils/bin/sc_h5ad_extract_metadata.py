@@ -45,7 +45,7 @@ FILE_PATH_IN = args.input.name
 try:
     adata = sc.read_h5ad(filename=FILE_PATH_IN)
 except IOError:
-    raise Exception("Can only handle .h5ad files.")
+    raise Exception("VSN ERROR: Can only handle .h5ad files.")
 
 #
 # Extract the given column_names from the feature/observation-based metadata.
@@ -54,7 +54,7 @@ except IOError:
 if args.axis == 'feature':
     metadata = adata.var[args.column_names]
 elif args.axis == 'observation':
-    raise Exception("Extracting the observation-based metadata is currently not implemented.")
+    raise Exception("VSN ERROR: Extracting the observation-based metadata is currently not implemented.")
 else:
     raise Exception(f"Cannot extract from the {args.axis}-based metadata.")
 
