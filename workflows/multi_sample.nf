@@ -91,12 +91,7 @@ workflow multi_sample {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            out = SC__SCANPY__REGRESS_OUT( out.scaled )
-        } else {
-            out = out.scaled
-        }
-        DIM_REDUCTION_PCA( out )
+        DIM_REDUCTION_PCA( out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTER_IDENTIFICATION(

@@ -35,9 +35,6 @@ include {
     HVG_SELECTION;
 } from '../src/scanpy/workflows/hvg_selection.nf' params(params)
 include {
-    SC__SCANPY__REGRESS_OUT;
-} from '../src/scanpy/processes/regress_out.nf' params(params)
-include {
     NEIGHBORHOOD_GRAPH;
 } from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
 include {
@@ -93,12 +90,7 @@ workflow bbknn {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            out = SC__SCANPY__REGRESS_OUT( out.scaled )
-        } else {
-            out = out.scaled
-        }
-        DIM_REDUCTION_PCA( out )
+        DIM_REDUCTION_PCA( out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
