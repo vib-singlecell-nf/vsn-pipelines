@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-import fnmatch
+import re
 import argparse
 from argparse import RawTextHelpFormatter
 from pysradb import SRAdb
@@ -10,7 +10,7 @@ import pandas as pd
 
 parser = argparse.ArgumentParser(
     description='''
-Convert a SRA ID to a meta data TSV file with the following information
+Convert a SRA ID to a metadata .tsv file with the following information
 - experiment_accession, e.g.: SRX4084637
 - experiment_title, e.g.: GSM3142622: w1118_1d_WholeBrain_Unstranded_RNA-seq; Drosophila melanogaster; RNA-Seq
 - experiment_desc, e.g.: GSM3142622: w1118_1d_WholeBrain_Unstranded_RNA-seq; Drosophila melanogaster; RNA-Seq
@@ -67,7 +67,7 @@ parser.add_argument(
     "-o", "--output",
     type=argparse.FileType('w'),
     required=True,
-    help='The TSV file path that will stored the metadata for the given SRA Project ID.'
+    help='The .tsv file path that will stored the metadata for the given SRA Project ID.'
 )
 
 args = parser.parse_args()
@@ -116,13 +116,17 @@ metadata = pd.concat(
     axis=1
 )
 
-# Filter the meta data based on the given ilters (if provided)
-if "sample_filters" in args:
+# Filter the metadata based on the given ilters (if provided)
+if args.sample_filters is not None:
+    # Convert * (if not preceded by .) to .*
+    def replace_bash_asterisk_wildcard(glob):
+        return re.sub(r'(?<!\.)\*', '.*', glob)
+
     metadata = pd.concat(
         list(map(
             lambda glob: metadata[
                 list(map(
-                    lambda x: fnmatch.fnmatch(str(x), glob),
+                    lambda x: re.match(replace_bash_asterisk_wildcard(glob=glob), x) is not None,
                     metadata['sample_name'].values
                 ))
             ].drop_duplicates(),

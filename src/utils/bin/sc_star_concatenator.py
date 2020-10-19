@@ -55,7 +55,7 @@ for FILE_PATH_IN in args.input:
         counts = pd.read_csv(FILE_PATH_IN, sep='\t', index_col=0, skiprows=4, header=None)
         files.append((counts, cell_name))
     except IOError:
-        raise Exception("Wrong input format. Expects .tab files, got .{}".format(FILE_PATH_IN))
+        raise Exception("VSN ERROR: Wrong input format. Expects .tab files, got .{}".format(FILE_PATH_IN))
 
 #
 # Adjust the data
@@ -65,6 +65,6 @@ try:
     for counts, cell_name in files:
         all_counts.loc[:, cell_name] = counts[strand_options[args.stranded]].astype(int)
 except IOError:
-    raise Exception("Concatenation failed.")
+    raise Exception("VSN ERROR: Concatenation failed.")
 
 all_counts.to_csv(f"{FILE_PATH_OUT_BASENAME}.tsv", header=True, index=True, sep='\t')

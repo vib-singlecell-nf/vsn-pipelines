@@ -1,6 +1,8 @@
 nextflow.preview.dsl=2
 
-include '../utils/processes/files.nf'
+include {
+    extractSample
+} from '../utils/processes/files.nf'
 
 workflow getChannel {
 

@@ -6,6 +6,18 @@ import re
 import scanpy as sc
 import numpy as np
 
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 in_formats = [
     '10x_cellranger_mex',
     '10x_cellranger_h5',
@@ -49,12 +61,21 @@ parser.add_argument(
 
 parser.add_argument(
     "-t", "--tag-cell-with-sample-id",
-    action="store_true",
+    type=str2bool,
+    action="store",
     dest="tag_cell_with_sample_id",
     default=False,
     help="Tag each cell with the given sample_id."
 )
 
+parser.add_argument(
+    "-u", "--make-var-index-unique",
+    type=str2bool,
+    action="store",
+    dest="make_var_index_unique",
+    default=False,
+    help="Make the var index unique of the AnnData."
+)
 
 parser.add_argument(
     "-o", "--output-format",
@@ -82,7 +103,7 @@ def check_10x_cellranger_mex_path(path):
             )
         )
     if not os.path.exists(path):
-        raise Exception("The given directory {} does not exist.".format(path))
+        raise Exception("VSN ERROR: The given directory {} does not exist.".format(path))
     if not (
         not os.path.exists(os.path.join(path, "matrix.mtx")) or not os.path.exists(os.path.join(path, "matrix.mtx.gz"))
     ):
@@ -96,6 +117,17 @@ def check_10x_cellranger_mex_path(path):
 def add_sample_id(adata, args):
     # Annotate the file with the sample ID
     adata.obs["sample_id"] = args.sample_id
+    return adata
+
+
+def tag_cell(adata, tag):
+    # Check the number of untagged cells
+    # We consider an untagged cell as matching the following pattern: [barcode-id]-[sample-index] where
+    # - [barcode-id] is sequence of A,C,G,T letters
+    # - [sample-index] is a natural number
+    num_untagged_cells = sum(list(map(lambda x: len(re.findall(r"[ACGT]*-[0-9]+$", x)), adata.obs.index)))
+    if num_untagged_cells != 0:
+        adata.obs.index = list(map(lambda x: re.sub(r"([ACGT]*)-.*", rf'\1-{tag}', x), adata.obs.index))
     return adata
 
 
@@ -114,15 +146,25 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
+    # Check if var index is unique
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
+        adata.var_names_make_unique()
+        print("Making AnnData var index unique...")
+    # Sort var index
     adata = adata[:, np.sort(adata.var.index)]
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
 elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     if not os.path.exists(FILE_PATH_IN):
-        raise Exception("The given file {} does not exist.".format(FILE_PATH_IN))
+        raise Exception("VSN ERROR: The given file {} does not exist.".format(FILE_PATH_IN))
     # Convert
     print("Reading 10x data from HDF5 format...")
     adata = sc.read_10x_h5(
@@ -134,8 +176,18 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     )
     # If is tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
-        adata.obs.index = map(lambda x: re.sub('-[0-9]+', f"-{args.sample_id}", x), adata.obs.index)
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
+    # Check if var index is unique
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
+        adata.var_names_make_unique()
+        print("Making AnnData var index unique...")
+    # Sort var index
     adata = adata[:, np.sort(adata.var.index)]
     print("Writing 10x data to h5ad...")
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
@@ -151,10 +203,76 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
         delimiter=delim,
         first_column_names=True
     ).T
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    if args.tag_cell_with_sample_id:
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
     adata.var.index = adata.var.index.astype(str)
+    # Check if var index is unique
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
+        adata.var_names_make_unique()
+        print("Making AnnData var index unique...")
+    # Sort var index
     adata = adata[:, np.sort(adata.var.index)]
     adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 
+elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
+    adata = sc.read_h5ad(
+        FILE_PATH_IN
+    )
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    if args.tag_cell_with_sample_id:
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
+    adata.var.index = adata.var.index.astype(str)
+    # Check if var index is unique
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
+        adata.var_names_make_unique()
+        print("Making AnnData var index unique...")
+    # Sort var index
+    adata = adata[:, np.sort(adata.var.index)]
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
+elif INPUT_FORMAT == 'loom' and OUTPUT_FORMAT == 'h5ad':
+    adata = sc.read_loom(
+        FILE_PATH_IN,
+        sparse=False
+    )
+    adata = add_sample_id(
+        adata=adata,
+        args=args
+    )
+    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    if args.tag_cell_with_sample_id:
+        adata = tag_cell(
+            adata=adata,
+            tag=args.sample_id
+        )
+    adata.var.index = adata.var.index.astype(str)
+    # Check if var index is unique
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+    if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
+        adata.var_names_make_unique()
+        print("Making AnnData var index unique...")
+    # Sort var index
+    adata = adata[:, np.sort(adata.var.index)]
+    adata.write_h5ad(filename="{}.h5ad".format(FILE_PATH_OUT_BASENAME))
 else:
     raise Exception(
         "File format conversion {0} --> {1} hasn't been implemented yet.".format(INPUT_FORMAT, OUTPUT_FORMAT))

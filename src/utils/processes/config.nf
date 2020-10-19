@@ -8,10 +8,17 @@ import static groovy.json.JsonOutput.*
 def updateParams(params, resolvedParams, setter) {
     resolvedParams.each { k, v ->
         if(setter == null) {
-            if(resolvedParams[k] instanceof Map)
-                updateParams(params, resolvedParams[k], params."${k}")
+            if(v instanceof Map) {
+                if(!params.containsKey(k))
+                    params."${k}" = [:]
+                updateParams(params, v, params."${k}")
+            } else {
+                params."${k}" = v
+            }
         } else {
-            setter."${k}" = resolvedParams[k] instanceof Map ? updateParams(params, resolvedParams[k], setter."${k}") : v
+            if(!setter.containsKey(k))
+                setter."${k}" = [:]
+            setter."${k}" = v instanceof Map ? updateParams(params, v, setter."${k}") : v
         }
     }
 }
@@ -40,5 +47,16 @@ def resolveParams(Map params, boolean verbose) {
     updateParams(params, config.params, null)
     if(verbose)
         println(prettyPrint(toJson(params)))
+    return params
+}
+
+def includeConfig(Map params, String configRelativeFilePath) {
+    def repoFilePath = workflow.scriptFile.getParent()
+    def isMainRepo = repoFilePath.getName() == "vsn-pipelines"
+    def config = new ConfigParser().setBinding([params: params])
+    def co = new ConfigObject()
+    def toolBaseDir = isMainRepo ? repoFilePath.toRealPath().toString() : repoFilePath.getParent().getParent().toRealPath().toString()
+    config = config.parse(Paths.get(toolBaseDir, configRelativeFilePath))
+    updateParams(params, config.params, null)
     return params
 }

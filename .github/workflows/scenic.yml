@@ -14,16 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
         submodules: true
     - name: Install Nextflow
       run: |
-        export NXF_VER='19.12.0-edge'
+        export NXF_VER='20.04.1'
         wget -qO- get.nextflow.io | bash
         sudo mv nextflow /usr/local/bin/
     - name: Run scenic test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile scenic,test__scenic,docker -entry scenic -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile scenic,test__scenic,test__compute_resources,docker -entry scenic -ansi-log false
         cat .nextflow.log
 

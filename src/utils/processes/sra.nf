@@ -3,7 +3,8 @@ nextflow.preview.dsl=2
 import java.nio.file.Files
 import java.nio.file.Paths
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin/" : ""
+binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
 
 processParams = params.utils.sra_metadata
 
@@ -11,7 +12,7 @@ process GET_SRA_DB {
 
     container params.utils.container
     publishDir "${processParams.sraDbOutDir}", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    label 'compute_resources__default'
 
     output:
         file("SRAmetadb.sqlite")
@@ -28,7 +29,9 @@ process SRA_TO_METADATA {
 
     container params.utils.container
     publishDir "${params.global.outdir}/metadata", mode: 'link', overwrite: true
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    errorStrategy 'retry'
+    maxRetries 5
+    label 'compute_resources__default'
 
     input:
         tuple val(sraId), val(sampleFilters)
@@ -53,7 +56,7 @@ process SRA_TO_METADATA {
         }
         def sampleFiltersAsArguments = sampleFilters.collect({ '--sample-filter' + ' "' + it + '"'}).join(' ')
         """
-        ${binDir}sra_to_metadata.py \
+        ${binDir}/sra_to_metadata.py \
             ${sraId} \
             ${sraDbAsArgument} \
             ${sampleFiltersAsArguments} \
@@ -75,7 +78,7 @@ def normalizeSRAFastQ(fastQPath, sampleName) {
 process NORMALIZE_SRA_FASTQS {
 
     // publishDir "${params.global.outdir}/data", mode: 'symlink'
-    clusterOptions "-l nodes=1:ppn=1 -l walltime=1:00:00 -A ${params.qsubaccount}"
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId), file(fastqs)

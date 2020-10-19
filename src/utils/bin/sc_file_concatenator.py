@@ -56,7 +56,7 @@ if args.format == 'h5ad':
             cell_ids.extend(adata.obs.index.values)
             files.append(adata)
         except IOError:
-            raise Exception("Wrong input format. Expects .h5ad files, got .{}".format(FILE_PATH_IN))
+            raise Exception("VSN ERROR: Wrong input format. Expects .h5ad files, got .{}".format(FILE_PATH_IN))
 
 index_unique = None
 
@@ -78,8 +78,9 @@ if args.format == 'h5ad':
     )
     adata.var.index = adata.var.index.astype(str)
     adata = adata[:, np.sort(adata.var.index)]
+    print(f"Total number of cells: {adata.obs.shape[0]}, genes: {adata.var.shape[0]}.")
 else:
-    raise Exception("Concatenation of .{} files is not implemented.".format(args.format))
+    raise Exception("VSN ERROR: Concatenation of .{} files is not implemented.".format(args.format))
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
