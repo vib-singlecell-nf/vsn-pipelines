@@ -13,6 +13,9 @@ include {
     SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES;
 } from '../processes/feature_selection.nf' params(params)
 include {
+    SC__SCANPY__REGRESS_OUT;
+} from '../processes/regress_out.nf' params(params)
+include {
     SC__SCANPY__FEATURE_SCALING;
 } from '../processes/transform.nf' params(params)
 
@@ -33,7 +36,9 @@ workflow HVG_SELECTION {
         hvg = data \
             | SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES \
             | SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES
-        scaled = SC__SCANPY__FEATURE_SCALING( hvg )
+        out = params.sc.scanpy.containsKey("regress_out") 
+            ? SC__SCANPY__REGRESS_OUT( hvg ) : hvg
+        scaled = SC__SCANPY__FEATURE_SCALING( out )
         PUBLISH_H5AD_HVG_SCALED(
             scaled.map {
                 // if stashedParams not there, just put null 3rd arg

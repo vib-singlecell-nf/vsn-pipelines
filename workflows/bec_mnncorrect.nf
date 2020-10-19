@@ -63,8 +63,10 @@ workflow BEC_MNNCORRECT {
         clusterIdentificationPreBatchEffectCorrection
 
     main:
+        out = params.sc.scanpy.containsKey("regress_out") 
+            ? SC__SCANPY__REGRESS_OUT( hvg ) : data
         SC__SCANPY__BATCH_EFFECT_CORRECTION( 
-            data.map { 
+            out.map { 
                 it -> tuple(it[0], it[1], null) 
             }
         )
@@ -82,12 +84,7 @@ workflow BEC_MNNCORRECT {
                 it -> tuple(it[0], it[1]) 
             }
         )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            preprocessed_data = SC__SCANPY__REGRESS_OUT( SC__SCANPY__FEATURE_SCALING.out )
-        } else {
-            preprocessed_data = SC__SCANPY__FEATURE_SCALING.out
-        }
-        DIM_REDUCTION_PCA( preprocessed_data )
+        DIM_REDUCTION_PCA( SC__SCANPY__FEATURE_SCALING.out )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
 
         // Run dimensionality reduction
