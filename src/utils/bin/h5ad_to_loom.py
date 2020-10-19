@@ -36,7 +36,7 @@ parser.add_argument(
     '--nomenclature',
     type=str,
     dest="nomenclature",
-    help='The name of the genome.'
+    help='The name of the genome annotation the genes come from. e.g.: Flybase r6.31.'
 )
 
 parser.add_argument(
@@ -65,7 +65,7 @@ parser.add_argument(
     type=float,
     default=0,
     dest="markers_log_fc_threshold",
-    help='The name of the genome.'
+    help='Threshold on the log fold change for the markers to not to be saved in the loom.'
 )
 
 parser.add_argument(
@@ -73,7 +73,7 @@ parser.add_argument(
     type=float,
     default=0.05,
     dest="markers_fdr_threshold",
-    help='The name of the genome.'
+    help='Threshold on the false discovery rate (FDR) for the markers to not to be saved in the loom.'
 )
 
 args = parser.parse_args()
