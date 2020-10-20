@@ -9,6 +9,10 @@ include {
     SC__H5AD_TO_LOOM;
 } from './../processes/h5adToLoom.nf' params(params)
 include {
+    SC__H5AD_MERGE
+} from "./../processes/h5adMerge.nf" params(params)
+include {
+    isParamNull;
     PUBLISH;
 } from "./utils.nf" params(params)
 
@@ -16,7 +20,7 @@ include {
 //  Define the workflow 
 
 inputFormatsAllowed = ['h5ad']
-outputFormatsAllowed = ['loom']
+outputFormatsAllowed = ['loom', 'h5ad']
 
 workflow FILE_CONVERTER {
 
@@ -31,54 +35,32 @@ workflow FILE_CONVERTER {
         rawFilteredData
 
     main:
-        data.branch {
-            h5adToLoom: (item = it[1] instanceof ArrayBag ? it[1][0] : it[1]) && item.extension.toLowerCase() == 'h5ad' && outputFormat.toLowerCase() == 'loom'
-            none: (item = it[1] instanceof ArrayBag ? it[1][0] : it[1]) && !inputFormatsAllowed.contains(item.extension.toLowerCase()) || !outputFormatsAllowed.contains(outputFormat.toLowerCase())
-        }
-        .set { convert }
+        out = Channel.empty()
 
-        convert.h5adToLoom.view {
-            if(it[1].size() > 1) {
-                """
-------------------------------------------------------------------
-\u001B[32m Aggregating multiple .h5ad files to ${it[1][0].baseName.split('\\.')[0]}.loom 
-(w/ additional compression)...\u001B[0m
-------------------------------------------------------------------
-                """
-            } else {
-"""
-------------------------------------------------------------------
-\u001B[32m Converting ${it[1][0].baseName}.h5ad to ${it[1][0].baseName}.loom
-(w/ additional compression)...\u001B[0m
-------------------------------------------------------------------
-"""
+        if(outputFormat == "mergeToSCopeLoom") {
+            if(isParamNull(rawFilteredData)) {
+                throw new Exception("VSN ERROR: Expecting rawFilteredData not to be null when outputFormat is "+ outputFormat)
             }
-        }
-        SC__H5AD_TO_LOOM(
-            rawFilteredData.combine(
-                convert.h5adToLoom.map {
-                    it -> tuple(it[0], it[1]) 
-                }, 
-                by: 0
-            ).ifEmpty('Channel empty: no h5ad files were converted to the loom format.')
-        )
-        out = PUBLISH(
-            SC__H5AD_TO_LOOM.out,
-            outputSuffix,
-            "h5ad",
-            null,
-            false
-        )
-        convert.none.view { 
-"""
-------------------------------------------------------------------
-\u001B[31m Aborting conversion of ${it[1]} to ${it[1].baseName}.loom 
-(not implemented) \u001B[0m
-------------------------------------------------------------------
-"""
+            out = SC__H5AD_TO_LOOM(
+                rawFilteredData.combine(
+                    data.map {
+                        it -> tuple(it[0], it[1]) 
+                    }, 
+                    by: 0
+                )
+            )
+        } else if(outputFormat == "mergeToScanpyH5ad") {
+            out = SC__H5AD_MERGE(
+                data.map {
+                    it -> tuple(it[0], it[1])
+                }
+            )
+        } else {
+            throw new Exception("VSN ERROR: Output format "+ outputFormat +"not supported")
         }
 
     emit:
         out
 
 }
+
