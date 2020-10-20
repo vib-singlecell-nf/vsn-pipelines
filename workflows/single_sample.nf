@@ -104,34 +104,19 @@ workflow SINGLE_SAMPLE {
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
-        // Conversion
-        // Convert h5ad to X (here we choose: loom format)
-        if(params.sc.scanpy.containsKey("filter")) {
-            filtered_loom = SC__H5AD_TO_FILTERED_LOOM( QC_FILTER.out.filtered )
-            // In parameter exploration mode, this automatically merge all the results into the resulting loom
-            final_processed_scope_loom = FILE_CONVERTER(
-                CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
-                'SINGLE_SAMPLE.final_output',
-                'loom',
-                QC_FILTER.out.filtered
-            )
-        } else {
-            // We expect here the data channel to contain a filtered h5ad
-            filtered_loom = SC__H5AD_TO_FILTERED_LOOM( data )
-            final_processed_scope_loom = FILE_CONVERTER(
-                CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
-                'SINGLE_SAMPLE.final_output',
-                'loom',
-                data
-            )
-        }
+        // Finalize
+        FINALIZE(
+            params.sc?.filter ? QC_FILTER.out.filtered : data,
+            CLUSTER_IDENTIFICATION.out.marker_genes,
+            'SINGLE_SAMPLE.final_output'
+        )
 
         marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map { 
             it -> tuple(it[0], it[1], null)
         }
 
         // Publishing
-        final_published_data = PUBLISH(
+        PUBLISH(
             marker_genes,
             params.global.project_name+".single_sample.final_output",
             "h5ad",
@@ -141,12 +126,12 @@ workflow SINGLE_SAMPLE {
 
     emit:
         filtered_data = params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.filtered : Channel.empty()
-        filtered_loom
+        filtered_loom = FINALIZE.out.filteredloom
         hvg_data = HVG_SELECTION.out.hvg
         dr_pca_data = DIM_REDUCTION_PCA.out
         final_processed_data = marker_genes
-        final_published_data
-        final_processed_scope_loom
+        final_processed_scanpy_h5ad = FINALIZE.out.scanpyh5ad
+        final_processed_scope_loom = FINALIZE.out.scopeloom
         reports = ipynbs
         merged_report
 
