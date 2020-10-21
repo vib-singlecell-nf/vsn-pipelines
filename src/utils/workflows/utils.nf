@@ -142,6 +142,7 @@ def INIT(params) {
     params.misc.paramsAsJSON = toJson(paramsCopy)
     // Include generic configs
     includeConfig(params, 'conf/generic.config')
+    params.logDir = params.global.outdir + '/nextflow_log'
     includeConfig(params, 'src/utils/conf/workflow_report.config')
 
 }
