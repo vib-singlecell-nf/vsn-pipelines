@@ -24,12 +24,10 @@ process SC__H5AD_MERGE {
 		    path("${sampleId}.SC__H5AD_MERGE.h5ad")
 
 	script:
-        processParams = params.sc.file_concatenator
 		"""
         ${binDir}/sc_h5ad_merge.py \
-            ${(processParams.containsKey('join')) ? '--join ' + processParams.join : ''} \
             * \
-            "${sampleId}.SC__H5AD_MERGE.${processParams.off}"
+            "${sampleId}.SC__H5AD_MERGE.h5ad"
 		"""
 
 }

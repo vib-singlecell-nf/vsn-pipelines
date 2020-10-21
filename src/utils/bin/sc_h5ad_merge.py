@@ -24,15 +24,6 @@ parser.add_argument(
     help='The path to the merged h5ad output.'
 )
 
-parser.add_argument(
-    "-j", "--join",
-    type=str,
-    action="store",
-    dest="join",
-    default="inner",
-    help="How to concatenate the multiple datasets. Choose one of : inner (intersect), outer (union)."
-)
-
 args = parser.parse_args()
 
 # Define the arguments properly
