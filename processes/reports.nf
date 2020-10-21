@@ -4,7 +4,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION_REPORT {
 
 	container params.sc.scrublet.container
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
-    label 'compute_resources__cpu'
+	label 'compute_resources__report'
 
   	input:
 		file(ipynb)

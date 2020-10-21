@@ -94,7 +94,10 @@ workflow DOUBLET_REMOVAL {
                 // Get the h5ad with Scrublet info
                 ANNOTATE_BY_CELL_METADATA.out
             ).join(
-                finalProcessedData
+                finalProcessedData.map {
+                    // Extract the Scrublet object file
+                    it -> tuple(it[0], it[1])
+                }
             )
         )
         UTILS__REPORT_TO_HTML(
