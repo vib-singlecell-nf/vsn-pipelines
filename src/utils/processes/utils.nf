@@ -447,7 +447,9 @@ process SC__PUBLISH_PROXY {
             null
         )
         """
-        ln -s $f "${outputFileName}"
+        if [ ! -f ${outputFileName} ]; then
+            ln -s $f "${outputFileName}"
+        fi
         """
 
 }
