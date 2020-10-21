@@ -13,7 +13,7 @@ process GENERATE_REPORT {
 
 	container toolParams.container
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
-    label 'compute_resources__mem'
+    label 'compute_resources__report'
 
 	input:
 		file ipynb
@@ -36,7 +36,7 @@ process REPORT_TO_HTML {
 
 	container toolParams.container
 	publishDir "${toolParams.scenicoutdir}/${sampleId}/notebooks", mode: 'link', overwrite: true
-    label 'compute_resources__minimal'
+    label 'compute_resources__report'
 
 	input:
 		tuple val(sampleId), path(ipynb)
