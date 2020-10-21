@@ -406,6 +406,17 @@ Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 .. |BBKNN Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/bbknn.svg?sanitize=true
 
 
+.. list-table:: Output Files (not exhaustive list)
+    :widths: 10 40
+    :header-rows: 1
+
+    * - Output File
+      - Description
+    * - `out/data/*.BBKNN.loom`
+      - `SCope`-ready loom file containing all results.
+    * - `out/data/*.BBKNN.h5ad`
+      - `Scanpy`-ready h5ad file containing all results.
+
 ----
 
 **bbknn_scenic** |bbknn_scenic|
@@ -421,6 +432,17 @@ This could be very resource intensive, depending on the dataset.
 .. |BBKNN SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/bbknn_scenic.svg?sanitize=true
 
 
+.. list-table:: Output Files (not exhaustive list)
+    :widths: 10 40
+    :header-rows: 1
+
+    * - Output File
+      - Description
+    * - `out/data/*.BBKNN.h5ad`
+      - `Scanpy`-ready h5ad file containing all results from a `bbknn` workflow run.
+    * - `out/data/*.BBKNN_SCENIC.loom`
+      - `SCope`-ready loom file containing all results from a `bbknn` workflow and a `scenic` workflow run (e.g.: regulon AUC matrix, regulons, ...).
+
 ----
 
 **harmony** |harmony|
@@ -434,6 +456,17 @@ The output is a loom file with the results embedded.
 |Harmony Workflow|
 
 .. |Harmony Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/harmony.svg?sanitize=true
+
+.. list-table:: Output Files (not exhaustive list)
+    :widths: 10 40
+    :header-rows: 1
+
+    * - Output File
+      - Description
+    * - `out/data/*.HARMONY.loom`
+      - `SCope`-ready loom file containing all results.
+    * - `out/data/*.HARMONY.h5ad`
+      - `Scanpy`-ready h5ad file containing all results.
 
 ----
 
@@ -450,6 +483,19 @@ The output is a loom file with the results embedded.
 |mnnCorrect Workflow|
 
 .. |mnnCorrect Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/mnncorrect.svg?sanitize=true
+
+
+.. list-table:: Output Files (not exhaustive list)
+    :widths: 10 40
+    :header-rows: 1
+
+    * - Output File
+      - Description
+    * - `out/data/*.MNNCORRECT.loom`
+      - `SCope`-ready loom file containing all results.
+    * - `out/data/*.MNNCORRECT.h5ad`
+      - `Scanpy`-ready h5ad file containing all results.
+
 
 ----
 
@@ -517,7 +563,6 @@ Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annot
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
 about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section and `Cell-based metadata filtering`_ section.
 
-.. _`Cell-based metadata annotation`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-annotation
 .. _`Cell-based metadata filtering`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-filtering
 
 First, generate the config :
