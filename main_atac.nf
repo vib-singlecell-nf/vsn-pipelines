@@ -5,7 +5,7 @@ nextflow.preview.dsl=2
 include { 
     INIT;
 } from './src/utils/workflows/utils' params(params)
-INIT()
+INIT(params)
 include {
     SC__FILE_CONVERTER;
 } from './src/utils/processes/utils' params(params)
