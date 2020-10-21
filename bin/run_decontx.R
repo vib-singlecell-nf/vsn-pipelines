@@ -82,7 +82,10 @@ library(ggplot2)
 
 # Run
 print("Running DecontX...")
-sce <- celda::decontX(x = sce)
+sce <- celda::decontX(
+	x = sce,
+	seed = args$seed
+)
 
 # Post-process
 print("Generating the different outlier masks...")
