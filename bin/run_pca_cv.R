@@ -153,174 +153,180 @@ ExtractDataFromH5Object <- function(h5.object) {
 #' @param default.svd If TRUE, perform base::svd instead of approximate PCA.
 #' @return data.frame containing of the PRESS error for each number of principal components tested.
 RunPCACV <- function(
-  data, 
-  k = 10,
-  from = 2,
-  to = 150,
-  by = 5,
-  maxit = 200,
-  seed = NULL,
-  n.cores = 1,
-  verbose = T,
-  default.svd = F) {
+	data, 
+	k = 10,
+	from = 2,
+	to = 150,
+	by = 5,
+	maxit = 200,
+	seed = NULL,
+	n.cores = 1,
+	verbose = T,
+	default.svd = F) {
+		# Load the libraries required for parallelization
+		library(doFuture)
+		# Increase max size of global objects passed to an item in the future package
+		options(future.globals.maxSize= 2000*1024^2)
+		library(doRNG)
 
+		if(is.null(seed)) {
+			stop("No seed is set, this will likely give none reproducible results. Please set one.")
+		}
+		# Required by irlba::irlba for reproducibility
+		set.seed(seed)
 
-  # Load the libraries required for parallelization
-  library(doFuture)
-  # Increase max size of global objects passed to an item in the future package
-  options(future.globals.maxSize= 1000*1024^2)
-  library(doRNG)
+		# Setup the parallelization
+		print(paste0("Number of workers used: ", n.cores))
+		registerDoFuture()
+		plan(multiprocess, workers = n.cores)
+		registerDoRNG(as.numeric(seed))
 
-  if(is.null(seed))
-    stop("No seed is set, this will likely give none reproducible results. Please set one.")
+		if(default.svd) {
+			print("Default singular value decomposition (SVD) is used for estimating the number PCs.") 
+		}
 
-  # Required by irlba::irlba for reproducibility
-  set.seed(seed)
+		pc <- seq(from = from, to = to, by = by)
 
-  # Setup the parallelization
-  print(paste0("Number of workers used: ", n.cores))
-  registerDoFuture()
-  plan(multiprocess, workers = n.cores)
-  registerDoRNG(as.numeric(seed))
+		# Init the error matrices
+		error <- matrix(0, nrow = length(c(1:k)), ncol = length(x = pc))
 
-  if(default.svd) {
-    print("Default singular value decomposition (SVD) is used for estimating the number PCs.") 
-  }
-  
-  pc <- seq(from = from, to = to, by = by)
+		# Partition the data into K-folds
+		print(paste0(k,"-fold paritioning..."))
+		data_kfold <- dismo::kfold(x = Matrix::t(x = data), k=k)
 
-  # Init the error matrices
-  error <- matrix(0, nrow = length(c(1:k)), ncol = length(x = pc))
+		# Perform PCA cross-validation
+		for(i in c(1:k)) {
+			print(paste0("Processing ", i, "th fold..."))
+			data_train <- Matrix::t(x = data[, data_kfold!=i])
+			data_test <- Matrix::t(x = data[, data_kfold==i])
+			print("Running SVD...")
+			if(!default.svd) {
+				print("...fast truncated SVD")
+				pca_results <- irlba::irlba(
+					A = data_train
+					, nv = to
+					, maxit = maxit
+					, verbose = verbose
+				)
+			} else {
+				print("...regular SVD")
+				pca_results <- base::svd(
+					x = data_train
+					, nv = to
+				)
+			}
+			print("==========================================")
+			gl <- pca_results$v
+			res <- foreach(j=1:length(x = pc), .combine='rbind') %dopar% {
+			# for(j in 1:length(x = pc)) {
+				print(paste0("...with ", pc[j], " PCs."))
+				P <- gl[,1:pc[j]]%*%Matrix::t(gl[,1:pc[j]])
+				err <- data_test %*% (diag(x = dim(x = P)[1]) - P + diag(x = diag(x = P)))
+				return (
+					data.frame("i"=i, "j"=j, err=sum(err^2))
+				)
+			}
+			apply(X = res, MARGIN = 1, FUN = function(r) {
+				error[r[["i"]],r[["j"]]] <<- r[["err"]]
+			})
+			# Free memory
+			# https://stat.ethz.ch/R-manual/R-patched/library/base/html/gc.html
+			rm(data_train)
+			rm(data_test)
+			rm(pca_results)
+			rm(gl)
+			rm(res)
+			gc()
+		}
+		errors <- colSums(x = error)
+		return (data.frame("PC"=pc,"error"=log(x = errors)))
+	}
+	cat("Parameters: \n")
+	print(args)
 
-  # Partition the data into K-folds
-  print(paste0(k,"-fold paritioning..."))
-  data_kfold <- dismo::kfold(x = Matrix::t(x = data), k=k)
+	input_ext <- tools::file_ext(args$`input-file`)
 
-  # Perform PCA cross-validation
-  for(i in c(1:k)) {
-    print(paste0("Processing ", i, "th fold..."))
-    data_train <- Matrix::t(x = data[, data_kfold!=i])
-    data_test <- Matrix::t(x = data[, data_kfold==i])
-    print("Running SVD...")
-    if(!default.svd) {
-      print("...fast truncated SVD")
-      pca_results <- irlba::irlba(
-        A = data_train
-        , nv = to
-        , maxit = maxit
-        , verbose = verbose
-      )
-    } else {
-      print("...regular SVD")
-      pca_results <- base::svd(
-        x = data_train
-        , nv = to
-      )
-    }
-    print("==========================================")
-    gl <- pca_results$v
-    res <- foreach(j=1:length(x = pc), .combine='rbind') %dopar% {
-    # for(j in 1:length(x = pc)) {
-      print(paste0("...with ", pc[j], " PCs."))
-      P <- gl[,1:pc[j]]%*%Matrix::t(gl[,1:pc[j]])
-      err <- data_test %*% (diag(x = dim(x = P)[1]) - P + diag(x = diag(x = P)))
-      return (
-        data.frame("i"=i, "j"=j, err=sum(err^2))
-      )
-    }
-    apply(X = res, MARGIN = 1, FUN = function(r) {
-      error[r[["i"]],r[["j"]]] <<- r[["err"]]
-    })
-  }
-  errors <- colSums(x = error)
-  return (data.frame("PC"=pc,"error"=log(x = errors)))
-}
-cat("Parameters: \n")
-print(args)
+	if(input_ext == "loom") {
+		print("Input type: Loom...")
+		# Get the data matrix from loom 
+		warnings("ASSUMPTION: Expecting a scaled data matrix in the main layer of the loom file!")
+		loom  <- SCopeLoomR::open_loom(file.path = args$`input-file`)
+		data <- SCopeLoomR::get_dgem(loom = loom)
+	} else if(input_ext == "Rds") {
+		print("Input type: Rds...")
+		object <- readRDS(file = args$`input-file`)
+		# Check if the accessor argument is NULL
+		if(is.null(args$`accessor`))
+			stop("The --accessor argument need to be set.")
+		data <- GetDataFromS4ObjectByAccessPath(
+			object = object
+			, path = args$`accessor`
+		)
+	} else if(input_ext == "h5ad") {
+		# Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
+		file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
+		if (is(object = file[['X']], class2 = 'H5Group')) {
+			data <- Seurat::as.sparse(x = file[['X']])
+		} else {
+			data <- file[['X']][, ]
+		}
+		# x will be an S3 matrix if X was scaled, otherwise will be a dgCMatrix
+		# Pull cell- and feature-level metadata
+		obs <- ExtractDataFromH5Object(file[['obs']])
+		meta_features <- ExtractDataFromH5Object(file[['var']])
+		rownames(x = data) <- rownames(x = meta_features) <- meta_features$index
+		colnames(x = data) <- rownames(x = obs) <- obs$index
+		file$close_all()
+		# seurat <- Seurat::ReadH5AD(file = args$`input-file`)
+		# if(!methods::.hasSlot(object = seurat@assays$RNA, name = "scale.data") || is.null(x = slot(object = seurat@assays$RNA, name = "scale.data")))
+		#   stop("Expects a feature-scaled data matrix but it does not exist.")
+		# if(is.null(args$`accessor`))
+		#   stop("The --accessor argument need to be set.")
+		# data <- GetDataFromS4ObjectByAccessPath(
+		#   object = seurat
+		#   , path = args$`accessor`
+		# )
+	} else {
+		stop(paste0("Unrecognized input file format: ", input_ext, "."))
+	}
 
-input_ext <- tools::file_ext(args$`input-file`)
+	use_variable_features <- as.logical(args$`use-variable-features`)
 
-if(input_ext == "loom") {
-  print("Input type: Loom...")
-  # Get the data matrix from loom 
-  warnings("ASSUMPTION: Expecting a scaled data matrix in the main layer of the loom file!")
-  loom  <- SCopeLoomR::open_loom(file.path = args$`input-file`)
-  data <- SCopeLoomR::get_dgem(loom = loom)
-} else if(input_ext == "Rds") {
-  print("Input type: Rds...")
-  object <- readRDS(file = args$`input-file`)
-  # Check if the accessor argument is NULL
-  if(is.null(args$`accessor`))
-    stop("The --accessor argument need to be set.")
-  data <- GetDataFromS4ObjectByAccessPath(
-    object = object
-    , path = args$`accessor`
-  )
-} else if(input_ext == "h5ad") {
-  # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
-  file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
-  if (is(object = file[['X']], class2 = 'H5Group')) {
-    data <- Seurat::as.sparse(x = file[['X']])
-  } else {
-    data <- file[['X']][, ]
-  }
-  # x will be an S3 matrix if X was scaled, otherwise will be a dgCMatrix
-  # Pull cell- and feature-level metadata
-  obs <- ExtractDataFromH5Object(file[['obs']])
-  meta_features <- ExtractDataFromH5Object(file[['var']])
-  rownames(x = data) <- rownames(x = meta_features) <- meta_features$index
-  colnames(x = data) <- rownames(x = obs) <- obs$index
-  file$close_all()
-  # seurat <- Seurat::ReadH5AD(file = args$`input-file`)
-  # if(!methods::.hasSlot(object = seurat@assays$RNA, name = "scale.data") || is.null(x = slot(object = seurat@assays$RNA, name = "scale.data")))
-  #   stop("Expects a feature-scaled data matrix but it does not exist.")
-  # if(is.null(args$`accessor`))
-  #   stop("The --accessor argument need to be set.")
-  # data <- GetDataFromS4ObjectByAccessPath(
-  #   object = seurat
-  #   , path = args$`accessor`
-  # )
-} else {
-  stop(paste0("Unrecognized input file format: ", input_ext, "."))
-}
-
-use_variable_features <- as.logical(args$`use-variable-features`)
-
-if(use_variable_features) {
-  # meta_features <- seurat@assays$RNA@meta.features
-  hv_column_names <- c("highly.variable","highly_variable")
-  hv_column_mask <- hv_column_names %in% colnames(x = meta_features)
-  if(sum(x = hv_column_mask) == 0) {
-    stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable' or 'highly_variable' is not present does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
-  } else {
-    hv_column_name <- hv_column_names[hv_column_mask]
-    meta_features[[hv_column_name]][is.na(x = meta_features[[hv_column_name]])] <- FALSE
-    hvf <- row.names(x = meta_features)[meta_features[[hv_column_name]]]
-  }
-  if(all(hvf == row.names(x = data))) {
-    print("Input contains already data with highly variable features.")
-    print("Skipping the subsetting.")
-  } else {
-    print(paste0("Subsetting matrix with highly variable features... "))
-    data <- data[hvf,]
-  }
-}
+	if(use_variable_features) {
+		# meta_features <- seurat@assays$RNA@meta.features
+		hv_column_names <- c("highly.variable","highly_variable")
+		hv_column_mask <- hv_column_names %in% colnames(x = meta_features)
+		if(sum(x = hv_column_mask) == 0) {
+			stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable' or 'highly_variable' is not present does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
+		} else {
+			hv_column_name <- hv_column_names[hv_column_mask]
+			meta_features[[hv_column_name]][is.na(x = meta_features[[hv_column_name]])] <- FALSE
+			hvf <- row.names(x = meta_features)[meta_features[[hv_column_name]]]
+		}
+		if(all(hvf == row.names(x = data))) {
+			print("Input contains already data with highly variable features.")
+			print("Skipping the subsetting.")
+		} else {
+			print(paste0("Subsetting matrix with highly variable features... "))
+			data <- data[hvf,]
+		}
+	}
 
 print(paste0("Data matrix has ", dim(x = data)[1], " rows, ", dim(x = data)[2], " columns."))
 
 
 # Run
 out <- RunPCACV(
-  data = data,
-  k = args$`k-fold`,
-  from = args$`from-n-pc`,
-  to = args$`to-n-pc`,
-  by = args$`by-n-pc`,
-  maxit = args$`max-iters`,
-  seed = args$`seed`,
-  n.cores = args$`n-cores`,
-  verbose = args$`verbose`,
-  default.svd = args$`default-svd`
+	data = data,
+	k = args$`k-fold`,
+	from = args$`from-n-pc`,
+	to = args$`to-n-pc`,
+	by = args$`by-n-pc`,
+	maxit = args$`max-iters`,
+	seed = args$`seed`,
+	n.cores = args$`n-cores`,
+	verbose = args$`verbose`,
+	default.svd = args$`default-svd`
 )
 
 # Fit to get optimal number of PCs
@@ -339,12 +345,12 @@ yaml::write_yaml(x = yaml::as.yaml(x = args), file = ".PARAMETERS.yaml")
 pcs_pred <- as.data.frame(x = pcs_pred)
 colnames(x = pcs_pred) <- c("PC", "error")
 write.table(
-  x = pcs_pred,
-  file = paste0(args$`output-prefix`, ".PRESS_ERRORS.tsv"),
-  quote = F,
-  sep = "\t",
-  row.names = F,
-  col.names = T
+	x = pcs_pred,
+	file = paste0(args$`output-prefix`, ".PRESS_ERRORS.tsv"),
+	quote = F,
+	sep = "\t",
+	row.names = F,
+	col.names = T
 )
 
 ## PRESS errors plot
@@ -357,9 +363,9 @@ dev.off()
 ## Optimal number of principal components
 
 write.table(
-  optimum_npcs,
-  paste0(args$`output-prefix`, ".OPTIMAL_NPCS.txt"),
-  append = FALSE,
-  row.names = FALSE,
-  col.names = FALSE
+	optimum_npcs,
+	paste0(args$`output-prefix`, ".OPTIMAL_NPCS.txt"),
+	append = FALSE,
+	row.names = FALSE,
+	col.names = FALSE
 )
