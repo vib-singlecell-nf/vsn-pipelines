@@ -14,6 +14,9 @@ include {
     COMBINE_BY_PARAMS;
 } from '../src/utils/workflows/utils.nf' params(params)
 include {
+    FINALIZE;
+} from '../src/utils/workflows/finalize.nf' params(params)
+include {
     SC__H5AD_TO_FILTERED_LOOM;
 } from '../src/utils/processes/h5adToLoom.nf' params(params)
 include {
