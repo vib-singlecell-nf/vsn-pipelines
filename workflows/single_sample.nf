@@ -67,10 +67,10 @@ workflow SINGLE_SAMPLE {
         // Process the data
         filtered = params.sc.scanpy.containsKey("filter") 
             ? QC_FILTER( data ).filtered : data
-        out = params.sc.scanpy.containsKey("data_transformation") \
-            && params.sc.scanpy.containsKey("normalization") 
+        transformed_normalized = params.sc.scanpy.containsKey("data_transformation") \
+            && params.sc.scanpy.containsKey("normalization")
             ? NORMALIZE_TRANSFORM( filtered ) : filtered
-        out = HVG_SELECTION( out )
+        out = HVG_SELECTION( transformed_normalized )
         DIM_REDUCTION_PCA( out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
