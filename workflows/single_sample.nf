@@ -14,6 +14,9 @@ include {
     PUBLISH;
 } from '../../utils/workflows/utils.nf' params(params)
 include {
+    FINALIZE;
+} from '../../utils/workflows/finalize.nf' params(params)
+include {
     SC__H5AD_TO_FILTERED_LOOM;
 } from '../../utils/processes/h5adToLoom.nf' params(params)
 include {
