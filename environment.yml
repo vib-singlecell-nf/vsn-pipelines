@@ -1,0 +1,14 @@
+name: celda-v1.4.5
+channels:
+  - r
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.7
+  - r-base=4.0.2
+  - r-argparse=2.0.1
+  - bioconductor-celda=1.4.5
+  - r-markdown
+  - r-robustbase
+  - r-hmisc
+  
