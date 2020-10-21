@@ -33,7 +33,7 @@ workflow PUBLISH {
     main:
         out = data
 
-        if(!taggedFilesToSkipPublishing.any { fileOutputSuffix.contains(it) }) {
+        if(fileOutputSuffix != null && !taggedFilesToSkipPublishing.any { fileOutputSuffix.contains(it) }) {
             // Compress only if part of formatsAllowed
             if(fileOutputSuffix != null && formatsAllowed.any { fileOutputFormat.contains(it) }) {
                 out = COMPRESS_HDF5(
