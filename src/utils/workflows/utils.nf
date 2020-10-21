@@ -143,6 +143,5 @@ def INIT(params) {
     // Include generic configs
     includeConfig(params, 'conf/generic.config')
     includeConfig(params, 'src/utils/conf/workflow_report.config')
-    return params
 
 }
