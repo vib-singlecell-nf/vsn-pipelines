@@ -1,0 +1,33 @@
+name: single_sample_decontx_scrublet
+
+on: 
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install Nextflow
+      run: |
+        export NXF_VER='20.04.1'
+        wget -qO- get.nextflow.io | bash
+        sudo mv nextflow /usr/local/bin/
+    - name: Get sample data
+      run: |
+        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
+        tar xzvf sample_data.tar.gz
+    - name: Run single_sample_decontx_scrublet test
+      run: |
+        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_decontx_correct_scrublet,test__single_sample_decontx_correct_scrublet,test__compute_resources,docker -entry single_sample_decontx_scrublet -ansi-log false
+        cat .nextflow.log
+

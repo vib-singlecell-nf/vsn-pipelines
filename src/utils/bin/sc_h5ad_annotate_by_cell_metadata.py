@@ -6,6 +6,7 @@ import argparse
 import pandas as pd
 import scanpy as sc
 import numpy as np
+import warnings
 
 parser = argparse.ArgumentParser(description='')
 
@@ -16,9 +17,10 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "cell_meta_data_file_path",
+    "cell_meta_data_file_paths",
     type=argparse.FileType('r'),
-    help='The file path to metadata (.tsv with header) for each cell where values from a column could be used to annotate the cells.'
+    nargs='+',
+    help='The file path(s) to metadata (.tsv with header) for each cell where values from a column could be used to annotate the cells.'
 )
 
 parser.add_argument(
@@ -88,33 +90,40 @@ except IOError:
 # Annotate the data
 #
 
-metadata = pd.read_csv(
-    filepath_or_buffer=args.cell_meta_data_file_path,
-    sep="\t",
-    header=0,
-    index_col=args.index_column_name
-)
-
 if args.method == 'obo':
     print("Annotating using the OBO method...")
-    if "sample_id" in metadata.columns:
-        # Drop the sample_id if already contained in adata.obs otherwise join needs a suffix
-        # but we want to keep sample_id as column name w/o any suffix
-        metadata.drop(
-            columns=['sample_id'],
-            inplace=True
+    for cell_meta_data_file_path in args.cell_meta_data_file_paths:
+        metadata = pd.read_csv(
+            filepath_or_buffer=cell_meta_data_file_path,
+            sep="\t",
+            header=0,
+            index_col=args.index_column_name
         )
-    if args.annotation_column_names is not None:
-        metadata = metadata.filter(items=args.annotation_column_names)
+        if "sample_id" in metadata.columns:
+            # Drop the sample_id if already contained in adata.obs otherwise join needs a suffix
+            # but we want to keep sample_id as column name w/o any suffix
+            metadata.drop(
+                columns=['sample_id'],
+                inplace=True
+            )
+        if args.annotation_column_names is not None:
+            metadata = metadata.filter(items=args.annotation_column_names)
 
-    # Check if all elements from the metadata subset are present in the given input file (h5ad file)
-    if np.sum(np.isin(adata.obs.index, metadata.index)) != len(adata.obs):
-        raise Exception(f"VSN ERROR: Make sure the cell IDs from the given input h5ad {FILE_PATH_IN} exist in the column {args.index_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
-
-    adata.obs = adata.obs.join(
-        other=metadata
-    )
+        # Check if all elements from the metadata subset are present in the given input file (h5ad file)
+        if np.sum(np.isin(adata.obs.index, metadata.index)) != len(adata.obs):
+            warnings.warn(f"VSN WARNING: Incomplete join between given .h5ad ({FILE_PATH_IN}, num cells: {adata.obs.shape[0]}) and given metadata file ({cell_meta_data_file_path}, num cells: {metadata.shape[0]}).")
+        adata.obs = adata.obs.join(
+            other=metadata
+        )
 elif args.method == 'aio':
+    if len(args.cell_meta_data_file_paths) > 1:
+        raise Exception("VSN ERROR: Using multiple metadata files is currently not supported with the AIO method.")
+    metadata = pd.read_csv(
+        filepath_or_buffer=args.cell_meta_data_file_paths[0],
+        sep="\t",
+        header=0,
+        index_col=args.index_column_name
+    )
     print("Annotating using the AIO method...")
     if args.sample_column_name is None:
         raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")

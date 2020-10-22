@@ -328,6 +328,30 @@ You'll just have to repeat the following structure for the parameters which you 
         }
     }
 
+If you want to apply custom parameters for some specific samples and have a "general" parameter for the rest of the samples, you should use the 'default' key as follows:
+
+.. code:: groovy
+
+    params {
+        sc {
+            scanpy {
+            container = 'vibsinglecellnf/scanpy:0.5.2'
+            filter {
+                report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
+                // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter
+                cellFilterMinNGenes = [
+                    '1k_pbmc_v2_chemistry': 600,
+                    'default': 800
+                ]
+                [...]
+            }
+        }
+    }
+
+Using this config, the param ``params.sc.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
+This strategy can be applied to any other paramameter of the config.
+
+
 Parameter exploration
 ----------------------
 

@@ -51,3 +51,11 @@
 	path = src/directs
 	url = https://github.com/vib-singlecell-nf/directs.git
 	branch = develop
+[submodule "src/celda"]
+	path = src/celda
+	url = https://github.com/vib-singlecell-nf/celda.git
+	branch = develop
+[submodule "src/soupx"]
+	path = src/soupx
+	url = git@github.com:vib-singlecell-nf/soupx.git
+	branch = develop

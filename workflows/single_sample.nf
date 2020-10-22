@@ -42,8 +42,8 @@ workflow single_sample {
         }
 
     emit:
-        finalh5ad = SCANPY__SINGLE_SAMPLE.out.final_processed_data
         filteredloom = SCANPY__SINGLE_SAMPLE.out.filtered_loom
-        scopeloom
+        scanpyh5ad = SCANPY__SINGLE_SAMPLE.out.final_processed_scanpy_h5ad
+        scopeloom = SCANPY__SINGLE_SAMPLE.out.final_processed_scope_loom
 
 }

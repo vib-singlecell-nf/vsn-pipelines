@@ -12,7 +12,11 @@ include {
 } from '../src/utils/processes/utils.nf' params(params)
 include {
     COMBINE_BY_PARAMS;
+    PUBLISH;
 } from '../src/utils/workflows/utils.nf' params(params)
+include {
+    FINALIZE;
+} from '../src/utils/workflows/finalize.nf' params(params)
 include {
     SC__H5AD_TO_FILTERED_LOOM;
 } from '../src/utils/processes/h5adToLoom.nf' params(params)
@@ -82,7 +86,7 @@ workflow multi_sample {
                 out.map {
                     it -> it[1]
                 }.toSortedList( 
-                    { a, b -> getBaseName(a) <=> getBaseName(b) }
+                    { a, b -> getBaseName(a, "SC") <=> getBaseName(b, "SC") }
                 ) 
             )
         }
@@ -90,12 +94,7 @@ workflow multi_sample {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            out = SC__SCANPY__REGRESS_OUT( out.scaled )
-        } else {
-            out = out.scaled
-        }
-        DIM_REDUCTION_PCA( out )
+        DIM_REDUCTION_PCA( out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTER_IDENTIFICATION(
@@ -104,15 +103,11 @@ workflow multi_sample {
             "No Batch Effect Correction"
         )
 
-        // Conversion
-        // Convert h5ad to X (here we choose: loom format)
-        filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-        // In parameter exploration mode, this automatically merge all the results into the resulting loom
-        scopeloom = FILE_CONVERTER(
-            CLUSTER_IDENTIFICATION.out.marker_genes.groupTuple(),
+        // Finalize
+        FINALIZE(
+            params.sc?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
+            CLUSTER_IDENTIFICATION.out.marker_genes,
             'MULTI_SAMPLE.final_output',
-            'loom',
-            SC__FILE_CONCATENATOR.out
         )
         
         // Define the parameters for clustering
@@ -120,7 +115,7 @@ workflow multi_sample {
 
         // Select a default clustering when in parameter exploration mode
         if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
-            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( scopeloom )
+            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
         }
 
         // Publishing
@@ -178,7 +173,8 @@ workflow multi_sample {
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
     emit:
-        filteredloom
-        scopeloom
+        filteredloom = FINALIZE.out.filteredloom
+        scopeloom = FINALIZE.out.scopeloom
+        scanpyh5ad = FINALIZE.out.scanpyh5ad
 
 }

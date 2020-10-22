@@ -1,8 +1,19 @@
 nextflow.preview.dsl=2
 
 import java.nio.file.Paths
+import nextflow.config.ConfigParser
+import static groovy.json.JsonOutput.*
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
+
+def getToolParams(params, toolKey) {
+    if(!toolKey.contains(".")) {
+        return params[toolKey]
+    }
+    def entry = params
+    toolKey.split('\\.').each { entry = entry?.get(it) }
+    return entry
+}
 
 def isParamNull(param) {
     return param == null || param == "NULL"
@@ -10,6 +21,10 @@ def isParamNull(param) {
 
 def clean(params) {
    return params.findAll { !it.key.contains('-') }
+}
+
+def printMap(map) {
+    prettyPrint(toJson(map))
 }
 
 def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
@@ -74,19 +89,94 @@ def detectCellRangerVersionData = { cellRangerV2Data, cellRangerV3Data ->
     }
 }
 
+def runPythonConverter = {
+    processParams,
+    sampleId,
+    inputDataType,
+    outputDataType,
+    outputExtension,
+    f ->
+    return (
+        """
+        ${binDir}/sc_file_converter.py \
+            --sample-id "${sampleId}" \
+            ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
+            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            --input-format $inputDataType \
+            --output-format $outputDataType \
+            ${f} \
+            "${sampleId}.SC__FILE_CONVERTER.${outputExtension}"
+        """
+    )
+}
+
+def runRConverter = {
+    processName,
+    processParams,
+    sampleId,
+    inputDataType,
+    outputDataType,
+    outputExtension,
+    f,
+    sceMainLayer = null ->
+    
+    return (
+        """
+        ${binDir}/sc_file_converter.R \
+            --sample-id "${sampleId}" \
+            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
+            ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
+            ${sceMainLayer != null ? '--sce-main-layer '+ sceMainLayer : ''} \
+            --input-format $inputDataType \
+            --output-format $outputDataType \
+            ${f} \
+            "${sampleId}.${processName}.${outputExtension}"
+        """
+    )
+}
+
+def getConverterContainer = { params, type ->
+    switch(type) {
+        case "cistopic":
+            return params.sc.cistopic.container
+        case "r":
+            return "vibsinglecellnf/scconverter:0.0.1"
+        break;
+        case "python":
+            return params.sc.scanpy.container
+    }
+}
+
+def getConverter = { iff, off ->
+    if(iff == "10x_atac_cellranger_mex_outs" && off == "cistopic_rds")
+        return "cistopic"
+    if((iff == "seurat_rds" && off == "h5ad")
+        || (iff == "10x_cellranger_mex" && off == "sce_rds")
+        || (iff == "sce_rds" && off == "h5ad"))
+        return "r"
+    return "python"
+}
+
+def getOutputExtension = { off ->
+    switch(off) {
+        case "cistopic_rds":
+            return "cisTopic.Rds"
+        case "sce_rds":
+            return "SCE.Rds"
+        case "h5ad":
+            return "h5ad"
+        default:
+            throw new Exception("VSN ERROR: This output file format is not implemented.")
+    }
+    return "python"
+}
+
 process SC__FILE_CONVERTER {
 
-    echo false
     cache 'deep'
-    if(!params.containsKey("data"))
-        container params.sc.scanpy.container
-	else if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex"))
-        container params.sc.cistopic.container
-    else if(params.data.containsKey("seurat_rds"))
-		container "vibsinglecellnf/sceasy:0.0.5"
-	else
-        container params.sc.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    container "${getConverterContainer(params,converterToUse)}"
     label 'compute_resources__mem'
 
     input:
@@ -99,7 +189,7 @@ process SC__FILE_CONVERTER {
     output:
         tuple \
             val(sampleId), \
-            path("${sampleId}.SC__FILE_CONVERTER.${outputDataType}")
+            path("${sampleId}.SC__FILE_CONVERTER.${outputExtension}")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
@@ -144,51 +234,88 @@ process SC__FILE_CONVERTER {
             break;
         }
 
-        if(inputDataType == "10x_atac_cellranger_mex_outs" && outputDataType == "cistopic_rds")
-            """
-            ${binDir}/create_cistopic_object.R \
-                --tenx_path ${f} \
-                --sampleId ${sampleId} \
-                --output ${sampleId}.SC__FILE_CONVERTER.${outputDataType}
-            """
-        else if(inputDataType.toLowerCase().contains("rds"))
-			"""
-			${binDir}/sc_file_converter.R \
-                --sample-id "${sampleId}" \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
-                ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
-                --input-format $inputDataType \
-                --output-format $outputDataType \
-                --input-file ${f} \
-                --output-file "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
-			"""
-		else
-            """
-            ${binDir}/sc_file_converter.py \
-                --sample-id "${sampleId}" \
-                ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
-                ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-                --input-format $inputDataType \
-                --output-format $outputDataType \
-                ${f} \
-                "${sampleId}.SC__FILE_CONVERTER.${outputDataType}"
-            """
+        // Get the converter based on input file format and output file format
+        converterToUse = getConverter(
+            inputDataType,
+            outputDataType
+        )
+        outputExtension = getOutputExtension(outputDataType)
+
+        switch(converterToUse) {
+            case "cistopic":
+                """
+                ${binDir}/create_cistopic_object.R \
+                    --tenx_path ${f} \
+                    --sampleId ${sampleId} \
+                    --output ${sampleId}.SC__FILE_CONVERTER.${outputExtension}
+                """
+                break;
+            case "r":
+                runRConverter(
+                    "SC__FILE_CONVERTER",
+                    processParams,
+                    sampleId,
+                    inputDataType,
+                    outputDataType,
+                    outputExtension,
+                    f
+                )
+                break;
+            case "python":
+                runPythonConverter(
+                    processParams,
+                    sampleId,
+                    inputDataType,
+                    outputDataType,
+                    outputExtension,
+                    f
+                )
+                break;
+            default:
+                throw new Exception("VSN ERROR: Unrecognized file converter.")
+        }
 
 }
 
-process SC__FILE_CONVERTER_HELP {
+process SC__FILE_CONVERTER_FROM_SCE {
 
-    container params.sc.scanpy.container
-    label 'compute_resources__minimal'
+    cache 'deep'
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
+    container "${getConverterContainer(params,converterToUse)}"
+    label 'compute_resources__mem'
+
+    input:
+        tuple \
+            val(sampleId), \
+            path(f)
+        val(outputDataType)
+        val(mainLayer)
 
     output:
-        stdout()
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.SC__FILE_CONVERTER_FROM_SCE.${outputDataType}")
 
     script:
-        """
-        ${binDir}/sc_file_converter.py -h | awk '/-h/{y=1;next}y'
-        """
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+        processParams = sampleParams.local
+        def _outputDataType = outputDataType
+        converterToUse = getConverter(
+            "sce_rds",
+            _outputDataType
+        )
+        def outputExtension = getOutputExtension(_outputDataType)
+
+        runRConverter(
+            "SC__FILE_CONVERTER_FROM_SCE",
+            processParams,
+            sampleId,
+            "sce_rds",
+            _outputDataType,
+            outputExtension,
+            f,
+            mainLayer
+        )
 
 }
 
@@ -278,13 +405,56 @@ def getOutputFileName(params, tag, f, fileOutputSuffix, isParameterExplorationMo
     return "${tag}.${fileOutputSuffix}.${f.extension}"
 }
 
-process SC__PUBLISH {
+def getPublishDir = { outDir, toolName ->
+    if(isParamNull(toolName))
+        return "${outDir}/data"
+    return "${outDir}/data/${toolName.toLowerCase()}"
+}
 
-    def getPublishDir = { outDir, toolName ->
-        if(isParamNull(toolName))
-            return "${outDir}/data"
-        return "${outDir}/data/${toolName.toLowerCase()}"
-    }
+process SC__PUBLISH_PROXY {
+
+    publishDir "${params.global.outdir}/data/intermediate", \
+        mode: 'symlink', \
+        overwrite: true, \
+        saveAs: {
+            filename -> "${outputFileName}" 
+        }
+
+    label 'compute_resources__minimal'
+
+    input:
+        tuple \
+            val(tag), \
+            path(f), \
+            val(stashedParams)
+        val(fileOutputSuffix)
+        val(toolName)
+        val(isParameterExplorationModeOn)
+
+    output:
+        tuple \
+            val(tag), \
+            path(outputFileName), \
+            val(stashedParams)
+
+    script:
+        outputFileName = getOutputFileName(
+            params,
+            tag,
+            f,
+            fileOutputSuffix,
+            false,
+            null
+        )
+        """
+        if [ ! -f ${outputFileName} ]; then
+            ln -s $f "${outputFileName}"
+        fi
+        """
+
+}
+
+process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \

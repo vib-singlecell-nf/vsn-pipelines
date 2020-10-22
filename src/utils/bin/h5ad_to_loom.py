@@ -33,10 +33,19 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--matrix-slot',
+    type=str,
+    dest="matrix_slot",
+    choices=['X', 'raw_X'],
+    default='X',
+    help='The slot name where to find the raw matrix in raw_filtered_data. X refers to adata.X while X_raw refers to adata.raw.X.'
+)
+
+parser.add_argument(
     '--nomenclature',
     type=str,
     dest="nomenclature",
-    help='The name of the genome.'
+    help='The name of the genome annotation the genes come from. e.g.: Flybase r6.31.'
 )
 
 parser.add_argument(
@@ -65,7 +74,7 @@ parser.add_argument(
     type=float,
     default=0,
     dest="markers_log_fc_threshold",
-    help='The name of the genome.'
+    help='Threshold on the log fold change for the markers to not to be saved in the loom.'
 )
 
 parser.add_argument(
@@ -73,7 +82,7 @@ parser.add_argument(
     type=float,
     default=0.05,
     dest="markers_fdr_threshold",
-    help='The name of the genome.'
+    help='Threshold on the false discovery rate (FDR) for the markers to not to be saved in the loom.'
 )
 
 args = parser.parse_args()
@@ -85,11 +94,11 @@ FILE_PATHS_IN = args.input
 FILE_PATH_OUT_BASENAME = os.path.splitext(args.output.name)[0]
 
 
-def df_to_named_matrix(df):
-    arr_ip = [tuple(i) for i in df.as_matrix()]
-    dtyp = np.dtype(list(zip(df.dtypes.index, df.dtypes)))
-    arr = np.array(arr_ip, dtype=dtyp)
-    return arr
+def df_to_named_matrix(df: pd.DataFrame):
+    # Create meta-data structure.
+    # Create a numpy structured array
+    return np.array([tuple(row) for row in df.values],
+                    dtype=np.dtype(list(zip(df.columns, df.dtypes))))
 
 
 def read_h5ad(file_path, backed='r'):
@@ -112,6 +121,19 @@ adatas = []
 try:
     raw_filtered_adata = read_h5ad(file_path=args.raw_filtered_data.name, backed=None)
     adata = read_h5ad(file_path=FILE_PATHS_IN[0].name)
+
+    # Check cell overlap between input and raw_filtered_adata
+    overlap = np.in1d(
+        adata.obs.index.values.astype(str),
+        raw_filtered_adata.obs.index.values.astype(str)
+    )
+    num_overlap = np.sum(overlap)
+    if num_overlap != adata.shape[0]:
+        raise Exception("VSN ERROR: Some cells from input is not present in raw_filtered_data.")
+    if num_overlap < raw_filtered_adata.shape[0]:
+        print("VSN MSG: Subsetting the raw_filtered_data .h5ad file by the cells found in the input .h5ad file.")
+        raw_filtered_adata = raw_filtered_adata[adata.obs.index, :]
+
     for adata_idx in range(0, len(FILE_PATHS_IN)):
         adatas = adatas + [read_h5ad(file_path=FILE_PATHS_IN[adata_idx].name)]
 except IOError:
@@ -277,8 +299,22 @@ for adata_idx in range(0, len(FILE_PATHS_IN)):
 
     clustering_id = adata_idx
     clustering_algorithm = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]["params"]["groupby"]
+
+    # Check if from AnnData 0.7.x
+    if isinstance(clustering_algorithm, np.ndarray):
+        if len(clustering_algorithm) > 1:
+            raise Exception("VSN ERROR: Currently there is no support for conversion of h5ad containing multiple clusterings.")
+        else:
+            clustering_algorithm = clustering_algorithm[0]
     clustering_resolution = adatas[adata_idx].uns[clustering_algorithm]["params"]["resolution"]
     cluster_marker_method = adatas[adata_idx].uns[SCANPY__CLUSTER_MARKER_DATA__ANNDATA_UNS_KEY]["params"]["method"]
+
+    # Check if from AnnData 0.7.x
+    if isinstance(cluster_marker_method, np.ndarray):
+        if len(cluster_marker_method) > 1:
+            raise Exception("VSN ERROR: Currently there is no support for conversion of h5ad containing multiple differential expression results.")
+        else:
+            cluster_marker_method = cluster_marker_method[0]
     num_clusters = len(np.unique(adatas[adata_idx].obs[clustering_algorithm]))
 
     # Data
@@ -426,9 +462,18 @@ attrs["MetaData"] = json.dumps(attrs_metadata)
 # Build the Loom #
 ##################
 
+if args.matrix_slot == "X":
+    print("Using X slot in AnnData...")
+    raw_filtered_mat = (raw_filtered_adata.X).T
+elif args.matrix_slot == "raw_X":
+    print("Using raw.X slot in AnnData...")
+    raw_filtered_mat = (raw_filtered_adata.raw.X).T
+else:
+    raise Exception("VSN ERROR: Invalid --matrix-slot. Choose X or X_raw.")
+
 lp.create(
     filename=f"{FILE_PATH_OUT_BASENAME}.loom",
-    layers=(raw_filtered_adata.X).T,
+    layers=raw_filtered_mat,
     row_attrs=row_attrs,
     col_attrs=col_attrs,
     file_attrs=attrs
