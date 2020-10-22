@@ -133,15 +133,17 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     # Reset Seurat slots
     if(isTrue(x = args$`seurat_reset`)) {
 		print("Resetting @graphs in seurat object...")
-		seurat@graphs<-list()
+		seurat@graphs <- list()
 		print("Resetting @reductions in seurat object...")
-		seurat@reductions<-list()
+		seurat@reductions <- list()
 		print("Resetting @neighbors in seurat object...")
-		seurat@neighbors<-list()
-		print(paste0("Resetting @assays$",args$`seurat_assay`,"@data in seurat object..."))
-		seurat@assays[[args$`seurat_assay`]]@data<-matrix(ncol = 0, nrow = 0)
+		seurat@neighbors <- list()
+        # Set @assays`<assay>`@data to @assays`<assay>`@counts (as in CreateSeuratObject
+        # @assays`<assay>`@data cannot be set to empty matrix otherwise row.names(object) will be NULL
+		print(paste0("Setting @assays$",args$`seurat_assay`,"@data to @assays$",args$`seurat_assay`,"@counts (as in CreateSeuratObject) in seurat object..."))
+		seurat@assays[[args$`seurat_assay`]]@data <- seurat@assays[[args$`seurat_assay`]]@counts
 		print(paste0("Resetting @assays$",args$`seurat_assay`,"@scale.data in seurat object..."))
-		seurat@assays[[args$`seurat_assay`]]@scale.data<-matrix(ncol = 0, nrow = 0)
+		seurat@assays[[args$`seurat_assay`]]@scale.data <- matrix(ncol = 0, nrow = 0)
     }
     # Add sample ID as obs entry
 	seurat <- AddMetaData(
