@@ -57,5 +57,5 @@
 	branch = develop
 [submodule "src/soupx"]
 	path = src/soupx
-	url = git@github.com:vib-singlecell-nf/soupx.git
+	url = https://github.com/vib-singlecell-nf/soupx.git
 	branch = develop
