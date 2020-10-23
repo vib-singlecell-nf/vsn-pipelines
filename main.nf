@@ -465,7 +465,8 @@ workflow single_sample_decontx_scrublet {
         ANNOTATE_BY_CELL_METADATA_BY_PAIR;
     } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
     include {
-        PUBLISH;
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_ANNOTATED;
+        PUBLISH as PUBLISH_CELDA_DECONTX_SCRUBLET
     } from './src/utils/workflows/utils.nf' params(params)
     include {
         SC__H5AD_TO_LOOM;
@@ -473,11 +474,11 @@ workflow single_sample_decontx_scrublet {
 
     data = getDataChannel \
         | SC__FILE_CONVERTER
-    // Run Single-sample pipeline on the data
+    // Run Single-sample pipeline on the INPUT DATA
     SCANPY__SINGLE_SAMPLE( data )
-    // Run DecontX on the data
+    // Run DecontX on the INPUT DATA
     CELDA__DECONTX()
-    // Run Scrublet on the DecontX filtered data
+    // Run Scrublet on the DecontX FILTERED DATA
     SCRUBLET__DOUBLET_REMOVAL(
         CELDA__DECONTX.out.decontx_processed.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
@@ -501,10 +502,24 @@ workflow single_sample_decontx_scrublet {
         )
     )
     if(params.utils?.publish) {
-        PUBLISH(
+        // Publish loom file where INPUT DATA:
+        // - processed by single_sample pipeline and ->
+        // - annotated by DecontX potential outliers
+        // - annotated by Scrublet potential doublets
+        PUBLISH_SINGLE_SAMPLE_ANNOTATED(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "SINGLE_SAMPLE_ANNOTATED",
             "loom",
+            null,
+            false
+        )
+        // Publish h5ad file where INPUT DATA:
+        // - processed by DecontX (either through filter or correct strategy) and ->
+        // - potential doublets removed by Scrublet 
+        PUBLISH_CELDA_DECONTX_SCRUBLET(
+            SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
+            "CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "h5ad",
             null,
             false
         )
@@ -541,9 +556,9 @@ workflow single_sample_soupx {
 
     data = getDataChannel \
         | SC__FILE_CONVERTER
-    // Run Single-sample pipeline on the data
+    // Run Single-sample pipeline on the INPUT DATA:
     SCANPY__SINGLE_SAMPLE( data )
-    // Run DecontX on the data
+    // Run SoupX on the INPUT DATA:
     SOUPX()
 
     SC__H5AD_TO_LOOM(
@@ -554,7 +569,7 @@ workflow single_sample_soupx {
     if(params.utils?.publish) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
+            "SINGLE_SAMPLE",
             "loom",
             null,
             false
@@ -577,7 +592,8 @@ workflow single_sample_soupx_scrublet {
         ANNOTATE_BY_CELL_METADATA_BY_PAIR;
     } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
     include {
-        PUBLISH;
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_ANNOTATED;
+        PUBLISH as PUBLISH_SOUPX_SCRUBLET
     } from './src/utils/workflows/utils.nf' params(params)
     include {
         SC__H5AD_TO_LOOM;
@@ -585,11 +601,11 @@ workflow single_sample_soupx_scrublet {
 
     data = getDataChannel \
         | SC__FILE_CONVERTER
-    // Run Single-sample pipeline on the data
+    // Run Single-sample pipeline on the INPUT DATA
     SCANPY__SINGLE_SAMPLE( data )
-    // Run Soupx on the data
+    // Run Soupx on the INPUT DATA
     SOUPX()
-    // Run Scrublet on the DecontX filtered data
+    // Run Scrublet on the DecontX FILTERED DATA
     SCRUBLET__DOUBLET_REMOVAL(
         SOUPX.out.soupx_processed.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
@@ -611,10 +627,23 @@ workflow single_sample_soupx_scrublet {
         )
     )
     if(params.utils?.publish) {
-        PUBLISH(
+        // Publish loom file where INPUT DATA:
+        // - processed by single_sample pipeline and ->
+        // - annotated by Scrublet potential doublets
+        PUBLISH_SINGLE_SAMPLE_ANNOTATED(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_SOUPX_CORRECT_SCRUBLET",
+            "SINGLE_SAMPLE_ANNOTATED",
             "loom",
+            null,
+            false
+        )
+        // Publish h5ad file where INPUT DATA:
+        // - processed by SoupX and ->
+        // - potential doublets removed by Scrublet 
+        PUBLISH_SOUPX_SCRUBLET(
+            SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
+            "SOUPX_SCRUBLET",
+            "h5ad",
             null,
             false
         )
