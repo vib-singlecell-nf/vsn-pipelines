@@ -170,9 +170,13 @@ for(threshold_idx in seq_along(x = thresholds)) {
 			label = paste(args$sample_id, "-", "DecontX Contamination Density Plot"),
 			subtitle = paste0("Num. Outlier Cells: ", round(x = num_outliers/nrow(col_data)*100, digits = 2), "%", " (", num_outliers, " / ", nrow(col_data) ,")")
 		)
-	d <- ggplot_build(plot = p)$data[[1]]
-	p <- p + 
-		geom_area(data = subset(d, x > threshold$value), aes(x=x,y=y), fill="orange")
+	# Check if there is at least 1 outlier otherwise
+	# Error: `data` must be uniquely named but has duplicate columns
+	if(num_outliers > 0) {
+		d <- ggplot_build(plot = p)$data[[1]]
+		p <- p + 
+			geom_area(data = subset(d, x > threshold$value), aes(x=x,y=y), fill="orange")
+	}
 	print(p)
 	ggsave(
 		filename=paste0(args$`output_prefix`, paste0(".Contamination_Score_Density_with_", threshold$name,".pdf"))
