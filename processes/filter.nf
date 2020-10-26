@@ -7,6 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" :
 process SC__SCANPY__COMPUTE_QC_STATS {
 
   	container params.sc.scanpy.container
+    publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
   	input:
