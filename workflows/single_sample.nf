@@ -22,6 +22,9 @@ include {
 include {
     FILE_CONVERTER;
 } from '../../utils/workflows/fileConverter.nf' params(params)
+include {
+    FILTER_AND_ANNOTATE_AND_CLEAN;
+} from '../../utils/workflows/filterAnnotateClean.nf' params(params)
 
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the tool module:
@@ -67,9 +70,11 @@ workflow SINGLE_SAMPLE {
         data
 
     main:
-        // Process the data
+        // Prefilter the data
+        out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
+
         filtered = params.sc.scanpy.containsKey("filter") 
-            ? QC_FILTER( data ).filtered : data
+            ? out = QC_FILTER( out ).filtered : out
         transformed_normalized = params.sc.scanpy.containsKey("data_transformation") \
             && params.sc.scanpy.containsKey("normalization")
             ? NORMALIZE_TRANSFORM( filtered ) : filtered

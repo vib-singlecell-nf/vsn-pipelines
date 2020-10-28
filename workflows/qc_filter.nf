@@ -2,9 +2,6 @@ nextflow.preview.dsl=2
 
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the utils module:
-include {
-    FILTER_AND_ANNOTATE_AND_CLEAN
-} from '../../utils/workflows/filterAnnotateClean.nf' params(params)
 
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the tool module:
@@ -28,12 +25,13 @@ workflow QC_FILTER {
         data
 
     main:
-        FILTER_AND_ANNOTATE_AND_CLEAN( data )
-        unfiltered = SC__SCANPY__COMPUTE_QC_STATS( FILTER_AND_ANNOTATE_AND_CLEAN.out )
-        SC__SCANPY__CELL_FILTER( unfiltered )
-        filtered = SC__SCANPY__GENE_FILTER( SC__SCANPY__CELL_FILTER.out )
+        filtered = data | \
+            SC__SCANPY__COMPUTE_QC_STATS | \
+            SC__SCANPY__CELL_FILTER | \
+            SC__SCANPY__GENE_FILTER
+
         report = GENERATE_DUAL_INPUT_REPORT(
-            unfiltered.join(filtered).map { 
+            SC__SCANPY__COMPUTE_QC_STATS.out.join(filtered).map { 
                 it -> tuple(*it[0..(it.size()-1)], null)
             },
             file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
