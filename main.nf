@@ -253,6 +253,30 @@ workflow single_sample {
 
 }
 
+// run single_sample QC
+workflow single_sample_qc {
+
+    include {
+        single_sample_qc as SINGLE_SAMPLE_QC;
+    } from './main' params(params)
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCOPE;
+    } from "./src/utils/workflows/utils" params(params)
+
+    getDataChannel | SINGLE_SAMPLE_QC
+
+    if(params.utils?.publish) {
+        PUBLISH_SINGLE_SAMPLE_SCOPE(
+            SINGLE_SAMPLE_QC.out.filtered,
+            "SINGLE_SAMPLE_QC",
+            "h5ad",
+            null,
+            false
+        )
+    }  
+
+}
+
 workflow multi_sample {
 
     include {
