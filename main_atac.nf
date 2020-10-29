@@ -5,7 +5,9 @@ nextflow.preview.dsl=2
 include { 
     INIT;
 } from './src/utils/workflows/utils' params(params)
-INIT()
+
+INIT(params)
+
 include {
     SC__FILE_CONVERTER;
 } from './src/utils/processes/utils' params(params)
@@ -42,6 +44,18 @@ workflow cistopic {
     } from './src/cistopic/main' params(params)
     
     getDataChannel | CISTOPIC
+
+}
+
+
+workflow atac_preprocess {
+
+    // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
+    include {
+        ATAC_PREPROCESS_WITH_METADATA;
+    } from './workflows/atac/preprocess.nf' params(params)
+
+    ATAC_PREPROCESS_WITH_METADATA(file(params.sc.atac.preprocess.metadata))
 
 }
 
