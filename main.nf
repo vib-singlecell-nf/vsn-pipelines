@@ -10,15 +10,17 @@ import static groovy.json.JsonOutput.*
 include { 
     INIT;
     getDataChannel;
-} from './src/utils/workflows/utils' params(params)
+} from '../utils/workflows/utils' params(params)
 INIT(params)
 include {
     SC__FILE_CONVERTER
-} from './src/utils/processes/utils' params(params)
+} from '../utils/processes/utils' params(params)
 include {
     getDataChannel
-} from './src/channels/channels' params(params)
-
+} from '../channels/channels' params(params)
+include {
+    QC_FILTER;
+} from './workflows/qc_filter.nf' params(params)
 include {
     SINGLE_SAMPLE
 } from './workflows/single_sample.nf' params(params)
@@ -31,5 +33,14 @@ workflow single_sample {
         getDataChannel | \
             SC__FILE_CONVERTER | \
             SINGLE_SAMPLE
+
+}
+
+workflow single_sample_qc {
+
+    main:
+        getDataChannel | \
+            SC__FILE_CONVERTER | \
+            QC_FILTER
 
 }
