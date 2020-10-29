@@ -1,6 +1,7 @@
 
-VSN-Pipelines template
-======================
+Trim Galore module
+==================
 
-This is a template repository for VIB-SingleCell-NF (VSN) pipelines tools
+This repository contains an implementation of Trim Galore for VIB-SingleCell-NF (VSN) pipelines.
+See `here <https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/>`_ for the original source.
 
