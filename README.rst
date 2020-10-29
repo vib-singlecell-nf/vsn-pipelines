@@ -1,6 +1,7 @@
 
-VSN-Pipelines template
-======================
+Sinto module
+============
 
-This is a template repository for VIB-SingleCell-NF (VSN) pipelines tools
+This repository contains an implementation of Sinto for VIB-SingleCell-NF (VSN) pipelines.
+See `timoast/sinto <https://github.com/timoast/sinto>`_ for the original source.
 
