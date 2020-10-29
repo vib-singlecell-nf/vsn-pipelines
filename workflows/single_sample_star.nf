@@ -74,8 +74,12 @@ workflow single_sample_star {
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
         file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
     )
-    QC_FILTER( data )
-    NORMALIZE_TRANSFORM( QC_FILTER.out.filtered )
+    out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
+
+    if(params.sc.scanpy.containsKey("filter")) {
+        out = QC_FILTER( out ).filtered // Remove concat
+    }    
+    NORMALIZE_TRANSFORM( out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
     if(params.sc.scanpy.containsKey("regress_out")) {
         preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
