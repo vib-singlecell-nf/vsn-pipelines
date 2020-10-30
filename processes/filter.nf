@@ -24,12 +24,13 @@ process SC__SCANPY__COMPUTE_QC_STATS {
             compute \
             $f \
             ${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off} \
-            ${(processParams.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
-            ${(processParams.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
-            ${(processParams.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
-            ${(processParams.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + processParams.cellFilterMaxNGenes : ''} \
-            ${(processParams.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + processParams.cellFilterMaxPercentMito : ''} \
-            ${(processParams.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
+            ${processParams?.cellFilterStrategy ? '--cell-filter-strategy ' + processParams.cellFilterStrategy : ''} \
+            ${processParams?.cellFilterMinNCounts ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
+            ${processParams?.cellFilterMaxNCounts ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
+            ${processParams?.cellFilterMinNGenes ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
+            ${processParams?.cellFilterMaxNGenes ? '--max-n-genes ' + processParams.cellFilterMaxNGenes : ''} \
+            ${processParams?.cellFilterMaxPercentMito ? '--max-percent-mito ' + processParams.cellFilterMaxPercentMito : ''} \
+            ${processParams?.geneFilterMinNCells ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
         """
 
 }
@@ -55,7 +56,7 @@ process SC__SCANPY__GENE_FILTER {
             genefilter \
             $f \
             ${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off} \
-            ${(processParams.containsKey('geneFilterMinNCells')) ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
+            ${processParams?.geneFilterMinNCells ? '--min-number-cells ' + processParams.geneFilterMinNCells : ''}
         """
 
 }
@@ -81,11 +82,12 @@ process SC__SCANPY__CELL_FILTER {
             cellfilter \
             $f \
             ${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off} \
-            ${(processParams.containsKey('cellFilterMinNCounts')) ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
-            ${(processParams.containsKey('cellFilterMaxNCounts')) ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
-            ${(processParams.containsKey('cellFilterMinNGenes')) ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
-            ${(processParams.containsKey('cellFilterMaxNGenes')) ? '--max-n-genes ' + processParams.cellFilterMaxNGenes : ''} \
-            ${(processParams.containsKey('cellFilterMaxPercentMito')) ? '--max-percent-mito ' + processParams.cellFilterMaxPercentMito : ''}
+            ${processParams?.cellFilterStrategy ? '--cell-filter-strategy ' + processParams.cellFilterStrategy : ''} \
+            ${processParams?.cellFilterMinNCounts ? '--min-n-counts ' + processParams.cellFilterMinNCounts : ''} \
+            ${processParams?.cellFilterMaxNCounts ? '--max-n-counts ' + processParams.cellFilterMaxNCounts : ''} \
+            ${processParams?.cellFilterMinNGenes ? '--min-n-genes ' + processParams.cellFilterMinNGenes : ''} \
+            ${processParams?.cellFilterMaxNGenes ? '--max-n-genes ' + processParams.cellFilterMaxNGenes : ''} \
+            ${processParams?.cellFilterMaxPercentMito ? '--max-percent-mito ' + processParams.cellFilterMaxPercentMito : ''}
         """
 
 }

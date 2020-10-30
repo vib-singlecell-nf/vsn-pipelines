@@ -22,6 +22,22 @@ def add_IO_arguments(parser):
 
 def add_cell_filters(parser):
     parser.add_argument(
+        "-s", "--cell-filter-strategy",
+        type=str,
+        action="store",
+        dest="cell_filter_strategy",
+        default="fixedthresholds",
+        choices=["fixedthresholds", "adaptivethresholds"],
+        help="""
+Strategy used to filter out cells. The 'fixedthresholds' strategy will only apply the given thresholds on the QC metrics (n_counts, n_genes, percent_mito).
+The 'adaptivethresholds' strategy will remove outliers based on the median absolute deviation (MAD) from the median value of each metric (n_counts, n_genes) across all cells.
+A value is considered an outlier if it is more than (+/-)3 MADs away (both directions) from the median of a given QC metric (n_counts, n_genes).
+This filter strategy is applied in the log space of the QC metrics (n_counts, n_genes).
+This filter strategy will NOT be applied on the percent_mito metric. A simple filter defined by max_percent_mito threshold will be applied.
+If min_n_counts and and min_n_genes are given, they will overrule the lower bound of each metric defined by (-)3MADs away from the median.
+             """
+    )
+    parser.add_argument(
         "-c", "--min-n-counts",
         type=int,
         action="store",
@@ -99,19 +115,70 @@ def compute_qc_stats(adata, args):
     #
     # Write filtering value into adata.uns
     #
-    adata.uns['sc'] = {
-        'scanpy': {
-            'filter': {
-                'cellFilterMinNCounts': args.min_n_counts,
-                'cellFilterMaxNCounts': args.max_n_counts,
-                'cellFilterMinNGenes': args.min_n_genes,
-                'cellFilterMaxNGenes': args.max_n_genes,
-                'cellFilterMaxPercentMito': args.max_percent_mito,
-                'geneFilterMinNCells': args.min_number_cells,
+    if args.cell_filter_strategy == "fixedthresholds":
+        adata.uns['sc'] = {
+            'scanpy': {
+                'filter': {
+                    'cellFilterStrategy': args.cell_filter_strategy,
+                    'cellFilterMinNCounts': args.min_n_counts,
+                    'cellFilterMaxNCounts': args.max_n_counts,
+                    'cellFilterMinNGenes': args.min_n_genes,
+                    'cellFilterMaxNGenes': args.max_n_genes,
+                    'cellFilterMaxPercentMito': args.max_percent_mito,
+                    'geneFilterMinNCells': args.min_number_cells,
+                }
             }
         }
-    }
+    elif args.cell_filter_strategy == "adaptivethresholds":
+        ncounts_lower, ncounts_upper = get_qc_metric_adaptive_thresholds_by_mad(
+            adata=adata,
+            qc_metric_name="n_counts"
+        )
+        ngenes_lower, ngenes_upper = get_qc_metric_adaptive_thresholds_by_mad(
+            adata=adata,
+            qc_metric_name="n_genes"
+        )
+        adata.uns['sc'] = {
+            'scanpy': {
+                'filter': {
+                    'cellFilterStrategy': args.cell_filter_strategy,
+                    'cellFilterMinNCounts': np.exp(ncounts_lower),
+                    'cellFilterMaxNCounts': np.exp(ncounts_upper),
+                    'cellFilterMinNGenes': np.exp(ngenes_lower),
+                    'cellFilterMaxNGenes': np.exp(ngenes_upper),
+                    'cellFilterMaxPercentMito': args.max_percent_mito,
+                    'geneFilterMinNCells': args.min_number_cells,
+                }
+            }
+        }
+    else:
+        raise Exception("VSN ERROR: Not a valid cell filter strategy.")
     return adata
+
+
+def get_qc_metric_adaptive_thresholds_by_mad(adata, qc_metric_name: str):
+    lower_n_mads, upper_n_mads = 3, 3
+    #
+    # Define a lower limit on metric if set
+    #
+    lowlimit = np.log(vars(args).get(f"min_{qc_metric_name}")) if vars(args).get(f"min_{qc_metric_name}") > 0 else 0
+    #
+    # Work in log space
+    #
+    log_qc_metric_name = f"log_{qc_metric_name}"
+    adata.obs[log_qc_metric_name] = np.log(adata.obs[qc_metric_name])
+    #
+    # Compute median and standard deviation of the given QC metric (defined by qc_metric_name) in the log space
+    #
+    log_mean, log_stdev = adata.obs[log_qc_metric_name].median(), adata.obs[log_qc_metric_name].std()
+    lower, upper = log_mean - lower_n_mads * log_stdev, log_mean + upper_n_mads * log_stdev
+    lower = np.max(
+        [
+            lowlimit,
+            lower
+        ]
+    )
+    return lower, upper
 
 
 def cell_filter(adata, args):
@@ -149,6 +216,48 @@ def cell_filter(adata, args):
         if args.max_percent_mito > 0:
             adata = adata[adata.obs['percent_mito'] < args.max_percent_mito, :]
         return adata
+    elif args.cell_filter_strategy == "adaptivethresholds":
+        print("Applying cell filter adaptive thresholds strategy...")
+        ncounts_lower, ncounts_upper = get_qc_metric_adaptive_thresholds_by_mad(
+            adata=adata,
+            qc_metric_name="n_counts"
+        )
+        ngenes_lower, ngenes_upper = get_qc_metric_adaptive_thresholds_by_mad(
+            adata=adata,
+            qc_metric_name="n_genes"
+        )
+        #
+        # Apply the filters
+        #
+        # n_counts upper bound
+        print(f"[ADAPTIVE THRESHOLD] Filtering cells by number of counts upper threshold ({np.exp(ncounts_upper)})...")
+        print(f"Before filter: {adata.shape[0]}")
+        adata = adata[adata.obs['log_n_counts'] <= ncounts_upper]
+        print(f"After filter: {adata.shape[0]}")
+        # n_counts lower bound
+        print(f"[ADAPTIVE THRESHOLD] Filtering cells by number of counts lower threshold ({np.exp(ncounts_lower)})...")
+        print(f"Before filter: {adata.shape[0]}")
+        adata = adata[adata.obs['log_n_counts'] >= ncounts_lower]
+        print(f"After filter: {adata.shape[0]}")
+        # n_genes upper bound
+        print(f"[ADAPTIVE THRESHOLD] Filtering cells by number of genes upper threshold ({np.exp(ngenes_upper)})...")
+        print(f"Before filter: {adata.shape[0]}")
+        adata = adata[adata.obs['log_n_genes'] <= ngenes_upper]
+        print(f"After filter: {adata.shape[0]}")
+        # n_genes lower bound
+        print(f"[ADAPTIVE THRESHOLD] Filtering cells by number of genes lower threshold ({np.exp(ngenes_lower)})...")
+        print(f"Before filter: {adata.shape[0]}")
+        adata = adata[adata.obs['log_n_genes'] >= ngenes_lower]
+        print(f"After filter: {adata.shape[0]}")
+        # percent_mito upper bound
+        if args.max_percent_mito > 0:
+            print(f"[FIXED THRESHOLD] Filtering cells by percentage of mitochondrial content upper threshold ({args.max_percent_mito})...")
+            print(f"Before filter: {adata.shape[0]}")
+            adata = adata[adata.obs['percent_mito'] <= args.max_percent_mito]
+            print(f"After filter: {adata.shape[0]}")
+        return adata
+    else:
+        raise Exception("VSN ERROR: Not a valid cell filter strategy.")
 
 
 def gene_filter(adata, args):
