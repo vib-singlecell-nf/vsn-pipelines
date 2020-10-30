@@ -6,7 +6,7 @@ process SC__TRIMGALORE__TRIM {
 
     container params.sc.atac.trimgalore.container
     publishDir "${params.global.outdir}/fastq/trimgalore", mode: 'symlink'
-    label 'compute_resources__default'
+    label 'compute_resources__cpu'
 
     input:
         tuple val(sampleId),
@@ -22,7 +22,6 @@ process SC__TRIMGALORE__TRIM {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.atac.trimgalore.trim)
         processParams = sampleParams.local
-        //varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
         """
         trim_galore \
             -j ${task.cpus} \

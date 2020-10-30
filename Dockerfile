@@ -28,6 +28,7 @@ RUN apt-get -y update && \
     apt-get -y --no-install-recommends install \
         # Need to run ps
         procps \
+        pigz \
         less && \
     rm -rf /var/cache/apt/* && \
     rm -rf /var/lib/apt/lists/*
