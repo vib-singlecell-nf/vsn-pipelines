@@ -115,26 +115,40 @@ def compute_qc_stats(adata, args):
 
 
 def cell_filter(adata, args):
-    #
-    # Filter on min/Max number of counts
-    #
-    if args.min_n_counts > 0:
-        adata = adata[adata.obs['n_counts'] > args.min_n_counts, :]
-    if args.max_n_counts > 0:
-        adata = adata[adata.obs['n_counts'] < args.max_n_counts, :]
-    #
-    # Filter on min/Max number of genes
-    #
-    if args.min_n_genes > 0:
-        sc.pp.filter_cells(adata, min_genes=args.min_n_genes)
-    if args.max_n_genes > 0:
-        adata = adata[adata.obs['n_genes'] < args.max_n_genes, :]
-    #
-    # Filter on percentage of mitochondrial genes
-    #
-    if args.max_percent_mito > 0:
-        adata = adata[adata.obs['percent_mito'] < args.max_percent_mito, :]
-    return adata
+    if args.cell_filter_strategy == "fixedthresholds":
+        print("Applying cell filter fixed thresholds strategy...")
+        #
+        # Filter on min/Max number of counts
+        #
+        if args.min_n_counts > 0:
+            print("Filtering cells by min. number of counts threshold...")
+            print(f"Before filter: {adata.shape[0]}")
+            adata = adata[adata.obs['n_counts'] > args.min_n_counts, :]
+            print(f"After filter: {adata.shape[0]}")
+        if args.max_n_counts > 0:
+            print("Filtering cells by max. number of counts threshold...")
+            print(f"Before filter: {adata.shape[0]}")
+            adata = adata[adata.obs['n_counts'] < args.max_n_counts, :]
+            print(f"After filter: {adata.shape[0]}")
+        #
+        # Filter on min/Max number of genes
+        #
+        if args.min_n_genes > 0:
+            print("Filtering cells by min. number of genes threshold...")
+            print(f"Before filter: {adata.shape[0]}")
+            sc.pp.filter_cells(adata, min_genes=args.min_n_genes)
+            print(f"After filter: {adata.shape[0]}")
+        if args.max_n_genes > 0:
+            print("Filtering cells by max. number of genes threshold...")
+            print(f"Before filter: {adata.shape[0]}")
+            adata = adata[adata.obs['n_genes'] < args.max_n_genes, :]
+            print(f"After filter: {adata.shape[0]}")
+        #
+        # Filter on percentage of mitochondrial genes
+        #
+        if args.max_percent_mito > 0:
+            adata = adata[adata.obs['percent_mito'] < args.max_percent_mito, :]
+        return adata
 
 
 def gene_filter(adata, args):
