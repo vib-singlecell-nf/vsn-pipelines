@@ -59,3 +59,18 @@ workflow atac_preprocess {
 
 }
 
+
+workflow atac_preprocess_freemuxlet {
+
+    // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
+    include {
+        ATAC_PREPROCESS_WITH_METADATA;
+    } from './workflows/atac/preprocess.nf' params(params)
+    include {
+        freemuxlet as FREEMUXLET;
+    } from './workflows/popscle' params(params)
+
+    ATAC_PREPROCESS_WITH_METADATA(file(params.sc.atac.preprocess.metadata))
+    FREEMUXLET(ATAC_PREPROCESS_WITH_METADATA.out.bam)
+}
+
