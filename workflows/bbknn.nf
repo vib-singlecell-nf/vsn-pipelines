@@ -124,6 +124,8 @@ workflow bbknn {
         // Select a default clustering when in parameter exploration mode
         if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
+        } else {
+            scopeloom = FINALIZE.out.scopeloom
         }
 
         /*******************************************
@@ -180,7 +182,7 @@ workflow bbknn {
 
     emit:
         filteredloom = FINALIZE.out.filteredloom
-        scopeloom = FINALIZE.out.scopeloom
+        scopeloom = scopeloom
         scanpyh5ad = FINALIZE.out.scanpyh5ad
 
 }
