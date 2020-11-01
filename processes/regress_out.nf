@@ -23,6 +23,9 @@ process SC__SCANPY__REGRESS_OUT {
 		processParams = sampleParams.local
 		variablesToRegressOutAsArguments = processParams.variablesToRegressOut.collect({ '--variable-to-regress-out' + ' ' + it }).join(' ')
 		"""
+		export MKL_NUM_THREADS=1
+		export NUMEXPR_NUM_THREADS=1
+		export OMP_NUM_THREADS=1
 		${binDir}adjust/sc_regress_out.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
 			${(processParams.containsKey('variablesToRegressOut')) ? variablesToRegressOutAsArguments : ''} \
