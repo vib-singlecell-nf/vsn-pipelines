@@ -73,10 +73,8 @@ workflow SINGLE_SAMPLE {
         // Prefilter the data
         out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
 
-        filtered = params.sc.scanpy.containsKey("filter") 
-            ? out = QC_FILTER( out ).filtered : out
-        transformed_normalized = params.sc.scanpy.containsKey("data_transformation") \
-            && params.sc.scanpy.containsKey("normalization")
+        filtered = params.sc.scanpy?.filter ? QC_FILTER( out ).filtered : out
+        transformed_normalized = params.sc.scanpy?.data_transformation && params.sc.scanpy?.normalization
             ? NORMALIZE_TRANSFORM( filtered ) : filtered
         out = HVG_SELECTION( transformed_normalized )
         DIM_REDUCTION_PCA( out.scaled )
@@ -98,7 +96,7 @@ workflow SINGLE_SAMPLE {
         ipynbs = COMBINE_REPORTS(
             samples,
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out,
-            params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.report : Channel.empty(),
+            params.sc.scanpy?.filter ? QC_FILTER.out.report : Channel.empty(),
             HVG_SELECTION.out.report,
             DIM_REDUCTION_TSNE_UMAP.out.report,
             CLUSTER_IDENTIFICATION.out.report
@@ -112,9 +110,11 @@ workflow SINGLE_SAMPLE {
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
+
+
         // Finalize
         FINALIZE(
-            params.sc?.filter ? QC_FILTER.out.filtered : data,
+            params.sc.scanpy?.filter ? QC_FILTER.out.filtered : data,
             CLUSTER_IDENTIFICATION.out.marker_genes,
             'SINGLE_SAMPLE.final_output'
         )
@@ -133,7 +133,7 @@ workflow SINGLE_SAMPLE {
         )
 
     emit:
-        filtered_data = params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.filtered : Channel.empty()
+        filtered_data = params.sc.scanpy?.filter ? QC_FILTER.out.filtered : Channel.empty()
         filtered_loom = FINALIZE.out.filteredloom
         hvg_data = HVG_SELECTION.out.hvg
         dr_pca_data = DIM_REDUCTION_PCA.out
