@@ -656,13 +656,13 @@ class SCopeLoom:
 
     def merge(self, loom, overwrite_embeddings=False):
         # Check all the cells and genes are in the same order
-        if not all(self.get_cell_ids() == loom.get_cell_ids()):
+        if not np.array_equal(a1=self.get_cell_ids(), a2=loom.get_cell_ids()):
             sys.exit(f"ERROR: Column attribute CellIDs does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
-        if not all(self.get_genes() == loom.get_genes()):
+        if not np.array_equal(a1=self.get_genes(), a2=loom.get_genes()):
             sys.exit(f"ERROR: Row attribute 'Gene' does not match between {os.path.basename(self.filename)} and {os.path.basename(loom.filename)}")
-        if not all(self.get_genes() == self.ex_mtx.columns):
+        if not np.array_equal(a1=self.get_genes(), a2=self.ex_mtx.columns):
             sys.exit(f"ERROR: Row attribute 'Gene' does not match with the features in the matrix of {os.path.basename(self.filename)}.")
-        if not all(loom.get_genes() == loom.ex_mtx.columns):
+        if not np.array_equal(a1=loom.get_genes(), a2=loom.ex_mtx.columns):
             sys.exit(f"ERROR: Row attribute 'Gene' does not match with the features in the matrix of {os.path.basename(loom.filename)}.")
 
         # Add the embeddings of the given loom (SCopeLoom) to this SCopeLoom
