@@ -8,7 +8,7 @@ process SC__BAP__BIORAD_DEBARCODE {
 
     container toolParams.container
     //publishDir "${params.global.outdir}/bap", mode: 'symlink'
-    label 'compute_resources__cpu'
+    label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
         tuple val(sampleId),
