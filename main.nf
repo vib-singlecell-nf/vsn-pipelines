@@ -6,6 +6,7 @@ nextflow.preview.dsl=2
 include { SC__BWAMAPTOOLS__BWA_MEM_PE; } from './processes/mapping.nf' params(params)
 include { SC__BWAMAPTOOLS__INDEX_BAM; } from './processes/index.nf' params(params)
 include { SC__BWAMAPTOOLS__ADD_BARCODE_TAG; } from './processes/add_barcode_as_tag.nf' params(params)
+include { SC__BWAMAPTOOLS__MAPPING_SUMMARY } from './processes/mapping_summary.nf' params(params)
 
 
 //////////////////////////////////////////////////////
@@ -32,6 +33,9 @@ workflow BWA_MAPPING_PE {
 
         // join bam index into the bam channel:
         bamout = bam_with_tag.join(bam_index)
+
+        // get mapping summary stats
+        SC__BWAMAPTOOLS__MAPPING_SUMMARY(bamout)
         
     emit:
         bamout
