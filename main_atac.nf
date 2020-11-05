@@ -59,6 +59,15 @@ workflow atac_preprocess {
 
 }
 
+workflow atac_qc_filtering {
+
+    include {
+        ATAC_QC_FILTERING;
+    } from './workflows/atac/qc_filtering.nf' params(params)
+
+    getDataChannel | ATAC_QC_FILTERING
+
+}
 
 workflow atac_preprocess_freemuxlet {
 
