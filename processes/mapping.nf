@@ -28,8 +28,10 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
             ${toolParams.index} \
             ${fastq_PE1} \
             ${fastq_PE2} \
-            | samtools view -bS - \
-            | samtools sort -@ ${task.cpus} - -o ${sampleId}.bwa.out.possorted.bam
+        | samtools sort -@ ${task.cpus} -n -O bam - \
+        | samtools fixmate -@ ${task.cpus} -m -O bam - - \
+        | samtools sort -@ ${task.cpus} -O bam - \
+        | samtools markdup -@ ${task.cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
         """
 }
 
