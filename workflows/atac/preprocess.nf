@@ -2,7 +2,8 @@ nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 // process imports:
-include { SC__SNAPTOOLS__DEX_FASTQ; } from './../../src/snaptools/processes/dex_fastq.nf' params(params)
+//include { SC__SNAPTOOLS__DEX_FASTQ; } from './../../src/snaptools/processes/dex_fastq.nf' params(params)
+include { SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ; } from './../../src/singlecelltoolkit/processes/debarcode_10x_scatac_fastqs.nf' params(params)
 include { SC__TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
 
 // workflow imports:
@@ -30,9 +31,9 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                           row -> tuple(
                               row.sample_name,
                               row.technology,
-                              row.fastq_type,
-                              row.fastq_path,
-                              row.fastq_path_barcode
+                              row.fastq_PE1_path,
+                              row.fastq_barcode_path,
+                              row.fastq_PE2_path
                               )
                       }
                       .branch {
@@ -41,25 +42,16 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                       }
 
         // run biorad debarcoding
-        fastq_dex_br = BAP__BIORAD_DEBARCODE(
-            data.biorad.map{ it -> tuple(it[0], it[2], it[3]) }
-                       .groupTuple(sort: { it[0] } )
-                       .map { it -> tuple(it[0], it[2][0], it[2][1]) }
-        )
+        fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
 
         // run barcode demultiplexing on each read+barcode:
-        fastq_dex = SC__SNAPTOOLS__DEX_FASTQ(data.standard.map{ it -> tuple(it[0], it[2], it[3], it[4]) })
-
-        // group parired fastqs by sampleID, keeping the R1, R2 order:
-        fastq_dex_paired = fastq_dex.map { it -> tuple(it[0], [it[1], it[2]]) }
-                     .groupTuple(sort: { it[0] } )
-                     .map { it -> tuple(it[0], it[1][0][1], it[1][1][1]) }
+        fastq_dex = SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ(data.standard.map{ it -> tuple(it[0], it[2], it[3], it[4]) })
 
         // concatenate the read channels:
-        fastq_dex_paired = fastq_dex_paired.concat(fastq_dex_br)
+        fastq_dex = fastq_dex.concat(fastq_dex_br)
 
         // run adapter trimming:
-        fastq_dex_trim = SC__TRIMGALORE__TRIM(fastq_dex_paired)
+        fastq_dex_trim = SC__TRIMGALORE__TRIM(fastq_dex)
 
         // map with bwa mem:
         bam = BWA_MAPPING_PE(fastq_dex_trim.map { it -> tuple(it[0..2]) })
