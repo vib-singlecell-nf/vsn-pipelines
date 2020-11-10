@@ -15,8 +15,8 @@ process SC__TRIMGALORE__TRIM {
 
     output:
         tuple val(sampleId),
-              path("${sampleId}.R1.dex_val_1.fq.gz"),
-              path("${sampleId}.R2.dex_val_2.fq.gz"),
+              path("${sampleId}_dex_R1_val_1.fq.gz"),
+              path("${sampleId}_dex_R2_val_2.fq.gz"),
               path("*trimming_report.txt")
 
     script:
