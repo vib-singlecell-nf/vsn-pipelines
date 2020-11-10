@@ -73,3 +73,6 @@
 [submodule "src/archr"]
 	path = src/archr
 	url = https://github.com/vib-singlecell-nf/archr.git
+[submodule "src/singlecelltoolkit"]
+	path = src/singlecelltoolkit
+	url = https://github.com/vib-singlecell-nf/singlecelltoolkit.git
