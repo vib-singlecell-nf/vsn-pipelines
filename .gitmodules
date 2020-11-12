@@ -79,3 +79,6 @@
 [submodule "src/singlecelltoolkit"]
 	path = src/singlecelltoolkit
 	url = https://github.com/vib-singlecell-nf/singlecelltoolkit.git
+[submodule "src/pycistopic"]
+	path = src/pycistopic
+	url = https://github.com/vib-singlecell-nf/pycistopic.git
