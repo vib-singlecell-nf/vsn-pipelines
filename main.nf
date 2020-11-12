@@ -79,6 +79,14 @@ workflow mnncorrect {
 
 }
 
+def getHarmonyBatchVariables = { params ->
+    batchVariables = params.sc.harmony.varsUse
+    if(batchVariables.size() > 1) {
+        throw new Exception("Currently it is not supported to run with multiple batch variables.")
+    }
+    return batchVariables
+}
+
 // run multi-sample with bbknn, output a scope loom file
 workflow harmony {
 
@@ -90,19 +98,22 @@ workflow harmony {
         PUBLISH as PUBLISH_SCANPY;
     } from "./src/utils/workflows/utils" params(params)
 
+    batchVariables = getHarmonyBatchVariables(params)
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+
     getDataChannel | HARMONY
 
     if(params.utils?.publish) {
         PUBLISH_SCOPE(
             HARMONY.out.scopeloom,
-            "HARMONY",
+            outputSuffix,
             "loom",
             null,
             false
         )
         PUBLISH_SCANPY(
             HARMONY.out.scanpyh5ad,
-            "HARMONY",
+            outputSuffix,
             "h5ad",
             null,
             false
@@ -119,13 +130,17 @@ workflow harmony_only {
     include {
         PUBLISH as PUBLISH_HARMONY;
     } from "./src/utils/workflows/utils" params(params)
+    
+
+    batchVariables = getHarmonyBatchVariables(params)
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
     if(params.utils?.publish) {
         PUBLISH_HARMONY(
             HARMONY.out.scanpyh5ad,
-            "HARMONY",
+            params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" +  batchVariables[0].toUpperCase() : "HARMONY",
             "h5ad",
             null,
             false
@@ -191,12 +206,15 @@ workflow harmony_scenic {
         PUBLISH as PUBLISH_HARMONY_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
+    batchVariables = getHarmonyBatchVariables(params)
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+
     getDataChannel | HARMONY
 
     if(params.utils?.publish) {
         PUBLISH_HARMONY(
             HARMONY.out.scanpyh5ad,
-            "HARMONY",
+            outputSuffix,
             "h5ad",
             null,
             false
@@ -211,7 +229,7 @@ workflow harmony_scenic {
     if(params.utils?.publish) {
         PUBLISH_HARMONY_SCENIC(
             SCENIC_APPEND.out,
-            "HARMONY_SCENIC",
+            outputSuffix + "_SCENIC",
             "loom",
             null,
             false
