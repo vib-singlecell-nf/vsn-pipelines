@@ -34,6 +34,9 @@ process CISTARGET {
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
         """
+        export MKL_NUM_THREADS=1
+		export NUMEXPR_NUM_THREADS=1
+		export OMP_NUM_THREADS=1
         pyscenic ctx \
             ${f} \
             ${featherDB} \
