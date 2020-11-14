@@ -7,7 +7,11 @@ include { SC__BWAMAPTOOLS__BWA_MEM_PE; } from './processes/mapping.nf' params(pa
 include { SC__BWAMAPTOOLS__INDEX_BAM; } from './processes/index.nf' params(params)
 include { SC__BWAMAPTOOLS__ADD_BARCODE_TAG; } from './processes/add_barcode_as_tag.nf' params(params)
 include { SC__BWAMAPTOOLS__MAPPING_SUMMARY } from './processes/mapping_summary.nf' params(params)
-
+include {
+    PUBLISH as PUBLISH_BAM;
+    PUBLISH as PUBLISH_BAM_INDEX;
+    PUBLISH as PUBLISH_MAPPING_SUMMARY;
+} from "../utils/workflows/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
 // Define the workflow
@@ -36,7 +40,12 @@ workflow BWA_MAPPING_PE {
 
         // get mapping summary stats
         SC__BWAMAPTOOLS__MAPPING_SUMMARY(bamout)
-        
+
+        // publish output:
+        PUBLISH_BAM(bam_with_tag, 'bwa.out.possorted', 'bam', 'bam', false)
+        PUBLISH_BAM_INDEX(bam_index, 'bwa.out.possorted.bam', 'bai', 'bam', false)
+        PUBLISH_MAPPING_SUMMARY(SC__BWAMAPTOOLS__MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
+
     emit:
         bamout
 

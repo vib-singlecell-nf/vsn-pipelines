@@ -7,7 +7,6 @@ toolParams = params.sc.atac.bwamaptools
 process SC__BWAMAPTOOLS__ADD_BARCODE_TAG {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/bam/", mode: 'symlink'
     label 'compute_resources__default','compute_resources__24hqueue'
     // todo: add storeDir instead of publishDir
 

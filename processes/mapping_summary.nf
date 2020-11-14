@@ -7,7 +7,6 @@ toolParams = params.sc.atac.bwamaptools
 process SC__BWAMAPTOOLS__MAPPING_SUMMARY {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/bam/", mode: 'symlink'
     label 'compute_resources__default'
 
     input:
