@@ -7,7 +7,6 @@ toolParams = params.sc.atac.singlecelltoolkit
 process SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/fastq/barcode_demultiplexed", mode: 'symlink'
     label 'compute_resources__cpu'
 
     input:
