@@ -5,7 +5,6 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/
 process SC__TRIMGALORE__TRIM {
 
     container params.sc.atac.trimgalore.container
-    publishDir "${params.global.outdir}/fastq/trimgalore", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
