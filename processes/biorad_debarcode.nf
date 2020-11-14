@@ -7,7 +7,6 @@ toolParams = params.sc.atac.bap
 process SC__BAP__BIORAD_DEBARCODE {
 
     container toolParams.container
-    //publishDir "${params.global.outdir}/bap", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
@@ -38,7 +37,6 @@ process SC__BAP__BIORAD_DEBARCODE {
 process SC__BAP__MERGE_FASTQS {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/fastq/barcode_demultiplexed", mode: 'symlink'
     label 'compute_resources__default'
 
     input:
