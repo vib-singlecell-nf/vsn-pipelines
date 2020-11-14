@@ -40,7 +40,6 @@ process SC__SINTO__FRAGMENTS {
 process SC__SINTO__SORT_FRAGMENTS {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/fragments/", mode: 'link'
     label 'compute_resources__mem'
 
     input:
