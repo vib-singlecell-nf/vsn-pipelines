@@ -1,6 +1,6 @@
 nextflow.preview.dsl=2
 
-binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
+// binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
 process SC__TRIMGALORE__TRIM {
 
@@ -16,7 +16,8 @@ process SC__TRIMGALORE__TRIM {
         tuple val(sampleId),
               path("${sampleId}_dex_R1_val_1.fq.gz"),
               path("${sampleId}_dex_R2_val_2.fq.gz"),
-              path("*trimming_report.txt")
+              path("${sampleId}_dex_R1.fastq.gz_trimming_report.txt"),
+              path("${sampleId}_dex_R2.fastq.gz_trimming_report.txt")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.atac.trimgalore.trim)
