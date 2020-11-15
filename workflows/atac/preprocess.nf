@@ -11,6 +11,13 @@ include { BWA_MAPPING_PE; } from './../../src/bwamaptools/main.nf' params(params
 include { BAM_TO_FRAGMENTS; } from './../../src/sinto/main.nf' params(params)
 include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode.nf' params(params)
 
+include {
+    PUBLISH as PUBLISH_FASTQS_PE1;
+    PUBLISH as PUBLISH_FASTQS_PE2;
+    PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
+    PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
+} from "../../src/utils/workflows/utils.nf" params(params)
+
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -52,6 +59,12 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
 
         // run adapter trimming:
         fastq_dex_trim = SC__TRIMGALORE__TRIM(fastq_dex)
+
+        // publish fastq output:
+        PUBLISH_FASTQS_PE1(fastq_dex_trim, '_dex_R1_val_1.fq', 'gz', 'fastq', false)
+        PUBLISH_FASTQS_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[2]) }, '_dex_R2_val_2.fq', 'gz', 'fastq', false)
+        PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '_dex_R1.fastq.gz_trimming_report', 'txt', 'fastq', false)
+        PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, '_dex_R2.fastq.gz_trimming_report', 'txt', 'fastq', false)
 
         // map with bwa mem:
         bam = BWA_MAPPING_PE(fastq_dex_trim.map { it -> tuple(it[0..2]) })
