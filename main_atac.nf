@@ -62,10 +62,10 @@ workflow atac_preprocess {
 workflow atac_qc_filtering {
 
     include {
-        ATAC_QC_FILTERING;
+        ATAC_QC_PREFILTER;
     } from './workflows/atac/qc_filtering.nf' params(params)
 
-    getDataChannel | ATAC_QC_FILTERING
+    getDataChannel | ATAC_QC_PREFILTER
 
 }
 
