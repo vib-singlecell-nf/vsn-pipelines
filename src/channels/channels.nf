@@ -7,7 +7,8 @@ include {
 } from './tenx' params(params)
 include {
     getChannel as getFileChannel;
-    getChannelWithIndex as getFileChannelWithIndex;
+    getChannelWithIndex as getFileChannelWithIndex_fragments;
+    getChannelWithIndex as getFileChannelWithIndex_bam;
 } from './file' params(params)
 
 boolean isCollectionOrArray(object) {    
@@ -160,7 +161,7 @@ workflow getDataChannel {
         }
         if(params.data.containsKey("fragments")) {
             data = data.concat(
-                getFileChannelWithIndex(
+                getFileChannelWithIndex_fragments(
                     params.data.fragments.file_paths,
                     params.data.fragments.suffix,
                     params.data.fragments.index_extension
@@ -171,7 +172,7 @@ workflow getDataChannel {
         }
         if(params.data.containsKey("bam")) {
             data = data.concat(
-                getFileChannelWithIndex(
+                getFileChannelWithIndex_bam(
                     params.data.bam.file_paths,
                     params.data.bam.suffix,
                     params.data.bam.index_extension
