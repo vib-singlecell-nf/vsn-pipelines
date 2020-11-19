@@ -833,8 +833,9 @@ workflow cellranger_count_libraries {
 
 workflow cellranger_count_demuxlet {
     include {
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_dataChannel_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
     include {
         SC__CELLRANGER__COUNT as CELLRANGER_COUNT;
     } from './src/cellranger/processes/count'
@@ -862,23 +863,30 @@ workflow cellranger_count_demuxlet {
         params.sc.cellranger.count.transcriptome,
         fastq_data
     )
-    DEMUXLET(data)
+    cellranger_dataChannel_to_bam_barcodes(data) |
+        DEMUXLET
 }
 
 workflow freemuxlet {
     include {
-        freemuxlet as FREEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_dataChannel_to_bam_barcodes;
+        FREEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
     
-    getDataChannel | FREEMUXLET
+    getDataChannel |
+        cellranger_dataChannel_to_bam_barcodes |
+        FREEMUXLET
 }
 
 workflow demuxlet {
-    include { 
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+    include {
+        cellranger_dataChannel_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
-    getDataChannel | DEMUXLET
+    getDataChannel |
+        cellranger_dataChannel_to_bam_barcodes |
+        DEMUXLET
 }
 
 // runs mkfastq, CellRanger count, then single_sample:
@@ -918,8 +926,9 @@ workflow cellranger_multi_sample_demuxlet {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_dataChannel_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger()
     MULTI_SAMPLE(        
@@ -927,7 +936,8 @@ workflow cellranger_multi_sample_demuxlet {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         }
     )
-    DEMUXLET(data)
+    cellranger_dataChannel_to_bam_barcodes(data) |
+        DEMUXLET
 
 }
 
@@ -951,8 +961,9 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        freemuxlet as FREEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_dataChannel_to_bam_barcodes;
+        FREEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger_libraries()
     MULTI_SAMPLE(
@@ -960,7 +971,8 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
     )
-    FREEMUXLET(data)
+    cellranger_dataChannel_to_bam_barcodes(data) |
+        FREEMUXLET
 
 }
 
@@ -970,8 +982,9 @@ workflow cellranger_libraries_demuxlet_multi_sample {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_dataChannel_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger_libraries()
     MULTI_SAMPLE(
@@ -979,7 +992,8 @@ workflow cellranger_libraries_demuxlet_multi_sample {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
     )
-    DEMUXLET(data)
+    cellranger_dataChannel_to_bam_barcodes(data) |
+        DEMUXLET
 }
 
 workflow star {
