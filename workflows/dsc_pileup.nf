@@ -8,10 +8,8 @@ include {
 } from '../../utils/processes/utils.nf' params(params)
 
 include {
-    SC__POPSCLE__DSC_PILEUP
-} from '../processes/dsc_pileup.nf' params(params)
-include {
-    SC__POPSCLE__PREFILTER_DSC_PILEUP
+    SC__POPSCLE__DSC_PILEUP;
+    SC__POPSCLE__PREFILTER_DSC_PILEUP;
 } from '../processes/dsc_pileup.nf' params(params)
 
 

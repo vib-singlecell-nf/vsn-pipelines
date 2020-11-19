@@ -31,7 +31,9 @@ process SC__POPSCLE__PREFILTER_DSC_PILEUP {
     label 'compute_resources__cpu'
 
     input:
-        tuple val(sampleId), path(f)
+        tuple val(sampleId),
+              path(bam),
+              path(barcodes)
         file vcf
 
     output:
@@ -40,8 +42,8 @@ process SC__POPSCLE__PREFILTER_DSC_PILEUP {
     script:
         """
         filter_bam_file_for_popscle_dsc_pileup.sh \
-            ${f}/possorted_genome_bam.bam \
-            ${f}/filtered_*_bc_matrix/barcodes.tsv* \
+            ${bam} \
+            ${barcodes} \
             ${vcf} \
             ${sampleId}_filtered_possorted_genome_bam.bam
         """

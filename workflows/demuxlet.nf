@@ -14,6 +14,22 @@ include {
 //////////////////////////////////////////////////////
 // Define the workflow
 
+workflow cellranger_dataChannel_to_bam_barcodes {
+
+    take:
+        data // standard data channel [ sampleId, path, type, format]
+
+    main:
+        out = data.map{ it -> [it[0],
+                               it[1]+"/possorted*bam.bam",
+                               it[1]+"/filtered_*_bc_matrix/barcodes.tsv*"
+                               ] }
+
+    emit:
+        out
+
+}
+
 workflow FREEMUXLET {
 
     take:
