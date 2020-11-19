@@ -1,6 +1,6 @@
 
-VSN-Pipelines template
-======================
+pycisTopic module
+=================
 
-This is a template repository for VIB-SingleCell-NF (VSN) pipelines tools
+This repository contains an implementation of pycisTopic for VIB-SingleCell-NF (VSN) pipelines.
 
