@@ -1,65 +1,22 @@
-# From: https://github.com/statgen/popscle/blob/master/Dockerfile
-# Source Image
-FROM ubuntu:latest
+FROM vibsinglecellnf/samtools:1.10
+# source: https://github.com/vib-singlecell-nf/bwamaptools/blob/master/Dockerfile.samtools
 
-# Set noninterative mode
-ENV DEBIAN_FRONTEND noninteractive
-
-# apt update and install global requirements
-RUN apt-get clean all && \
-    apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y  \
-        autoconf \
-        build-essential \
-        cmake \
-        git \
-        libbz2-dev \
-        libcurl4-openssl-dev \
-        libssl-dev \
-        zlib1g-dev \
-        liblzma-dev \
-        automake \
-        make \
-        gcc \
-        perl \
-        libncurses5-dev \
-        bedtools
-
-# apt clean and remove cached source lists
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install htslib
-RUN git clone https://github.com/samtools/htslib.git
-RUN cd htslib && \
-    autoheader && \
-    autoconf && \
-    ./configure --prefix=/usr/local/ && \
-    make && \
-    make install
-
-# Install SAMtools
-RUN git clone https://github.com/samtools/samtools.git
-RUN cd samtools && \
-    autoheader && \
-    autoconf -Wno-syntax && \
-    ./configure --prefix=/usr/local/ && \
-    make && \
-    make install
+RUN apk add --virtual build-dependencies git cmake g++
 
 # Install popscle
-RUN git clone https://github.com/statgen/popscle.git
-RUN cd popscle && \
+RUN git clone --depth 1 https://github.com/statgen/popscle.git && \
+    cd popscle && \
     mkdir build && \
     cd build && \
     cmake .. && \
-    make
+    make && \
+    cp /popscle/bin/popscle /usr/local/bin
 
-RUN cp /popscle/bin/popscle /usr/local/bin
+# install popscle_helper_tools into this image
+# (https://github.com/aertslab/popscle_helper_tools)
+RUN git clone --depth 1 https://github.com/aertslab/popscle_helper_tools.git /tmp/popscle_helper_tools && \
+    mv /tmp/popscle_helper_tools/*sh /usr/bin
 
-  # Define default command
-CMD ["/usr/local/bin/popscle"]
-#  COPY ./entrypoint.sh /
-#  RUN chmod 755 /entrypoint.sh
-#  ENTRYPOINT ["/entrypoint.sh"]
+RUN apk del build-dependencies && \
+    rm -rf /var/cache/apk/*
+

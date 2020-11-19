@@ -39,7 +39,7 @@ process SC__POPSCLE__PREFILTER_DSC_PILEUP {
 
     script:
         """
-        ${binDir}/filter_bam_file_for_popscle_dsc_pileup.sh \
+        filter_bam_file_for_popscle_dsc_pileup.sh \
             ${f}/possorted_genome_bam.bam \
             ${f}/filtered_*_bc_matrix/barcodes.tsv* \
             ${vcf} \
