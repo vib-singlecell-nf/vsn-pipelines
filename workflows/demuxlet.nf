@@ -21,9 +21,10 @@ workflow cellranger_dataChannel_to_bam_barcodes {
 
     main:
         out = data.map{ it -> [it[0],
-                               it[1]+"/possorted*bam.bam",
-                               it[1]+"/filtered_*_bc_matrix/barcodes.tsv*"
+                               file(it[1]+"/possorted*bam.bam"),
+                               file(it[1]+"/filtered_*_bc_matrix/barcodes.tsv*")
                                ] }
+                               .view()
 
     emit:
         out
