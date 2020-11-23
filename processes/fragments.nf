@@ -27,6 +27,7 @@ process SC__SINTO__FRAGMENTS {
             -m ${processParams.min_mapq} \
             ${processParams.containsKey('barcodetag') && processParams.barcodetag ? '--barcodetag ' + processParams.barcodetag: ''} \
             ${processParams.containsKey('barcode_regex') && processParams.barcode_regex ? '--barcode_regex ' + processParams.barcode_regex: ''} \
+            ${processParams.containsKey('use_chrom') && processParams.use_chrom ? '--use_chrom ' + processParams.use_chrom: ''} \
             ${processParams.containsKey('min_distance') && processParams.min_distance ? '--min_distance ' + processParams.min_distance: ''} \
             ${processParams.containsKey('max_distance') && processParams.max_distance ? '--max_distance ' + processParams.max_distance: ''} \
             ${processParams.containsKey('chunksize') && processParams.chunksize ? '--chunksize ' + processParams.chunksize: ''} \
