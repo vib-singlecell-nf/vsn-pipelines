@@ -157,7 +157,7 @@ Most of the ATAC-specific parameters are in the ``params.sc.atac`` block.
 The important parameters to change are:
 
 - ``params.sc.atac.preprocess.metadata``: the path to the metadata file.
-- ``params.sc.atac.bwamaptools.index``: the path to the bwa reference, which needs to be already indexed.
+- ``params.sc.atac.bwamaptools.bwa_fasta``: the path to the bwa reference fasta file. This should be already indexed with ``bwa index``, and the index files located in the same directory as the fasta file.
 
 Optional parameters to change:
 
