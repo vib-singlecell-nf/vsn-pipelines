@@ -1,5 +1,7 @@
 nextflow.preview.dsl=2
 
+import java.nio.file.Paths
+
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
@@ -16,6 +18,35 @@ include {
 //////////////////////////////////////////////////////
 // Define the workflow
 
+workflow get_bwa_index {
+
+    take:
+        fasta_path
+
+    main:
+
+        bwa_fasta = Channel.fromPath(fasta_path)
+
+        bwa_index_path = Paths.get(
+                                   Paths.get(fasta_path).getParent().toString(),
+                                   "*.{amb,ann,bwt,fai,flat,gdx,pac,sa}"
+                                   )
+        bwa_index = Channel.fromPath(bwa_index_path,
+                                     glob: true,
+                                     type: 'file',
+                                     )
+                           .ifEmpty { exit 1, "ERROR: Could not find bwa indices from: ${bwa_index_path}." }
+                           .collect()
+                           .toList()
+
+        channel = bwa_fasta.combine(bwa_index)
+
+    emit:
+        channel
+
+}
+
+
 workflow BWA_MAPPING_PE {
 
     take:
@@ -26,8 +57,7 @@ workflow BWA_MAPPING_PE {
            1) create a channel linking bwa index files from genome.fa in params, and
            2) combine this channel with the items in the data channel
         */
-        bwa_inputs = Channel.fromPath(params.sc.atac.bwamaptools.index)
-                            .combine(data)
+        bwa_inputs = get_bwa_index(params.sc.atac.bwamaptools.bwa_fasta).combine(data)
 
         bam = SC__BWAMAPTOOLS__BWA_MEM_PE(bwa_inputs)
 

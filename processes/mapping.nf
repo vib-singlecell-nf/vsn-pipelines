@@ -10,7 +10,8 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
     label 'compute_resources__bwa_mem'
 
     input:
-        tuple path(bwa_index),
+        tuple path(bwa_fasta),
+              path(bwa_index),
               val(sampleId),
               path(fastq_PE1),
               path(fastq_PE2)
@@ -23,9 +24,10 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         processParams = sampleParams.local
         """
+        set -euo pipefail
         bwa mem \
             -t ${task.cpus} \
-            ${toolParams.index} \
+            ${bwa_fasta} \
             ${fastq_PE1} \
             ${fastq_PE2} \
         | samtools sort -@ ${task.cpus} -n -O bam - \
@@ -33,5 +35,6 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
         | samtools sort -@ ${task.cpus} -O bam - \
         | samtools markdup -@ ${task.cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
         """
+
 }
 
