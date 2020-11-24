@@ -315,12 +315,18 @@ RunPCACV <- function(
 print(paste0("Data matrix has ", dim(x = data)[1], " rows, ", dim(x = data)[2], " columns."))
 
 
+# Set to 
+if(args$`to-n-pc` > dim(x = data)[2]) {
+	print(paste0("Setting --to-n-pc parameter to ", dim(x = data)[1], " instead of ", args$`to-n-pc`, "."))
+}
+to_npcs <- min(dim(x = data)[1], args$`to-n-pc`)
+
 # Run
 out <- RunPCACV(
 	data = data,
 	k = args$`k-fold`,
 	from = args$`from-n-pc`,
-	to = args$`to-n-pc`,
+	to = to_npcs,
 	by = args$`by-n-pc`,
 	maxit = args$`max-iters`,
 	seed = args$`seed`,
