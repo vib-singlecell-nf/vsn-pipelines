@@ -27,12 +27,15 @@ if(!isAppendOnlyMode && !(params.global.genome.assembly in ALLOWED_GENOME_ASSEMB
 //  Define the parameters for current testing proces
 
 include {
-    getChannelFromFilePath
+    getChannelFromFilePath;
 } from './../channels/file.nf' params(params)
 
 include {
-    ARBORETO_WITH_MULTIPROCESSING
+    ARBORETO_WITH_MULTIPROCESSING;
 } from './processes/arboreto_with_multiprocessing' params(params)
+include {
+    ADD_COR;
+} from './processes/add_cor' params(params)
 include {
     CISTARGET as CISTARGET__MOTIF;
     CISTARGET as CISTARGET__TRACK;
@@ -82,6 +85,7 @@ workflow scenic {
         /* GRN */
         tfs = file(params.sc.scenic.grn.tfs)
         grn = ARBORETO_WITH_MULTIPROCESSING( filteredLoom.combine(runs), tfs )
+        grn_wCor = ADD_COR(grn)
 
         /* cisTarget motif analysis */
         // channel for SCENIC databases resources:
@@ -89,7 +93,7 @@ workflow scenic {
             .fromPath( params.sc.scenic.cistarget.motifsDb )
             .collect() // use all files together in the ctx command
         motifsAnnotation = file(params.sc.scenic.cistarget.motifsAnnotation)
-        ctx_mtf = CISTARGET__MOTIF( grn, motifsDb, motifsAnnotation, 'mtf' )
+        ctx_mtf = CISTARGET__MOTIF( grn_wCor, motifsDb, motifsAnnotation, 'mtf' )
 
         /* cisTarget track analysis */
         if(params.sc.scenic.cistarget.tracksDb) {
@@ -97,7 +101,7 @@ workflow scenic {
                 .fromPath( params.sc.scenic.cistarget.tracksDb )
                 .collect() // use all files together in the ctx command
             tracksAnnotation = file(params.sc.scenic.cistarget.tracksAnnotation)
-            ctx_trk = CISTARGET__TRACK( grn, tracksDb, tracksAnnotation, 'trk' )
+            ctx_trk = CISTARGET__TRACK( grn_wCor, tracksDb, tracksAnnotation, 'trk' )
         }
 
         /* AUCell, motif regulons */
