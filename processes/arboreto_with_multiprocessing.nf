@@ -31,7 +31,7 @@ process ARBORETO_WITH_MULTIPROCESSING {
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv" : sampleId + "__adj.tsv"
         seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.global.seed + runId) : params.global.seed
         """
-        ${binDir}arboreto_with_multiprocessing.py \
+        arboreto_with_multiprocessing.py \
             $filteredLoom \
             $tfs \
             --output ${outputFileName} \
