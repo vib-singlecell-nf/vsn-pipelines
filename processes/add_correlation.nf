@@ -5,7 +5,7 @@ nextflow.preview.dsl=2
 toolParams = params.sc.scenic
 processParams = params.sc.scenic.grn
 
-process ADD_COR {
+process ADD_PEARSON_CORRELATION {
 
     cache 'deep'
     container toolParams.container
