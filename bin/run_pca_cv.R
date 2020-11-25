@@ -35,6 +35,13 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
+  c("-p", "--n-pc-fallback"),
+  action = "store",
+  default = 0,
+  help="Minimum principal components to return. If no optimal number of PCs is found, this minimum number of PCs will be returned. [default %default]"
+)
+parser <- add_option(
+  parser,
   c("-k", "--k-fold"),
   action = "store",
   default = 10,
@@ -342,6 +349,25 @@ pcs_pred <- predict(object = out_fit, x = 1:args$`to-n-pc`)
 optimum_npcs <- pcs_pred$x[which.min(pcs_pred$y)]
 print(paste0("Optimal number of PCs: ", optimum_npcs))
 
+out_npcs <- NULL
+
+if(optimum_npcs == 1) {
+	if(args$`n-pc-fallback` < 0) {
+		stop(paste0("Invalid value for --n-pc-fallback parameter: value should be > 0."))
+	}
+	if(args$`n-pc-fallback` == 0) {
+		stop(paste0("Could not find an optimal number of PCs. You can set --n-pc-fallback parameter (> 0) in order to return a minimum number of PCs."))
+	}
+	msg <- paste0("No optimal number of PCs found. The number of PCs returned is defined by --n-pc-fallback: ", args$`n-pc-fallback`)
+	warning(msg)
+	file_conn <- file(paste0(args$`output-prefix`, ".WARNING.txt"))
+	writeLines(c(msg), file_conn)
+	close(file_conn)
+	out_npcs <- args$`n-pc-fallback`
+} else {
+	out_npcs <- optimum_npcs
+}
+
 # Save the results
 
 ## Save parameters
@@ -369,7 +395,7 @@ dev.off()
 ## Optimal number of principal components
 
 write.table(
-	optimum_npcs,
+	out_npcs,
 	paste0(args$`output-prefix`, ".OPTIMAL_NPCS.txt"),
 	append = FALSE,
 	row.names = FALSE,

@@ -40,6 +40,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
             ${(processParams.containsKey('fromNPC')) ? '--from-n-pc ' + processParams.fromNPC: ''} \
             ${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
             ${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
+            ${(processParams.containsKey('nPCFallback')) ? '--n-pc-fallback ' + processParams.nPCFallback: ''} \
             ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.maxIters: ''} \
             --n-cores ${task.cpus} \
             ${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
