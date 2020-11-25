@@ -28,7 +28,7 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
             -o bap_output \
             -r ${toolParams.genome} \
             -c ${task.cpus} \
-            -bt $toolParams.barcode}
+            -bt ${toolParams.barcode}
         """
 }
 
