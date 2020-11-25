@@ -17,7 +17,7 @@ The full steps are:
   * Duplicates are marked with ``samtools markdup``.
   * Droplet barcodes are included in the BAM file with the ``CR`` tag (by default). No barcode correction is performed.
 
-- A fragments file is created using the `Sinto <https://github.com/timoast/sinto>`_ tool.
+- A fragments file is created using `Sinto <https://github.com/timoast/sinto>`_.
 
 Input
 -----
@@ -144,7 +144,7 @@ Running the workflow
 --------------------
 
 To generate a config file, use the ``atac_preprocess`` profile along with ``docker`` or ``singularity``.
-Note that the full path to ``vib-singlecell-nf/vsn-pipelines/main_atac.nf`` needs to be used:
+Note that the full path to ``vib-singlecell-nf/vsn-pipelines/main_atac.nf`` must be used:
 
 .. code:: bash
 
@@ -182,4 +182,3 @@ After configuring, the workflow can be run with:
         -entry atac_preprocess -resume
 
 ----
-
