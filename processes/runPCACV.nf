@@ -36,11 +36,11 @@ process PCACV__FIND_OPTIMAL_NPCS {
             --seed ${params.global.seed} \
             ${(processParams.containsKey('accessor')) ? '--accessor "' + processParams.accessor.replace('$','\\$') + '"': ''} \
             ${(processParams.containsKey('useVariableFeatures')) ? '--use-variable-features ' + processParams.useVariableFeatures: ''} \
-            ${(processParams.containsKey('kFold')) ? '--k-fold ' + processParams.libraries: ''} \
+            ${(processParams.containsKey('kFold')) ? '--k-fold ' + processParams.kFold: ''} \
             ${(processParams.containsKey('fromNPC')) ? '--from-n-pc ' + processParams.fromNPC: ''} \
             ${(processParams.containsKey('toNPC')) ? '--to-n-pc ' + processParams.toNPC: ''} \
             ${(processParams.containsKey('byNPC')) ? '--by-n-pc ' + processParams.byNPC: ''} \
-            ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.libraries: ''} \
+            ${(processParams.containsKey('maxIters')) ? '--max-iters ' + processParams.maxIters: ''} \
             --n-cores ${task.cpus} \
             ${(processParams.containsKey('defaultSVD')) ? '--default-svd ' + processParams.defaultSVD: ''} \
             ${(processParams.containsKey('verbose')) ? '--verbose ' + processParams.verbose: ''} \
