@@ -7,8 +7,7 @@ include {
 } from './tenx' params(params)
 include {
     getChannel as getFileChannel;
-    getChannelWithIndex as getFileChannelWithIndex_fragments;
-    getChannelWithIndex as getFileChannelWithIndex_bam;
+    getChannelWithIndex as getFileChannelWithIndex;
 } from './file' params(params)
 
 boolean isCollectionOrArray(object) {    
@@ -161,25 +160,25 @@ workflow getDataChannel {
         }
         if(params.data.containsKey("fragments")) {
             data = data.concat(
-                getFileChannelWithIndex_fragments(
+                getFileChannelWithIndex(
                     params.data.fragments.file_paths,
                     params.data.fragments.suffix,
                     params.data.fragments.index_extension
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "fragments") //, outputFileFormat)
+                    it -> tuple(it[0], it[1], it[2], "fragments")
                 }
-            )//.view()
+            ).view()
         }
         if(params.data.containsKey("bam")) {
             data = data.concat(
-                getFileChannelWithIndex_bam(
+                getFileChannelWithIndex(
                     params.data.bam.file_paths,
                     params.data.bam.suffix,
                     params.data.bam.index_extension
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "bam") //, outputFileFormat)
+                    it -> tuple(it[0], it[1], it[2], "bam")
                 }
-            )//.view()
+            ).view()
         }
         data.ifEmpty { exit 1, "Pipeline cannot run: no data provided." }
 
