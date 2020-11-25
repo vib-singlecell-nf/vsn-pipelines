@@ -2,7 +2,6 @@ nextflow.preview.dsl=2
 
 //////////////////////////////////////////////////////
 // process imports:
-//include { SC__SNAPTOOLS__DEX_FASTQ; } from './../../src/snaptools/processes/dex_fastq.nf' params(params)
 include { SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ; } from './../../src/singlecelltoolkit/processes/debarcode_10x_scatac_fastqs.nf' params(params)
 include { SC__TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
 
