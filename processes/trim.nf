@@ -2,9 +2,11 @@ nextflow.preview.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
+toolParams = params.tools.trimgalore
+
 process SC__TRIMGALORE__TRIM {
 
-    container params.sc.atac.trimgalore.container
+    container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
@@ -20,7 +22,7 @@ process SC__TRIMGALORE__TRIM {
               path("${sampleId}_dex_R2.fastq.gz_trimming_report.txt")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.atac.trimgalore.trim)
+        def sampleParams = params.parseConfig(sampleId, params.global, toolParams.trim)
         processParams = sampleParams.local
         """
         trim_galore \
