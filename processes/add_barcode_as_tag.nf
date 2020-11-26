@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.sc.atac.bwamaptools
+toolParams = params.tools.bwamaptools
 
 process SC__BWAMAPTOOLS__ADD_BARCODE_TAG {
 
