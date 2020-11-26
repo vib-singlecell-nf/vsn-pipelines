@@ -55,7 +55,7 @@ workflow atac_preprocess {
         ATAC_PREPROCESS_WITH_METADATA;
     } from './workflows/atac/preprocess.nf' params(params)
 
-    ATAC_PREPROCESS_WITH_METADATA(file(params.sc.atac.preprocess.metadata))
+    ATAC_PREPROCESS_WITH_METADATA(file(params.data.atac_preprocess.metadata))
 
 }
 
