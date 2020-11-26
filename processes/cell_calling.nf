@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/archr/bin/" : ""
 
-toolParams = params.sc.atac.archr
+toolParams = params.tools.archr
 
 process SC__ARCHR__CELL_CALLING {
 
