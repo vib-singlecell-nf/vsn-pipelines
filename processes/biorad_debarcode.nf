@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.sc.atac.bap
+toolParams = params.tools.bap
 
 process SC__BAP__BIORAD_DEBARCODE {
 
