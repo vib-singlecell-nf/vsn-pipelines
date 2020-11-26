@@ -2,7 +2,7 @@ nextflow.preview.dsl=2
 
 //binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/singlecelltoolkit/bin/" : ""
 
-toolParams = params.sc.atac.singlecelltoolkit
+toolParams = params.tools.singlecelltoolkit
 
 process SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ {
 
