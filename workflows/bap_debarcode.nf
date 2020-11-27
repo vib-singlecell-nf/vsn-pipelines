@@ -7,6 +7,9 @@ include {
     SC__BAP__MERGE_FASTQS;
 } from './../processes/biorad_debarcode.nf' params(params)
 
+include {
+    PUBLISH as PUBLISH_BC_STATS_BR;
+} from "../../utils/workflows/utils.nf" params(params)
 
 
 //////////////////////////////////////////////////////
@@ -21,6 +24,8 @@ workflow BAP__BIORAD_DEBARCODE {
 
         SC__BAP__BIORAD_DEBARCODE(data) |
             SC__BAP__MERGE_FASTQS
+
+        PUBLISH_BC_STATS_BR(SC__BAP__BIORAD_DEBARCODE.out.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'fastq', false)
 
     emit:
         SC__BAP__MERGE_FASTQS.out

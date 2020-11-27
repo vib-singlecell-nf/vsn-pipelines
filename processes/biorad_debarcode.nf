@@ -17,8 +17,8 @@ process SC__BAP__BIORAD_DEBARCODE {
     output:
         tuple val(sampleId),
               path("${sampleId}*1.fastq.gz"),
-              path("${sampleId}*2.fastq.gz")
-              //path("*/*parse.sumstats.log")
+              path("${sampleId}*2.fastq.gz"),
+              path("${sampleId}-parse.sumstats.log")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.biorad_debarcode)
@@ -42,7 +42,8 @@ process SC__BAP__MERGE_FASTQS {
     input:
         tuple val(sampleId),
               path(fastq_PE1),
-              path(fastq_PE2)
+              path(fastq_PE2),
+              path(log)
 
     output:
         tuple val(sampleId),
