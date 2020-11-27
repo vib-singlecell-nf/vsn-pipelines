@@ -9,6 +9,11 @@ scATAC-seq preprocessing
 This pipeline takes fastq files from paired end single cell ATAC-seq, and applies preprocessing steps to align the reads to a reference genome, and produce a bam file and scATAC-seq fragments file.
 The full steps are:
 
+- Barcode correction:
+
+  * For 'standard' and 'multiome' samples (e.g. 10x Genomics) correction is performed against a whitelist by `this script <https://github.com/aertslab/single_cell_toolkit/blob/master/correct_barcode_in_fastq.sh>`_.
+  * For 'biorad' samples, barcode correction is performed by `BAP <https://github.com/caleblareau/bap>`_.
+
 - Debarcoding: Add the barcode sequence to the beginning of the fastq sequence identifier
 - Read/adapter trimming
 - Mapping to a reference genome:
@@ -39,23 +44,28 @@ The input to this pipeline is a (tab-delimited) metadata table with the sample I
       - sample_1_R2.fastq.gz
       - sample_1_R3.fastq.gz
     * - sample_2
-      - biorad
+      - multiome
       - sample_2_R1.fastq.gz
-      -  
+      - sample_2_R2.fastq.gz
       - sample_2_R3.fastq.gz
+    * - sample_3
+      - biorad
+      - sample_3_R1.fastq.gz
+      -  
+      - sample_3_R3.fastq.gz
 
 The columns represent:
 
 - ``sample_name`` Sample name for labeling the sample in the pipeline and output files. This can be any arbitrary string.
-- ``technology``: This described the processing method to use for the fastq files. Current options are ``standard`` or ``biorad``. See below for additional details.
-- ``fastq_PE1_path``: The full path to the fastq file for the first read in a pair. Full paths should be used.
-- ``fastq_barcode_path``: The full path to the fastq file containing the barcodes. Full paths should be used. This column can be blank/empty depending on the technology setting.
-- ``fastq_PE2_path``: The full path to the fastq file for the second read in a pair. Full paths should be used.
+- ``technology``: This described the barcode correction and processing methods to use for the fastq files. Current options are ``standard``, ``multiome``, or ``biorad``. See below for additional details.
+- ``fastq_PE1_path``: The full path to the fastq file for the first read in a pair.
+- ``fastq_barcode_path``: The full path to the fastq file containing the barcodes. This column can be blank/empty depending on the technology setting.
+- ``fastq_PE2_path``: The full path to the fastq file for the second read in a pair.
 
 Technology
 ----------
 
-This controls how the debarcoding is applied to the input fastq files.
+This controls how both barcode correction and debarcoding is applied to the input fastq files.
 Available options are:
 
 ``standard`` 
@@ -100,6 +110,13 @@ which transforms this input into two paired fastq files with the barcode integra
     CCTGAATCCATGTCGGGGGGTGCTGAGACAAGCTGTCTCTTATACACAT
     +
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
+
+``multiome``
+____________
+
+The ``multiome`` setting works the same as ``standard`` with the exception of the whitelist used for barcode correction.
+The whitelists are supplied in the params file (``params.tools.singlecelltoolkit.barcode_correction.whitelist``).
 
 
 ``biorad`` 
@@ -153,23 +170,24 @@ Note that the full path to ``vib-singlecell-nf/vsn-pipelines/main_atac.nf`` must
         -profile atac_preprocess,singularity \
         > atac_preprocess.config
 
-Most of the ATAC-specific parameters are in the ``params.sc.atac`` block.
+The ATAC-specific parameters are described here.
 The important parameters to change are:
 
-- ``params.sc.atac.preprocess.metadata``: the path to the metadata file.
-- ``params.sc.atac.bwamaptools.bwa_fasta``: the path to the bwa reference fasta file. This should be already indexed with ``bwa index``, and the index files located in the same directory as the fasta file.
+- ``params.data.atac_preprocess.metadata``: the path to the metadata file.
+- ``params.tools.bwamaptools.bwa_fasta``: the path to the bwa reference fasta file. This should be already indexed with ``bwa index``, and the index files located in the same directory as the fasta file.
+- ``params.tools.singlecelltoolkit.barcode_correction.whitelist``: Whitelists for barcode correction are supplied here. The whitelists are matched to samples based on the parameter key here ('standard', 'multiome') and the technology field listed for each sample in the metadata file.
 
 Optional parameters to change:
 
-- Within ``params.sc.atac.bwamaptools.add_barcode_as_tag``:
+- Within ``params.tools.bwamaptools.add_barcode_as_tag``:
 
   - ``tag``: controls the naming of the barcode tag added to the bam (``CR`` by default).
   - ``delimiter_to_split_qname``: Controls which delimiter to split the bam read name field to get the barcode. By default it uses the regex ``'[:|_]'`` to split on both ``:`` and ``|``.
 
-- Within ``params.sc.atac.sinto.fragments``:
+- Within ``params.tools.sinto.fragments``:
 
   - One of (but not both) ``barcodetag`` or ``barcode_regex`` needs to be set to tell Sinto where to find the barcodes in the bam file. The default is to use ``barcodetag`` of ``CR``.
-  - ``mapq``: Controls Quality filtering settings for generating the fragments file. Discards reads with quality score lower than this number (default 30).
+  - ``mapq``: Controls quality filtering settings for generating the fragments file. Discards reads with quality score lower than this number (default 30).
   - ``temp_dir``: Controls where temp files are stored during fragments processing. For large BAM files, the system default temp location may become full. An alternate temp path can be specified here. Be sure to also include this temp path in the global volume mounts for Docker/Singularity in the config file.
 
 
