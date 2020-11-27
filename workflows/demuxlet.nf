@@ -14,7 +14,7 @@ include {
 //////////////////////////////////////////////////////
 // Define the workflow
 
-workflow cellranger_dataChannel_to_bam_barcodes {
+workflow cellranger_output_to_bam_barcodes {
 
     take:
         data // standard data channel [ sampleId, path, type, format]
