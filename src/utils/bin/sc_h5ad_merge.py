@@ -7,6 +7,7 @@ import pandas as pd
 import scanpy as sc
 import numpy as np
 import anndata as ad
+from scipy.sparse import csr_matrix
 from collections import OrderedDict
 
 parser = argparse.ArgumentParser(description='')
@@ -41,9 +42,16 @@ for FILE_PATH_IN in FILE_PATHS_IN:
 
 index_unique = None
 
-if not all([np.array_equal(adatas[0].X, _adata.X) for _adata in adatas]):
+
+def is_same_matrix(mat1, mat2):
+    if type(mat1) == np.ndarray and type(mat2) == np.ndarray:
+        return np.array_equal(mat1, mat2)
+    return (mat1 != mat2).nnz == 0
+
+
+if not all([is_same_matrix(mat1=adatas[0].X, mat2=_adata.X) for _adata in adatas]):
     raise Exception("VSN ERROR: adata.X slots are not the same between h5ad files.")
-if not all([(adatas[0].raw.X != _adata.raw.X).nnz == 0 for _adata in adatas]):
+if not all([is_same_matrix(mat1=adatas[0].raw.X, mat2=_adata.raw.X) for _adata in adatas]):
     # Source: https://stackoverflow.com/questions/30685024/check-if-two-scipy-sparse-csr-matrix-are-equal
     raise Exception("VSN ERROR: adata.raw.X slots are not the same between h5ad files.")
 if not all([np.array_equal(adatas[0].obs.index, _adata.obs.index) for _adata in adatas]):
