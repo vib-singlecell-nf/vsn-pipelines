@@ -7,7 +7,7 @@ toolParams = params.tools.bwamaptools
 process SC__BWAMAPTOOLS__MAPPING_SUMMARY {
 
     container toolParams.container
-    label 'compute_resources__default'
+    label 'compute_resources__default','compute_resources__24hqueue'
 
     input:
         tuple val(sampleId),
