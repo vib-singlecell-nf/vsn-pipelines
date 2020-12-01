@@ -24,6 +24,9 @@ include {
     FILE_CONVERTER;
 } from '../src/utils/workflows/fileConverter.nf' params(params)
 include {
+    FILTER_AND_ANNOTATE_AND_CLEAN;
+} from '../src/utils/workflows/filterAnnotateClean.nf' params(params)
+include {
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
 } from '../src/utils/processes/reports.nf' params(params)
 
@@ -77,7 +80,10 @@ workflow multi_sample {
         /*******************************************
         * Data processing
         */
-        out = SC__FILE_CONVERTER( data )
+        out = data | \
+            SC__FILE_CONVERTER | \
+            FILTER_AND_ANNOTATE_AND_CLEAN
+
         if(params.sc.scanpy.containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
@@ -116,6 +122,8 @@ workflow multi_sample {
         // Select a default clustering when in parameter exploration mode
         if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
+        } else {
+            scopeloom = FINALIZE.out.scopeloom
         }
 
         // Publishing
@@ -174,7 +182,7 @@ workflow multi_sample {
 
     emit:
         filteredloom = FINALIZE.out.filteredloom
-        scopeloom = FINALIZE.out.scopeloom
+        scopeloom = scopeloom
         scanpyh5ad = FINALIZE.out.scanpyh5ad
 
 }

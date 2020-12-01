@@ -482,9 +482,10 @@ Steps:
                 data
 
             main:
-                // run the pipeline
-                out = data
-                out = SC__FILE_CONVERTER( data )
+                out = data | \
+                    SC__FILE_CONVERTER | \
+                    FILTER_AND_ANNOTATE_AND_CLEAN
+
                 if(params.sc.scanpy.containsKey("filter")) {
                     out = QC_FILTER( out ).filtered // Remove concat
                 }

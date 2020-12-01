@@ -124,6 +124,10 @@ def setSeed(params) {
 ------------------------------------------------------------------
                 """
         }
+        // If seed is of type String, it should be converted to an Integer because R doesn't not allow to have seeds of type character (see set.seed)
+        if (params.global.seed instanceof String) {
+            params.global.seed = params.global.seed.hashCode().abs()
+        }
     }
 }
 

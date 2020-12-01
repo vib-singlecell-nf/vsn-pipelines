@@ -112,6 +112,9 @@ def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
+if args.sample_column_name not in metadata.columns:
+    raise Exception(f"VSN ERROR: Missing '{args.sample_column_name}'' column in the given metadata file.")
+
 sample_info = metadata[metadata[args.sample_column_name] == SAMPLE_NAME]
 sample_scores = [similar(index_entry, SAMPLE_NAME) for index_entry in metadata[args.sample_column_name]]
 
