@@ -38,6 +38,9 @@ process AUCELL {
             (params.global.seed + runId) : 
             params.global.seed
         """
+        export MKL_NUM_THREADS=1
+		export NUMEXPR_NUM_THREADS=1
+		export OMP_NUM_THREADS=1
         pyscenic aucell \
             $filteredLoom \
             $regulons \
