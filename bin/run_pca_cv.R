@@ -339,10 +339,17 @@ if(args$`to-n-pc` > data_min_dim) {
 	}
 	k <- 5
 	print(paste0("The k-fold parameter is decreased to ", k, "."))
-	data_min_dim <- min(nrow(x = data), ncol(x = data) / k)
 	from_npcs <- 2
 	to_npcs <- data_min_dim
 	by_npcs <- 1
+	repeat {
+		pc <- seq(from = from_npcs, to = to_npcs, by = by_npcs)
+		if(length(x = pc) < 50) {
+			break
+		} else {
+			by_npcs <- by_npcs + 1
+		}
+	}
 	print(paste0("Setting --from-n-pc parameter to ", from_npcs, " instead of ", args$`from-n-pc`, "."))
 	print(paste0("Setting --to-n-pc parameter to ", to_npcs, " instead of ", args$`to-n-pc`, "."))
 	print(paste0("Setting --by-n-pc parameter to ", by_npcs, " instead of ", args$`by-n-pc`, "."))
