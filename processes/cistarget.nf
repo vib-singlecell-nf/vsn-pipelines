@@ -32,7 +32,7 @@ process CISTARGET {
     script:
         if(toolParams.numRuns > 2 && task.maxForks > 1 && task.executor == "local")
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
-        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv" : sampleId + "__reg_" + type + ".csv"
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__reg_" + type + ".csv.gz" : sampleId + "__reg_" + type + ".csv.gz"
         """
         export MKL_NUM_THREADS=1
 		export NUMEXPR_NUM_THREADS=1

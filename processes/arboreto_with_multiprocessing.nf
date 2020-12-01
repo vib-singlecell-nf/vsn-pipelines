@@ -28,7 +28,7 @@ process ARBORETO_WITH_MULTIPROCESSING {
     script:
         if(toolParams.numRuns > 2 && task.maxForks > 1 && task.executor == "local")
             throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
-        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj0.tsv" : sampleId + "__adj0.tsv"
+        outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? sampleId + "__run_" + runId +"__adj.tsv.gz" : sampleId + "__adj.tsv.gz"
         seed = "numRuns" in toolParams && toolParams.numRuns > 1 ? (params.global.seed + runId) : params.global.seed
         """
         arboreto_with_multiprocessing.py \
