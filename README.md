@@ -20,8 +20,7 @@ nextflow config \
 
 ```{bash}
 nextflow config \
-   -profile hg38,scenic_multiruns,scenic_use_cistarget_motifs,scenic_use_cistarget_tracks,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
-   > nextflow.config
+   -profile hg38,scenic,scenic_use_cistarget_motifs,scenic_use_cistarget_tracks,qsub,singularity vib-singlecell-nf/vsn-pipelines
 ```
 
 ### Update the config file
