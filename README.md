@@ -10,8 +10,7 @@
 
 ```{bash}
 nextflow config \
-   -profile hg38,scenic,scenic_use_cistarget_motifs,scenic_use_cistarget_tracks,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
-   > nextflow.config
+   -profile hg38,scenic,scenic_use_cistarget_motifs,scenic_use_cistarget_tracks,qsub,singularity vib-singlecell-nf/vsn-pipelines
 ```
 
 - Multi-runs SCENIC
@@ -60,7 +59,7 @@ Here is the DAG summarizing the multi-runs SCENIC workflow:
 
 ```{bash}
 nextflow config \
-   -profile scenic,scenic_test,qsub,singularity vib-singlecell-nf/vib-singlecell-nf \
+   -profile scenic,scenic_test,qsub,singularity vib-singlecell-nf/vsn-pipelines \
    > nextflow.config
 nextflow -C nextflow.config run main.nf --test
 ```
