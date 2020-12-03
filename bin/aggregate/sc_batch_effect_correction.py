@@ -166,10 +166,13 @@ elif args.method == 'mnncorrect':
     from mnnpy import mnn_correct
 
     _adatas = []
+    cell_ids = []
     print(f"Splitting the AnnData into batches defined by {args.batch_key}...")
     for batch in np.unique(adata.obs[args.batch_key]):
+        _adata_by_batch = adata[adata.obs[args.batch_key] == batch, :]
+        cell_ids.extend(_adata_by_batch.obs.index.values)
         _adatas.append(
-            adata[adata.obs[args.batch_key] == batch, :]
+            _adata_by_batch
         )
 
     # Get all HVG into a list
@@ -179,6 +182,13 @@ elif args.method == 'mnncorrect':
     for ADATA in _adatas:
         hvgs = np.union1d(hvgs, ADATA.var.index[ADATA.var.highly_variable])
 
+    index_unique = None
+
+    if len(cell_ids) != len(np.unique(cell_ids)):
+        print("Non-unique cell index detected!")
+        print("Make the index unique by joining the existing index names with the batch category, using index_unique='-'")
+        index_unique = '-'
+
     # [mnn_correct] Subset only HVG otherwise "ValueError: Lengths must match to compare"
     print(f"Perform mnnCorrect...")
     corrected = mnn_correct(
@@ -186,6 +196,7 @@ elif args.method == 'mnncorrect':
         var_index=args.var_index,
         var_subset=hvgs if args.var_subset is None else args.var_subset,
         batch_key=args.batch_key,
+        index_unique=index_unique,
         k=args.k,
         n_jobs=args.n_jobs)
     adata = corrected[0]

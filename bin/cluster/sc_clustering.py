@@ -3,6 +3,7 @@
 import argparse
 import os
 import scanpy as sc
+import numpy as np
 
 parser = argparse.ArgumentParser(
     description='',
@@ -75,6 +76,13 @@ def check_neighborhood_graph_exists(adata):
         raise Exception(
             "The neighborhood graph of observations has not been computed.")
 
+
+def check_no_single_cluster(adata, method, resolution):
+    num_clusters = len(np.unique(adata.obs[method]))
+
+    if num_clusters == 1:
+        raise Exception(f"Single cluster found when running clustering algorithm {method} with resolution {resolution}. Please remove this one from params.sc.scanpy.clustering.resolutions.")
+
 #
 # Clustering the data
 #
@@ -100,6 +108,12 @@ elif args.method.lower() == "leiden":
     )
 else:
     raise Exception("VSN ERROR: The given clustering algorithm {} does not exist or is not implemeted.".format(args.method))
+
+check_no_single_cluster(
+    adata=adata,
+    method=args.method,
+    resolution=args.resolution
+)
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

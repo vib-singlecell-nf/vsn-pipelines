@@ -19,6 +19,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 	String iff = null;
 	String off = null;
 	String report_ipynb = null;
+	boolean preflight_checks = null;
 	// Parameters benchmarkable
 	String method = null; ArrayList<String> methods = null;
     Float resolution = null; ArrayList<Float> resolutions = null;
@@ -84,6 +85,36 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		displayMessage(tag)
 		return $method.combine($resolution)
 	}
+
+}
+
+process SC__SCANPY__CLUSTERING_PREFLIGHT_CHECKS {
+
+	container params.sc.scanpy.container
+	label 'compute_resources__mem'
+
+	input:
+    	tuple \
+			val(sampleId), \
+			path(f)
+
+	output:
+		tuple \
+			val(sampleId), \
+			path(f)
+
+  	script:
+		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.clustering)
+		processParams = sampleParams.local
+		methodAsArguments = processParams?.methods ? processParams.methods.collect({ '--method' + ' ' + it }).join(' ') : '--method ' + processParams.method
+		resolutionAsArguments = processParams?.resolutions ? processParams?.resolutions.collect({ '--resolution' + ' ' + it }).join(' ') : '--resolution ' + processParams.resolution
+		"""
+		${binDir}/cluster/sc_clustering_preflight_checks.py \
+			--seed ${params.global.seed} \
+			${methodAsArguments} \
+			${resolutionAsArguments} \
+			$f \
+		"""
 
 }
 

@@ -14,11 +14,17 @@ include {
     PUBLISH;
 } from '../../utils/workflows/utils.nf' params(params)
 include {
+    FINALIZE;
+} from '../../utils/workflows/finalize.nf' params(params)
+include {
     SC__H5AD_TO_FILTERED_LOOM;
 } from '../../utils/processes/h5adToLoom.nf' params(params)
 include {
     FILE_CONVERTER;
 } from '../../utils/workflows/fileConverter.nf' params(params)
+include {
+    FILTER_AND_ANNOTATE_AND_CLEAN;
+} from '../../utils/workflows/filterAnnotateClean.nf' params(params)
 
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the tool module:
@@ -64,14 +70,14 @@ workflow SINGLE_SAMPLE {
         data
 
     main:
-        // Process the data
-        filtered = params.sc.scanpy.containsKey("filter") 
-            ? QC_FILTER( data ).filtered : data
-        transformed_normalized = params.sc.scanpy.containsKey("data_transformation") \
-            && params.sc.scanpy.containsKey("normalization") 
+        // Prefilter the data
+        out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
+
+        filtered = params.sc.scanpy?.filter ? QC_FILTER( out ).filtered : out
+        transformed_normalized = params.sc.scanpy?.data_transformation && params.sc.scanpy?.normalization
             ? NORMALIZE_TRANSFORM( filtered ) : filtered
         out = HVG_SELECTION( transformed_normalized )
-        DIM_REDUCTION_PCA( out )
+        DIM_REDUCTION_PCA( out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTER_IDENTIFICATION(
@@ -90,7 +96,7 @@ workflow SINGLE_SAMPLE {
         ipynbs = COMBINE_REPORTS(
             samples,
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out,
-            params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.report : Channel.empty(),
+            params.sc.scanpy?.filter ? QC_FILTER.out.report : Channel.empty(),
             HVG_SELECTION.out.report,
             DIM_REDUCTION_TSNE_UMAP.out.report,
             CLUSTER_IDENTIFICATION.out.report
@@ -104,9 +110,11 @@ workflow SINGLE_SAMPLE {
         )
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
+
+
         // Finalize
         FINALIZE(
-            params.sc?.filter ? QC_FILTER.out.filtered : data,
+            params.sc.scanpy?.filter ? QC_FILTER.out.filtered : data,
             CLUSTER_IDENTIFICATION.out.marker_genes,
             'SINGLE_SAMPLE.final_output'
         )
@@ -125,7 +133,7 @@ workflow SINGLE_SAMPLE {
         )
 
     emit:
-        filtered_data = params.sc.scanpy.containsKey("filter") ? QC_FILTER.out.filtered : Channel.empty()
+        filtered_data = params.sc.scanpy?.filter ? QC_FILTER.out.filtered : Channel.empty()
         filtered_loom = FINALIZE.out.filteredloom
         hvg_data = HVG_SELECTION.out.hvg
         dr_pca_data = DIM_REDUCTION_PCA.out

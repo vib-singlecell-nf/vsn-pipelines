@@ -34,6 +34,15 @@ parser.add_argument(
     help="Variable to regress out. To regress multiple variables, add that many -v arguments. Used when running 'regress_out"
 )
 
+parser.add_argument(
+    "-j", "--n-jobs",
+    type=int,
+    action="store",
+    dest="n_jobs",
+    default=1,
+    help="The number of jobs. When set to None, automatically uses the number of cores."
+)
+
 args = parser.parse_args()
 
 # Define the arguments properly
@@ -53,7 +62,11 @@ except IOError:
 
 if args.method == 'linear_regression':
     # regress out variables (e.g.: total counts per cell and the percentage of mitochondrial genes expressed)
-    sc.pp.regress_out(adata, args.vars_to_regress_out)
+    sc.pp.regress_out(
+        adata=adata,
+        keys=args.vars_to_regress_out,
+        n_jobs=args.n_jobs
+    )
 else:
     raise Exception("VSN ERROR: Method does not exist.")
 

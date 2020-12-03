@@ -10,6 +10,7 @@ include {
 //  Import sub-workflows/processes from the tool module:
 include {
     SC__SCANPY__CLUSTERING;
+    SC__SCANPY__CLUSTERING_PREFLIGHT_CHECKS;
     SC__SCANPY__CLUSTERING_PARAMS;
     SC__SCANPY__PARAM_EXPLORE_CLUSTERING;
 } from '../processes/cluster' params(params)
@@ -32,10 +33,17 @@ workflow CLUSTER_IDENTIFICATION {
     main:
         // To run multiple clustering, we need at least 1 argument that is a list
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        // Run sanity checks
+        if(params.sc.scanpy.clustering?.preflight_checks) {
+            $data = SC__SCANPY__CLUSTERING_PREFLIGHT_CHECKS( data.map { it -> tuple(it[0], it[1]) } )
+        } else {
+            $data = data
+        }
+
         if(clusteringParams.isParameterExplorationModeOn()) {
             // Run
             out = SC__SCANPY__PARAM_EXPLORE_CLUSTERING(
-                data.map{ 
+                $data.map{ 
                     // Remove the runtimeParams
                     it -> tuple(it[0], it[1], it[2])
                 }.combine(
@@ -45,7 +53,7 @@ workflow CLUSTER_IDENTIFICATION {
             )
         } else {
             // Run
-            out = SC__SCANPY__CLUSTERING( data.map { it -> tuple(it[0], it[1]) } )
+            out = SC__SCANPY__CLUSTERING( $data.map { it -> tuple(it[0], it[1]) } )
         }
 
         // Generate the report
