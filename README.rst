@@ -11,6 +11,10 @@ A repository of pipelines for single-cell data analysis in Nextflow DSL2.
 This main repo contains multiple workflows for analyzing single cell transcriptomics data, and depends on a number of tools, which are organized into submodules within the VIB-Singlecell-NF_ organization.
 Currently available workflows are listed below.
 
+If VSN-Pipelines is useful for your research, consider citing:
+
+- VSN-Pipelines All Versions (latest): `10.5281/zenodo.3703108 <https://doi.org/10.5281/zenodo.3703108>`_.
+
 Raw Data Processing Workflows
 -----------------------------
 
@@ -104,13 +108,17 @@ Sample Aggregation Workflows
       - |mnncorrect|
 
 
+---
 In addition, the pySCENIC_ implementation of the SCENIC_ workflow is integrated here and can be run in conjunction with any of the above workflows.
 The output of each of the main workflows is a loom_-format file, which is ready for import into the interactive single-cell web visualization tool SCope_.
 In addition, data is also output in h5ad format, and reports are generated for the major pipeline steps.
 
-If VSN-Pipelines is useful for your research, consider citing:
+scATAC-seq workflows
+--------------------
 
-- VSN-Pipelines All Versions (latest): `10.5281/zenodo.3703108 <https://doi.org/10.5281/zenodo.3703108>`_.
+Single cell ATAC-seq processing steps are now included in VSN Pipelines.
+Currently, a preprocesing workflow is available, which will take fastq inputs, apply barcode correction, read trimming, bwa mapping, and output bam and fragments files for further downstream analysis.
+See `here <https://vsn-pipelines.readthedocs.io/en/latest/scatac-seq.html>`_ for complete documentation.
 
 
 .. |VSN-Pipelines| image:: https://img.shields.io/github/v/release/vib-singlecell-nf/vsn-pipelines
