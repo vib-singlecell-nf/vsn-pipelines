@@ -13,6 +13,7 @@
    features
    case-studies
    development
+   scatac-seq
 
 .. include:: ../README.rst
 
