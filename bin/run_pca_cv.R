@@ -35,6 +35,13 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
+  c("-p", "--n-pc-fallback"),
+  action = "store",
+  default = 0,
+  help="Minimum principal components to return. If no optimal number of PCs is found, this minimum number of PCs will be returned. [default %default]"
+)
+parser <- add_option(
+  parser,
   c("-k", "--k-fold"),
   action = "store",
   default = 10,
@@ -187,6 +194,10 @@ RunPCACV <- function(
 
 		pc <- seq(from = from, to = to, by = by)
 
+		if(length(x = pc) > 50) {
+			stop("Too many PCs to test please adjust: --k-fold, --from-n-pc, --to-n-pc, --by-n-pc.")
+		}
+
 		# Init the error matrices
 		error <- matrix(0, nrow = length(c(1:k)), ncol = length(x = pc))
 
@@ -312,16 +323,45 @@ RunPCACV <- function(
 		}
 	}
 
-print(paste0("Data matrix has ", dim(x = data)[1], " rows, ", dim(x = data)[2], " columns."))
+print(paste0("Data matrix has ", dim(x = data)[1], " rows (features), ", dim(x = data)[2], " columns (observations)."))
 
+k <- args$`k-fold`
+from_npcs <- args$`from-n-pc`
+to_npcs <- args$`to-n-pc`
+by_npcs <- args$`by-n-pc`
+
+data_min_dim <- min(nrow(x = data), ncol(x = data) / k)
+# Check if --to-n-pc is not violating requirement and adapt the parameters
+if(args$`to-n-pc` > data_min_dim) {
+	print("The --to-n-pc parameter is greater than the smallest dimension of the data given the k-fold setting.")
+	if(k < 10) {
+		stop("Please adapt the following parameters: --k-fold, --from-n-pc, --to-n-pc, --by-n-pc.")
+	}
+	k <- 5
+	print(paste0("The k-fold parameter is decreased to ", k, "."))
+	from_npcs <- 2
+	to_npcs <- data_min_dim
+	by_npcs <- 1
+	repeat {
+		pc <- seq(from = from_npcs, to = to_npcs, by = by_npcs)
+		if(length(x = pc) < 50) {
+			break
+		} else {
+			by_npcs <- by_npcs + 1
+		}
+	}
+	print(paste0("Setting --from-n-pc parameter to ", from_npcs, " instead of ", args$`from-n-pc`, "."))
+	print(paste0("Setting --to-n-pc parameter to ", to_npcs, " instead of ", args$`to-n-pc`, "."))
+	print(paste0("Setting --by-n-pc parameter to ", by_npcs, " instead of ", args$`by-n-pc`, "."))
+}
 
 # Run
 out <- RunPCACV(
 	data = data,
-	k = args$`k-fold`,
-	from = args$`from-n-pc`,
-	to = args$`to-n-pc`,
-	by = args$`by-n-pc`,
+	k = k,
+	from = from_npcs,
+	to = to_npcs,
+	by = by_npcs,
 	maxit = args$`max-iters`,
 	seed = args$`seed`,
 	n.cores = args$`n-cores`,
@@ -329,12 +369,40 @@ out <- RunPCACV(
 	default.svd = args$`default-svd`
 )
 
-# Fit to get optimal number of PCs
-out_fit <- smooth.spline(x = out$PC, out$error)
-pcs_pred <- predict(object = out_fit, x = 1:args$`to-n-pc`)
 
-optimum_npcs <- pcs_pred$x[which.min(pcs_pred$y)]
+pcs_pred <- NULL
+
+# Fit to get optimal number of PCs
+if(length(x = out$error) >= 4) {
+	print("Find the number of optimal number of PCs by fitting spline...")
+	out_fit <- smooth.spline(x = out$PC, out$error)
+	pcs_pred <- predict(object = out_fit, x = 1:to_npcs)
+	optimum_npcs <- pcs_pred$x[which.min(pcs_pred$y)]
+} else {
+	print("Find the number of optimal number of PCs without fitting a spline (too few values) ...")
+	optimum_npcs <- out$PC[which.min(out$error)]
+}
+
 print(paste0("Optimal number of PCs: ", optimum_npcs))
+
+out_npcs <- NULL
+
+if(optimum_npcs == 1) {
+	if(args$`n-pc-fallback` < 0) {
+		stop(paste0("Invalid value for --n-pc-fallback parameter: value should be > 0."))
+	}
+	if(args$`n-pc-fallback` == 0) {
+		stop(paste0("Could not find an optimal number of PCs. You can set --n-pc-fallback parameter (> 0) in order to return a minimum number of PCs."))
+	}
+	msg <- paste0("No optimal number of PCs found. The number of PCs returned is defined by --n-pc-fallback: ", args$`n-pc-fallback`)
+	warning(msg)
+	file_conn <- file(paste0(args$`output-prefix`, ".WARNING.txt"))
+	writeLines(c(msg), file_conn)
+	close(file_conn)
+	out_npcs <- args$`n-pc-fallback`
+} else {
+	out_npcs <- optimum_npcs
+}
 
 # Save the results
 
@@ -342,10 +410,16 @@ print(paste0("Optimal number of PCs: ", optimum_npcs))
 yaml::write_yaml(x = yaml::as.yaml(x = args), file = ".PARAMETERS.yaml")
 
 ## PRESS errors
-pcs_pred <- as.data.frame(x = pcs_pred)
-colnames(x = pcs_pred) <- c("PC", "error")
+pcs_data <- NULL
+
+if(!is.null(x = pcs_pred)) {
+	pcs_data <- as.data.frame(x = pcs_pred)
+} else {
+	pcs_data <- data.frame(x = out$PC, y = out$error)
+}
+colnames(x = pcs_data) <- c("PC", "error")
 write.table(
-	x = pcs_pred,
+	x = pcs_data,
 	file = paste0(args$`output-prefix`, ".PRESS_ERRORS.tsv"),
 	quote = F,
 	sep = "\t",
@@ -356,14 +430,14 @@ write.table(
 ## PRESS errors plot
 
 pdf(file = paste0(args$`output-prefix`, ".PRESS_ERROR_PLOT.pdf"))
-plot(pcs_pred)
-lines(pcs_pred, col = "blue")
+plot(pcs_data)
+lines(pcs_data, col = "blue")
 dev.off()
 
 ## Optimal number of principal components
 
 write.table(
-	optimum_npcs,
+	out_npcs,
 	paste0(args$`output-prefix`, ".OPTIMAL_NPCS.txt"),
 	append = FALSE,
 	row.names = FALSE,
