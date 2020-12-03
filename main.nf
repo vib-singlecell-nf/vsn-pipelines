@@ -23,16 +23,24 @@ workflow bbknn {
         bbknn as BBKNN;
     } from './workflows/bbknn' params(params)
     include {
-        PUBLISH as PUBLISH_BBKNN;
+        PUBLISH as PUBLISH_SCOPE;
+        PUBLISH as PUBLISH_SCANPY;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | BBKNN
 
-    if(params.utils.containsKey("publish")) {
-        PUBLISH_BBKNN(
+    if(params.utils?.publish) {
+        PUBLISH_SCOPE(
             BBKNN.out.scopeloom,
             "BBKNN",
             "loom",
+            null,
+            false
+        )
+        PUBLISH_SCANPY(
+            BBKNN.out.scanpyh5ad,
+            "BBKNN",
+            "h5ad",
             null,
             false
         )
@@ -46,21 +54,37 @@ workflow mnncorrect {
         mnncorrect as MNNCORRECT;
     } from './workflows/mnncorrect' params(params)
     include {
-        PUBLISH as PUBLISH_MNNCORRECT;
+        PUBLISH as PUBLISH_SCOPE;
+        PUBLISH as PUBLISH_SCANPY;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | MNNCORRECT
 
-    if(params.utils.containsKey("publish")) {
-        PUBLISH_MNNCORRECT(
+    if(params.utils?.publish) {
+        PUBLISH_SCOPE(
             MNNCORRECT.out.scopeloom,
             "MNNCORRECT",
             "loom",
             null,
             false
         )
+        PUBLISH_SCANPY(
+            MNNCORRECT.out.scanpyh5ad,
+            "MNNCORRECT",
+            "h5ad",
+            null,
+            false
+        )
     }
 
+}
+
+def getHarmonyBatchVariables = { params ->
+    batchVariables = params.sc.harmony.varsUse
+    if(batchVariables.size() > 1) {
+        throw new Exception("Currently it is not supported to run with multiple batch variables.")
+    }
+    return batchVariables
 }
 
 // run multi-sample with bbknn, output a scope loom file
@@ -70,16 +94,27 @@ workflow harmony {
         harmony as HARMONY;
     } from './workflows/harmony' params(params)
     include {
-        PUBLISH as PUBLISH_HARMONY;
+        PUBLISH as PUBLISH_SCOPE;
+        PUBLISH as PUBLISH_SCANPY;
     } from "./src/utils/workflows/utils" params(params)
+
+    batchVariables = getHarmonyBatchVariables(params)
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
-    if(params.utils.containsKey("publish")) {
-        PUBLISH_HARMONY(
+    if(params.utils?.publish) {
+        PUBLISH_SCOPE(
             HARMONY.out.scopeloom,
-            "HARMONY",
+            outputSuffix,
             "loom",
+            null,
+            false
+        )
+        PUBLISH_SCANPY(
+            HARMONY.out.scanpyh5ad,
+            outputSuffix,
+            "h5ad",
             null,
             false
         )
@@ -95,13 +130,17 @@ workflow harmony_only {
     include {
         PUBLISH as PUBLISH_HARMONY;
     } from "./src/utils/workflows/utils" params(params)
+    
+
+    batchVariables = getHarmonyBatchVariables(params)
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH_HARMONY(
-            HARMONY.out,
-            "HARMONY",
+            HARMONY.out.scanpyh5ad,
+            params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" +  batchVariables[0].toUpperCase() : "HARMONY",
             "h5ad",
             null,
             false
@@ -120,16 +159,28 @@ workflow bbknn_scenic {
         scenic_append as SCENIC_APPEND; 
     } from './src/scenic/main' params(params)
     include {
+        PUBLISH as PUBLISH_BBKNN;
         PUBLISH as PUBLISH_BBKNN_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | BBKNN
+
+    if(params.utils?.publish) {
+        PUBLISH_BBKNN(
+            BBKNN.out.scanpyh5ad,
+            "BBKNN",
+            "h5ad",
+            null,
+            false
+        )
+    }
+
     SCENIC_APPEND(
         BBKNN.out.filteredloom,
         BBKNN.out.scopeloom
     )
 
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH_BBKNN_SCENIC(
             SCENIC_APPEND.out,
             "BBKNN_SCENIC",
@@ -151,19 +202,34 @@ workflow harmony_scenic {
         scenic_append as SCENIC_APPEND;
     } from './src/scenic/main' params(params)
     include {
+        PUBLISH as PUBLISH_HARMONY;
         PUBLISH as PUBLISH_HARMONY_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
+    batchVariables = getHarmonyBatchVariables(params)
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+
     getDataChannel | HARMONY
+
+    if(params.utils?.publish) {
+        PUBLISH_HARMONY(
+            HARMONY.out.scanpyh5ad,
+            outputSuffix,
+            "h5ad",
+            null,
+            false
+        )
+    }
+
     SCENIC_APPEND( 
         HARMONY.out.filteredloom,
         HARMONY.out.scopeloom 
     )
 
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH_HARMONY_SCENIC(
             SCENIC_APPEND.out,
-            "HARMONY_SCENIC",
+            outputSuffix + "_SCENIC",
             "loom",
             null,
             false
@@ -180,16 +246,48 @@ workflow single_sample {
         single_sample as SINGLE_SAMPLE;
     } from './workflows/single_sample' params(params)
     include {
-        PUBLISH as PUBLISH_SINGLE_SAMPLE;
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCOPE;
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCANPY;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | SINGLE_SAMPLE
 
-    if(params.utils.containsKey("publish")) {
-        PUBLISH_SINGLE_SAMPLE(
+    if(params.utils?.publish) {
+        PUBLISH_SINGLE_SAMPLE_SCOPE(
             SINGLE_SAMPLE.out.scopeloom,
             "SINGLE_SAMPLE",
             "loom",
+            null,
+            false
+        )
+        PUBLISH_SINGLE_SAMPLE_SCANPY(
+            SINGLE_SAMPLE.out.scanpyh5ad,
+            "SINGLE_SAMPLE",
+            "h5ad",
+            null,
+            false
+        )
+    }  
+
+}
+
+// run single_sample QC
+workflow single_sample_qc {
+
+    include {
+        single_sample_qc as SINGLE_SAMPLE_QC;
+    } from './main' params(params)
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCOPE;
+    } from "./src/utils/workflows/utils" params(params)
+
+    getDataChannel | SINGLE_SAMPLE_QC
+
+    if(params.utils?.publish) {
+        PUBLISH_SINGLE_SAMPLE_SCOPE(
+            SINGLE_SAMPLE_QC.out.filtered,
+            "SINGLE_SAMPLE_QC",
+            "h5ad",
             null,
             false
         )
@@ -204,13 +302,23 @@ workflow multi_sample {
     } from './workflows/multi_sample' params(params)
 
     getDataChannel | MULTI_SAMPLE
-    include PUBLISH as PUBLISH_MULTI_SAMPLE from "./src/utils/workflows/utils" params(params)
-    
-    if(params.utils.containsKey("publish")) {
-        PUBLISH_MULTI_SAMPLE(
+    include {
+        PUBLISH as PUBLISH_SCOPE;
+        PUBLISH as PUBLISH_SCANPY;
+    } from "./src/utils/workflows/utils" params(params)
+
+    if(params.utils?.publish) {
+        PUBLISH_SCOPE(
             MULTI_SAMPLE.out.scopeloom,
             "MULTI_SAMPLE",
             "loom",
+            null,
+            false
+        )
+        PUBLISH_SCANPY(
+            MULTI_SAMPLE.out.scanpyh5ad,
+            "MULTI_SAMPLE",
+            "h5ad",
             null,
             false
         )
@@ -228,17 +336,29 @@ workflow single_sample_scenic {
         single_sample as SINGLE_SAMPLE;
     } from './workflows/single_sample' params(params)
     include {
-        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCENIC;
+        PUBLISH as PUBLISH_SCANPY;
+        PUBLISH as PUBLISH_SCOPE;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | SINGLE_SAMPLE
+
+    if(params.utils?.publish) {
+        PUBLISH_SCANPY(
+            SINGLE_SAMPLE.out.scanpyh5ad,
+            "SINGLE_SAMPLE",
+            "h5ad",
+            null,
+            false
+        )
+    }
+
     SCENIC_APPEND(
         SINGLE_SAMPLE.out.filteredloom,
         SINGLE_SAMPLE.out.scopeloom
     )
 
-    if(params.utils.containsKey("publish")) {
-        PUBLISH_SINGLE_SAMPLE_SCENIC(
+    if(params.utils?.publish) {
+        PUBLISH_SCOPE(
             SCENIC_APPEND.out,
             "SINGLE_SAMPLE_SCENIC",
             "loom",
@@ -301,7 +421,7 @@ workflow single_sample_scrublet {
         )
     )
 
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH_SINGLE_SAMPLE_SCRUBLET(
             SC__H5AD_TO_LOOM.out,
             "SINGLE_SAMPLE_SCRUBLET",
@@ -361,7 +481,7 @@ workflow single_sample_decontx {
             ANNOTATE_BY_CELL_METADATA_BY_PAIR.out
         )
     )
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
             "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
@@ -387,7 +507,8 @@ workflow single_sample_decontx_scrublet {
         ANNOTATE_BY_CELL_METADATA_BY_PAIR;
     } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
     include {
-        PUBLISH;
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_ANNOTATED;
+        PUBLISH as PUBLISH_CELDA_DECONTX_SCRUBLET
     } from './src/utils/workflows/utils.nf' params(params)
     include {
         SC__H5AD_TO_LOOM;
@@ -395,11 +516,11 @@ workflow single_sample_decontx_scrublet {
 
     data = getDataChannel \
         | SC__FILE_CONVERTER
-    // Run Single-sample pipeline on the data
+    // Run Single-sample pipeline on the INPUT DATA
     SCANPY__SINGLE_SAMPLE( data )
-    // Run DecontX on the data
+    // Run DecontX on the INPUT DATA
     CELDA__DECONTX()
-    // Run Scrublet on the DecontX filtered data
+    // Run Scrublet on the DecontX FILTERED DATA
     SCRUBLET__DOUBLET_REMOVAL(
         CELDA__DECONTX.out.decontx_processed.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
         SCANPY__SINGLE_SAMPLE.out.final_processed_data
@@ -422,11 +543,149 @@ workflow single_sample_decontx_scrublet {
             ANNOTATE_BY_CELL_METADATA_BY_PAIR.out
         )
     )
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
+        // Publish loom file where INPUT DATA:
+        // - processed by single_sample pipeline and ->
+        // - annotated by DecontX potential outliers
+        // - annotated by Scrublet potential doublets
+        PUBLISH_SINGLE_SAMPLE_ANNOTATED(
+            SC__H5AD_TO_LOOM.out,
+            "SINGLE_SAMPLE_ANNOTATED",
+            "loom",
+            null,
+            false
+        )
+        // Publish h5ad file where INPUT DATA:
+        // - processed by DecontX (either through filter or correct strategy) and ->
+        // - potential doublets removed by Scrublet 
+        PUBLISH_CELDA_DECONTX_SCRUBLET(
+            SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
+            "CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "h5ad",
+            null,
+            false
+        )
+    }
+}
+
+workflow soupx {
+
+    include {
+        soupx as SOUPX__DECONTX;
+    } from "./src/soupx/main" params(params)
+    // Run DecontX on the data
+    SOUPX__DECONTX()
+
+}
+
+workflow single_sample_soupx {
+
+    include {
+        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
+    } from './src/scanpy/workflows/single_sample' params(params)
+    include {
+        soupx as SOUPX;
+    } from "./src/soupx/main" params(params)
+    include {
+        ANNOTATE_BY_CELL_METADATA_BY_PAIR;
+    } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
+    include {
+        PUBLISH;
+    } from './src/utils/workflows/utils.nf' params(params)
+    include {
+        SC__H5AD_TO_LOOM;
+    } from './src/utils/processes/h5adToLoom.nf' params(params)
+
+    data = getDataChannel \
+        | SC__FILE_CONVERTER
+    // Run Single-sample pipeline on the INPUT DATA:
+    SCANPY__SINGLE_SAMPLE( data )
+    // Run SoupX on the INPUT DATA:
+    SOUPX()
+
+    SC__H5AD_TO_LOOM(
+        SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
+            it -> tuple(it[0], it[1])
+        }
+    )
+    if(params.utils?.publish) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "SINGLE_SAMPLE",
             "loom",
+            null,
+            false
+        )
+    }
+
+}
+
+workflow single_sample_soupx_scrublet {
+    include {
+        SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
+    } from './src/scanpy/workflows/single_sample' params(params)
+    include {
+        soupx as SOUPX;
+    } from "./src/soupx/main" params(params)
+    include {
+        DOUBLET_REMOVAL as SCRUBLET__DOUBLET_REMOVAL;
+    } from "./src/scrublet/workflows/doublet_removal" params(params)
+    include {
+        ANNOTATE_BY_CELL_METADATA_BY_PAIR;
+    } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_ANNOTATED;
+        PUBLISH as PUBLISH_SOUPX_SCRUBLET
+    } from './src/utils/workflows/utils.nf' params(params)
+    include {
+        SC__H5AD_TO_LOOM;
+    } from './src/utils/processes/h5adToLoom.nf' params(params)
+
+    data = getDataChannel \
+        | SC__FILE_CONVERTER
+    // Run Single-sample pipeline on the INPUT DATA
+    SCANPY__SINGLE_SAMPLE( data )
+    // Run Soupx on the INPUT DATA
+    SOUPX()
+    // Run Scrublet on the DecontX FILTERED DATA
+    SCRUBLET__DOUBLET_REMOVAL(
+        SOUPX.out.soupx_processed.join( SCANPY__SINGLE_SAMPLE.out.dr_pca_data ),
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data
+    )
+
+    // Annotate the final processed file with doublet information inferred from Scrublet
+    ANNOTATE_BY_CELL_METADATA_BY_PAIR(
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data,
+        SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection.map {
+            it -> tuple(it[0], it[1])
+        },
+        "scrublet"
+    )
+    SC__H5AD_TO_LOOM(
+        SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
+            it -> tuple(it[0], it[1])
+        }.join(
+            ANNOTATE_BY_CELL_METADATA_BY_PAIR.out
+        )
+    )
+    if(params.utils?.publish) {
+        // Publish loom file where INPUT DATA:
+        // - processed by single_sample pipeline and ->
+        // - annotated by Scrublet potential doublets
+        PUBLISH_SINGLE_SAMPLE_ANNOTATED(
+            SC__H5AD_TO_LOOM.out,
+            "SINGLE_SAMPLE_ANNOTATED",
+            "loom",
+            null,
+            false
+        )
+        // Publish h5ad file where INPUT DATA:
+        // - processed by SoupX and ->
+        // - potential doublets removed by Scrublet 
+        PUBLISH_SOUPX_SCRUBLET(
+            SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
+            "SOUPX_SCRUBLET",
+            "h5ad",
             null,
             false
         )
@@ -455,7 +714,7 @@ workflow pipe_single_sample_scenic {
             SINGLE_SAMPLE.out.scopeloom
         )
 
-        if(params.utils.containsKey("publish")) {
+        if(params.utils?.publish) {
             PUBLISH_P_SINGLE_SAMPLE_SCENIC(
                 SCENIC_APPEND.out,
                 "P_SINGLE_SAMPLE_SCENIC",
@@ -482,7 +741,7 @@ workflow scenic {
         Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
     )
 
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH_SCENIC(
             SCENIC.out,
             "SCENIC",
@@ -574,8 +833,9 @@ workflow cellranger_count_libraries {
 
 workflow cellranger_count_demuxlet {
     include {
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_output_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
     include {
         SC__CELLRANGER__COUNT as CELLRANGER_COUNT;
     } from './src/cellranger/processes/count'
@@ -603,23 +863,30 @@ workflow cellranger_count_demuxlet {
         params.sc.cellranger.count.transcriptome,
         fastq_data
     )
-    DEMUXLET(data)
+    cellranger_output_to_bam_barcodes(data) |
+        DEMUXLET
 }
 
 workflow freemuxlet {
     include {
-        freemuxlet as FREEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_output_to_bam_barcodes;
+        FREEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
     
-    getDataChannel | FREEMUXLET
+    getDataChannel |
+        cellranger_output_to_bam_barcodes |
+        FREEMUXLET
 }
 
 workflow demuxlet {
-    include { 
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+    include {
+        cellranger_output_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
-    getDataChannel | DEMUXLET
+    getDataChannel |
+        cellranger_output_to_bam_barcodes |
+        DEMUXLET
 }
 
 // runs mkfastq, CellRanger count, then single_sample:
@@ -659,8 +926,9 @@ workflow cellranger_multi_sample_demuxlet {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_output_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger()
     MULTI_SAMPLE(        
@@ -668,7 +936,8 @@ workflow cellranger_multi_sample_demuxlet {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         }
     )
-    DEMUXLET(data)
+    cellranger_output_to_bam_barcodes(data) |
+        DEMUXLET
 
 }
 
@@ -692,8 +961,9 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        freemuxlet as FREEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_output_to_bam_barcodes;
+        FREEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger_libraries()
     MULTI_SAMPLE(
@@ -701,7 +971,8 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
     )
-    FREEMUXLET(data)
+    cellranger_output_to_bam_barcodes(data) |
+        FREEMUXLET
 
 }
 
@@ -711,8 +982,9 @@ workflow cellranger_libraries_demuxlet_multi_sample {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        demuxlet as DEMUXLET;
-    } from './workflows/popscle' params(params)
+        cellranger_output_to_bam_barcodes;
+        DEMUXLET;
+    } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger_libraries()
     MULTI_SAMPLE(
@@ -720,7 +992,8 @@ workflow cellranger_libraries_demuxlet_multi_sample {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
     )
-    DEMUXLET(data)
+    cellranger_output_to_bam_barcodes(data) |
+        DEMUXLET
 }
 
 workflow star {
@@ -804,7 +1077,7 @@ workflow sra_cellranger_bbknn_scenic {
         sra_cellranger_bbknn.out.scopeLoom
     )
 
-    if(params.utils.containsKey("publish")) {
+    if(params.utils?.publish) {
         PUBLISH_SRA_CELLRANGER_BBKNN_SCENIC(
             SCENIC_APPEND.out,
             "SRA_CELLRANGER_BBKNN_SCENIC",
@@ -949,7 +1222,7 @@ workflow cell_annotate_filter_and_sample_annotate {
             out = SC__H5AD_BEAUTIFY( out )
         }
 
-        if(params.utils.containsKey("publish")) {
+        if(params.utils?.publish) {
             PUBLISH(
                 out,
                 "CELL_ANNOTATE_FILTER_AND_SAMPLE_ANNOTATE",

@@ -405,13 +405,56 @@ def getOutputFileName(params, tag, f, fileOutputSuffix, isParameterExplorationMo
     return "${tag}.${fileOutputSuffix}.${f.extension}"
 }
 
-process SC__PUBLISH {
+def getPublishDir = { outDir, toolName ->
+    if(isParamNull(toolName))
+        return "${outDir}/data"
+    return "${outDir}/data/${toolName.toLowerCase()}"
+}
 
-    def getPublishDir = { outDir, toolName ->
-        if(isParamNull(toolName))
-            return "${outDir}/data"
-        return "${outDir}/data/${toolName.toLowerCase()}"
-    }
+process SC__PUBLISH_PROXY {
+
+    publishDir "${params.global.outdir}/data/intermediate", \
+        mode: 'symlink', \
+        overwrite: true, \
+        saveAs: {
+            filename -> "${outputFileName}" 
+        }
+
+    label 'compute_resources__minimal'
+
+    input:
+        tuple \
+            val(tag), \
+            path(f), \
+            val(stashedParams)
+        val(fileOutputSuffix)
+        val(toolName)
+        val(isParameterExplorationModeOn)
+
+    output:
+        tuple \
+            val(tag), \
+            path(outputFileName), \
+            val(stashedParams)
+
+    script:
+        outputFileName = getOutputFileName(
+            params,
+            tag,
+            f,
+            fileOutputSuffix,
+            false,
+            null
+        )
+        """
+        if [ ! -f ${outputFileName} ]; then
+            ln -s $f "${outputFileName}"
+        fi
+        """
+
+}
+
+process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \

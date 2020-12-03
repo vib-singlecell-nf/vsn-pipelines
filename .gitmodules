@@ -76,3 +76,7 @@
 [submodule "src/pycistopic"]
 	path = src/pycistopic
 	url = https://github.com/vib-singlecell-nf/pycistopic.git
+[submodule "src/soupx"]
+	path = src/soupx
+	url = https://github.com/vib-singlecell-nf/soupx.git
+	branch = develop
