@@ -5,7 +5,10 @@ include {
     getH5Channel as getTenXCellRangerH5Channel;
     getMEXChannel as getTenXCellRangerMEXChannel;
 } from './tenx' params(params)
-include getChannel as getFileChannel from './file' params(params)
+include {
+    getChannel as getFileChannel;
+    getChannelWithIndex as getFileChannelWithIndex;
+} from './file' params(params)
 
 boolean isCollectionOrArray(object) {    
     [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
@@ -152,6 +155,28 @@ workflow getDataChannel {
                     params.data.seurat_rds.suffix
                 ).map {
                     it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat)
+                }
+            ).view()
+        }
+        if(params.data.containsKey("fragments")) {
+            data = data.concat(
+                getFileChannelWithIndex(
+                    params.data.fragments.file_paths,
+                    params.data.fragments.suffix,
+                    params.data.fragments.index_extension
+                ).map {
+                    it -> tuple(it[0], it[1], it[2], "fragments")
+                }
+            ).view()
+        }
+        if(params.data.containsKey("bam")) {
+            data = data.concat(
+                getFileChannelWithIndex(
+                    params.data.bam.file_paths,
+                    params.data.bam.suffix,
+                    params.data.bam.index_extension
+                ).map {
+                    it -> tuple(it[0], it[1], it[2], "bam")
                 }
             ).view()
         }

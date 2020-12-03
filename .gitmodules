@@ -55,6 +55,27 @@
 	path = src/celda
 	url = https://github.com/vib-singlecell-nf/celda.git
 	branch = develop
+[submodule "src/sinto"]
+	path = src/sinto
+	url = https://github.com/vib-singlecell-nf/sinto.git
+[submodule "src/bwamaptools"]
+	path = src/bwamaptools
+	url = https://github.com/vib-singlecell-nf/bwamaptools.git
+[submodule "src/trimgalore"]
+	path = src/trimgalore
+	url = https://github.com/vib-singlecell-nf/trimgalore.git
+[submodule "src/archr"]
+	path = src/archr
+	url = https://github.com/vib-singlecell-nf/archr.git
+[submodule "src/bap"]
+	path = src/bap
+	url = https://github.com/vib-singlecell-nf/bap.git
+[submodule "src/singlecelltoolkit"]
+	path = src/singlecelltoolkit
+	url = https://github.com/vib-singlecell-nf/singlecelltoolkit.git
+[submodule "src/pycistopic"]
+	path = src/pycistopic
+	url = https://github.com/vib-singlecell-nf/pycistopic.git
 [submodule "src/soupx"]
 	path = src/soupx
 	url = https://github.com/vib-singlecell-nf/soupx.git
