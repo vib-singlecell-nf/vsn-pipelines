@@ -55,6 +55,10 @@ process SC__CELDA__DECONTX {
         if(processParams?.roundToInt) {
             roundToIntAsArgument = '--round-to-int '+ processParams.roundToInt
         }
+        def filterEmptyCells = ''
+        if(processParams?.filterEmptyCells) {
+            filterEmptyCells = '--filter-empty-cells '+ processParams.filterEmptyCells
+        }
 
         """
         ${binDir}/run_decontx.R \
@@ -63,6 +67,7 @@ process SC__CELDA__DECONTX {
             ${filterNumMadsThresholdsAsArguments} \
             ${filterContaminationScoreThresholdsAsArguments} \
             ${roundToIntAsArgument} \
+            ${filterEmptyCells} \
             --output-prefix "${sampleId}.CELDA__DECONTX" \
             $f
         """
