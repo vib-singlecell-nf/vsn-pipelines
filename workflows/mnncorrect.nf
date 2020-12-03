@@ -14,11 +14,17 @@ include {
     COMBINE_BY_PARAMS;
 } from '../src/utils/workflows/utils.nf' params(params)
 include {
+    FINALIZE;
+} from '../src/utils/workflows/finalize.nf' params(params)
+include {
     SC__H5AD_TO_FILTERED_LOOM;
 } from '../src/utils/processes/h5adToLoom.nf' params(params)
 include {
     FILE_CONVERTER;
 } from '../src/utils/workflows/fileConverter.nf' params(params)
+include {
+    FILTER_AND_ANNOTATE_AND_CLEAN;
+} from '../src/utils/workflows/filterAnnotateClean.nf' params(params)
 include {
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
 } from '../src/utils/processes/reports.nf' params(params)
@@ -77,8 +83,10 @@ workflow mnncorrect {
         /*******************************************
         * Data processing
         */
-        out = data
-        out = SC__FILE_CONVERTER( data )
+        out = data | \
+            SC__FILE_CONVERTER | \
+            FILTER_AND_ANNOTATE_AND_CLEAN
+
         if(params.sc.scanpy.containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
@@ -95,12 +103,7 @@ workflow mnncorrect {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
-        if(params.sc.scanpy.containsKey("regress_out")) {
-            out = SC__SCANPY__REGRESS_OUT( out.scaled )
-        } else {
-            out = out.scaled
-        }
-        DIM_REDUCTION_PCA( out )
+        DIM_REDUCTION_PCA( out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
 
@@ -117,32 +120,21 @@ workflow mnncorrect {
             clusterIdentificationPreBatchEffectCorrection.marker_genes
         )
 
-       // Conversion
-        // Convert h5ad to X (here we choose: loom format)
-        if(params.sc.containsKey("file_concatenator")) {
-            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-            scopeloom = FILE_CONVERTER(
-                BEC_MNNCORRECT.out.data.groupTuple(),
-                'MNNCORRECT.final_output',
-                'loom',
-                SC__FILE_CONCATENATOR.out
-            )
-        } else {
-            filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
-            scopeloom = FILE_CONVERTER(
-                BEC_MNNCORRECT.out.data.groupTuple(),
-                'MNNCORRECT.final_output',
-                'loom',
-                SC__FILE_CONVERTER.out
-            )
-        }
+        // Finalize
+        FINALIZE(
+            params.sc?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
+            BEC_MNNCORRECT.out.data,
+            'MNNCORRECT.final_output'
+        )
 
         // Define the parameters for clustering
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
 
         // Select a default clustering when in parameter exploration mode
         if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
-            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( scopeloom )
+            scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
+        } else {
+            scopeloom = FINALIZE.out.scopeloom
         }
 
         /*******************************************
@@ -198,6 +190,7 @@ workflow mnncorrect {
         SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
 
     emit:
-        filteredloom
-        scopeloom
+        filteredloom = FINALIZE.out.filteredloom
+        scopeloom = scopeloom
+        scanpyh5ad = FINALIZE.out.scanpyh5ad
 }

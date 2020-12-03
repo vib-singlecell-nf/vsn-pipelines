@@ -449,9 +449,6 @@ Steps:
             HVG_SELECTION
         } from '../src/scanpy/workflows/hvg_selection.nf' params(params)
         include {
-            SC__SCANPY__REGRESS_OUT
-        } from '../src/scanpy/processes/regress_out.nf' params(params)
-        include {
             NEIGHBORHOOD_GRAPH
         } from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
         include {
@@ -485,9 +482,10 @@ Steps:
                 data
 
             main:
-                // run the pipeline
-                out = data
-                out = SC__FILE_CONVERTER( data )
+                out = data | \
+                    SC__FILE_CONVERTER | \
+                    FILTER_AND_ANNOTATE_AND_CLEAN
+
                 if(params.sc.scanpy.containsKey("filter")) {
                     out = QC_FILTER( out ).filtered // Remove concat
                 }
@@ -504,11 +502,6 @@ Steps:
                     out = NORMALIZE_TRANSFORM( out )
                 }
                 out = HVG_SELECTION( out )
-                if(params.sc.scanpy.containsKey("regress_out")) {
-                    out = SC__SCANPY__REGRESS_OUT( out.scaled )
-                } else {
-                    out = out.scaled
-                }
                 DIM_REDUCTION_PCA( out )
                 NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
                 DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )

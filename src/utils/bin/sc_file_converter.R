@@ -133,15 +133,17 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     # Reset Seurat slots
     if(isTrue(x = args$`seurat_reset`)) {
 		print("Resetting @graphs in seurat object...")
-		seurat@graphs<-list()
+		seurat@graphs <- list()
 		print("Resetting @reductions in seurat object...")
-		seurat@reductions<-list()
+		seurat@reductions <- list()
 		print("Resetting @neighbors in seurat object...")
-		seurat@neighbors<-list()
-		print(paste0("Resetting @assays$",args$`seurat_assay`,"@data in seurat object..."))
-		seurat@assays[[args$`seurat_assay`]]@data<-matrix(ncol = 0, nrow = 0)
+		seurat@neighbors <- list()
+        # Set @assays`<assay>`@data to @assays`<assay>`@counts (as in CreateSeuratObject
+        # @assays`<assay>`@data cannot be set to empty matrix otherwise row.names(object) will be NULL
+		print(paste0("Setting @assays$",args$`seurat_assay`,"@data to @assays$",args$`seurat_assay`,"@counts (as in CreateSeuratObject) in seurat object..."))
+		seurat@assays[[args$`seurat_assay`]]@data <- seurat@assays[[args$`seurat_assay`]]@counts
 		print(paste0("Resetting @assays$",args$`seurat_assay`,"@scale.data in seurat object..."))
-		seurat@assays[[args$`seurat_assay`]]@scale.data<-matrix(ncol = 0, nrow = 0)
+		seurat@assays[[args$`seurat_assay`]]@scale.data <- matrix(ncol = 0, nrow = 0)
     }
     # Add sample ID as obs entry
 	seurat <- AddMetaData(
@@ -186,12 +188,24 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     if(class(x = sce) != "SingleCellExperiment") {
       	stop("VSN ERROR: The object contained in the Rds file is not a SingleCellExperiment object.")
     }
+    # Set/update row.names with gene symbols
+    row_data <- SummarizedExperiment::rowData(x = sce)
+    if("Symbol" %in% colnames(x = row_data)) {
+	    row.names(x = sce) <- row_data$Symbol
+    }
+    # Tag cell with sample ID
+    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
+		new.names <- gsub(
+			pattern = "-([0-9]+)$",
+			replace = paste0("-", args$`sample_id`),
+			x = colnames(x = sce)
+		)
+		colnames(x = sce) <- new.names
+    }
     # Add sample ID as colData entry
 	col_data <- SummarizedExperiment::colData(x = sce)
     col_data$sample_id <- args$`sample_id`
     SummarizedExperiment::colData(x = sce) <- col_data
-	# Update row.names with gene symbols
-	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     sceasy::convertFormat(
@@ -207,7 +221,10 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
       	samples = FILE_PATH_IN
     )
     # Set/update row.names with gene symbols
-	row.names(x = sce) <- SummarizedExperiment::rowData(x = sce)$Symbol
+    row_data <- SummarizedExperiment::rowData(x = sce)
+    if("Symbol" %in% colnames(x = row_data)) {
+	    row.names(x = sce) <- row_data$Symbol
+    }
     # Set col.names with barcode ID
     colnames(x = sce) <- SummarizedExperiment::colData(x = sce)$Barcode
     # Tag cell with sample ID
