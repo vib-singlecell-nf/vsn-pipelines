@@ -10,9 +10,6 @@
 [submodule "src/star"]
 	path = src/star
 	url = https://github.com/vib-singlecell-nf/star.git
-[submodule "src/popscle"]
-	path = src/popscle
-	url = https://github.com/vib-singlecell-nf/popscle.git
 [submodule "src/scrublet"]
 	path = src/scrublet
 	url = https://github.com/vib-singlecell-nf/scrublet.git
