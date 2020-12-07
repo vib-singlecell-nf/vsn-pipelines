@@ -1,6 +1,3 @@
-[submodule "src/scanpy"]
-	path = src/scanpy
-	url = https://github.com/vib-singlecell-nf/scanpy.git
 [submodule "src/scenic"]
 	path = src/scenic
 	url = https://github.com/vib-singlecell-nf/scenic.git
