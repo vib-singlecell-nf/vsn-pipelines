@@ -1,3 +1,0 @@
-[submodule "src/trimgalore"]
-	path = src/trimgalore
-	url = https://github.com/vib-singlecell-nf/trimgalore.git
