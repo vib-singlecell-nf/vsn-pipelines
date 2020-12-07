@@ -58,9 +58,6 @@
 [submodule "src/sinto"]
 	path = src/sinto
 	url = https://github.com/vib-singlecell-nf/sinto.git
-[submodule "src/bwamaptools"]
-	path = src/bwamaptools
-	url = https://github.com/vib-singlecell-nf/bwamaptools.git
 [submodule "src/trimgalore"]
 	path = src/trimgalore
 	url = https://github.com/vib-singlecell-nf/trimgalore.git
