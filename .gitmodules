@@ -1,6 +1,3 @@
-[submodule "src/star"]
-	path = src/star
-	url = https://github.com/vib-singlecell-nf/star.git
 [submodule "src/trimgalore"]
 	path = src/trimgalore
 	url = https://github.com/vib-singlecell-nf/trimgalore.git
