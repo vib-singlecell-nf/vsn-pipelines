@@ -1,6 +1,3 @@
-[submodule "src/scenic"]
-	path = src/scenic
-	url = https://github.com/vib-singlecell-nf/scenic.git
 [submodule "src/sratoolkit"]
 	path = src/sratoolkit
 	url = https://github.com/vib-singlecell-nf/sratoolkit.git
