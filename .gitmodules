@@ -13,9 +13,6 @@
 [submodule "src/star"]
 	path = src/star
 	url = https://github.com/vib-singlecell-nf/star.git
-[submodule "src/flybaser"]
-	path = src/flybaser
-	url = https://github.com/vib-singlecell-nf/flybaser.git
 [submodule "src/pcacv"]
 	path = src/pcacv
 	url = https://github.com/vib-singlecell-nf/pcacv.git
