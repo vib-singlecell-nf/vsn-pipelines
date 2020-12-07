@@ -10,9 +10,6 @@
 [submodule "src/trimgalore"]
 	path = src/trimgalore
 	url = https://github.com/vib-singlecell-nf/trimgalore.git
-[submodule "src/singlecelltoolkit"]
-	path = src/singlecelltoolkit
-	url = https://github.com/vib-singlecell-nf/singlecelltoolkit.git
 [submodule "src/soupx"]
 	path = src/soupx
 	url = https://github.com/vib-singlecell-nf/soupx.git
