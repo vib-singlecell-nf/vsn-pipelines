@@ -1,6 +1,3 @@
-[submodule "src/cellranger"]
-	path = src/cellranger
-	url = https://github.com/vib-singlecell-nf/cellranger.git
 [submodule "src/dropletutils"]
 	path = src/dropletutils
 	url = https://github.com/vib-singlecell-nf/dropletutils.git
