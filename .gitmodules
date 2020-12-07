@@ -7,7 +7,3 @@
 [submodule "src/trimgalore"]
 	path = src/trimgalore
 	url = https://github.com/vib-singlecell-nf/trimgalore.git
-[submodule "src/soupx"]
-	path = src/soupx
-	url = https://github.com/vib-singlecell-nf/soupx.git
-	branch = develop
