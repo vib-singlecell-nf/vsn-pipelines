@@ -1,6 +1,3 @@
-[submodule "src/dropseqtools"]
-	path = src/dropseqtools
-	url = https://github.com/vib-singlecell-nf/dropseqtools.git
 [submodule "src/edirect"]
 	path = src/edirect
 	url = https://github.com/vib-singlecell-nf/edirect.git
