@@ -64,9 +64,6 @@
 [submodule "src/trimgalore"]
 	path = src/trimgalore
 	url = https://github.com/vib-singlecell-nf/trimgalore.git
-[submodule "src/archr"]
-	path = src/archr
-	url = https://github.com/vib-singlecell-nf/archr.git
 [submodule "src/bap"]
 	path = src/bap
 	url = https://github.com/vib-singlecell-nf/bap.git
