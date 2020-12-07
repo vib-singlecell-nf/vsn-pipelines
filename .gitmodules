@@ -1,6 +1,3 @@
-[submodule "src/sratoolkit"]
-	path = src/sratoolkit
-	url = https://github.com/vib-singlecell-nf/sratoolkit.git
 [submodule "src/star"]
 	path = src/star
 	url = https://github.com/vib-singlecell-nf/star.git
