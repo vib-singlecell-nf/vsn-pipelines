@@ -1,6 +1,3 @@
-[submodule "src/dropletutils"]
-	path = src/dropletutils
-	url = https://github.com/vib-singlecell-nf/dropletutils.git
 [submodule "src/dropseqtools"]
 	path = src/dropseqtools
 	url = https://github.com/vib-singlecell-nf/dropseqtools.git
