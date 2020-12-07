@@ -1,6 +1,3 @@
-[submodule "src/edirect"]
-	path = src/edirect
-	url = https://github.com/vib-singlecell-nf/edirect.git
 [submodule "src/fastp"]
 	path = src/fastp
 	url = https://github.com/vib-singlecell-nf/fastp.git
