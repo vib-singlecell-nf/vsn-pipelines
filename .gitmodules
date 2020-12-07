@@ -1,6 +1,3 @@
-[submodule "src/fastp"]
-	path = src/fastp
-	url = https://github.com/vib-singlecell-nf/fastp.git
 [submodule "src/picard"]
 	path = src/picard
 	url = https://github.com/vib-singlecell-nf/picard.git
