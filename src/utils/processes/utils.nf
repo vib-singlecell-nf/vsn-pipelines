@@ -415,15 +415,14 @@ def getPublishDir = { outDir, toolName ->
 process SC__PUBLISH {
 
     publishDir \
-        "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: "${params.utils.publish.mode}", \
-        saveAs: { filename -> "${outputFileName}" }
+        path: "${getPublishDir(params.global.outdir,toolName)}", \
+        mode: "${params.utils.publish.mode}"
 
     label 'compute_resources__minimal'
-    
+
     input:
         tuple \
-            val(tag), \
+            val(sampleId), \
             path(f), \
             val(stashedParams)
         val(fileOutputSuffix)
@@ -432,19 +431,12 @@ process SC__PUBLISH {
 
     output:
         tuple \
-            val(tag), \
+            val(sampleId), \
             path(outputFileName), \
             val(stashedParams)
 
     script:
-        outputFileName = getOutputFileName(
-            params,
-            tag,
-            f,
-            fileOutputSuffix,
-            isParameterExplorationModeOn,
-            stashedParams
-        )
+        outputFileName = "${sampleId}.${fileOutputSuffix}.${f.extension}"
         /* avoid cases where the input and output files have identical names:
            Move the input file to a unique name, then create a link to
            the input file */
