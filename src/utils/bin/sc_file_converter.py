@@ -5,7 +5,7 @@ import os
 import re
 import scanpy as sc
 import numpy as np
-
+from scipy.sparse import csr_matrix
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -197,12 +197,14 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
         delim = '\t'
     elif INPUT_FORMAT == 'csv':
         delim = ','
-
+    # Expects csv/tsv to have features as rows and observations as columns
     adata = sc.read_csv(
         FILE_PATH_IN,
         delimiter=delim,
         first_column_names=True
     ).T
+    # Convert to sparse matrix
+    adata.X = csr_matrix(adata.X)
     adata = add_sample_id(
         adata=adata,
         args=args
