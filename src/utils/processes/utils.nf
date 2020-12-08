@@ -414,11 +414,8 @@ def getPublishDir = { outDir, toolName ->
 process SC__PUBLISH_PROXY {
 
     publishDir "${params.global.outdir}/data/intermediate", \
-        mode: 'symlink', \
-        overwrite: true, \
-        saveAs: {
-            filename -> "${outputFileName}" 
-        }
+        mode: "${params.utils.publish.mode}", \
+        saveAs: { filename -> "${outputFileName}" }
 
     label 'compute_resources__minimal'
 
@@ -458,11 +455,8 @@ process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: 'link', \
-        overwrite: true, \
-        saveAs: {
-            filename -> "${outputFileName}" 
-        }
+        mode: "${params.utils.publish.mode}", \
+        saveAs: { filename -> "${outputFileName}" }
 
     label 'compute_resources__minimal'
     
