@@ -83,7 +83,7 @@ Steps:
 
 #. Update the ``nextflow.config`` file to create the ``harmony.config`` configuration file.
 
-    * Each process's options should be in their own level. With a single proccess, you do not need one extra level.
+    * Each process's options should be in their own level. With a single process, you do not need one extra level.
 
     .. code:: dockerfile
 
@@ -624,7 +624,7 @@ Steps:
 
         }
 
-#. Finally add a new entry in main.nf of the ``vsn-pipelines`` repository
+#. Finally add a new entry in ``main.nf`` of the ``vsn-pipelines`` repository
 
     .. code:: groovy
 

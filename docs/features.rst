@@ -55,14 +55,14 @@ Finally run the pipeline,
 
 Set the seed
 ------------
-Some steps in the pipelines are nondeterministic. In order to have reproducible results, a seed is set by default to:
+Some steps in the pipelines are non-deterministic. In order to have reproducible results, a seed is set by default to:
 
 .. code:: groovy
 
     workflow.manifest.version.replaceAll("\\.","").toInteger()
 
-The seed is a number derived from the the version of the pipeline used at the time of the analysis run.
-To override the seed (integer) you have edit the nextflow.config file with:
+The seed is a number derived from the version of the pipeline used at the time of the analysis run.
+To override the seed (integer) you have edit the ``nextflow.config`` file with:
 
 .. code:: groovy
 
@@ -154,19 +154,19 @@ Two methods (``params.sc.cell_annotate.method``) are available:
 
 If you have a single file containing the metadata information of all your samples, use ``aio`` method otherwise use ``obo``.
 
-For both methods, here are the mandatory params to set:
+For both methods, here are the mandatory parameters to set:
 
 - ``off`` should be set to ``h5ad``
 - ``method`` choose either ``obo`` or ``aio``
 - ``annotationColumnNames`` is an array of columns names from ``cellMetaDataFilePath`` containing different annotation metadata to add.
 
-If ``aio`` used, the following additional params are required:
+If ``aio`` used, the following additional parameters are required:
 
 - ``cellMetaDataFilePath`` is a file path pointing to a single .tsv file (with header) with at least 2 columns: a column containing all the cell IDs and an annotation column.
 - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **can** have unique values; if it's not the case, it's important that the combination of the values from the ``indexColumnName`` and the ``sampleColumnName`` are unique. 
-- ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
+- ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sure that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
 
-If ``obo`` is used, the following params are required:
+If ``obo`` is used, the following parameters are required:
 
 - ``cellMetaDataFilePath``
 
@@ -267,7 +267,7 @@ Two methods (``params.sc.cell_filter.method``) are available:
 
 If you have a single file containing the metadata information of all your samples, use ``external`` method otherwise use ``internal``.
 
-For both methods, here are the mandatory params to set:
+For both methods, here are the mandatory parameters to set:
 
 - ``off`` should be set to ``h5ad``
 - ``method`` choose either ``internal`` or ``external``
@@ -276,20 +276,20 @@ For both methods, here are the mandatory params to set:
   - ``id`` is a short identifier for the filter
   - ``valuesToKeepFromFilterColumn`` is array of values from the ``filterColumnName`` that should be kept (other values will be filtered out).
 
-If ``internal`` used, the following additional params are required:
+If ``internal`` used, the following additional parameters are required:
 
 - ``filters`` is a List of Maps where each Map is required to have the following parameters:
 
   - ``sampleColumnName`` is the column name containing the sample ID/name information. It should exist in the ``obs`` column attribute of the h5ad.
   - ``filterColumnName`` is the column name that will be used to filter out cells.  It should exist in the ``obs`` column attribute of the h5ad.
 
-If ``external`` used, the following additional params are required:
+If ``external`` used, the following additional parameters are required:
 
 - ``filters`` is a List of Maps where each Map is required to have the following parameters:
 
   - ``cellMetaDataFilePath`` is a file path pointing to a single .tsv file (with header) with at least 3 columns: a column containing all the cell IDs, another containing the sample ID/name information, and a column to use for the filtering.
   - ``indexColumnName`` is the column name from ``cellMetaDataFilePath`` containing the cell IDs information. This column **must** have unique values. 
-  - `optional` ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sur that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
+  - `optional` ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sure that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
   - `optional` ``filterColumnName`` is the column name from ``cellMetaDataFilePath`` which be used to filter out cells.
 
 
@@ -348,8 +348,8 @@ If you want to apply custom parameters for some specific samples and have a "gen
         }
     }
 
-Using this config, the param ``params.sc.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
-This strategy can be applied to any other paramameter of the config.
+Using this config, the parameter ``params.sc.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
+This strategy can be applied to any other parameter of the config.
 
 
 Parameter exploration
