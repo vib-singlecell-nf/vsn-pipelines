@@ -69,6 +69,16 @@ workflow atac_qc_filtering {
 
 }
 
+workflow atac_qc_filtering_archr {
+
+    include {
+        ATAC_QC_FILTERING;
+    } from './workflows/atac/qc_filtering.nf' params(params)
+
+    getDataChannel | ATAC_QC_FILTERING
+
+}
+
 workflow atac_preprocess_freemuxlet {
 
     // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
