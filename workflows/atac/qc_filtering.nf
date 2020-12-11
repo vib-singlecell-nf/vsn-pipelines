@@ -17,8 +17,12 @@ workflow ATAC_QC_PREFILTER {
 
     main:
 
-        data.view()
-        //SC__PYCISTOPIC__MACS2_CALL_PEAKS(data)
+        data.branch {
+            fragments: it[3] == 'fragments'
+            bam: it[3] == 'bam'
+        }
+        .set{ data_split }
+        SC__PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam)
 
         //SC__PYCISTOPIC__PREFILTER(data)
 
