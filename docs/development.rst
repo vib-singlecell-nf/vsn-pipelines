@@ -4,6 +4,8 @@ Development
 Create module
 -------------
 
+Tool-based modules are located in ``src/<tool-name>``, and each module has a specific structure for scripts and Nextflow processes (see `Repository structure`_ below).
+
 Case study: Add `Harmony`
 *************************
 
@@ -19,40 +21,42 @@ Links:
 
 Steps:
 
-#. Ask the `VIB-SingleCell-NF` administrators to create a new repository (in this case: ``harmony``) or create one on your GitHub account that could be brought into the `VIB-SingleCell-NF` organization.
-
-    When using your own repo, you MUST start from the `template repository`_ in the vib-singlecell-nf organisation. Click the green "Use this template" button and provide a name for your new repo. Make sure the "Include all branches" checkbox is checked.
-
-    .. _`template repository`: https://github.com/vib-singlecell-nf/template
-
 #. Create a new issue on ``vsn-pipelines`` GitHub repository explaining which module you are going to add (e.g.: `Add Harmony batch correction method`).
 
-
-#. `Fork the`_ ``vsn-pipelines`` repository to your own GitHub account.
+#. `Fork the`_ ``vsn-pipelines`` repository to your own GitHub account (if you are an external collaborator).
 
     .. _`Fork the`: https://help.github.com/en/github/getting-started-with-github/fork-a-repo
 
-#. From your ``vsn-pipelines`` GitHub repository, create a new branch called ``feature/[github-issue-id]-[description]``.
+#. From your local copy of ``vsn-pipelines`` GitHub repository, create a new branch called ``feature/[github-issue-id]-[description]``.
 
     In this case,
 
     - ``[github-issue-id] = 115``
     - ``[description] = add_harmony_batch_correction_method``
 
+   It is highly recommended to start from the ``develop`` branch:
+
     .. code:: bash
 
+        git checkout develop
+        git fetch
+        git pull
         git checkout -b feature/115-add_harmony_batch_correction_method
 
-#. From within the ``src`` directory of the ``vsn-pipelines`` repo, run the ``add_new_submodule.sh`` script.
+#. Use the `template repository`_ in the vib-singlecell-nf organisation to create the framework for the new module in ``src/<tool-name>``:
 
     .. code:: bash
 
-        ./add_new_submodule.sh [git-repo-url] -d
+        git clone --depth=1 https://github.com/vib-singlecell-nf/template.git src/harmony
 
-    ``[git-repo-url]`` = https://github.com/vib-singlecell-nf/harmony.git (Git Repository URL from `VSN-SingleCell-NF` or from your GitHub account)
-    ``-d`` tracks the develop branch of the new repository, which is where you should work until the module is working.
+    .. _`template repository`: https://github.com/vib-singlecell-nf/template
 
-    If you are using VSCode and you don't see the new submodule appearing in ``SOURCE CONTROL PROVIDERS``, open any file from ``src/harmony`` (e.g.: LICENSE)
+#. Now, you can start to edit file in the tool module that is now located in ``src/<tool-name>``.
+   Optionally, you can delete the ``.git`` directory in the new module to avoid confusion in future local development:
+
+    .. code:: bash
+
+        rm -rf src/harmony/.git
 
 
 #. Create the Dockerfile recipe
@@ -81,11 +85,11 @@ Steps:
             apt-get clean
 
 
-#. Update the ``nextflow.config`` file to create the ``harmony.config`` configuration file.
+#. Rename the ``nextflow.config`` file to create the ``harmony.config`` configuration file.
 
     * Each process's options should be in their own level. With a single process, you do not need one extra level.
 
-    .. code:: dockerfile
+    .. code:: groovy
 
         params {
             sc {
@@ -225,7 +229,7 @@ Steps:
 
 
 
-#. Create the Nextflow process that will run the Harmony R script defined in 7.
+#. Create the Nextflow process that will run the Harmony R script defined in the previous step.
 
     .. code:: groovy
 
@@ -260,9 +264,9 @@ Steps:
         }
 
 
-#. Create a Nextflow module that will call the Nextflow process defined in 8. and perform some other tasks (dimensionality reduction, cluster identification, marker genes identification and report generation)
+#. Create a Nextflow "subworkflow" that will call the Nextflow process defined in the previous step and perform some other tasks (dimensionality reduction, cluster identification, marker genes identification and report generation)
 
-    This step is not required. However it this step is skipped, the code would still need to added into the main ``harmony`` workflow (`workflows/harmony.nf`, see step 10)
+    This step is not required. However it this step is skipped, the code would still need to added into the main ``harmony`` workflow (`workflows/harmony.nf`, see the next step)
 
     .. code:: groovy
 
@@ -408,7 +412,7 @@ Steps:
 
         }
 
-#. In the ``vsn-pipelines``, create a new main workflow called ``harmony.nf`` under ``workflows``
+#. In the ``vsn-pipelines``, create a new main workflow called ``harmony.nf`` under ``workflows/``:
 
     .. code:: groovy
 
@@ -599,7 +603,20 @@ Steps:
 
 
 
-#. Add a new Nextflow profile in ``nextflow.config`` of the ``vsn-pipelines`` repository
+#. Add a new Nextflow profile in the ``profiles`` section of the main ``nextflow.config`` of the ``vsn-pipelines`` repository:
+
+    .. code:: groovy
+
+        profiles {
+
+            harmony {
+                includeConfig 'src/scanpy/scanpy.config'
+                includeConfig 'src/harmony/harmony.config'
+            }
+            ...
+        }
+
+#. Finally add a new entry in ``main.nf`` of the ``vsn-pipelines`` repository
 
     .. code:: groovy
 
@@ -624,29 +641,14 @@ Steps:
 
         }
 
-#. Finally add a new entry in ``main.nf`` of the ``vsn-pipelines`` repository
+    You should now be able to configure (``nextflow config ...``) and run the ``harmony`` pipeline (``nextflow run ...``).
 
-    .. code:: groovy
-
-        harmony {
-            includeConfig 'src/scanpy/scanpy.config'
-            includeConfig 'src/harmony/harmony.config'
-        }
-
-    You should now be able to configure (``nextflow config``) and run the ``harmony`` pipeline (``nextflow run``).
-
-#. After confirming that your module is functional, you should merge your changes in the tool repo into the ``master`` branch.
+#. After confirming that your module is functional, you should create a pull request to merge your changes into the ``develop`` branch.
 
     - Make sure you have removed all references to ``TEMPLATE`` in your repository
     - Include some basic documentation for your module so people know what it does and how to use it.
 
-#. Once merged into ``master`` you should update the submodule in the ``vsn-pipelines`` repo to point to the correct branch
-
-    .. code:: bash
-
-        git submodule set-branch --default src/harmony
-
-#. Finally, add your new and updated files alongside the updated ``.gitmodules`` file and ``src/harmony`` files to a new commit and submit a pull request on the ``vsn-pipelines`` repo to have your new module integrated.
+   The pull request will be reviewed and accepted once it is confirmed to be working. Once the ``develop`` branch is merged into ``master``, the new tool will be part of the new release of VSN Pipelines!
 
 Repository structure
 --------------------
