@@ -7,7 +7,7 @@ toolParams = params.tools.archr
 process SC__ARCHR__CELL_CALLING {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/archr/", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/archr/", mode: 'link'
     label 'compute_resources__default'
 
     input:

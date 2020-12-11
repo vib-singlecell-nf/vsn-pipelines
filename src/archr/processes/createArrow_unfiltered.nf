@@ -7,7 +7,7 @@ toolParams = params.tools.archr
 process SC__ARCHR__CREATE_ARROW_UNFILTERED {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/archr/", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/archr/", mode: 'symlink'
     label 'compute_resources__cpu'
 
     input:
