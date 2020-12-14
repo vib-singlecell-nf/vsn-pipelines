@@ -2,7 +2,7 @@ import static groovy.json.JsonOutput.*
 
 nextflow.preview.dsl=2
 
-include { 
+include {
     INIT;
 } from './src/utils/workflows/utils' params(params)
 
@@ -11,11 +11,11 @@ INIT(params)
 include {
     SC__FILE_CONVERTER;
 } from './src/utils/processes/utils' params(params)
-
+/*
 include {
     getDataChannel;
 } from './src/channels/channels' params(params)
-
+*/
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
 
@@ -130,7 +130,7 @@ workflow harmony_only {
     include {
         PUBLISH as PUBLISH_HARMONY;
     } from "./src/utils/workflows/utils" params(params)
-    
+
 
     batchVariables = getHarmonyBatchVariables(params)
     outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
@@ -156,7 +156,7 @@ workflow bbknn_scenic {
         bbknn as BBKNN;
     } from './workflows/bbknn' params(params)
     include {
-        scenic_append as SCENIC_APPEND; 
+        scenic_append as SCENIC_APPEND;
     } from './src/scenic/main' params(params)
     include {
         PUBLISH as PUBLISH_BBKNN;
@@ -221,9 +221,9 @@ workflow harmony_scenic {
         )
     }
 
-    SCENIC_APPEND( 
+    SCENIC_APPEND(
         HARMONY.out.filteredloom,
-        HARMONY.out.scopeloom 
+        HARMONY.out.scopeloom
     )
 
     if(params.utils?.publish) {
@@ -267,7 +267,7 @@ workflow single_sample {
             null,
             false
         )
-    }  
+    }
 
 }
 
@@ -291,7 +291,7 @@ workflow single_sample_qc {
             null,
             false
         )
-    }  
+    }
 
 }
 
@@ -557,7 +557,7 @@ workflow single_sample_decontx_scrublet {
         )
         // Publish h5ad file where INPUT DATA:
         // - processed by DecontX (either through filter or correct strategy) and ->
-        // - potential doublets removed by Scrublet 
+        // - potential doublets removed by Scrublet
         PUBLISH_CELDA_DECONTX_SCRUBLET(
             SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
             "CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
@@ -681,7 +681,7 @@ workflow single_sample_soupx_scrublet {
         )
         // Publish h5ad file where INPUT DATA:
         // - processed by SoupX and ->
-        // - potential doublets removed by Scrublet 
+        // - potential doublets removed by Scrublet
         PUBLISH_SOUPX_SCRUBLET(
             SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
             "SOUPX_SCRUBLET",
@@ -737,8 +737,8 @@ workflow scenic {
         PUBLISH as PUBLISH_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
-    SCENIC( 
-        Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
+    SCENIC(
+        Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom)))
     )
 
     if(params.utils?.publish) {
@@ -842,22 +842,22 @@ workflow cellranger_count_demuxlet {
     if (params.sc.cellranger.count.fastqs instanceof Map) {
         // Remove default key
         Channel.from(params.sc.cellranger.count.fastqs.findAll {
-            it.key != 'default' 
-        }.collect { k, v -> 
+            it.key != 'default'
+        }.collect { k, v ->
             // Split possible multiple file paths
             if(v.contains(',')) {
                 v = Arrays.asList(v.split(',')).collect { fqs -> file(fqs) }
             } else {
                 v = file(v)
             }
-            tuple(k, v) 
+            tuple(k, v)
         })
         // Group fastqs per sample
         .groupTuple()
         .map {
             it -> tuple(it[0], *it[1])
         }
-        .set { fastq_data }           
+        .set { fastq_data }
     }
     data = CELLRANGER_COUNT(
         params.sc.cellranger.count.transcriptome,
@@ -872,7 +872,7 @@ workflow freemuxlet {
         cellranger_output_to_bam_barcodes;
         FREEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
-    
+
     getDataChannel |
         cellranger_output_to_bam_barcodes |
         FREEMUXLET
@@ -907,7 +907,7 @@ workflow single_sample_cellranger {
 
 workflow cellranger_multi_sample {
 
-    include { 
+    include {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
 
@@ -931,7 +931,7 @@ workflow cellranger_multi_sample_demuxlet {
     } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     data = cellranger()
-    MULTI_SAMPLE(        
+    MULTI_SAMPLE(
         data.map {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         }
@@ -948,7 +948,7 @@ workflow cellranger_libraries_multi_sample {
     } from './workflows/multi_sample' params(params)
 
     data = cellranger_libraries()
-    MULTI_SAMPLE(        
+    MULTI_SAMPLE(
         data.map {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         }
@@ -1042,15 +1042,15 @@ workflow sra_cellranger_bbknn {
         include {
             bbknn as BBKNN;
         } from './workflows/bbknn' params(params)
-        
-        // Run 
+
+        // Run
         DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
         SC__CELLRANGER__PREPARE_FOLDER( DOWNLOAD_FROM_SRA.out.groupTuple() )
         SC__CELLRANGER__COUNT(
             file(params.sc.cellranger.count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out
         )
-        BBKNN( 
+        BBKNN(
             SC__CELLRANGER__COUNT.out.map {
                 it -> tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
@@ -1085,7 +1085,7 @@ workflow sra_cellranger_bbknn_scenic {
             null,
             false
         )
-    }  
+    }
 
 }
 
@@ -1105,8 +1105,8 @@ workflow cell_annotate {
     // Run
     getDataChannel | \
         SC__FILE_CONVERTER
-    ANNOTATE_BY_CELL_METADATA( 
-        SC__FILE_CONVERTER.out, 
+    ANNOTATE_BY_CELL_METADATA(
+        SC__FILE_CONVERTER.out,
         null,
     )
     PUBLISH(
@@ -1144,8 +1144,8 @@ workflow cell_annotate_filter {
             throw new Exception("VSN ERROR: The cell_annotate param is missing in params.sc.")
 
         // Annotate & publish
-        ANNOTATE_BY_CELL_METADATA( 
-            SC__FILE_CONVERTER.out, 
+        ANNOTATE_BY_CELL_METADATA(
+            SC__FILE_CONVERTER.out,
             null,
         )
         if(params.sc.cell_annotate.containsKey("publish") && params.sc.cell_annotate.publish) {
@@ -1256,4 +1256,25 @@ workflow filter_and_annotate_and_clean {
         false
     )
 
+}
+
+workflow R_rnaseq {
+	include {
+		seurat_scater_sct_doubletfinder
+	} from './workflows/seurat_scater_sct_doubletfinder.nf' params(params)
+
+	include {
+		SEURAT__SEURAT_OBJECT_BUILDER
+	} from './src/seurat/processes/seuratObjBuilder.nf' params(params)
+
+	if(params.Seurat.seuratObjBuilder.inputFile == null){
+		seuratInput = Channel.fromPath(params.Seurat.inputRdsFile)
+						.map{ file -> tuple(params.global.sampleName,file)}
+	} else {
+		input = Channel.fromPath(params.Seurat.seuratObjBuilder.inputFile)
+						.map{ file -> tuple(params.global.sampleName,file)}
+		seuratInput = SEURAT__SEURAT_OBJECT_BUILDER(input)
+	}
+
+	seurat_scater_sct_doubletfinder(seuratInput)
 }

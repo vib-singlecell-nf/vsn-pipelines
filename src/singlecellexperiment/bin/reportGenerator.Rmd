@@ -1,0 +1,19 @@
+---
+params:
+  input: ''
+  id: "Sample 1"
+title: "`r params$id` report"
+author: "Singularity."
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r ,echo=FALSE}
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("SingleCellExperiment"))
+sceobj <- readRDS(params$input)
+for(graph in sceobj@metadata$plots){
+  print(graph)
+}
+
+```
