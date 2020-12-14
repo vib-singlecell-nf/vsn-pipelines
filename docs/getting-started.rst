@@ -126,6 +126,6 @@ The pipelines will generate 3 types of results in the output directory (`params.
 
     - See the example output report from the 1k PBMC data `here <http://htmlpreview.github.io/?https://github.com/vib-singlecell-nf/vsn-pipelines/blob/master/notebooks/10x_PBMC.merged_report.html>`_
 
-- ``pipeline_reports``: nextflow dag, execution, timeline, and trace reports
+- ``pipeline_reports``: Nextflow dag, execution, timeline, and trace reports
 
 If you would like to use the pipelines on a custom dataset, please see the `pipelines <./pipelines.html>`_ section below.

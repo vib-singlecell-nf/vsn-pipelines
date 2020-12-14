@@ -8,7 +8,7 @@ This pipeline can be configured and run on custom data with a few steps.
 The recommended method is to first run ``nextflow config ...`` to generate a complete config file (with the default parameters) in your working directory.
 The tool-specific parameters, as well as Docker/Singularity profiles, are included when specifying the appropriate profiles to ``nextflow config``.
 
-1. First, update to the latest pipeline version (this will update the nextflow cache of the repository, typically located in ``~/.nextflow/assets/vib-singlecell-nf/``)::
+1. First, update to the latest pipeline version (this will update the Nextflow cache of the repository, typically located in ``~/.nextflow/assets/vib-singlecell-nf/``)::
 
     nextflow pull vib-singlecell-nf/vsn-pipelines
 
@@ -502,14 +502,14 @@ The output is a loom file with the results embedded.
 Utility Pipelines
 *****************
 
-Contrary to the aformentioned pipelines, these are not end-to-end. They are used to perfom small incremental processing steps.
+Contrary to the aformentioned pipelines, these are not end-to-end. They are used to perform small incremental processing steps.
 
 **cell_annotate**
 -----------------
 
 Runs the ``cell_annotate`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files.
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
-about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section.
+about this cell-based annotation feature please visit `Cell-based metadata annotation`_ section.
 
 .. _`Cell-based metadata annotation`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-annotation
 
@@ -561,7 +561,7 @@ Now we can run it with the following command:
 
 Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files following by a cell-based filtering.
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
-about this cell-based annotation feautre please visit `Cell-based metadata annotation`_ section and `Cell-based metadata filtering`_ section.
+about this cell-based annotation feature please visit `Cell-based metadata annotation`_ section and `Cell-based metadata filtering`_ section.
 
 .. _`Cell-based metadata filtering`: https://vsn-pipelines.readthedocs.io/en/latest/features.html#cell-based-metadata-filtering
 
@@ -752,7 +752,7 @@ In the generated .config file, make sure the ``file_paths`` parameter is set wit
 
 - The ``suffix`` parameter is used to infer the sample name from the file paths (it is removed from the input file path to derive a sample name).
 
-In case there are multiple .h5ad files that need to be processed with different suffixes, the multi-labelled strategy should be used to define the h5ad param::
+In case there are multiple .h5ad files that need to be processed with different suffixes, the multi-labelled strategy should be used to define the h5ad parameter::
 
     [...]
     data {
