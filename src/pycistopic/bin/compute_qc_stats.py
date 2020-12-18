@@ -2,13 +2,14 @@
 
 import argparse
 import pybiomart as pbm
+import pandas as pd
+import pickle
 
 from pycisTopic.qc import computeQCStats
 
-#import os
-#import scanpy as sc
+################################################################################
 
-parser = argparse.ArgumentParser(description='Template script')
+parser = argparse.ArgumentParser(description='Compute QC stats')
 
 parser.add_argument(
     "--sampleId",
@@ -18,41 +19,53 @@ parser.add_argument(
 )
 parser.add_argument(
     "--fragments",
-    type=argparse.FileType('r'),
+    type=str,
     required=True,
     help='Input fragments file.'
 )
 parser.add_argument(
     "--regions",
-    type=argparse.FileType('r'),
+    type=str,
     required=True,
     help='Path to regions file.'
 )
 parser.add_argument(
-    "--output",
-    type=argparse.FileType('w'),
-    help='Output file.'
+    "--n_frag",
+    type=int,
+    required=True,
+    default=50,
+    help='Threshold on the number of fragments to keep for a barcode.'
 )
 parser.add_argument(
-    "-s", "--seed",
+    "--output_metadata",
+    type=str,
+    help='Output file, tsv format.'
+)
+parser.add_argument(
+    "--output_metadata_pkl",
+    type=str,
+    help='Metadata output, pickle format.'
+)
+parser.add_argument(
+    "--output_profile_data_pkl",
+    type=str,
+    help='Profile data output, pickle format.'
+)
+parser.add_argument(
+    "--threads",
     type=int,
-    action="store",
-    dest="seed",
-    default=0,
-    help="Use this integer seed for reproducibility."
+    required=True,
+    default=1,
+    help='Number of threads to use.'
 )
 
 args = parser.parse_args()
 
-
-singularity run -B /ddn1 /ddn1/vol1/site_scratch/leuven/325/vsc32528/sif/vibsinglecellnf-pycistopic-0.1.img ipython
-
-args.sampleId = 'sample_test'
-args.fragments = '/ddn1/vol1/staging/leuven/stg_00002/lcb/cflerin/analysis/pbmc_atac/analysis/nextflow/test/out/fragments/VIB_1.sinto.fragments.tsv.gz'
+################################################################################
 
 dataset = pbm.Dataset(name='hsapiens_gene_ensembl',  host='http://www.ensembl.org')
 annot = dataset.query(attributes=['chromosome_name', 'transcription_start_site', 'strand', 'external_gene_name', 'transcript_biotype'])
-filter = annot['Chromosome/scaffold name'].str.contains('CHR|GL|JH|MT')
+filter = annot['Chromosome/scaffold name'].str.contains('CHR|GL|JH|MT', na=False)
 annot = annot[~filter]
 annot['Chromosome/scaffold name'] = annot['Chromosome/scaffold name'].str.replace(r'(\b\S)', r'chr\1')
 annot.columns=['Chromosome', 'Start', 'Strand', 'Gene', 'Transcript_type']
@@ -60,20 +73,23 @@ annot = annot[annot.Transcript_type == 'protein_coding']
 
 ##################################################
 
+
 fragments_dict = { 
     args.sampleId: args.fragments
     }
-path_to_regions = {'Run_1':'/staging/leuven/stg_00002/lcb/dwmax/documents/aertslab/MLV/10x/exp/ih/20190425_NextSeq500_10x_scATAC/MLV__4aa2e0__Mouse_liver_ctrl/outs/peaks.bed',
-                  'Run_2':'/staging/leuven/stg_00002/lcb/lcb_projects/MLV/cellranger_atac/NovaSeq6000_20200730/MLV__0d3236__liver_fresh_07_07_2020/outs/peaks.bed'}
+path_to_regions = {
+    args.sampleId: args.regions
+    }
 
-metadata_bc_dict, profile_data_dict = computeQCStats(fragments_dict= fragments_dict,
+metadata_bc_dict, profile_data_dict = computeQCStats(
+                fragments_dict= fragments_dict,
                 tss_annotation = annot,
                 stats=['barcodeRankPlot', 'insertSizeDistribution', 'profileTSS', 'FRIP'],
                 label_list = None,
                 path_to_regions = path_to_regions,
-                n_cpu = 5,
+                n_cpu = args.threads,
                 valid_bc = None,
-                n_frag = 50,
+                n_frag = args.n_frag,
                 n_bc = None,
                 tss_flank_window = 2000,
                 tss_window = 50,
@@ -82,7 +98,13 @@ metadata_bc_dict, profile_data_dict = computeQCStats(fragments_dict= fragments_d
                 remove_duplicates = True)
 
 
+### outputs:
 
+metadata_bc_dict[args.sampleId].to_csv(args.output_metadata, sep='\t', index_label='barcode')
 
+with open(args.output_metadata_pkl, 'wb') as f:
+    pickle.dump(metadata_bc_dict, f)
 
+with open(args.output_profile_data_pkl, 'wb') as f:
+    pickle.dump(profile_data_dict, f)
 

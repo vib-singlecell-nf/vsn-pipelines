@@ -8,7 +8,6 @@ processParams = params.tools.pycistopic.macs2_call_peaks
 process SC__PYCISTOPIC__MACS2_CALL_PEAKS {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/peaks/", mode: 'symlink'
     label 'compute_resources__cpu'
 
     input:
