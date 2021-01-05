@@ -1,10 +1,6 @@
-scATAC-seq Pipelines
-====================
+scATAC-seq Preprocessing
+========================
 
-----
-
-scATAC-seq preprocessing
-************************
 
 This pipeline takes fastq files from paired end single cell ATAC-seq, and applies preprocessing steps to align the reads to a reference genome, and produce a bam file and scATAC-seq fragments file.
 The full steps are:
@@ -25,7 +21,7 @@ The full steps are:
 - A fragments file is created using `Sinto <https://github.com/timoast/sinto>`_.
 
 Input
------
+*****
 
 The input to this pipeline is a (tab-delimited) metadata table with the sample ID, sequencing technology, and locations of the fastq files:
 
@@ -63,13 +59,13 @@ The columns represent:
 - ``fastq_PE2_path``: The full path to the fastq file for the second read in a pair.
 
 Technology
-----------
+**********
 
 This controls how both barcode correction and debarcoding is applied to the input fastq files.
 Available options are:
 
 ``standard`` 
-____________
+------------
 
 The ``standard`` setting assumes a typical 10x Genomics style format with two read pair fastqs and a barcode fastq:
 
@@ -113,14 +109,14 @@ which transforms this input into two paired fastq files with the barcode integra
 
 
 ``multiome``
-____________
+------------
 
 The ``multiome`` setting works the same as ``standard`` with the exception of the whitelist used for barcode correction.
 The whitelists are supplied in the params file (``params.tools.singlecelltoolkit.barcode_correction.whitelist``).
 
 
 ``biorad`` 
-__________
+----------
 
 The ``biorad`` setting processes BioRad data using `BAP <https://github.com/caleblareau/bap/wiki/Working-with-BioRad-data>`_.
 This takes input data:
@@ -158,7 +154,7 @@ And produces paired fastq files with the barcode integrated into the read name (
 
 
 Running the workflow
---------------------
+********************
 
 To generate a config file, use the ``atac_preprocess`` profile along with ``docker`` or ``singularity``.
 Note that the full path to ``vib-singlecell-nf/vsn-pipelines/main_atac.nf`` must be used:

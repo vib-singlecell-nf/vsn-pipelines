@@ -1,5 +1,27 @@
-Features
-=========
+Advanced Features
+=================
+
+Two-pass strategy
+-----------------
+
+Typically, cell- and gene-level filtering is one of the first steps performed in the analysis pipelines.
+This usually results in the pipeline being run in two passes.
+In the **first pass**, the default filters are applied (which are probably not valid for new datasets), and a separate QC report is generated for each sample.
+These QC reports can be inspected and the filters can be adjusted in the config file
+either for all samples (by editing the ``params.sc.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
+Then, the **second pass** restarts the pipeline with the correct filtering parameters applied (use ``nextflow run ... -resume`` to skip already completed steps).
+
+Other notes
+^^^^^^^^^^^
+In order to run a specific pipeline (e.g. ``single_sample``),
+the pipeline name must be specified as a **profile** when running ``nextflow config ...`` (so that the default parameters are included),
+and as the **entry** workflow when running the pipeline with ``nextflow run``.
+
+One exception to this is that the ``-entry`` pipeline can be one that is a subset of the one present in the config file.
+For example, in a pipeline with long running step that occurs after filtering (e.g. ``single_sample_scenic``),
+it can be useful to generate the full config file (``nextflow config vib-singlecell-nf/vsn-pipelines -profile single_sample_scenic``),
+then run a first pass for filtering using ``nextflow run vib-singlecell-nf/vsn-pipelines -entry single_sample``, and a second pass using the full pipeline ``-entry single_sample_scenic``).
+
 
 Avoid re-running SCENIC and use pre-existing results
 ----------------------------------------------------
@@ -107,6 +129,9 @@ Remarks:
 
 Currently, only the Scanpy related pipelines have this feature implemented.
 
+
+.. _Cell annotation:
+
 Cell-based metadata annotation
 ------------------------------
 
@@ -179,6 +204,8 @@ If ``obo`` is used, the following parameters are required:
 
 .. _`Input Data Formats`: https://vsn-pipelines.readthedocs.io/en/develop/pipelines.html#input-data-formats
 
+
+.. _Sample annotation:
 
 Sample-based metadata annotation
 --------------------------------
@@ -292,6 +319,8 @@ If ``external`` used, the following additional parameters are required:
   - `optional` ``sampleColumnName`` is the column name from ``cellMetaDataFilePath`` containing the sample ID/name information. Make sure that the values from this column match the samples IDs inferred from the data files. To know how those are inferred, please read the `Input Data Formats`_ section.
   - `optional` ``filterColumnName`` is the column name from ``cellMetaDataFilePath`` which be used to filter out cells.
 
+
+.. _Multi-sample parameters:
 
 Multi-sample parameters
 ------------------------
