@@ -109,7 +109,7 @@ Sample Aggregation Workflows
       - |mnncorrect|
 
 
----
+----
 
 In addition, the pySCENIC_ implementation of the SCENIC_ workflow is integrated here and can be run in conjunction with any of the above workflows.
 The output of each of the main workflows is a loom_-format file, which is ready for import into the interactive single-cell web visualization tool SCope_.
