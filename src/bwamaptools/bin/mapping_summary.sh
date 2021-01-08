@@ -18,5 +18,5 @@ CMR=$(samtools view -c -F 0x4 -F 0x100 -F 0x800 -q 30 ${bam})
 printf "\t${sampleId}\n" > ${sampleId}.mapping_stats.tsv
 grep ^SN ${sampleId}.stat | cut -f 2,3 >> ${sampleId}.mapping_stats.tsv
 printf "Uniquely mapped reads:\t${UMR}\n" >> ${sampleId}.mapping_stats.tsv
-printf "Fraction of reads mapped with MAPQ>30:\t${CMR}\n" >> ${sampleId}.mapping_stats.tsv
+printf "Reads mapped with MAPQ>30:\t${CMR}\n" >> ${sampleId}.mapping_stats.tsv
 
