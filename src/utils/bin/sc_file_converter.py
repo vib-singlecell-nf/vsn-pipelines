@@ -253,7 +253,8 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
 elif INPUT_FORMAT == 'loom' and OUTPUT_FORMAT == 'h5ad':
     adata = sc.read_loom(
         FILE_PATH_IN,
-        sparse=False
+        sparse=False,
+        validate=False
     )
     adata = add_sample_id(
         adata=adata,
