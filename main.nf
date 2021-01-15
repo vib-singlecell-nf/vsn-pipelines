@@ -1,6 +1,6 @@
 import static groovy.json.JsonOutput.*
 
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 include { 
     INIT;

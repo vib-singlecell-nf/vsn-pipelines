@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 // Should be set in case this pipeline is run with other pipelines (e.g.: single_sample)
 

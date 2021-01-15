@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 CELLRANGER_OUTS_REGEX = /(.+)\/(.+)\/outs/
 CELLRANGER_H5_REGEX = /(.+)\/(.+)\/outs\/(.+)\.h5/
