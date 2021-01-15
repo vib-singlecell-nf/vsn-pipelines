@@ -15,14 +15,14 @@ workflow getChannel {
         if(glob.contains(',')) {
             glob = Arrays.asList(glob.split(',')); 
         }
-        channel = Channel
+        data_channel = Channel
             .fromPath(glob, checkIfExists: true)
             .map {
                 path -> tuple(extractSample( "${path}", sampleSuffixWithExtension ), file("${path}"))
             }
 
     emit:
-        channel
+        data_channel
 
 }
 
@@ -38,14 +38,14 @@ workflow getChannelWithIndex {
         if(glob.contains(',')) {
             glob = Arrays.asList(glob.split(',')); 
         }
-        channel = Channel
+        data_channel = Channel
             .fromPath(glob, checkIfExists: true)
             .map {
                 path -> tuple(extractSample( "${path}", sampleSuffixWithExtension ), file("${path}"), file("${path}${indexFileExtension}"))
             }
 
     emit:
-        channel
+        data_channel
 
 }
 
@@ -56,13 +56,13 @@ workflow getChannelFromFilePath {
         sampleSuffixWithExtension // Suffix after the sample name in the file paths
     
     main:
-        channel = Channel.of(
+        data_channel = Channel.of(
             tuple(filePath)
         ).map {
             it -> tuple(extractSample( "${it[0]}", sampleSuffixWithExtension ), file("${it[0]}"))
         }
 
     emit:
-        channel
+        data_channel
 
 }
