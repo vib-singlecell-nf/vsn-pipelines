@@ -11,7 +11,8 @@ def generateCellRangerCountCommandDefaults = {
 	processParams,
 	transcriptome,
 	expectCells,
-	chemistry ->
+	chemistry,
+    task ->
 	_expectCells = null
 	// --expect-cells argument
 	if(!isParamNull(expectCells)) {
@@ -53,7 +54,7 @@ def runCellRangerCount = {
 	expectCells = null,
 	chemistry = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry, task) + \
 		"""	\
 		--id=${id} \
 		--sample=${sample} \
@@ -72,7 +73,7 @@ def runCellRangerCountLibraries = {
 	expectCells = null,
 	chemistry = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry, task) + \
 		""" \
 		--id ${id} \
 		--libraries ${libraries} \
