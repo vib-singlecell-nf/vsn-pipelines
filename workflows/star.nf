@@ -16,7 +16,9 @@ include {
     SC__STAR_CONCATENATOR;
 } from '../src/utils/processes/utils.nf' params(params)
 
-include getChannel as getSingleEndChannel from '../src/channels/singleend.nf' params(params)
+include {
+    getChannel;
+} as getSingleEndChannel from '../src/channels/singleend.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

@@ -1,7 +1,5 @@
 nextflow.preview.dsl=2
 
-// include groupParams from '../../utils/utils.nf'
-
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 

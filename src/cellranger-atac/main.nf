@@ -5,9 +5,15 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__CELLRANGER_ATAC__MKFASTQ             from './processes/mkfastq'  params(params)
-include SC__CELLRANGER_ATAC__COUNT               from './processes/count'    params(params)
-include CELLRANGER_ATAC_COUNT_WITH_METADATA      from './workflows/cellRangerCountWithMetadata'    params(params)
+include {
+    SC__CELLRANGER_ATAC__MKFASTQ;
+} from './processes/mkfastq' params(params)
+include {
+    SC__CELLRANGER_ATAC__COUNT;
+} from './processes/count' params(params)
+include {
+    CELLRANGER_ATAC_COUNT_WITH_METADATA;
+} from './workflows/cellRangerCountWithMetadata' params(params)
 
 
 //////////////////////////////////////////////////////

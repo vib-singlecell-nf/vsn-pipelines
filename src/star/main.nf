@@ -3,9 +3,15 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__STAR__LOAD_GENOME from './processes/load_genome'  params(params)
-include SC__STAR__MAP_COUNT from './processes/map_count'  params(params)
-include SC__STAR__UNLOAD_GENOME from './processes/unload_genome'  params(params)
+include {
+    SC__STAR__LOAD_GENOME;
+} from './processes/load_genome' params(params)
+include {
+    SC__STAR__MAP_COUNT;
+} from './processes/map_count' params(params)
+include {
+    SC__STAR__UNLOAD_GENOME;
+} from './processes/unload_genome' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

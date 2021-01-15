@@ -3,8 +3,12 @@ nextflow.preview.dsl=2
 //////////////////////////////////////////////////////
 //  process imports:
 
-include SC__HARMONY__HARMONY_MATRIX from './../processes/runHarmony.nf' params(params)
-include SC__H5AD_UPDATE_X_PCA from './../../utils/processes/h5adUpdate.nf' params(params)
+include {
+    SC__HARMONY__HARMONY_MATRIX;
+} from './../processes/runHarmony.nf' params(params)
+include {
+SC__H5AD_UPDATE_X_PCA;
+} from './../../utils/processes/h5adUpdate.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

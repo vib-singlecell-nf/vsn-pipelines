@@ -15,7 +15,9 @@ include {
  } from '../processes/dim_reduction.nf' params(params + [method: "umap"])
 
 // reporting:
-include GENERATE_REPORT from './create_report.nf' params(params)
+include {
+    GENERATE_REPORT;
+} from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 
