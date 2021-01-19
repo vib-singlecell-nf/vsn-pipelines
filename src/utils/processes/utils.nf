@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 import java.nio.file.Paths
 import nextflow.config.ConfigParser

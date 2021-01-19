@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 toolParams = params.sc.cellranger_atac
 
@@ -63,7 +63,7 @@ process SC__CELLRANGER_ATAC__COUNT_WITH_METADATA {
     cache 'deep'
     container toolParams.container
     publishDir "${params.global.outdir}/counts", mode: 'link', overwrite: true
-    label 'compute_resources__cellranger'
+    label 'compute_resources__cellranger_count'
 
     input:
         tuple \

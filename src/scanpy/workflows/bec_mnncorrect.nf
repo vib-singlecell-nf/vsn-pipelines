@@ -3,7 +3,7 @@
  * - batch effect correction using python package mnnpy (fast and python version of mnnCorrect (Haghverdi et al, 2018)
  */ 
 
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the utils module:

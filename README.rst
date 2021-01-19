@@ -8,7 +8,8 @@ A repository of pipelines for single-cell data analysis in Nextflow DSL2.
 
 **Full documentation** is available on `Read the Docs <https://vsn-pipelines.readthedocs.io/en/latest/>`_, or take a look at the `Quick Start <https://vsn-pipelines.readthedocs.io/en/latest/getting-started.html#quick-start>`_ guide.
 
-This main repo contains multiple workflows for analyzing single cell transcriptomics data, and depends on a number of tools, which are organized into submodules within the VIB-Singlecell-NF_ organization.
+This main repo contains multiple workflows for analyzing single cell transcriptomics data, and depends on a number of tools, which are organized into subfolders within the ``src/`` directory.
+The VIB-Singlecell-NF_ organization contains this main repo along with a collection of example runs (`VSN-Pipelines-examples <https://vsn-pipelines-examples.readthedocs.io/en/latest/>`_).
 Currently available workflows are listed below.
 
 If VSN-Pipelines is useful for your research, consider citing:
@@ -108,7 +109,8 @@ Sample Aggregation Workflows
       - |mnncorrect|
 
 
----
+----
+
 In addition, the pySCENIC_ implementation of the SCENIC_ workflow is integrated here and can be run in conjunction with any of the above workflows.
 The output of each of the main workflows is a loom_-format file, which is ready for import into the interactive single-cell web visualization tool SCope_.
 In addition, data is also output in h5ad format, and reports are generated for the major pipeline steps.
