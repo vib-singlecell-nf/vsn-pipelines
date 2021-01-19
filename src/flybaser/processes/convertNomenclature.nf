@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 if(!params.containsKey("test")) {
     binDir = "${workflow.projectDir}/src/flybaser/bin/"

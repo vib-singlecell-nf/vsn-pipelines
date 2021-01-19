@@ -1,14 +1,20 @@
-nextflow.preview.dsl=2
-
-// include groupParams from '../../utils/utils.nf'
+nextflow.enable.dsl=2
 
 //////////////////////////////////////////////////////
 //  Define the parameters for current testing proces
 
-include SC__CELLRANGER__MKFASTQ             from './processes/mkfastq'  params(params)
-include SC__CELLRANGER__COUNT               from './processes/count'    params(params)
-include CELLRANGER_COUNT_WITH_METADATA      from './workflows/cellRangerCountWithMetadata'    params(params)
-include MKFASTQ                             from './workflows/mkfastq'    params(params)
+include {
+    SC__CELLRANGER__MKFASTQ;
+} from './processes/mkfastq' params(params)
+include {
+    SC__CELLRANGER__COUNT;
+} from './processes/count' params(params)
+include {
+    CELLRANGER_COUNT_WITH_METADATA;
+} from './workflows/cellRangerCountWithMetadata' params(params)
+include {
+    MKFASTQ;
+} from './workflows/mkfastq' params(params)
 
 
 workflow CELLRANGER {

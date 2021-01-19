@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 process SC__DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT {
     

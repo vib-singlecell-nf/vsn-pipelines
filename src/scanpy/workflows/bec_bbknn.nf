@@ -5,7 +5,7 @@
  * - batch effect correction using python package bbknn (Park et al. (2018), Fast Batch Alignment of Single Cell Transcriptomes Unifies Multiple Mouse Cell Atlases into an Integrated Landscape)
  */ 
 
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 ////////////////////////////////////////////////////////
 //  Import sub-workflows/processes from the utils module:

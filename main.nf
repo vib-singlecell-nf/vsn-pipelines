@@ -1,6 +1,6 @@
 import static groovy.json.JsonOutput.*
 
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 include { 
     INIT;
@@ -371,7 +371,9 @@ workflow single_sample_scenic {
 
 workflow pcacv {
 
-    include PCACV__FIND_OPTIMAL_NPCS from './src/pcacv/processes/runPCACV' params(params)
+    include {
+        PCACV__FIND_OPTIMAL_NPCS;
+    } from './src/pcacv/processes/runPCACV' params(params)
     getDataChannel().map {
         it -> tuple(it[0], it[1])
     }
