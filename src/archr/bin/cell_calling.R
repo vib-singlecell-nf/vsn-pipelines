@@ -176,4 +176,6 @@ dev.off()
 write.table(dat[dat$Keep==1,],
             paste0(args$output_directory,"/",sample_id,"-qc_stats.txt"), sep='\t', quote=FALSE)
 
+write.table(dat,
+            gzfile(paste0(args$output_directory,"/",sample_id,"-qc_stats_unfiltered.txt.gz")), sep='\t', quote=FALSE)
 
