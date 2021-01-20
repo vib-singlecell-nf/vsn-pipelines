@@ -12,7 +12,6 @@ include {
     isParamNull;
     COMPRESS_HDF5;
     SC__PUBLISH;
-    SC__PUBLISH_PROXY;
 } from "./../processes/utils.nf" params(params)
 
 formatsAllowed = ['h5ad', 'loom']
@@ -45,22 +44,11 @@ workflow PUBLISH {
                     isParamNull(toolName) ? 'NULL' : toolName,
                 )
             }
-
-            // Publish
-            SC__PUBLISH(
-                out.map {
-                    // if stashedParams not there, just put null 3rd arg
-                    it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
-                },
-                isParamNull(fileOutputSuffix) ? 'NULL' : fileOutputSuffix,
-                isParamNull(toolName) ? 'NULL' : toolName,
-                isParameterExplorationModeOn
-            )
         }
 
-        // Proxy to avoid file name collision
-        SC__PUBLISH_PROXY(
-            data.map {
+        // Publish
+        SC__PUBLISH(
+            out.map {
                 // if stashedParams not there, just put null 3rd arg
                 it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
             },
@@ -70,7 +58,7 @@ workflow PUBLISH {
         )
 
     emit:
-        SC__PUBLISH_PROXY.out
+        SC__PUBLISH.out
 
 }
 

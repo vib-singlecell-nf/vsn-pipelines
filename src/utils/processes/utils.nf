@@ -411,58 +411,13 @@ def getPublishDir = { outDir, toolName ->
     return "${outDir}/data/${toolName.toLowerCase()}"
 }
 
-process SC__PUBLISH_PROXY {
-
-    publishDir "${params.global.outdir}/data/intermediate", \
-        mode: 'symlink', \
-        overwrite: true, \
-        saveAs: {
-            filename -> "${outputFileName}" 
-        }
-
-    label 'compute_resources__minimal'
-
-    input:
-        tuple \
-            val(tag), \
-            path(f), \
-            val(stashedParams)
-        val(fileOutputSuffix)
-        val(toolName)
-        val(isParameterExplorationModeOn)
-
-    output:
-        tuple \
-            val(tag), \
-            path(outputFileName), \
-            val(stashedParams)
-
-    script:
-        outputFileName = getOutputFileName(
-            params,
-            tag,
-            f,
-            fileOutputSuffix,
-            false,
-            null
-        )
-        """
-        if [ ! -f ${outputFileName} ]; then
-            ln -s $f "${outputFileName}"
-        fi
-        """
-
-}
 
 process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: 'link', \
-        overwrite: true, \
-        saveAs: {
-            filename -> "${outputFileName}" 
-        }
+        mode: "${params.utils.publish.mode}", \
+        saveAs: { filename -> "${outputFileName}" }
 
     label 'compute_resources__minimal'
     
@@ -490,14 +445,17 @@ process SC__PUBLISH {
             isParameterExplorationModeOn,
             stashedParams
         )
+        /* avoid cases where the input and output files have identical names:
+           Move the input file to a unique name, then create a link to
+           the input file */
         """
-        cp -rL $f tmp
-        rm $f
-        ln tmp "${outputFileName}"
-        rm tmp
+        mv $f tmp
+        if [ ! -f ${outputFileName} ]; then
+            ln -L tmp "${outputFileName}"
+        fi
         """
-
 }
+
 
 process COMPRESS_HDF5() {
 
