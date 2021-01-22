@@ -9,6 +9,7 @@ workflow getChannel {
     take:
         glob
         sampleSuffixWithExtension // Suffix after the sample name in the file paths
+        groups
 
     main:
         // Check whether multiple globs are provided
@@ -18,7 +19,17 @@ workflow getChannel {
         data_channel = Channel
             .fromPath(glob, checkIfExists: true)
             .map {
-                path -> tuple(extractSample( "${path}", sampleSuffixWithExtension ), file("${path}"))
+                path -> tuple(
+                    *extractSample(
+                        "${path}",
+                        sampleSuffixWithExtension,
+                        groups
+                    ),
+                    file("${path}")
+                )
+            }.map {
+                // reorder: sample ID, file path, tag
+                it -> tuple(it[0], it[2], it[1])
             }
 
     emit:

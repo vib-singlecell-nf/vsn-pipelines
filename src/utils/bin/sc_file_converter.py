@@ -61,6 +61,24 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-k", "--group-name",
+    type=str,
+    dest="group_name",
+    default=None,
+    action='store',
+    help="Name of the group which the given input files are from. A new column named by this group_name will be added in anndata.obs"
+)
+
+parser.add_argument(
+    "-l", "--group-value",
+    type=str,
+    dest="group_value",
+    default=None,
+    action='store',
+    help="Value of the group which the given input files are from. The group_name column in anndata.obs will be populated with this group_value."
+)
+
+parser.add_argument(
     "-t", "--tag-cell-with-sample-id",
     type=str2bool,
     action="store",
@@ -154,16 +172,19 @@ def update_obs(adata, args):
         column_name="sample_id",
         value=args.sample_id
     )
-    adata = add_sample_id(
-        adata=adata,
-        args=args
-    )
-    # If is tag_cell_with_sample_id is given, add the sample ID as suffix
+    # If tag_cell_with_sample_id is given, add the sample ID as suffix
     if args.tag_cell_with_sample_id:
         adata = tag_cell(
             adata=adata,
             tag=args.sample_id,
             remove_10x_gem_well=args.remove_10x_gem_well
+        )
+    # Add group_value as obs entry with group_name as column name
+    if args.group_name is not None and args.group_value is not None:
+        adata = add_obs_column(
+            adata=adata,
+            column_name=args.group_name,
+            value=args.group_value
         )
     return adata
 

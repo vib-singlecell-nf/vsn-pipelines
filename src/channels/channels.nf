@@ -47,7 +47,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", outputFileFormat, 'NULL')
                     }
                 ).view()
             } else {
@@ -55,7 +55,7 @@ workflow getDataChannel {
                     getTenXCellRangerMEXChannel(
                         params.data.tenx.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_mex", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex", outputFileFormat, 'NULL')
                     }
                 ).view()
             }
@@ -66,7 +66,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx_atac.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", outputFileFormat, 'NULL')
                     }
                 ).view()
             } else {
@@ -74,7 +74,7 @@ workflow getDataChannel {
                     getTenXCellRangerMEXChannel(
                         params.data.tenx_atac.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat, 'NULL')
                     }
                 ).view()
             }
@@ -85,7 +85,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx.cellranger_h5
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", outputFileFormat, 'NULL')
                     }
                 ).view()
             } else {
@@ -93,7 +93,7 @@ workflow getDataChannel {
                     getTenXCellRangerH5Channel( 
                         params.data.tenx.cellranger_h5
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_h5", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5", outputFileFormat, 'NULL')
                     }
                 ).view()
             }
@@ -102,19 +102,37 @@ workflow getDataChannel {
             dataH5ad = params.data.h5ad
             def filePaths = null
             def suffix = null
+            def groups = null
             if(!dataH5ad.containsKey("file_paths") && !dataH5ad.containsKey("suffix")) {
                 filePaths = dataH5ad.collect { k,v -> v["file_paths"] }.flatten()
                 suffix = dataH5ad.collect { k,v -> v["suffix"] }.flatten()
+                numGroups = dataH5ad.size()
+                numUniqueSuffixes = suffix.unique { a, b -> a <=> b }.size()
+                if(numGroups != numUniqueSuffixes) {
+                    throw new Exception("VSN ERROR: Number of data groups ("+ numGroups +") should be equal to the number of unique suffixes ("+ numUniqueSuffixes +"). Fix the group definitions in params.data.")
+                }
+                // optional
+                groups = dataH5ad.collect { 
+                    k,v -> "group" in v ? v["group"] : 'NULL' 
+                }
             } else {
                 filePaths = dataH5ad.file_paths
                 suffix = dataH5ad.suffix
+                groups = null
             }
             data = data.concat(
                 getFileChannel(
                     filePaths,
-                    suffix
+                    suffix,
+                    groups
                 ).map {
-                    it -> tuple(it[0], it[1], "h5ad", outputFileFormat)
+                    it -> tuple(
+                        it[0], // sample ID
+                        it[1], // file path
+                        "h5ad", // input format
+                        outputFileFormat,
+                        it[2] // group
+                    )
                 }
             ).view()
         }
@@ -124,7 +142,7 @@ workflow getDataChannel {
                     params.data.loom.file_paths,
                     params.data.loom.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "loom", outputFileFormat)
+                    it -> tuple(it[0], it[1], "loom", outputFileFormat, 'NULL')
                 }
             ).view()
         }
@@ -134,7 +152,7 @@ workflow getDataChannel {
                     params.data.tsv.file_paths,
                     params.data.tsv.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "tsv", outputFileFormat)
+                    it -> tuple(it[0], it[1], "tsv", outputFileFormat, 'NULL')
                 }
             ).view()
         }
@@ -144,7 +162,7 @@ workflow getDataChannel {
                     params.data.csv.file_paths,
                     params.data.csv.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "csv", outputFileFormat)
+                    it -> tuple(it[0], it[1], "csv", outputFileFormat, 'NULL')
                 }
             ).view()
         }
@@ -154,7 +172,7 @@ workflow getDataChannel {
                     params.data.seurat_rds.file_paths,
                     params.data.seurat_rds.suffix
                 ).map {
-                    it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat)
+                    it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat, 'NULL')
                 }
             ).view()
         }
@@ -165,7 +183,7 @@ workflow getDataChannel {
                     params.data.fragments.suffix,
                     params.data.fragments.index_extension
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "fragments")
+                    it -> tuple(it[0], it[1], it[2], "fragments", 'NULL')
                 }
             ).view()
         }
@@ -176,7 +194,7 @@ workflow getDataChannel {
                     params.data.bam.suffix,
                     params.data.bam.index_extension
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "bam")
+                    it -> tuple(it[0], it[1], it[2], "bam", 'NULL')
                 }
             ).view()
         }

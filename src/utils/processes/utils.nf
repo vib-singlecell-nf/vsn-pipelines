@@ -95,11 +95,14 @@ def runPythonConverter = {
     inputDataType,
     outputDataType,
     outputExtension,
+    group,
     f ->
     return (
         """
         ${binDir}/sc_file_converter.py \
             --sample-id "${sampleId}" \
+            ${!isParamNull(group) ? '--group-name ' + group.get(0) : ''} \
+            ${!isParamNull(group) ? '--group-value ' + group.get(1) : ''} \
             ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
             ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
             ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
@@ -118,6 +121,7 @@ def runRConverter = {
     inputDataType,
     outputDataType,
     outputExtension,
+    group,
     f,
     sceMainLayer = null ->
     
@@ -125,6 +129,8 @@ def runRConverter = {
         """
         ${binDir}/sc_file_converter.R \
             --sample-id "${sampleId}" \
+            ${!isParamNull(group) ? '--group-name ' + group.get(0) : ''} \
+            ${!isParamNull(group) ? '--group-value ' + group.get(1) : ''} \
             ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
             ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
@@ -186,7 +192,8 @@ process SC__FILE_CONVERTER {
             val(sampleId), \
             path(f), \
             val(inputDataType), \
-            val(outputDataType)
+            val(outputDataType), \
+            val(group)
 
     output:
         tuple \
@@ -260,6 +267,7 @@ process SC__FILE_CONVERTER {
                     inputDataType,
                     outputDataType,
                     outputExtension,
+                    group,
                     f
                 )
                 break;
@@ -270,6 +278,7 @@ process SC__FILE_CONVERTER {
                     inputDataType,
                     outputDataType,
                     outputExtension,
+                    group,
                     f
                 )
                 break;

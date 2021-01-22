@@ -47,6 +47,22 @@ parser$add_argument(
     help = "Sample ID of the given input file."
 )
 parser$add_argument(
+    '--group-name',
+    type="character",
+    dest='group_name',
+    action = "store",
+    default = NULL,
+    help = "Name of the group which the given input files are from. A new column named by this group_name will be added in anndata.obs"
+)
+parser$add_argument(
+    '--group-value',
+    type="character",
+    dest='group_value',
+    action = "store",
+    default = NULL,
+    help = "Value of the group which the given input files are from. The group_name column in anndata.obs will be populated with this group_value."
+)
+parser$add_argument(
     '--tag-cell-with-sample-id',
     type="character",
     dest='tag_cell_with_sample_id',
@@ -131,6 +147,13 @@ UpdateSeuratCellMetadata <- function(seurat, args) {
     }
     
     # Add group_value as obs entry with group_name as column name
+    if(!is.null(args$`group_name`) & !is.null(args$`group_value`)) {
+        seurat <- AddMetaData(
+            object = seurat,
+            metadata = as.character(x = args$`group_value`),
+            col.name = as.character(x = args$`group_name`)
+        )
+    }
     return (seurat)
 }
 
