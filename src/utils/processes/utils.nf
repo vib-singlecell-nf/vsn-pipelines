@@ -103,9 +103,10 @@ def runPythonConverter = {
             --sample-id "${sampleId}" \
             ${!isParamNull(group) ? '--group-name ' + group.get(0) : ''} \
             ${!isParamNull(group) ? '--group-value ' + group.get(1) : ''} \
-            ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
-            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
+            ${processParams?.makeVarIndexUnique ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
+            ${processParams?.tagCellWithSampleId ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${processParams?.remove10xGEMWell ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
+            ${processParams?.useRaw ? '--use-raw '+ processParams.useRaw : ''} \
             --input-format $inputDataType \
             --output-format $outputDataType \
             ${f} \
@@ -131,8 +132,8 @@ def runRConverter = {
             --sample-id "${sampleId}" \
             ${!isParamNull(group) ? '--group-name ' + group.get(0) : ''} \
             ${!isParamNull(group) ? '--group-value ' + group.get(1) : ''} \
-            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
+            ${processParams?.tagCellWithSampleId ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${processParams?.remove10xGEMWell ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
             ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
             ${sceMainLayer != null ? '--sce-main-layer '+ sceMainLayer : ''} \

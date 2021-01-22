@@ -106,6 +106,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-w", "--use-raw",
+    type=str2bool,
+    action="store",
+    dest="use_raw",
+    default=False,
+    help="Replace X entry with raw.X matrix. This only is used when input format is h5ad."
+)
+
+parser.add_argument(
     "-o", "--output-format",
     action="store",  # optional because action defaults to "store"
     dest="output_format",
@@ -260,6 +269,16 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
     adata = sc.read_h5ad(
         FILE_PATH_IN
     )
+
+    if args.use_raw and adata.raw is not None:
+        # Replace X with raw.X
+        print("Replacing X with raw.X...")
+        adata = sc.AnnData(
+            X=adata.raw.X,
+            obs=adata.obs,
+            var=adata.raw.var
+        )
+
     # Add additional information
     adata = update_obs(adata=adata, args=args)
     # Add/update additional information to features (var)
