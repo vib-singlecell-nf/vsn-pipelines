@@ -111,6 +111,21 @@ workflow getDataChannel {
                 if(numGroups != numUniqueSuffixes) {
                     throw new Exception("VSN ERROR: Number of data groups ("+ numGroups +") should be equal to the number of unique suffixes ("+ numUniqueSuffixes +"). Fix the group definitions in params.data.")
                 }
+                // Check if any suffix overlap
+                for(int i=0; i<suffix.size(); i++) {
+                    for(int j=0; j<suffix.size(); j++) {
+                        if(i==j) continue
+                        if(suffix[i].length() > suffix[j].length()) {
+                            if(suffix[i].contains(suffix[j])) {
+                                throw new Exception("VSN ERROR: some suffixes are overlapping ("+ suffix[j] +" with "+ suffix[i] +")")
+                            }
+                        } else {
+                            if(suffix[j].contains(suffix[i])) {
+                                throw new Exception("VSN ERROR: some suffixes are overlapping ("+ suffix[i] +" with "+ suffix[j] +")")
+                            }
+                        }
+                    }  
+                }
                 // optional
                 groups = dataH5ad.collect { 
                     k,v -> "group" in v ? v["group"] : 'NULL' 
