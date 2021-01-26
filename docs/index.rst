@@ -9,11 +9,26 @@
 
    Home <self>
    getting-started
+   input_formats
    pipelines
    features
    case-studies
-   development
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: scATAC-seq
+
    scatac-seq
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Development
+
+   development
+   attributions
+
 
 .. include:: ../README.rst
 

@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 import java.nio.file.Paths
 import nextflow.config.ConfigParser
@@ -102,6 +102,7 @@ def runPythonConverter = {
             --sample-id "${sampleId}" \
             ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
             ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             --input-format $inputDataType \
             --output-format $outputDataType \
             ${f} \
@@ -125,6 +126,7 @@ def runRConverter = {
         ${binDir}/sc_file_converter.R \
             --sample-id "${sampleId}" \
             ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
             ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
             ${sceMainLayer != null ? '--sce-main-layer '+ sceMainLayer : ''} \
@@ -411,58 +413,13 @@ def getPublishDir = { outDir, toolName ->
     return "${outDir}/data/${toolName.toLowerCase()}"
 }
 
-process SC__PUBLISH_PROXY {
-
-    publishDir "${params.global.outdir}/data/intermediate", \
-        mode: 'symlink', \
-        overwrite: true, \
-        saveAs: {
-            filename -> "${outputFileName}" 
-        }
-
-    label 'compute_resources__minimal'
-
-    input:
-        tuple \
-            val(tag), \
-            path(f), \
-            val(stashedParams)
-        val(fileOutputSuffix)
-        val(toolName)
-        val(isParameterExplorationModeOn)
-
-    output:
-        tuple \
-            val(tag), \
-            path(outputFileName), \
-            val(stashedParams)
-
-    script:
-        outputFileName = getOutputFileName(
-            params,
-            tag,
-            f,
-            fileOutputSuffix,
-            false,
-            null
-        )
-        """
-        if [ ! -f ${outputFileName} ]; then
-            ln -s $f "${outputFileName}"
-        fi
-        """
-
-}
 
 process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: 'link', \
-        overwrite: true, \
-        saveAs: {
-            filename -> "${outputFileName}" 
-        }
+        mode: "${params.utils.publish?.mode ? params.utils.publish.mode: 'link'}", \
+        saveAs: { filename -> "${outputFileName}" }
 
     label 'compute_resources__minimal'
     
@@ -490,14 +447,17 @@ process SC__PUBLISH {
             isParameterExplorationModeOn,
             stashedParams
         )
+        /* avoid cases where the input and output files have identical names:
+           Move the input file to a unique name, then create a link to
+           the input file */
         """
-        cp -rL $f tmp
-        rm $f
-        ln tmp "${outputFileName}"
-        rm tmp
+        mv $f tmp
+        if [ ! -f ${outputFileName} ]; then
+            ln -L tmp "${outputFileName}"
+        fi
         """
-
 }
+
 
 process COMPRESS_HDF5() {
 

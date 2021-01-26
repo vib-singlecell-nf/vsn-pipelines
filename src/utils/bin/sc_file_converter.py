@@ -7,6 +7,7 @@ import scanpy as sc
 import numpy as np
 from scipy.sparse import csr_matrix
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -69,6 +70,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-r", "--remove-10x-gem-well",
+    type=str2bool,
+    action="store",
+    dest="remove_10x_gem_well",
+    default=False,
+    help="If tag_cell_with_sample_id is passed, remove the GEM well number from the barcode."
+)
+
+parser.add_argument(
     "-u", "--make-var-index-unique",
     type=str2bool,
     action="store",
@@ -120,14 +130,17 @@ def add_sample_id(adata, args):
     return adata
 
 
-def tag_cell(adata, tag):
+def tag_cell(adata, tag, remove_10x_gem_well=False):
     # Check the number of untagged cells
     # We consider an untagged cell as matching the following pattern: [barcode-id]-[sample-index] where
     # - [barcode-id] is sequence of A,C,G,T letters
     # - [sample-index] is a natural number
-    num_untagged_cells = sum(list(map(lambda x: len(re.findall(r"[ACGT]*-[0-9]+$", x)), adata.obs.index)))
-    if num_untagged_cells != 0:
-        adata.obs.index = list(map(lambda x: re.sub(r"([ACGT]*)-.*", rf'\1-{tag}', x), adata.obs.index))
+    if remove_10x_gem_well:
+        num_untagged_cells = sum(list(map(lambda x: len(re.findall(r"[ACGT]*-[0-9]+$", x)), adata.obs.index)))
+        if num_untagged_cells != 0:
+            adata.obs.index = list(map(lambda x: re.sub(r"([ACGT]*)-.*", rf'\1-{tag}', x), adata.obs.index))
+    else:
+        adata.obs.index = [cell_barcode + "___" + tag for cell_barcode in adata.obs.index]
     return adata
 
 
@@ -148,7 +161,8 @@ if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
     if args.tag_cell_with_sample_id:
         adata = tag_cell(
             adata=adata,
-            tag=args.sample_id
+            tag=args.sample_id,
+            remove_10x_gem_well=args.remove_10x_gem_well
         )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
@@ -178,7 +192,8 @@ elif INPUT_FORMAT == '10x_cellranger_h5' and OUTPUT_FORMAT == 'h5ad':
     if args.tag_cell_with_sample_id:
         adata = tag_cell(
             adata=adata,
-            tag=args.sample_id
+            tag=args.sample_id,
+            remove_10x_gem_well=args.remove_10x_gem_well
         )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
@@ -213,7 +228,8 @@ elif INPUT_FORMAT in ['tsv', 'csv'] and OUTPUT_FORMAT == 'h5ad':
     if args.tag_cell_with_sample_id:
         adata = tag_cell(
             adata=adata,
-            tag=args.sample_id
+            tag=args.sample_id,
+            remove_10x_gem_well=args.remove_10x_gem_well
         )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
@@ -238,7 +254,8 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
     if args.tag_cell_with_sample_id:
         adata = tag_cell(
             adata=adata,
-            tag=args.sample_id
+            tag=args.sample_id,
+            remove_10x_gem_well=args.remove_10x_gem_well
         )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
@@ -253,7 +270,8 @@ elif INPUT_FORMAT == 'h5ad' and OUTPUT_FORMAT == 'h5ad':
 elif INPUT_FORMAT == 'loom' and OUTPUT_FORMAT == 'h5ad':
     adata = sc.read_loom(
         FILE_PATH_IN,
-        sparse=False
+        sparse=True,
+        validate=False
     )
     adata = add_sample_id(
         adata=adata,
@@ -263,7 +281,8 @@ elif INPUT_FORMAT == 'loom' and OUTPUT_FORMAT == 'h5ad':
     if args.tag_cell_with_sample_id:
         adata = tag_cell(
             adata=adata,
-            tag=args.sample_id
+            tag=args.sample_id,
+            remove_10x_gem_well=args.remove_10x_gem_well
         )
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique

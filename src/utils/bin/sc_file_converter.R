@@ -55,6 +55,14 @@ parser$add_argument(
     help = "Sample ID of the given input file."
 )
 parser$add_argument(
+    '--remove-10x-gem-well',
+    type="character",
+    dest='remove_10x_gem_well',
+    action = "store",
+    default = FALSE,
+    help = "If tag_cell_with_sample_id is passed, remove the GEM well number from the barcode."
+)
+parser$add_argument(
     '--seurat-assay',
     type="character",
     dest='seurat_assay',
@@ -120,11 +128,15 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     }
     # Tag cell with sample ID
     if(isTrue(x = args$`tag_cell_with_sample_id`)) {
-		new.names <- gsub(
-			pattern = "-([0-9]+)$",
-			replace = paste0("-", args$`sample_id`),
-			x = colnames(x = seurat)
-		)
+        if(isTrue(x = args$`remove_10x_gem_well`)) {
+            new.names <- gsub(
+                pattern = "-([0-9]+)$",
+                replace = paste0("-", args$`sample_id`),
+                x = colnames(x = seurat)
+            )
+        } else {
+            new.names <- paste0(colnames(x = seurat), "___", args$`sample_id`)
+        }
 		seurat <- Seurat::RenameCells(
 			object = seurat,
 			new.names = new.names
@@ -195,12 +207,16 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     }
     # Tag cell with sample ID
     if(isTrue(x = args$`tag_cell_with_sample_id`)) {
-		new.names <- gsub(
-			pattern = "-([0-9]+)$",
-			replace = paste0("-", args$`sample_id`),
-			x = colnames(x = sce)
-		)
-		colnames(x = sce) <- new.names
+        if(isTrue(x = args$`remove_10x_gem_well`)) {
+            new.names <- gsub(
+                pattern = "-([0-9]+)$",
+                replace = paste0("-", args$`sample_id`),
+                x = colnames(x = sce)
+            )
+        } else {
+            new.names <- paste0(colnames(x = sce), "___", args$`sample_id`)
+        }
+        colnames(x = sce) <- new.names
     }
     # Add sample ID as colData entry
 	col_data <- SummarizedExperiment::colData(x = sce)
@@ -229,12 +245,16 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     colnames(x = sce) <- SummarizedExperiment::colData(x = sce)$Barcode
     # Tag cell with sample ID
     if(isTrue(x = args$`tag_cell_with_sample_id`)) {
-		new.names <- gsub(
-			pattern = "-([0-9]+)$",
-			replace = paste0("-", args$`sample_id`),
-			x = colnames(x = sce)
-		)
-		colnames(x = sce) <- new.names
+        if(isTrue(x = args$`remove_10x_gem_well`)) {
+            new.names <- gsub(
+                pattern = "-([0-9]+)$",
+                replace = paste0("-", args$`sample_id`),
+                x = colnames(x = sce)
+            )
+        } else {
+            new.names <- paste0(colnames(x = sce), "___", args$`sample_id`)
+        }
+        colnames(x = sce) <- new.names
     }
     # Add sample ID as colData entry
 	col_data <- SummarizedExperiment::colData(x = sce)

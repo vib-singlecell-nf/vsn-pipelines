@@ -40,7 +40,7 @@
 //  nextflow -C conf/multi_runs.config,conf/test.config run main.test.nf --test SAVE_SCENIC_MULTI_RUNS_TO_LOOM
 
 
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 ///////////////////////////////////////////
 //  Define the parameters for all processes
