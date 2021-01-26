@@ -102,6 +102,7 @@ def runPythonConverter = {
             --sample-id "${sampleId}" \
             ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
             ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             --input-format $inputDataType \
             --output-format $outputDataType \
             ${f} \
@@ -125,6 +126,7 @@ def runRConverter = {
         ${binDir}/sc_file_converter.R \
             --sample-id "${sampleId}" \
             ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
             ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
             ${sceMainLayer != null ? '--sce-main-layer '+ sceMainLayer : ''} \
@@ -416,7 +418,7 @@ process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: "${params.utils.publish.mode}", \
+        mode: "${params.utils.publish?.mode ? params.utils.publish.mode: 'link'}", \
         saveAs: { filename -> "${outputFileName}" }
 
     label 'compute_resources__minimal'
