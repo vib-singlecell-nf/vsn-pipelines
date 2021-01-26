@@ -17,8 +17,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
     - name: Install Nextflow
       run: |
         export NXF_VER='20.10.0'
