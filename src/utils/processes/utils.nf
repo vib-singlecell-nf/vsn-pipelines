@@ -418,7 +418,7 @@ process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: "${params.utils.publish.mode}", \
+        mode: "${params.utils.publish?.mode ? params.utils.publish.mode: 'link'}", \
         saveAs: { filename -> "${outputFileName}" }
 
     label 'compute_resources__minimal'
