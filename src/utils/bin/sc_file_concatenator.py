@@ -76,6 +76,10 @@ if args.format == 'h5ad':
         join=args.join,
         index_unique=index_unique
     )
+    # Not casting to float 64 bits can lead to not exact reproducible results. See:
+    # - https://github.com/theislab/scanpy/issues/1612
+    # - https://github.com/vib-singlecell-nf/vsn-pipelines/issues/295
+    adata.X = adata.X.astype(np.float64)
     adata.var.index = adata.var.index.astype(str)
     adata = adata[:, np.sort(adata.var.index)]
     print(f"Total number of cells: {adata.obs.shape[0]}, genes: {adata.var.shape[0]}.")
