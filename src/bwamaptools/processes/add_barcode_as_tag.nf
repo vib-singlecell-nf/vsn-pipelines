@@ -22,17 +22,25 @@ process SC__BWAMAPTOOLS__ADD_BARCODE_TAG {
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.add_barcode_as_tag)
         processParams = sampleParams.local
         """
-        samtools view -h \
-            ${bam} \
-            | mawk '/^@/ {print;next} {N=split(\$1,n,"${processParams.delimiter_to_split_qname}");print \$0 "\t${processParams.tag}:Z:" n[${processParams.position_of_barcode_in_qname}]}' \
+        samtools view -h ${bam} \
+            | mawk '/^@/ {print;next} {
+                N=split(\$1,n,"${processParams.delimiter_to_get_barcode_block}");
+                NN=split(n[1],nbc,"${processParams.delimiter_to_split_barcodes}");
+                ucorr_bc="";
+                corr_bc="";
+                if(NN==1){ # BioRad data with format {corrected_bc}_qname
+                    corr_bc="\t${processParams.corrected_bc_tag}:Z:" nbc[1];
+                }
+                if(NN==2){ # standard format with {uncorrected_bc}-{corrected_bc}_qname
+                    ucorr_bc="\t${processParams.uncorrected_bc_tag}:Z:" nbc[1];
+                    if(length(nbc[2])>0){ # skip if corrected bc is empty: {uncorrected_bc}-_qname
+                        corr_bc="\t${processParams.corrected_bc_tag}:Z:" nbc[2];
+                    }
+                }
+                sub(/^[^${processParams.delimiter_to_get_barcode_block}]+${processParams.delimiter_to_get_barcode_block}/,"",\$0);
+                print \$0 ucorr_bc corr_bc;
+              }' \
             | samtools view -bS - -o ${sampleId}.bwa.possorted.bam
         """
 }
-
-/*
-original mawk command:
-samtools view -h possorted.bam \
-    | mawk '/^@/ {print;next} {N=split($1,n,":");print $0 "\tCR:Z:" n[1]}' \
-    | samtools view -bS - -o possorted.bc.bam
-*/
 

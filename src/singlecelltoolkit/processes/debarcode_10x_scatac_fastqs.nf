@@ -28,7 +28,8 @@ process SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ {
             ${fastq_PE1} \
             ${fastq_bc} \
             ${fastq_PE2} \
-            ${sampleId}_dex
+            ${sampleId}_dex \
+            _
         """
 }
 
