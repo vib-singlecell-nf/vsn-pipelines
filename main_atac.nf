@@ -59,6 +59,38 @@ workflow atac_preprocess {
 
 }
 
+
+workflow atac_preprocess_bap {
+
+    include {
+        ATAC_PREPROCESS_WITH_METADATA;
+    } from './workflows/atac/preprocess.nf' params(params)
+    include {
+        get_bam;
+        BAP__BARCODE_MULTIPLET_PIPELINE;
+    } from './src/bap/main.nf' params(params)
+
+    ATAC_PREPROCESS_WITH_METADATA(file(params.data.atac_preprocess.metadata)) |
+        get_bam |
+        BAP__BARCODE_MULTIPLET_PIPELINE
+
+}
+
+
+workflow bap {
+
+    include {
+        BAP__BARCODE_MULTIPLET_PIPELINE;
+    } from './src/bap/main.nf' params(params)
+
+    getDataChannel | BAP__BARCODE_MULTIPLET_PIPELINE
+
+}
+
+
+/*
+ QC
+ */
 workflow atac_qc_filtering {
 
     include {
