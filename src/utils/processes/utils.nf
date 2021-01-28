@@ -299,7 +299,8 @@ process SC__FILE_CONVERTER_FROM_SCE {
     input:
         tuple \
             val(sampleId), \
-            path(f)
+            path(f), \
+            val(group)
         val(outputDataType)
         val(mainLayer)
 
@@ -325,6 +326,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
             "sce_rds",
             _outputDataType,
             outputExtension,
+            group,
             f,
             mainLayer
         )
