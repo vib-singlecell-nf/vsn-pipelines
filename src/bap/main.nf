@@ -26,9 +26,7 @@ workflow BAP__BARCODE_MULTIPLET_PIPELINE {
 
     main:
 
-        bam.view()
         SC__BAP__BARCODE_MULTIPLET_PIPELINE(bam.map { it -> tuple(it[0], it[1], it[2]) })
-
 
 }
 
