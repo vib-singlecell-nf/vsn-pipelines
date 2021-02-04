@@ -29,6 +29,7 @@ process SC__ARCHR__CELL_CALLING {
         --output_dir . \
         --filter_frags ${processParams.filter_frags} \
         --filter_tss ${processParams.filter_tss} \
+        --density ${processParams.density} \
         --seed ${params.global.seed} \
         --threads ${task.cpus} \
         --genome ${toolParams.genome}
