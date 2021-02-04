@@ -24,16 +24,13 @@ workflow BAM_TO_FRAGMENTS {
 
     main:
 
+        //println("${params.tools.sinto.fragments.barcodetag}")
         fragments = SC__SINTO__FRAGMENTS(bam)
         fragments_sort = SC__SINTO__SORT_FRAGMENTS(fragments)
         index = SC__BWAMAPTOOLS__INDEX_BED(fragments_sort)
 
         // join bed index into the fragments channel:
         fragments_out = fragments_sort.join(index)
-
-        // publish fragments output:
-        PUBLISH_FRAGMENTS(fragments_out, 'sinto.fragments.tsv', 'gz', 'fragments', false)
-        PUBLISH_FRAGMENTS_INDEX(fragments_out.map{ it -> tuple(it[0], it[2]) }, 'sinto.fragments.tsv.gz', 'tbi', 'fragments', false)
 
     emit:
         fragments_out

@@ -17,6 +17,8 @@ include {
     PUBLISH as PUBLISH_FASTQS_PE2;
     PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
     PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
+    PUBLISH as PUBLISH_FRAGMENTS;
+    PUBLISH as PUBLISH_FRAGMENTS_INDEX;
 } from "../../src/utils/workflows/utils.nf" params(params)
 
 
@@ -94,6 +96,9 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
 
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)
+        // publish fragments output:
+        PUBLISH_FRAGMENTS(fragments, 'sinto.fragments.tsv', 'gz', 'fragments', false)
+        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0], it[2]) }, 'sinto.fragments.tsv.gz', 'tbi', 'fragments', false)
 
     emit:
         bam
