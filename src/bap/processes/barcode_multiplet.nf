@@ -17,7 +17,11 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
 
     output:
         tuple val(sampleId),
-              path('bap_output/*')
+              path("${sampleId}/final/${sampleId}.bap.bam"),
+              path("${sampleId}/final/${sampleId}.bap.bam.bai"),
+              path("${sampleId}/final/*"),
+              path("${sampleId}/knee/*"),
+              path("${sampleId}/logs/*")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_multiplet)
@@ -25,7 +29,7 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
         """
         bap2 bam \
             --input ${bam} \
-            --output bap_output \
+            --output ${sampleId} \
             --ncores ${task.cpus} \
             --drop-tag ${processParams.drop_tag} \
             --bead-tag ${processParams.bead_tag} \
@@ -39,7 +43,7 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
             ${processParams?.bedtools_genome ? '--bedtools-genome ' + processParams.bedtools_genome : ''} \
             ${processParams?.blacklist_file ? '--blacklist-file ' + processParams.blacklist_file : ''} \
             ${processParams?.tss_file ? '--tss-file ' + processParams.tss_file : ''} \
-            --mito-chromosome ${processParams.mito_chromosome} \
+            --mito-chromosome ${processParams.mito_chromosome}
         """
 }
 
