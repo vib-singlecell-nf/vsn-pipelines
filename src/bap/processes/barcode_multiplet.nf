@@ -30,6 +30,7 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
         bap2 bam \
             --input ${bam} \
             --output ${sampleId} \
+            --name ${sampleId} \
             --ncores ${task.cpus} \
             --drop-tag ${processParams.drop_tag} \
             --bead-tag ${processParams.bead_tag} \
