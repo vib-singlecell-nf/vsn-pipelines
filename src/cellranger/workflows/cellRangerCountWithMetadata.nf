@@ -12,7 +12,7 @@ include {
 } from './../processes/count' params(params)
 include {
     SC__CELLRANGER__PREFLIGHT;
-} from './processes/preflight' params(params)
+} from './../processes/preflight' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 

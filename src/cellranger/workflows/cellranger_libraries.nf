@@ -10,7 +10,7 @@ include {
 } from './mkfastq' params(params)
 include {
     SC__CELLRANGER__PREFLIGHT;
-} from './processes/preflight' params(params)
+} from './../processes/preflight' params(params)
 include {
     SC__CELLRANGER__COUNT_WITH_LIBRARIES
 } from './../processes/count' params(params)
