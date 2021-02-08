@@ -9,6 +9,9 @@ include {
     MKFASTQ
 } from './mkfastq' params(params)
 include {
+    SC__CELLRANGER__PREFLIGHT;
+} from './processes/preflight' params(params)
+include {
     SC__CELLRANGER__COUNT_WITH_LIBRARIES
 } from './../processes/count' params(params)
 
@@ -65,6 +68,8 @@ workflow CELLRANGER_LIBRARIES {
         .set { oldRunsData }
         
         // Run MKFASTQ on current run
+        SC__CELLRANGER__PREFLIGHT()
+
         data = MKFASTQ(mkfastq_csv, runFolder)
 
         // Get Library info for MKFASTQ run from params

@@ -27,6 +27,23 @@ def generateCellRangerCountCommandDefaults = {
 	} else if (processParams.containsKey('chemistry')) {
 		_chemistry = processParams.chemistry
 	}
+
+	_includeIntrons = null
+	if(processParams.containsKey('includeIntrons') {
+		if (processParams.includeIntrons == true) {
+			_includeIntrons = true
+		} else {
+			_includeIntrons = false
+		}
+	}
+		_noBam = null
+	if(processParams.containsKey('noBam') {
+		if (processParams.noBam == true) {
+			_noBam = true
+		} else {
+			_noBam = false
+		}
+	}
 	return (
 		"""
 		cellranger count \
@@ -38,6 +55,8 @@ def generateCellRangerCountCommandDefaults = {
 			${(processParams.containsKey('r1Length')) ? '--r1-length ' + processParams.r1Length: ''} \
 			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
 			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
+			${_includeIntrons ? '--include-introns ': ''} \
+			${_noBam' ? '--no-bam ': ''} \
             --localcores=${task.cpus} \
             --localmem=${task.memory.toGiga()} \
 		"""

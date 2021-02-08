@@ -10,6 +10,9 @@ EMPTY_VALUES = ["n/a","n.a.","none","null"]
 include {
     SC__CELLRANGER__COUNT_WITH_METADATA;
 } from './../processes/count' params(params)
+include {
+    SC__CELLRANGER__PREFLIGHT;
+} from './processes/preflight' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -66,6 +69,8 @@ workflow CELLRANGER_COUNT_WITH_METADATA {
                 }
             )
         }
+        
+        SC__CELLRANGER__PREFLIGHT()
         SC__CELLRANGER__COUNT_WITH_METADATA( transcriptome, data )
 
     emit:
