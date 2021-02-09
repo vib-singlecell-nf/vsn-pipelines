@@ -168,7 +168,9 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 
 		csvData = "fastqs,sample,library_type\n"
 		fastqs.eachWithIndex { fastq, ix -> 
-			csvData += "\$PWD/${fastq},${sampleNames[ix]},${assays[ix]}\n"
+			if (sampleNames[ix] != null) {
+				csvData += "\$PWD/${fastq},${sampleNames[ix]},${assays[ix]}\n"
+			}
 		}
 
 		"""
