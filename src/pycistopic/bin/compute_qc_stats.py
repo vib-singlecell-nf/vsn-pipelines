@@ -5,7 +5,7 @@ import pybiomart as pbm
 import pandas as pd
 import pickle
 
-from pycisTopic.qc import computeQCStats
+from pycisTopic.qc import compute_qc_stats
 
 ################################################################################
 
@@ -81,17 +81,17 @@ path_to_regions = {
     args.sampleId: args.regions
     }
 
-metadata_bc_dict, profile_data_dict = computeQCStats(
+metadata_bc_dict, profile_data_dict = compute_qc_stats(
                 fragments_dict= fragments_dict,
                 tss_annotation = annot,
-                stats=['barcodeRankPlot', 'insertSizeDistribution', 'profileTSS', 'FRIP'],
+                stats=['barcode_rank_plot', 'duplicate_rate', 'insert_size_distribution', 'profile_tss', 'frip'],
                 label_list = None,
                 path_to_regions = path_to_regions,
                 n_cpu = args.threads,
                 valid_bc = None,
                 n_frag = args.n_frag,
                 n_bc = None,
-                tss_flank_window = 2000,
+                tss_flank_window = 1000,
                 tss_window = 50,
                 tss_minimum_signal_window = 100,
                 tss_rolling_window = 10,

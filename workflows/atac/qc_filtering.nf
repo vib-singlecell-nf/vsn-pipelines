@@ -7,10 +7,12 @@ include { SC__ARCHR__CELL_CALLING; } from './../../src/archr/processes/cell_call
 
 include { SC__PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf' params(params)
 include { SC__PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf' params(params)
+include { SC__PYCISTOPIC__PLOT_QC_STATS; } from './../../src/pycistopic/processes/plot_qc_stats.nf' params(params)
 
 include {
-    PUBLISH as PUBLISH_METADATA;
     PUBLISH as PUBLISH_PEAKS;
+    PUBLISH as PUBLISH_METADATA;
+    PUBLISH as PUBLISH_QC_SAMPLE_METRICS;
 } from "../../src/utils/workflows/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
@@ -38,6 +40,9 @@ workflow ATAC_QC_PREFILTER {
 
         qc_stats = SC__PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks)
         PUBLISH_METADATA(qc_stats.map { it -> tuple(it[0], it[1]) }, 'metadata.tsv', 'gz', 'pycistopic', false)
+
+        qc_stats_plot = SC__PYCISTOPIC__PLOT_QC_STATS(qc_stats)
+        PUBLISH_QC_SAMPLE_METRICS(qc_stats_plot, 'qc_sample_metrics.pdf', 'pdf', 'pycistopic', false)
 
 }
 
