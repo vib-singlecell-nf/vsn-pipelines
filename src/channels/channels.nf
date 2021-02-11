@@ -49,7 +49,7 @@ workflow getDataChannel {
                     ).map {
                         it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", outputFileFormat)
                     }
-                ).view()
+                )
             } else {
                 data = data.concat(
                     getTenXCellRangerMEXChannel(
@@ -57,7 +57,7 @@ workflow getDataChannel {
                     ).map {
                         it -> tuple(it[0], it[1], "10x_cellranger_mex", outputFileFormat)
                     }
-                ).view()
+                )
             }
         }
         if(params.data.containsKey("tenx_atac") && params.data.tenx_atac.containsKey("cellranger_mex")) {
@@ -68,7 +68,7 @@ workflow getDataChannel {
                     ).map {
                         it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", outputFileFormat)
                     }
-                ).view()
+                )
             } else {
                 data = data.concat(
                     getTenXCellRangerMEXChannel(
@@ -76,7 +76,7 @@ workflow getDataChannel {
                     ).map {
                         it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat)
                     }
-                ).view()
+                )
             }
         }
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5")) {
@@ -87,7 +87,7 @@ workflow getDataChannel {
                     ).map {
                         it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", outputFileFormat)
                     }
-                ).view()
+                )
             } else {
                 data = data.concat(
                     getTenXCellRangerH5Channel( 
@@ -95,7 +95,7 @@ workflow getDataChannel {
                     ).map {
                         it -> tuple(it[0], it[1], "10x_cellranger_h5", outputFileFormat)
                     }
-                ).view()
+                )
             }
         }
         if(params.data.containsKey("h5ad")) {
@@ -116,7 +116,7 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], "h5ad", outputFileFormat)
                 }
-            ).view()
+            )
         }
         if(params.data.containsKey("loom")) {
             data = data.concat(
@@ -126,7 +126,7 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], "loom", outputFileFormat)
                 }
-            ).view()
+            )
         }
         if(params.data.containsKey("tsv")) {
             data = data.concat(
@@ -136,7 +136,7 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], "tsv", outputFileFormat)
                 }
-            ).view()
+            )
         }
         if(params.data.containsKey("csv")) {
             data = data.concat(
@@ -146,7 +146,7 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], "csv", outputFileFormat)
                 }
-            ).view()
+            )
         }
         if(params.data.containsKey("seurat_rds")) {
             data = data.concat(
@@ -156,7 +156,7 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat)
                 }
-            ).view()
+            )
         }
         if(params.data.containsKey("fragments")) {
             data = data.concat(
@@ -167,7 +167,7 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], it[2], "fragments")
                 }
-            ).view()
+            )
         }
         if(params.data.containsKey("bam")) {
             data = data.concat(
@@ -178,9 +178,11 @@ workflow getDataChannel {
                 ).map {
                     it -> tuple(it[0], it[1], it[2], "bam")
                 }
-            ).view()
+            )
         }
         data.ifEmpty { exit 1, "Pipeline cannot run: no data provided." }
+
+        if(!params.containsKey('quiet')) data.view()
 
     emit:
         data
