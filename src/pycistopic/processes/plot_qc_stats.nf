@@ -8,7 +8,7 @@ processParams = params.tools.pycistopic.compute_qc_stats
 process SC__PYCISTOPIC__PLOT_QC_STATS {
 
     container toolParams.container
-    label 'compute_resources__cpu'
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId),

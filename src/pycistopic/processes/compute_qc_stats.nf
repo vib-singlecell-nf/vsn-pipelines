@@ -9,7 +9,7 @@ process SC__PYCISTOPIC__COMPUTE_QC_STATS {
 
     publishDir "${params.global.outdir}/intermediate/pycistopic/qc/", mode: 'symlink'
     container toolParams.container
-    label 'compute_resources__cpu'
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId),

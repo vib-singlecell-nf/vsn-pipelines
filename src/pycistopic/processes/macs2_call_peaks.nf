@@ -8,7 +8,7 @@ processParams = params.tools.pycistopic.macs2_call_peaks
 process SC__PYCISTOPIC__MACS2_CALL_PEAKS {
 
     container toolParams.container
-    label 'compute_resources__cpu'
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId),
@@ -22,7 +22,7 @@ process SC__PYCISTOPIC__MACS2_CALL_PEAKS {
               path("${sampleId}_summits.bed")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
+        //def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         """
         macs2 callpeak \
             --treatment ${bam} \
