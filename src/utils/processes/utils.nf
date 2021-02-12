@@ -15,6 +15,10 @@ def getToolParams(params, toolKey) {
     return entry
 }
 
+def boolean isCollectionOrArray(object) {    
+    [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
+}
+
 def isParamNull(param) {
     return param == null || param == "NULL"
 }

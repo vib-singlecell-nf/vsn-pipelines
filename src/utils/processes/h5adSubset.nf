@@ -7,7 +7,8 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 include {
     isParamNull;
     getToolParams;
-} from './utils.nf' params(params)
+    isCollectionOrArray;
+} from './utils' params(params)
 
 process SC__PREPARE_OBS_FILTER {
 
@@ -46,6 +47,10 @@ process SC__PREPARE_OBS_FILTER {
         } else {
             throw new Exception("The given method" + args.method + " is not implemented. Choose either: internal or external.")
         }
+        if(!isCollectionOrArray(filterConfig.valuesToKeepFromFilterColumn)) {
+            throw new Exception("The given valuesToKeepFromFilterColumn" + filterConfig.valuesToKeepFromFilterColumn + " is expected to be an array.")
+        }
+
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')
         """
         ${binDir}/sc_h5ad_prepare_obs_filter.py \
