@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process SC__DROPLET_UTILS__BARCODE_SELECTION {
     
-    container params.sc.dropletutils.container
+    container params.getToolParams("dropletutils")..container
     publishDir "03.count", mode: 'symlink'
     label 'compute_resources__default'
 
