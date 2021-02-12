@@ -25,7 +25,6 @@ workflow popscle {
 
     main:
         data = SC__FILE_CONVERTER(data)
-        data.view()
         SC__POPSCLE__PREFILTER_DSC_PILEUP(data) |
         SC__POPSCLE__DSC_PILEUP
 

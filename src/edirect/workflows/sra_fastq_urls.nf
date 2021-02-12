@@ -19,7 +19,8 @@ workflow SRA_FASTQ_URLS {
         sraFastqUrls = sraIDsToSample
             .join(sraIDs)
             .map { it -> tuple(it[0],it[1],"ftp://ftp.sra.ebi.ac.uk/" + it[2])} 
-            .view()
+
+        if(!params.containsKey('quiet')) sraFastqUrls.view()
 
     emit:
         sraFastqUrls

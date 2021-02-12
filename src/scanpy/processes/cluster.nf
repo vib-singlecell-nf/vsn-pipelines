@@ -33,7 +33,8 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 	}
 
 	void displayMessage(tag) {
-		Channel.from('').view {
+        if(!params.containsKey('quiet')) {
+            Channel.from('').view {
 			"""
 ------------------------------------------------------------------
 \u001B[32m Parameter exploration of SC__SCANPY__CLUSTERING step... \u001B[0m
@@ -45,6 +46,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 \u001B[32m   - values: \u001B[0m \u001B[33m   ${resolutions} \u001B[0m
 ------------------------------------------------------------------
             """
+            }
         }
 	}
 
