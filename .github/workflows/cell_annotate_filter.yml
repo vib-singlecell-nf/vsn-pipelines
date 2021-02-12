@@ -27,7 +27,7 @@ jobs:
       run: |
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
         tar xzvf sample_data_tiny.tar.gz
-        wget https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/bugfix/cell_annotate_filter_fixes/data/sample_data_tiny/sample_data_tiny_dummy_annotation.tsv.gz
+        wget https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/develop/data/sample_data_tiny/sample_data_tiny_dummy_annotation.tsv.gz
     - name: Run cell_annotate_filter test
       run: |
         nextflow run ${GITHUB_WORKSPACE} -profile utils_cell_annotate_filter,test__cell_annotate_filter,test__compute_resources,docker -entry cell_annotate_filter -ansi-log false
