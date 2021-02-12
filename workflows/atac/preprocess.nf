@@ -57,28 +57,42 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
         /* Barcode correction */
         // gather barcode whitelists from params into a channel:
         wl = Channel.empty()
+        wl_cnt = 0
         params.tools.singlecelltoolkit.barcode_correction.whitelist.each { k, v ->
             if(v != '') {
                 wl = wl.mix( Channel.of(tuple(k, file(v)) ))
+                wl_cnt = wl_cnt + 1
             }
         }
 
-        // join wl to the data channel:
-        data_wl = wl.cross( data.standard.map { it -> tuple(it[1], it[0], it[2], it[3], it[4]) } ) // technology, sampleId, R1, R2, R3
-                .map { it -> tuple(it[1][1], it[1][0],           // sampleId, technology
-                                   it[1][2], it[1][3], it[1][4], // R1, R2, R3
-                                   it[0][1]                      // whitelist
-                                   ) }
+        if(wl_cnt == 0) {
+            if(!params.containsKey('quiet')) {
+                println("No whitelist files were found in 'params.tools.singlecelltoolkit.barcode_correction.whitelist'. Skipping barcode correction for standard-type samples.")
+            }
+            // run barcode demultiplexing on each read+barcode:
+            fastq_dex = SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ(
+                data.standard.map { it -> tuple(it[0], it[2], it[3], it[4]) }
+            )
+        } else {
 
-        // run barcode correction against a whitelist:
-        fastq_bc_corrected = SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
-        PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, 'corrected.bc_stats', 'log', 'fastq', false)
+            // join wl to the data channel:
+            data_wl = wl.cross( data.standard.map { it -> tuple(it[1], it[0], it[2], it[3], it[4]) } ) // technology, sampleId, R1, R2, R3
+                    .map { it -> tuple(it[1][1], it[1][0],           // sampleId, technology
+                                       it[1][2], it[1][3], it[1][4], // R1, R2, R3
+                                       it[0][1]                      // whitelist
+                                       ) }
+
+            // run barcode correction against a whitelist:
+            fastq_bc_corrected = SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
+            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, 'corrected.bc_stats', 'log', 'fastq', false)
 
 
-        // run barcode demultiplexing on each read+barcode:
-        fastq_dex = SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ(
-            data.standard.join(fastq_bc_corrected).map { it -> tuple(it[0], it[2], it[5], it[4]) }
-        )
+            // run barcode demultiplexing on each read+barcode:
+            fastq_dex = SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ(
+                data.standard.join(fastq_bc_corrected).map { it -> tuple(it[0], it[2], it[5], it[4]) }
+            )
+
+        }
 
         // concatenate the read channels:
         fastq_dex = fastq_dex.concat(fastq_dex_br)
