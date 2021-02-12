@@ -124,28 +124,35 @@ if args.filter_column_name in metadata.columns:
 
 if args.method == 'internal' or len(np.unique(metadata.index)) != len(metadata.index):
 
-    if args.sample_column_name not in metadata.columns:
-        raise Exception(f"VSN ERROR: Missing '{args.sample_column_name}' column in obs slot of the given h5ad input file.")
+    # Check if index are all unique, in that case index only may be used
+    if len(np.unique(metadata.index)) == metadata.shape[0]:
+        # Check existence of 1-to-many relationships between adata.obs.index and metadata.index
+        if np.sum(np.isin(adata.obs.index, metadata.index)) == adata.obs.shape[0]:
+            print(f"VSN MSG: Creating a filter mask based only on '{args.filter_column_name}'...")
+            filter_mask = metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
+        else:
+            raise Exception(f"VSN ERROR: There is not a 1-to-1 relationship between the index elements of the dataset {args.input.name} and index elements of the metadata {args.cell_meta_data_file_paths[0].name}.")
+    else:
+        if args.sample_column_name is None:
+            raise Exception(f"VSN ERROR: Missing --sample-column-name argument (sampleColumnName param).")
 
-    if values_to_keep_from_filter_column_formatted is None:
-        if args.filter_column_name not in metadata.columns:
-            raise Exception(f"VSN ERROR: The filter column defined by --filter-column-name argument (filterColumnName param) does not exist.")
-        if args.filter_column_name is None:
-            raise Exception(f"VSN ERROR: Missing --filter-column-name argument (filterColumnName param). This is required since the '{args.index_column_name}' index column does not contain unique values.")
-        if args.values_to_keep_from_filter_column is None:
-            raise Exception(f"VSN ERROR: Missing --value-to-keep-from-filter-column (valuesToKeepFromFilterColumn param). This is required since the '{args.index_column_name}' index column does not contain unique values.")
+        if args.sample_column_name not in metadata.columns:
+            raise Exception(f"VSN ERROR: Missing '{args.sample_column_name}' column in obs slot of the given h5ad input file.")
 
-    print(f"Creating a filter mask based on '{args.sample_column_name}' and '{args.filter_column_name}'...")
-    filter_mask = np.logical_and(
-        metadata[args.sample_column_name] == args.sample_id,
-        metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
-    )
+        if values_to_keep_from_filter_column_formatted is None:
+            raise Exception(f"VSN ERROR: Missing --filter-column-name argument (filterColumnName param) and/or --value-to-keep-from-filter-column (valuesToKeepFromFilterColumn param). These are required since the '{args.index_column_name}' index column does not contain unique values.")
+
+        print(f"VSN MSG: Creating a filter mask based on '{args.sample_column_name}' and '{args.filter_column_name}'...")
+        filter_mask = np.logical_and(
+            metadata[args.sample_column_name] == args.sample_id,
+            metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
+        )
 else:
     if values_to_keep_from_filter_column_formatted is not None:
-        print(f"Creating a filter mask based only on '{args.filter_column_name}' filter column...")
+        print(f"VSN MSG: Creating a filter mask based only on '{args.filter_column_name}' filter column...")
         filter_mask = metadata[args.filter_column_name].isin(values_to_keep_from_filter_column_formatted)
     else:
-        print(f"No filter mask: use all the cells from the given cell-based metadata .tsv filter file...")
+        print(f"VSN MSG: No filter mask: use all the cells from the given cell-based metadata .tsv filter file...")
         filter_mask = np.in1d(metadata.index, metadata.index)
 
 cells_to_keep = metadata.index[filter_mask]

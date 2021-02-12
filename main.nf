@@ -1123,6 +1123,13 @@ workflow cell_annotate {
 
 workflow cell_annotate_filter {
 
+    main:
+        _cell_annotate_filter(true)
+
+}
+
+workflow _cell_annotate_filter {
+
     take:
         // Expects publish : boolean
         publish
@@ -1209,7 +1216,7 @@ workflow cell_annotate_filter_and_sample_annotate {
 
 
         // Run
-        out = cell_annotate_filter(false)
+        out = _cell_annotate_filter(false)
 
         // Annotate cells based on an indexed sample-based metadata table
         if(!params.sc.containsKey("sample_annotate"))
