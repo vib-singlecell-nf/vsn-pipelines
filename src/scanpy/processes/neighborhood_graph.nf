@@ -32,7 +32,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 		this.configProcessParams = params
 	}
 
-	void displayMessage(tag = null) {
+	void displayMessage(tag = null, params) {
         if(!params.containsKey('quiet')) {
             Channel.from('').view {
 			"""
@@ -66,7 +66,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 		// Prepare argument stream
 		def $nPcs = Channel.from("NULL")
 		if(isParameterExplorationModeOn()) {
-			displayMessage(tag)
+			displayMessage(tag, params)
 			$nPcs = Channel.from(nPcs)
 		}
 		return $nPcs

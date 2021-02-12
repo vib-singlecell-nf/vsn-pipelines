@@ -32,7 +32,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		this.configProcessParams = params
 	}
 
-	void displayMessage(tag) {
+	void displayMessage(tag, params) {
         if(!params.containsKey('quiet')) {
             Channel.from('').view {
 			"""
@@ -84,7 +84,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		def _resolution = resolution == null ? "NULL" : resolution
 		def $method = Channel.from(methods == null ? _method : methods)
 		def $resolution = Channel.from(resolutions == null ? _resolution : resolutions)
-		displayMessage(tag)
+		displayMessage(tag, params)
 		return $method.combine($resolution)
 	}
 
