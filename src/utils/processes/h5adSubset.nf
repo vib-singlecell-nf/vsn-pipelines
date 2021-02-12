@@ -43,12 +43,15 @@ process SC__PREPARE_OBS_FILTER {
         if(processParams.method == 'internal') {
             input = f
         } else if (processParams.method == 'external') {
+            if(!filterConfig.cellMetaDataFilePath) {
+                throw new Exception("VSN ERROR: A filter in params.sc.cell_filter does not provide a cellMetaDataFilePath entry.")
+            }
             input = filterConfig.cellMetaDataFilePath
         } else {
-            throw new Exception("The given method" + args.method + " is not implemented. Choose either: internal or external.")
+            throw new Exception("VSN ERROR: The given method" + args.method + " is not implemented. Choose either: internal or external.")
         }
         if(!isCollectionOrArray(filterConfig.valuesToKeepFromFilterColumn)) {
-            throw new Exception("The given valuesToKeepFromFilterColumn" + filterConfig.valuesToKeepFromFilterColumn + " is expected to be an array.")
+            throw new Exception("VSN ERROR: The given valuesToKeepFromFilterColumn " + filterConfig.valuesToKeepFromFilterColumn + " is expected to be an array.")
         }
 
         valuesToKeepFromFilterColumnAsArguments = filterConfig.valuesToKeepFromFilterColumn.collect({ '--value-to-keep-from-filter-column' + ' ' + it }).join(' ')

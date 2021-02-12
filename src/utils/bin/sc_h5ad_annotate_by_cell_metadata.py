@@ -125,8 +125,6 @@ elif args.method == 'aio':
         index_col=args.index_column_name
     )
     print("Annotating using the AIO method...")
-    if args.sample_column_name is None:
-        raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")
 
     if len(np.unique(adata.obs.index)) != adata.obs.shape[0]:
         raise Exception("VSN ERROR: Cells of the given h5ad are not unique.")
@@ -142,6 +140,9 @@ elif args.method == 'aio':
             else:
                 raise Exception(f"VSN ERROR: There is not a 1-to-1 relationship between the index elements of the dataset {args.input.name} and index elements of the metadata {args.cell_meta_data_file_paths[0].name}.")
         else:
+            if args.sample_column_name is None:
+                raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")
+
             print(f"VSN MGS: subsetting metadata based on index on '{args.sample_column_name}' and '{args.index_column_name}' columns of the metadata {args.cell_meta_data_file_paths[0].name}.")
             metadata_subset = metadata[
                 np.logical_and(
