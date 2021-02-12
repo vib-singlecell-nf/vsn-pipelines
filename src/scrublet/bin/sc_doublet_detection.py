@@ -7,6 +7,7 @@ import os
 import numpy as np
 import scrublet as scr
 import scanpy as sc
+from matplotlib import pyplot
 
 
 def str2bool(v):
@@ -101,9 +102,9 @@ parser.add_argument(
     dest="normalize_variance",
     default=True,
     help='''
-        If True, normalize the data such that each gene has a variance of 1.
-        `sklearn.decomposition.TruncatedSVD` will be used for dimensionality
-        reduction, unless `mean_center` is True.
+If True, normalize the data such that each gene has a variance of 1.
+`sklearn.decomposition.TruncatedSVD` will be used for dimensionality
+reduction, unless `mean_center` is True.
         '''
 )
 
@@ -113,6 +114,17 @@ parser.add_argument(
     dest="n_prin_comps",
     default=30,
     help='Number of principal components used to embed the transcriptomes prior to k-nearest-neighbor graph construction.'
+)
+
+parser.add_argument(
+    "-r", "--threshold",
+    type=float,
+    dest="threshold",
+    default=None,
+    help="""
+Doublet score threshold for calling a transcriptome a doublet. 
+If `None`, this is set automatically by looking for the minimum between the two modes of the `doublet_scores_sim_` histogram. 
+It is best practice to check the threshold visually using the `doublet_scores_sim_` histogram and/or based on co-localization of predicted doublets in a 2-D embedding."""
 )
 
 parser.add_argument(
@@ -147,6 +159,7 @@ args = parser.parse_args()
 # Define the arguments properly
 FILE_PATH_IN = args.input
 FILE_PATH_OUT_BASENAME = args.output_prefix
+SAMPLE_NAME = FILE_PATH_OUT_BASENAME.split(".")[0]
 
 # I/O
 # Expects h5ad file
@@ -184,6 +197,46 @@ adata_raw.obs['doublet_scores'], adata_raw.obs['predicted_doublets'] = scrub.scr
     n_prin_comps=args.n_prin_comps,
     verbose=True
 )
+
+
+def save_histograms(out_basename, scrublet):
+    fig, _ = scrublet.plot_histogram(fig_size=(20, 10))
+    fig.suptitle(f"{out_basename} - Scrublet Histgrams", fontsize=16)
+    fig.subplots_adjust(top=0.85)
+    pyplot.savefig(f"{FILE_PATH_OUT_BASENAME}.ScrubletHistograms.png")
+
+
+# Check if algorithm failed at identifying a doublet score threshold
+if (adata_raw.obs["predicted_doublets"].isnull().values.any() or scrub.predicted_doublets_ is None) and args.threshold is None:
+    # Set dummy threshold in order to save the plots
+    scrub.threshold_ = 1
+    # Save the histograms in the isolated process directory so that user can use it to define a doublet score threshold for the current sample.
+    save_histograms(
+        out_basename=FILE_PATH_OUT_BASENAME,
+        scrublet=scrub
+    )
+    raise Exception(f"""
+VSN ERROR: Scrublet failed to automatically identify a doublet score threshold for {SAMPLE_NAME}.
+A manual doublet score threshold can be set using the --threshold (params.sc.scrublet.threshold) argument.
+Consider to use sample-based parameter setting as described at https://vsn-pipelines.readthedocs.io/en/develop/features.html#multi-sample-parameters. E.g.:
+params {{
+    sc {{
+        scrublet {{
+            threshold = [
+                {SAMPLE_NAME}: [your-custom-threshold-for-that-sample],
+                ...
+            ]
+        }}
+    }}
+}}
+In order to facilitate this process, the Scrublet histograms have been saved in the given process work directory.""")
+
+# Call the doublets using custom threshold
+if (adata_raw.obs["predicted_doublets"].isnull().values.any() or scrub.predicted_doublets_ is None) and args.threshold is not None:
+    print(f"VSN MSG: Calling doublets using manual threshold: {args.threshold}")
+    adata_raw.obs["predicted_doublets"] = scrub.call_doublets(threshold=args.threshold)
+
+
 # Rename the columns
 adata_raw.obs.rename(
     columns={
