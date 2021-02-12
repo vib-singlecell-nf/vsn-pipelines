@@ -38,7 +38,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 	}
 
 	void displayMessage(tag = null) {
-		if(!this.params?.quiet)) {
+		if(!this.params?.quiet) {
 			Channel.from('').view {
 				"""
 	------------------------------------------------------------------
