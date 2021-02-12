@@ -6,15 +6,6 @@ import static groovy.json.JsonOutput.*
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
-def getToolParams(params, toolKey) {
-    if(!toolKey.contains(".")) {
-        return params[toolKey]
-    }
-    def entry = params
-    toolKey.split('\\.').each { entry = entry?.get(it) }
-    return entry
-}
-
 def boolean isCollectionOrArray(object) {    
     [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
 }
@@ -157,7 +148,7 @@ def getConverterContainer = { params, type ->
             return "vibsinglecellnf/scconverter:0.0.1"
         break;
         case "python":
-            return params.sc.scanpy.container
+            return params.getToolParams("scanpy").container
     }
 }
 
@@ -340,7 +331,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
 process SC__FILE_CONCATENATOR {
 
     cache 'deep'
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -363,7 +354,7 @@ process SC__FILE_CONCATENATOR {
 
 process SC__STAR_CONCATENATOR() {
 
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
