@@ -128,16 +128,31 @@ elif args.method == 'aio':
     if args.sample_column_name is None:
         raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")
 
+    if len(np.unique(adata.obs.index)) != adata.obs.shape[0]:
+        raise Exception("VSN ERROR: Cells of the given h5ad are not unique.")
+
     for annotation_column_name in args.annotation_column_names:
         # Extract the metadata for the cells from the adata
-        metadata_subset = metadata[
-            np.logical_and(
-                metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
-                metadata.index.isin(adata.obs.index.values))
-        ]
-        # Check if all elements from the metadata subset are present in the given input file (h5ad file)
-        if np.sum(np.isin(adata.obs.index, metadata_subset.index)) != len(adata.obs):
-            raise Exception(f"VSN ERROR: Make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_path.name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+        # Check if index are all unique, in that case index only may be used
+        if len(np.unique(metadata.index)) == metadata.shape[0]:
+            # Check existence of 1-to-many relationships between adata.obs.index and metadata.index
+            if np.sum(np.isin(adata.obs.index, metadata.index)) == adata.obs.shape[0]:
+                print(f"VSN MGS: subsetting metadata based on only on '{args.index_column_name}' column of the metadata {args.cell_meta_data_file_paths[0].name}.")
+                metadata_subset = metadata[metadata.index.isin(adata.obs.index.values)]
+            else:
+                raise Exception(f"VSN ERROR: There is not a 1-to-1 relationship between the index elements of the dataset {args.input.name} and index elements of the metadata {args.cell_meta_data_file_paths[0].name}.")
+        else:
+            print(f"VSN MGS: subsetting metadata based on index on '{args.sample_column_name}' and '{args.index_column_name}' columns of the metadata {args.cell_meta_data_file_paths[0].name}.")
+            metadata_subset = metadata[
+                np.logical_and(
+                    metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
+                    metadata.index.isin(adata.obs.index.values))
+            ]
+            # Check if all elements from the metadata subset are present in the given input file (h5ad file)
+            num_matching_cells = np.sum(np.isin(adata.obs.index, metadata_subset.index))
+
+            if num_matching_cells != len(adata.obs):
+                raise Exception(f"VSN ERROR: Dimensions mismatch between {args.input.name} and {args.cell_meta_data_file_paths[0].name}: expected {len(adata.obs)} but got {num_matching_cells} cells matching. Make sur all cells from metadata file can be found in the data and/or make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_paths[0].name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
 
         # Annotate
         adata.obs[annotation_column_name] = None
