@@ -128,7 +128,12 @@ if args.method == 'internal' or len(np.unique(metadata.index)) != len(metadata.i
         raise Exception(f"VSN ERROR: Missing '{args.sample_column_name}' column in obs slot of the given h5ad input file.")
 
     if values_to_keep_from_filter_column_formatted is None:
-        raise Exception(f"VSN ERROR: Missing --filter-column-name argument (filterColumnName param) and/or --value-to-keep-from-filter-column (valuesToKeepFromFilterColumn param). These are required since the '{args.index_column_name}' index column does not contain unique values.")
+        if args.filter_column_name not in metadata.columns:
+            raise Exception(f"VSN ERROR: The filter column defined by --filter-column-name argument (filterColumnName param) does not exist.")
+        if args.filter_column_name is None:
+            raise Exception(f"VSN ERROR: Missing --filter-column-name argument (filterColumnName param). This is required since the '{args.index_column_name}' index column does not contain unique values.")
+        if args.values_to_keep_from_filter_column is None:
+            raise Exception(f"VSN ERROR: Missing --value-to-keep-from-filter-column (valuesToKeepFromFilterColumn param). This is required since the '{args.index_column_name}' index column does not contain unique values.")
 
     print(f"Creating a filter mask based on '{args.sample_column_name}' and '{args.filter_column_name}'...")
     filter_mask = np.logical_and(
