@@ -118,6 +118,7 @@ if args.method == 'obo':
 elif args.method == 'aio':
     if len(args.cell_meta_data_file_paths) > 1:
         raise Exception("VSN ERROR: Using multiple metadata files is currently not supported with the AIO method.")
+    
     metadata = pd.read_csv(
         filepath_or_buffer=args.cell_meta_data_file_paths[0].name,
         sep="\t",
@@ -130,20 +131,23 @@ elif args.method == 'aio':
         raise Exception("VSN ERROR: Cells of the given h5ad are not unique.")
 
     for annotation_column_name in args.annotation_column_names:
+
         # Extract the metadata for the cells from the adata
         # Check if index are all unique, in that case index only may be used
         if len(np.unique(metadata.index)) == metadata.shape[0]:
             # Check existence of 1-to-many relationships between adata.obs.index and metadata.index
-            if np.sum(np.isin(adata.obs.index, metadata.index)) == adata.obs.shape[0]:
-                print(f"VSN MGS: subsetting metadata based on only on '{args.index_column_name}' column of the metadata {args.cell_meta_data_file_paths[0].name}.")
+            num_matching_cells = np.sum(np.isin(adata.obs.index, metadata.index))
+
+            if num_matching_cells == adata.obs.shape[0]:
+                print(f"VSN MSG: subsetting metadata based on only on '{args.index_column_name}' column of the metadata {args.cell_meta_data_file_paths[0].name}.")
                 metadata_subset = metadata[metadata.index.isin(adata.obs.index.values)]
             else:
-                raise Exception(f"VSN ERROR: There is not a 1-to-1 relationship between the index elements of the dataset {args.input.name} and index elements of the metadata {args.cell_meta_data_file_paths[0].name}.")
+                raise Exception(f"VSN ERROR: There is a dimension mismatch between the dataset {args.input.name} and the metadata {args.cell_meta_data_file_paths[0].name}: expected {len(adata.obs)} but got {num_matching_cells} cells matching.")
         else:
             if args.sample_column_name is None:
                 raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")
 
-            print(f"VSN MGS: subsetting metadata based on index on '{args.sample_column_name}' and '{args.index_column_name}' columns of the metadata {args.cell_meta_data_file_paths[0].name}.")
+            print(f"VSN MSG: subsetting metadata based on index on '{args.sample_column_name}' and '{args.index_column_name}' columns of the metadata {args.cell_meta_data_file_paths[0].name}.")
             metadata_subset = metadata[
                 np.logical_and(
                     metadata[args.sample_column_name] == args.sample_id,  # Taking sample into consideration is important here (barcode collision between samples might happen!)
