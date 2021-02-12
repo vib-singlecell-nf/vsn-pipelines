@@ -119,7 +119,7 @@ elif args.method == 'aio':
     if len(args.cell_meta_data_file_paths) > 1:
         raise Exception("VSN ERROR: Using multiple metadata files is currently not supported with the AIO method.")
     metadata = pd.read_csv(
-        filepath_or_buffer=args.cell_meta_data_file_paths[0],
+        filepath_or_buffer=args.cell_meta_data_file_paths[0].name,
         sep="\t",
         header=0,
         index_col=args.index_column_name
