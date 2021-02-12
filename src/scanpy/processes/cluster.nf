@@ -38,7 +38,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 	}
 
 	void displayMessage(tag) {
-		if(!this.params?.quiet)) {
+		if(!this.params?.quiet) {
         	Channel.from('').view {
 			"""
 ------------------------------------------------------------------
