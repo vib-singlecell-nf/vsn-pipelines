@@ -722,8 +722,8 @@ Workflows import multiple processes and define the workflow by name:
     workflow CELLRANGER {
 
         main:
-            SC__CELLRANGER__MKFASTQ(file(params.sc.cellranger.mkfastq.csv), path(params.sc.cellranger.mkfastq.runFolder))
-            SC__CELLRANGER__COUNT(file(params.sc.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
+            SC__CELLRANGER__MKFASTQ(file(params.getToolParams("cellranger").mkfastq.csv), path(params.getToolParams("cellranger").mkfastq.runFolder))
+            SC__CELLRANGER__COUNT(file(params.getToolParams("cellranger").count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
         emit:
             SC__CELLRANGER__COUNT.out
 

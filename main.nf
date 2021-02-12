@@ -784,9 +784,9 @@ workflow cellranger {
     } from './src/cellranger/main' params(params)
 
     CELLRANGER(
-        file(params.sc.cellranger.mkfastq.csv),
-        file(params.sc.cellranger.mkfastq.runFolder),
-        file(params.sc.cellranger.count.transcriptome)
+        file(params.getToolParams("cellranger").mkfastq.csv),
+        file(params.getToolParams("cellranger").mkfastq.runFolder),
+        file(params.getToolParams("cellranger").count.transcriptome)
     )
 
     emit:
@@ -800,10 +800,10 @@ workflow cellranger_libraries {
     } from './src/cellranger/workflows/cellranger_libraries' params(params)
 
     CELLRANGER_LIBRARIES(
-        file(params.sc.cellranger.mkfastq.csv),
-        file(params.sc.cellranger.mkfastq.runFolder),
-        file(params.sc.cellranger.count.transcriptome),
-        file(params.sc.cellranger.count.featureRef)
+        file(params.getToolParams("cellranger").mkfastq.csv),
+        file(params.getToolParams("cellranger").mkfastq.runFolder),
+        file(params.getToolParams("cellranger").count.transcriptome),
+        file(params.getToolParams("cellranger").count.featureRef)
     )
 
     emit:
@@ -818,8 +818,8 @@ workflow cellranger_count_metadata {
     } from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
 
     CELLRANGER_COUNT_WITH_METADATA(
-        file(params.sc.cellranger.count.transcriptome),
-        file(params.sc.cellranger.count.metadata)
+        file(params.getToolParams("cellranger").count.transcriptome),
+        file(params.getToolParams("cellranger").count.metadata)
     )
     emit:
         CELLRANGER_COUNT_WITH_METADATA.out
@@ -843,9 +843,9 @@ workflow cellranger_count_libraries {
     } from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
 
     CELLRANGER_COUNT_WITH_LIBRARIES(
-        file(params.sc.cellranger.count.transcriptome),
-        file(params.sc.cellranger.count.featureRef),
-        params.sc.cellranger.count.libraries
+        file(params.getToolParams("cellranger").count.transcriptome),
+        file(params.getToolParams("cellranger").count.featureRef),
+        params.getToolParams("cellranger").count.libraries
     )
 
     emit:
@@ -861,9 +861,9 @@ workflow cellranger_count_demuxlet {
     include {
         SC__CELLRANGER__COUNT as CELLRANGER_COUNT;
     } from './src/cellranger/processes/count'
-    if (params.sc.cellranger.count.fastqs instanceof Map) {
+    if (params.getToolParams("cellranger").count.fastqs instanceof Map) {
         // Remove default key
-        Channel.from(params.sc.cellranger.count.fastqs.findAll {
+        Channel.from(params.getToolParams("cellranger").count.fastqs.findAll {
             it.key != 'default' 
         }.collect { k, v -> 
             // Split possible multiple file paths
@@ -882,7 +882,7 @@ workflow cellranger_count_demuxlet {
         .set { fastq_data }           
     }
     data = CELLRANGER_COUNT(
-        params.sc.cellranger.count.transcriptome,
+        params.getToolParams("cellranger").count.transcriptome,
         fastq_data
     )
     get_bam_barcodes_from_cellranger_rna(data) |
@@ -1092,7 +1092,7 @@ workflow sra_cellranger_bbknn {
         out = sra()
         SC__CELLRANGER__PREPARE_FOLDER( out.groupTuple() )
         SC__CELLRANGER__COUNT(
-            file(params.sc.cellranger.count.transcriptome),
+            file(params.getToolParams("cellranger").count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out
         )
         BBKNN( 
