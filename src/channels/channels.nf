@@ -9,10 +9,10 @@ include {
     getChannel as getFileChannel;
     getChannelWithIndex as getFileChannelWithIndex;
 } from './file' params(params)
+include {
+    isCollectionOrArray;
+} from './../utils/processes/utils'
 
-boolean isCollectionOrArray(object) {    
-    [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
-}
 
 def isOuts = { glob ->
     // Avoid file() which will resolve the glob
