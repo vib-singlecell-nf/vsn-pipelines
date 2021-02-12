@@ -506,7 +506,7 @@ workflow single_sample_decontx {
     if(params.utils?.publish) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
+            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.getToolParams("celda").decontx.strategy.toUpperCase(),
             "loom",
             null,
             false
@@ -582,7 +582,7 @@ workflow single_sample_decontx_scrublet {
         // - potential doublets removed by Scrublet 
         PUBLISH_CELDA_DECONTX_SCRUBLET(
             SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
-            "CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "CELDA_DECONTX_"+ params.getToolParams("celda").decontx.strategy.toUpperCase() +"_SCRUBLET",
             "h5ad",
             null,
             false
@@ -1219,7 +1219,7 @@ workflow _cell_annotate_filter {
             null
         )
 
-        if(params.sc.cell_filter.containsKey("publish") && params.sc.cell_filter.publish) {
+        if(params.getToolParams("cell_filter").containsKey("publish") && params.getToolParams("cell_filter").publish) {
             PUBLISH_H5AD_CELL_FILTERED(
                 FILTER_BY_CELL_METADATA.out,
                 "FILTER_BY_CELL_METADATA",

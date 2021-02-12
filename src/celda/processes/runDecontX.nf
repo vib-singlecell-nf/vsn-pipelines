@@ -8,7 +8,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/${moduleName}
 
 process SC__CELDA__DECONTX {
     
-    container params.sc.celda.container
+    container params.getToolParams("celda").container
     publishDir "${params.global.outdir}/data/${moduleName}", mode: 'link'
     label 'compute_resources__default'
 
@@ -32,7 +32,7 @@ process SC__CELDA__DECONTX {
             emit: other
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.celda.decontx)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("celda").decontx)
         processParams = sampleParams.local
         
         def filterNumMadsThresholdsAsArguments = ''

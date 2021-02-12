@@ -33,7 +33,7 @@ process SC__PREPARE_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : params.getToolParams(tool)["cell_filter"]
+            isParamNull(tool) ? params.getToolParams("cell_filter") : params.getToolParams(tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -91,7 +91,7 @@ process SC__APPLY_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : params.getToolParams(tool)["cell_filter"]
+            isParamNull(tool) ? params.getToolParams("cell_filter") : params.getToolParams(tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'

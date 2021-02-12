@@ -32,7 +32,7 @@ workflow FILTER_BY_CELL_METADATA {
 
     main:
         def workflowParams = isParamNull(tool) ? 
-            params.sc.cell_filter :
+            params.getToolParams("cell_filter") :
             params.getToolParams(tool)["cell_filter"]
 
         Channel

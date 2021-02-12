@@ -305,7 +305,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
             path("${sampleId}.SC__FILE_CONVERTER_FROM_SCE.${outputDataType}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("file_converter"))
         processParams = sampleParams.local
         def _outputDataType = outputDataType
         converterToUse = getConverter(
