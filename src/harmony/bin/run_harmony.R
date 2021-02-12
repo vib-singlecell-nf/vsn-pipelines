@@ -50,7 +50,7 @@ args <- parser$parse_args()
 cat("Parameters: \n")
 print(args)
 
-if(is.null(args$`vars_use`)) {
+if(is.null(args$vars_use)) {
 	stop("The parameter --vars-use has to be set.")
 }
 
@@ -61,11 +61,11 @@ if(!is.null(args$seed)) {
   warnings("No seed is set, this will likely give none reproducible results.")
 }
 
-input_ext <- tools::file_ext(args$`input`)
+input_ext <- tools::file_ext(args$input)
 
 if(input_ext == "h5ad") {
   # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
-  file <- hdf5r::h5file(filename = args$`input`, mode = 'r')
+  file <- hdf5r::h5file(filename = args$input, mode = 'r')
   if(!("X_pca" %in% names(x = file[["obsm"]]))) {
     stop("X_pca slot is not found in the AnnData (h5ad).")
   }
@@ -74,7 +74,7 @@ if(input_ext == "h5ad") {
   row.names(x = pca_embeddings) <- obs$index
   colnames(x = pca_embeddings) <- paste0("PCA_", seq(from = 1, to = ncol(x = pca_embeddings)))
   metadata <- obs
-  # seurat <- Seurat::ReadH5AD(file = args$`input`)
+  # seurat <- Seurat::ReadH5AD(file = args$input)
   # if(!("pca" %in% names(seurat@reductions)) || is.null(x = seurat@reductions$pca))
   #   stop("Expects a PCA embeddings data matrix but it does not exist.")
   # data <- seurat@reductions$pca
@@ -86,19 +86,19 @@ if(input_ext == "h5ad") {
 
 print(paste0("PCA embeddings matrix has ", dim(x = data)[1], " rows, ", dim(x = data)[2], " columns."))
 
-if(sum(args$`vars_use` %in% colnames(x = metadata)) != length(x = args$`vars_use`)) {
+if(sum(args$vars_use %in% colnames(x = metadata)) != length(x = args$vars_use)) {
 	stop("Some argument value from the parameter(s) --vars-use are not found in the metadata.")
 }
 
-print(paste0("Batch variables used for integration: ", paste0(args$`vars_use`, collapse=", ")))
+print(paste0("Batch variables used for integration: ", paste0(args$vars_use, collapse=", ")))
 
 # Run Harmony
 # Expects PCA matrix (Cells as rows and PCs as columns.)
 harmony_embeddings <- harmony::HarmonyMatrix(
   data_mat = pca_embeddings,
   meta_data = metadata,
-  vars_use = args$`vars_use`,
-  do_pca = args$`do_pca`,
+  vars_use = args$vars_use,
+  do_pca = args$do_pca,
   verbose = FALSE
 )
 
@@ -108,7 +108,7 @@ harmony_embeddings <- harmony::HarmonyMatrix(
 
 write.table(
 	x = harmony_embeddings,
-	file = paste0(args$`output_prefix`, ".tsv"),
+	file = paste0(args$output_prefix, ".tsv"),
 	quote = FALSE,
 	sep = "\t",
 	row.names = TRUE,
