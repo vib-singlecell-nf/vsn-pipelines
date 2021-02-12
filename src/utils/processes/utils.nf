@@ -99,14 +99,18 @@ def runPythonConverter = {
     inputDataType,
     outputDataType,
     outputExtension,
+    group,
     f ->
     return (
         """
         ${binDir}/sc_file_converter.py \
             --sample-id "${sampleId}" \
-            ${(processParams.containsKey('makeVarIndexUnique')) ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
-            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
+            ${!isParamNull(group) ? '--group-name ' + group.get(0) : ''} \
+            ${!isParamNull(group) ? '--group-value ' + group.get(1) : ''} \
+            ${processParams?.makeVarIndexUnique ? '--make-var-index-unique '+ processParams.makeVarIndexUnique : ''} \
+            ${processParams?.tagCellWithSampleId ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${processParams?.remove10xGEMWell ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
+            ${processParams?.useRaw ? '--use-raw '+ processParams.useRaw : ''} \
             --input-format $inputDataType \
             --output-format $outputDataType \
             ${f} \
@@ -122,6 +126,7 @@ def runRConverter = {
     inputDataType,
     outputDataType,
     outputExtension,
+    group,
     f,
     sceMainLayer = null ->
     
@@ -129,8 +134,10 @@ def runRConverter = {
         """
         ${binDir}/sc_file_converter.R \
             --sample-id "${sampleId}" \
-            ${(processParams.containsKey('tagCellWithSampleId')) ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
-            ${(processParams.containsKey('remove10xGEMWell')) ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
+            ${!isParamNull(group) ? '--group-name ' + group.get(0) : ''} \
+            ${!isParamNull(group) ? '--group-value ' + group.get(1) : ''} \
+            ${processParams?.tagCellWithSampleId ? '--tag-cell-with-sample-id '+ processParams.tagCellWithSampleId : ''} \
+            ${processParams?.remove10xGEMWell ? '--remove-10x-gem-well '+ processParams.remove10xGEMWell : ''} \
             ${(processParams.containsKey('seuratAssay')) ? '--seurat-assay '+ processParams.seuratAssay : ''} \
             ${(processParams.containsKey('seuratMainLayer')) ? '--seurat-main-assay '+ processParams.seuratMainLayer : ''} \
             ${sceMainLayer != null ? '--sce-main-layer '+ sceMainLayer : ''} \
@@ -190,7 +197,8 @@ process SC__FILE_CONVERTER {
             val(sampleId), \
             path(f), \
             val(inputDataType), \
-            val(outputDataType)
+            val(outputDataType), \
+            val(group)
 
     output:
         tuple \
@@ -264,6 +272,7 @@ process SC__FILE_CONVERTER {
                     inputDataType,
                     outputDataType,
                     outputExtension,
+                    group,
                     f
                 )
                 break;
@@ -274,6 +283,7 @@ process SC__FILE_CONVERTER {
                     inputDataType,
                     outputDataType,
                     outputExtension,
+                    group,
                     f
                 )
                 break;
@@ -293,7 +303,8 @@ process SC__FILE_CONVERTER_FROM_SCE {
     input:
         tuple \
             val(sampleId), \
-            path(f)
+            path(f), \
+            val(group)
         val(outputDataType)
         val(mainLayer)
 
@@ -319,6 +330,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
             "sce_rds",
             _outputDataType,
             outputExtension,
+            group,
             f,
             mainLayer
         )

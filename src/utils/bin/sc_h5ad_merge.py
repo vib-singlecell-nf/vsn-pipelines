@@ -129,7 +129,13 @@ for _adata in adatas:
         },
         index=_adata.obs.index
     )
-    clustering.columns = [f"{clustering_algorithm}_res{clustering_params['resolution']}"]
+    clustering_name = f"{clustering_algorithm}_res{clustering_params['resolution']}"
+    clustering.columns = [clustering_name]
+
+    # Remove clustering if already exists
+    if clustering_name in adata.obs:
+        print(f"VSN MSG: Already existing {clustering_name} obs column in AnnData. Removing this column before joining clustering data...")
+        del adata.obs[clustering_name]
     adata.obs = adata.obs.join(clustering)
 
 ####################

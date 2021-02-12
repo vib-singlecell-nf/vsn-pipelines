@@ -367,10 +367,10 @@ Source: https://github.com/Teichlab/bbknn/blob/master/examples/pancreas.ipynb
 
     * - Output File
       - Description
+    * - `out/data/*.BBKNN.h5ad`
+      - `Scanpy`-ready h5ad file containing all results. The `raw.X` slot contains the log-normalized data (if normalization & transformation steps applied) while the `X` slot contains the log-normalized scaled data.
     * - `out/data/*.BBKNN.loom`
       - `SCope`-ready loom file containing all results.
-    * - `out/data/*.BBKNN.h5ad`
-      - `Scanpy`-ready h5ad file containing all results.
 
 ----
 
@@ -394,7 +394,7 @@ This could be very resource intensive, depending on the dataset.
     * - Output File
       - Description
     * - `out/data/*.BBKNN.h5ad`
-      - `Scanpy`-ready h5ad file containing all results from a `bbknn` workflow run.
+      - `Scanpy`-ready h5ad file containing all results from a `bbknn` workflow run. The `raw.X` slot contains the log-normalized data (if normalization & transformation steps applied) while the `X` slot contains the log-normalized scaled data.
     * - `out/data/*.BBKNN_SCENIC.loom`
       - `SCope`-ready loom file containing all results from a `bbknn` workflow and a `scenic` workflow run (e.g.: regulon AUC matrix, regulons, ...).
 
@@ -418,10 +418,10 @@ The output is a loom file with the results embedded.
 
     * - Output File
       - Description
+    * - `out/data/*.HARMONY.h5ad`
+      - `Scanpy`-ready h5ad file containing all results. The `raw.X` slot contains the log-normalized data (if normalization & transformation steps applied) while the `X` slot contains the log-normalized scaled data.
     * - `out/data/*.HARMONY.loom`
       - `SCope`-ready loom file containing all results.
-    * - `out/data/*.HARMONY.h5ad`
-      - `Scanpy`-ready h5ad file containing all results.
 
 ----
 
@@ -446,11 +446,10 @@ The output is a loom file with the results embedded.
 
     * - Output File
       - Description
+    * - `out/data/*.MNNCORRECT.h5ad`
+      - `Scanpy`-ready h5ad file containing all results. The `raw.X` slot contains the log-normalized data (if normalization & transformation steps applied) while the `X` slot contains the log-normalized scaled data.
     * - `out/data/*.MNNCORRECT.loom`
       - `SCope`-ready loom file containing all results.
-    * - `out/data/*.MNNCORRECT.h5ad`
-      - `Scanpy`-ready h5ad file containing all results.
-
 
 ----
 

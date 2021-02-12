@@ -22,7 +22,7 @@ workflow SOUPX_CORRECT {
         soupx = SC__SOUPX( data.map { it -> tuple(it[0], it[1]) } )
 
         SC__FILE_CONVERTER_FROM_SCE(
-            soupx.main,
+            soupx.main.map { it -> tuple(it[0], it[1], "NULL") },
             "h5ad",
             "soupXcounts"
         )
