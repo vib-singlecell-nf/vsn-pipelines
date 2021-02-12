@@ -33,8 +33,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 	}
 
 	void displayMessage(tag = null, params) {
-        if(!params.containsKey('quiet')) {
-            Channel.from('').view {
+        Channel.from('').view {
 			"""
 ------------------------------------------------------------------
 \u001B[32m Parameter exploration of SC__SCANPY__NEIGHBORHOOD_GRAPH step... \u001B[0m
@@ -44,7 +43,6 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 \u001B[32m   - values: \u001B[0m \u001B[33m   ${nPcss} \u001B[0m
 ------------------------------------------------------------------
             """
-            }
         }
 	}
 
@@ -66,7 +64,7 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 		// Prepare argument stream
 		def $nPcs = Channel.from("NULL")
 		if(isParameterExplorationModeOn()) {
-			displayMessage(tag, params)
+			displayMessage(tag)
 			$nPcs = Channel.from(nPcs)
 		}
 		return $nPcs

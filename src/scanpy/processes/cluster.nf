@@ -32,9 +32,8 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		this.configProcessParams = params
 	}
 
-	void displayMessage(tag, params) {
-        if(!params.containsKey('quiet')) {
-            Channel.from('').view {
+	void displayMessage(tag) {
+        Channel.from('').view {
 			"""
 ------------------------------------------------------------------
 \u001B[32m Parameter exploration of SC__SCANPY__CLUSTERING step... \u001B[0m
@@ -46,7 +45,6 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 \u001B[32m   - values: \u001B[0m \u001B[33m   ${resolutions} \u001B[0m
 ------------------------------------------------------------------
             """
-            }
         }
 	}
 
@@ -84,7 +82,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		def _resolution = resolution == null ? "NULL" : resolution
 		def $method = Channel.from(methods == null ? _method : methods)
 		def $resolution = Channel.from(resolutions == null ? _resolution : resolutions)
-		displayMessage(tag, params)
+		displayMessage(tag)
 		return $method.combine($resolution)
 	}
 
