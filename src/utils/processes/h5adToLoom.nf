@@ -7,7 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 process SC__H5AD_TO_LOOM {
 
-	container params.sc.scanpy.container
+	container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/loom", mode: 'link', overwrite: true, saveAs: { filename -> "${sampleId}.SCope_output.loom" }
     label 'compute_resources__mem'
 
@@ -42,7 +42,7 @@ process SC__H5AD_TO_LOOM {
 
 process SC__H5AD_TO_FILTERED_LOOM {
 
-	container params.sc.scanpy.container
+	container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 

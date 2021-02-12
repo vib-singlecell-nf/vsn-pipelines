@@ -7,7 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 process SC__UTILS__EXTRACT_FEATURE_METADATA {
 
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 

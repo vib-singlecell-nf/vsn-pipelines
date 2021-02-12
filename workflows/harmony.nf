@@ -78,7 +78,7 @@ workflow harmony {
             SC__FILE_CONVERTER | \
             FILTER_AND_ANNOTATE_AND_CLEAN
 
-        if(params.sc.scanpy.containsKey("filter")) {
+        if(params.getToolParams("scanpy").containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
         if(params.sc.containsKey("file_concatenator")) {
@@ -90,7 +90,7 @@ workflow harmony {
                 ) 
             )
         }
-        if(params.sc.scanpy.containsKey("data_transformation") && params.sc.scanpy.containsKey("normalization")) {
+        if(params.getToolParams("scanpy").containsKey("data_transformation") && params.getToolParams("scanpy").containsKey("normalization")) {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
@@ -121,7 +121,7 @@ workflow harmony {
         )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
 
         // Select a default clustering when in parameter exploration mode
         if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {

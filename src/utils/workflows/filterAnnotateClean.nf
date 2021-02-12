@@ -34,18 +34,18 @@ workflow FILTER_AND_ANNOTATE_AND_CLEAN {
             out = UPDATE_FEATURE_NOMENCLATURE( data )
         }
         // Filter cells based on an indexed cell-based metadata table
-        if(params.sc.containsKey("cell_filter")) {
+        if(params.hasToolParams("cell_filter")) {
             out = FILTER_BY_CELL_METADATA( out, 'NULL' )
         }
         // Annotate cells based on an indexed cell-based metadata table
-        if(params.sc.containsKey("cell_annotate")) {
+        if(params.hasToolParams("cell_annotate")) {
             out = STATIC__ANNOTATE_BY_CELL_METADATA( 
                 out,
                 null
             )
         }
         // Annotate cells based on an indexed sample-based metadata table
-        if(params.sc.containsKey("sample_annotate")) {
+        if(params.hasToolParams("sample_annotate")) {
             if (!hasMetadataFilePath(params.sc.sample_annotate)) {
                 throw new Exception("The metadataFilePath param is missing in sample_annotate.")
             }
@@ -54,7 +54,7 @@ workflow FILTER_AND_ANNOTATE_AND_CLEAN {
         // Clean
         // e.g.: 
         // - h5ad: rename adata.obs values, remove adata.obs columns
-        if(params.sc.containsKey("file_cleaner")) {
+        if(params.hasToolParams("file_cleaner")) {
             out = SC__H5AD_BEAUTIFY( out )
         }
 

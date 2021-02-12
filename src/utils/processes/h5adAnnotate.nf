@@ -6,7 +6,6 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 include {
     isParamNull;
-    getToolParams;
 } from './utils.nf' params(params)
 
 def getPublishDir = { outDir, toolName ->
@@ -24,7 +23,7 @@ def getMode = { toolName ->
 
 process SC__ANNOTATE_BY_CELL_METADATA {
 
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${getPublishDir(params.global.outdir,tool)}", mode: "${getMode(tool)}", overwrite: true
     label 'compute_resources__default'
 
@@ -45,7 +44,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_annotate : getToolParams(params.sc, tool)["cell_annotate"]
+            isParamNull(tool) ? params.sc.cell_annotate : params.getToolParams(tool)["cell_annotate"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -83,7 +82,7 @@ def hasMetadataFilePath(processParams) {
 
 process SC__ANNOTATE_BY_SAMPLE_METADATA {
 
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 

@@ -76,12 +76,12 @@ workflow single_sample_star {
     )
     out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
 
-    if(params.sc.scanpy.containsKey("filter")) {
+    if(params.getToolParams("scanpy").containsKey("filter")) {
         out = QC_FILTER( out ).filtered // Remove concat
     }    
     NORMALIZE_TRANSFORM( out )
     HVG_SELECTION( NORMALIZE_TRANSFORM.out )
-    if(params.sc.scanpy.containsKey("regress_out")) {
+    if(params.getToolParams("scanpy").containsKey("regress_out")) {
         preprocessed_data = SC__SCANPY__REGRESS_OUT( HVG_SELECTION.out.scaled )
     } else {
         preprocessed_data = HVG_SELECTION.out.scaled
@@ -106,7 +106,7 @@ workflow single_sample_star {
     )
 
     // Define the parameters for clustering
-    def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+    def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
 
     // Select a default clustering when in parameter exploration mode
     if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {

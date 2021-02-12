@@ -18,7 +18,7 @@ workflow COMBINE_REPORTS {
         cluster_report
     
     main:
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
         ipynbs = qc_filter_report.map {
             it -> tuple(it[0], it[1])
         }.mix(

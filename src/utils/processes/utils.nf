@@ -197,7 +197,7 @@ process SC__FILE_CONVERTER {
             path("${sampleId}.SC__FILE_CONVERTER.${outputExtension}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("file_converter"))
         processParams = sampleParams.local
 
         switch(inputDataType) {

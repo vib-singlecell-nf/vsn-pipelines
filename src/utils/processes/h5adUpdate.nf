@@ -8,7 +8,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 process SC__H5AD_UPDATE_X_PCA {
 
-	container params.sc.scanpy.container
+	container params.getToolParams("scanpy").container
     label 'compute_resources__mem'
 
 	input:
@@ -34,7 +34,7 @@ process SC__H5AD_UPDATE_X_PCA {
 
 process SC__H5AD_CLEAN {
 
-	container params.sc.scanpy.container
+	container params.getToolParams("scanpy").container
     label 'compute_resources__mem'
 
 	input:
@@ -61,7 +61,7 @@ process SC__H5AD_CLEAN {
 
 process SC__H5AD_BEAUTIFY {
 
-	container params.sc.scanpy.container
+	container params.getToolParams("scanpy").container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 

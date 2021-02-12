@@ -33,7 +33,7 @@ workflow DIM_REDUCTION {
         report = GENERATE_REPORT(
             "DIMENSIONALITY_REDUCTION",
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
-            file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
+            file(workflow.projectDir + params.getToolParams("scanpy").dim_reduction.report_ipynb),
             false
         )
 
@@ -57,7 +57,7 @@ workflow DIM_REDUCTION_TSNE_UMAP {
         report = GENERATE_REPORT(
             "DIMENSIONALITY_REDUCTION",
             dimred_tsne_umap.map { it -> tuple(it[0], it[1]) },
-            file(workflow.projectDir + params.sc.scanpy.dim_reduction.report_ipynb),
+            file(workflow.projectDir + params.getToolParams("scanpy").dim_reduction.report_ipynb),
             false
         )
 

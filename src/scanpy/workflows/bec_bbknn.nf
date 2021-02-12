@@ -71,7 +71,7 @@ workflow BEC_BBKNN {
         )
 
         // Define the parameters for dimensionality reduction
-        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.sc.scanpy.dim_reduction.umap) )
+        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.getToolParams("scanpy").dim_reduction.umap) )
         SC__SCANPY__DIM_REDUCTION__UMAP( 
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out.combine(
                 dimRedParams.$()
@@ -87,7 +87,7 @@ workflow BEC_BBKNN {
         )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
@@ -122,7 +122,7 @@ workflow BEC_BBKNN {
 
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
-            file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
+            file(workflow.projectDir + params.getToolParams("scanpy").batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report",
             clusteringParams.isParameterExplorationModeOn()
         )

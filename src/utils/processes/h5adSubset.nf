@@ -6,13 +6,12 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 include {
     isParamNull;
-    getToolParams;
     isCollectionOrArray;
 } from './utils' params(params)
 
 process SC__PREPARE_OBS_FILTER {
 
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -34,7 +33,7 @@ process SC__PREPARE_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : getToolParams(params.sc, tool)["cell_filter"]
+            isParamNull(tool) ? params.sc.cell_filter : params.getToolParams(tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -71,7 +70,7 @@ process SC__PREPARE_OBS_FILTER {
 
 process SC__APPLY_OBS_FILTER {
 
-    container params.sc.scanpy.container
+    container params.getToolParams("scanpy").container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -92,7 +91,7 @@ process SC__APPLY_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : getToolParams(params.sc, tool)["cell_filter"]
+            isParamNull(tool) ? params.sc.cell_filter : params.getToolParams(tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'

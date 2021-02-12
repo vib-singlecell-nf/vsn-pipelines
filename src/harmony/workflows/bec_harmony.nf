@@ -95,7 +95,7 @@ workflow BEC_HARMONY {
 
         // Run clustering
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,

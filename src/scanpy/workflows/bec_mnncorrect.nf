@@ -63,7 +63,7 @@ workflow BEC_MNNCORRECT {
         clusterIdentificationPreBatchEffectCorrection
 
     main:
-        out = params.sc.scanpy.containsKey("regress_out") 
+        out = params.getToolParams("scanpy").containsKey("regress_out") 
             ? SC__SCANPY__REGRESS_OUT( hvg ) : data
         SC__SCANPY__BATCH_EFFECT_CORRECTION( 
             out.map { 
@@ -99,7 +99,7 @@ workflow BEC_MNNCORRECT {
         )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
@@ -136,7 +136,7 @@ workflow BEC_MNNCORRECT {
 
         mnncorrect_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
-            file(workflow.projectDir + params.sc.scanpy.batch_effect_correct.report_ipynb),
+            file(workflow.projectDir + params.getToolParams("scanpy").batch_effect_correct.report_ipynb),
             "SC_BEC_MNNCORRECT_report",
             clusteringParams.isParameterExplorationModeOn()
         )

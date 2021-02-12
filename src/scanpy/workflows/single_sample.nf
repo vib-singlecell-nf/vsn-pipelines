@@ -73,8 +73,10 @@ workflow SINGLE_SAMPLE {
         // Prefilter the data
         out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
 
-        filtered = params.sc.scanpy?.filter ? QC_FILTER( out ).filtered : out
-        transformed_normalized = params.sc.scanpy?.data_transformation && params.sc.scanpy?.normalization
+        def scanpyParams = params.getToolParams("scanpy")
+
+        filtered = scanpyParams?.filter ? QC_FILTER( out ).filtered : out
+        transformed_normalized = scanpyParams?.data_transformation && scanpyParams?.normalization
             ? NORMALIZE_TRANSFORM( filtered ) : filtered
         out = HVG_SELECTION( transformed_normalized )
         DIM_REDUCTION_PCA( out.scaled )
@@ -96,13 +98,13 @@ workflow SINGLE_SAMPLE {
         ipynbs = COMBINE_REPORTS(
             samples,
             UTILS__GENERATE_WORKFLOW_CONFIG_REPORT.out,
-            params.sc.scanpy?.filter ? QC_FILTER.out.report : Channel.empty(),
+            scanpyParams?.filter ? QC_FILTER.out.report : Channel.empty(),
             HVG_SELECTION.out.report,
             DIM_REDUCTION_TSNE_UMAP.out.report,
             CLUSTER_IDENTIFICATION.out.report
         )
 
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(scanpyParams.clustering) )
         merged_report = SC__SCANPY__MERGE_REPORTS(
             ipynbs,
             "merged_report",
@@ -114,7 +116,7 @@ workflow SINGLE_SAMPLE {
 
         // Finalize
         FINALIZE(
-            params.sc.scanpy?.filter ? QC_FILTER.out.filtered : data,
+            scanpyParams?.filter ? QC_FILTER.out.filtered : data,
             CLUSTER_IDENTIFICATION.out.marker_genes,
             'SINGLE_SAMPLE.final_output'
         )
@@ -133,7 +135,7 @@ workflow SINGLE_SAMPLE {
         )
 
     emit:
-        filtered_data = params.sc.scanpy?.filter ? QC_FILTER.out.filtered : Channel.empty()
+        filtered_data = scanpyParams?.filter ? QC_FILTER.out.filtered : Channel.empty()
         filtered_loom = FINALIZE.out.filteredloom
         hvg_data = HVG_SELECTION.out.hvg
         dr_pca_data = DIM_REDUCTION_PCA.out
