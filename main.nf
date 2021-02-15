@@ -381,6 +381,9 @@ workflow pcacv {
 workflow single_sample_scrublet {
 
     include {
+        SC__SCANPY__CLUSTERING_PARAMS;
+    } from './src/scanpy/processes/cluster.nf' params(params)
+    include {
         SINGLE_SAMPLE as SCANPY__SINGLE_SAMPLE;
     } from './src/scanpy/workflows/single_sample' params(params)
     include {
@@ -389,6 +392,10 @@ workflow single_sample_scrublet {
     include {
         ANNOTATE_BY_CELL_METADATA;
     } from './src/utils/workflows/annotateByCellMetadata.nf' params(params)
+    include {
+        clean;
+        MAKE_UNIQUE_FILENAME;
+    } from './src/utils/processes/utils.nf' params(params)
     include {
         PUBLISH as PUBLISH_SINGLE_SAMPLE_SCRUBLET;
     } from './src/utils/workflows/utils.nf' params(params)
@@ -404,19 +411,30 @@ workflow single_sample_scrublet {
     )
     // Annotate the final processed file with doublet information inferred from Scrublet
     ANNOTATE_BY_CELL_METADATA(
-        SCANPY__SINGLE_SAMPLE.out.final_processed_data.map {
-            it -> tuple(it[0], it[1])
-        },
+        SCANPY__SINGLE_SAMPLE.out.final_processed_data,
         SCRUBLET__DOUBLET_REMOVAL.out.doublet_detection.map {
             it -> tuple(it[0], it[1])
         },
         "scrublet"
     )
+
+    def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+
+    MAKE_UNIQUE_FILENAME(
+        ANNOTATE_BY_CELL_METADATA.out,
+        "single_sample_scrublet_annotated",
+        "NULL",
+        clusteringParams.isParameterExplorationModeOn()
+    )
+
     SC__H5AD_TO_LOOM(
         SCANPY__SINGLE_SAMPLE.out.filtered_data.map {
             it -> tuple(it[0], it[1])
         }.join(
-            ANNOTATE_BY_CELL_METADATA.out
+            // Renaming the file is necessary here in order to avoid input collision
+            MAKE_UNIQUE_FILENAME.out.groupTuple().map {
+                it -> tuple(it[0], it[1])
+            }
         )
     )
 
@@ -426,7 +444,7 @@ workflow single_sample_scrublet {
             "SINGLE_SAMPLE_SCRUBLET",
             "loom",
             null,
-            false
+            clusteringParams.isParameterExplorationModeOn()
         )
     }
 

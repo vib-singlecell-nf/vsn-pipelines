@@ -52,8 +52,9 @@ workflow DOUBLET_REMOVAL {
         )
 
         ANNOTATE_BY_CELL_METADATA(
+            // Expects (sampleId, data, stashedParams)
             data.map {
-                it -> tuple(it[0], it[1])
+                it -> tuple(it[0], it[1], it[3])
             },
             SC__SCRUBLET__DOUBLET_DETECTION.out.map {
                 it -> tuple(it[0], it[1])
@@ -92,7 +93,9 @@ workflow DOUBLET_REMOVAL {
                 it -> tuple(it[0], it[2])
             }.join(
                 // Get the h5ad with Scrublet info
-                ANNOTATE_BY_CELL_METADATA.out
+                ANNOTATE_BY_CELL_METADATA.out.map {
+                    it -> tuple(it[0], it[1])
+                }
             ).join(
                 finalProcessedData.map {
                     // Extract the Scrublet object file

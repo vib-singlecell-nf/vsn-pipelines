@@ -21,8 +21,9 @@ process SC__H5AD_TO_LOOM {
 			path(data)
 
 	output:
-		tuple val(sampleId), \
-		path("${sampleId}.SC__H5AD_TO_LOOM.loom")
+		tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__H5AD_TO_LOOM.loom")
 
 	script:
 		"""
