@@ -510,8 +510,10 @@ Now we can run it with the following command:
        -entry cell_annotate \
        > nextflow.config
 
-**cell_annotate_filter**
-------------------------
+**cell_annotate_filter** |cell_annotate_filter|
+-----------------------------------------------
+
+.. |cell_annotate_filter| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/cell_annotate_filter/badge.svg
 
 Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files following by a cell-based filtering.
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
