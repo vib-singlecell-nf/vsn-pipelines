@@ -104,6 +104,9 @@ Sample Aggregation Workflows
     * - harmony
       - Sample aggregation + Harmony
       - |harmony|
+    * - harmony_scenic
+      - Harmony + SCENIC
+      - |harmony_scenic|
     * - mnncorrect
       - Sample aggregation + mnnCorrect
       - |mnncorrect|
@@ -196,6 +199,10 @@ See `here <https://vsn-pipelines.readthedocs.io/en/latest/scatac-seq.html>`_ for
 .. |harmony| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/harmony/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#harmony-harmony
     :alt: Harmony Pipeline
+
+.. |harmony_scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/harmony_scenic/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#harmony-scenic
+    :alt: Harmony SCENIC Pipeline
 
 .. |mnncorrect| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/mnncorrect/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#mnncorrect-mnncorrect
