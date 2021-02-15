@@ -120,7 +120,7 @@ workflow SINGLE_SAMPLE {
         )
 
         marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map {
-            it -> tuple(it[0], it[1], it[2..(it.size()-1)]) // stash params
+            it -> it.size() > 2 ? tuple(it[0], it[1], it[2..(it.size()-1)]) : it // stash params if multiple param exploration mode
         }
 
         // Publishing
