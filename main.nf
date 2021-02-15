@@ -81,9 +81,6 @@ workflow mnncorrect {
 
 def getHarmonyBatchVariables = { params ->
     batchVariables = params.sc.harmony.varsUse
-    if(batchVariables.size() > 1) {
-        throw new Exception("Currently it is not supported to run with multiple batch variables.")
-    }
     return batchVariables
 }
 
@@ -99,7 +96,7 @@ workflow harmony {
     } from "./src/utils/workflows/utils" params(params)
 
     batchVariables = getHarmonyBatchVariables(params)
-    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables.join("_").toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 

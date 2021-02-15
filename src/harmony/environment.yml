@@ -1,0 +1,12 @@
+name: harmony-v1.0
+channels:
+  - r
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.7
+  - r-base=4.0.2
+  - r-argparse=2.0.1
+  - r-devtools
+  - r-hdf5r
+  - r-harmony
