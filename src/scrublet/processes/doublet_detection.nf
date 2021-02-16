@@ -13,12 +13,17 @@ include {
 class SC__SCRUBLET__DOUBLET_DETECTION_PARAMS {
 
 	Script env = null;
+	Map params = null;
 	LinkedHashMap configParams = null;
 	// Parameters definiton
 	String off = null;
 
 	void setEnv(env) {
 		this.env = env
+	}
+
+	void setParams(params) {
+		this.params = params
 	}
 
 	void setConfigProcessParams(params) {
@@ -67,6 +72,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 		processParams = sampleParams.local
 		def _processParams = new SC__SCRUBLET__DOUBLET_DETECTION_PARAMS()
 		_processParams.setEnv(this)
+		_processParams.setParams(params)
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}/sc_doublet_detection.py \

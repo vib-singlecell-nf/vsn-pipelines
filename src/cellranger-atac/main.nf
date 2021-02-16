@@ -30,7 +30,7 @@ workflow MKFASTQ_ATAC {
         runFolder
     main:
         SC__CELLRANGER_ATAC__MKFASTQ(mkfastq_csv, runFolder)
-        SC__CELLRANGER_ATAC__MKFASTQ.out.view()
+        if(!params.containsKey('quiet')) SC__CELLRANGER_ATAC__MKFASTQ.out.view()
         fastqs = SC__CELLRANGER_ATAC__MKFASTQ.out.map {
             fastqDirPath -> (full, parentDir, sampleId) = (fastqDirPath =~ /(.+)\/(.+)_fastqOut/)[0]
             return tuple(sampleId, fastqDirPath)
