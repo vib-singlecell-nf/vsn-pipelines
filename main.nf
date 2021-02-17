@@ -80,7 +80,10 @@ workflow mnncorrect {
 }
 
 def getHarmonyBatchVariables = { params ->
-    batchVariables = params.sc.harmony.varsUse
+    batchVariables = params.tools.harmony.varsUse
+    if(batchVariables.size() > 1) {
+        throw new Exception("Currently it is not supported to run with multiple batch variables.")
+    }
     return batchVariables
 }
 
