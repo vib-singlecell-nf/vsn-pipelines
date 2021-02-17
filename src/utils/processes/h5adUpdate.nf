@@ -78,7 +78,7 @@ process SC__H5AD_BEAUTIFY {
 			val(stashedParams)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_cleaner)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("file_cleaner"))
         processParams = sampleParams.local
 
 		obsColumnsToRemoveAsArgument = processParams.containsKey("obsColumnsToRemove") ? 

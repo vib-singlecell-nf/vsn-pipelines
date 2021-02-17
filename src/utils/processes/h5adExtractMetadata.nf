@@ -18,7 +18,7 @@ process SC__UTILS__EXTRACT_FEATURE_METADATA {
         tuple val(sampleId), path("${sampleId}.SC__UTILS__EXTRACT_FEATURE_METADATA.tsv")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.extract_feature_metadata)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("extract_feature_metadata"))
 		processParams = sampleParams.local
         columnNamesAsArguments = processParams.columnNames.collect({ '--column-name' + ' ' + it }).join(' ')
         """

@@ -18,7 +18,7 @@ process SC__UTILS__UPDATE_FEATURE_METADATA_INDEX {
         tuple val(sampleId), path("${sampleId}.SC__UTILS__UPDATE_FEATURE_METADATA_INDEX.h5ad")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.update_feature_metadata_index)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("update_feature_metadata_index"))
 		processParams = sampleParams.local
         """
         ${binDir}/sc_h5ad_update_metadata.py \

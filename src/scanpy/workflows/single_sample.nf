@@ -92,7 +92,7 @@ workflow SINGLE_SAMPLE {
         // Reporting
         samples = data.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
-            file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
+            file(workflow.projectDir + params.getUtilsParams("workflow_configuration").report_ipynb)
         )
 
         ipynbs = COMBINE_REPORTS(

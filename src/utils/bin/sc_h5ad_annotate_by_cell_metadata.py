@@ -160,7 +160,7 @@ elif args.method == 'aio':
             num_matching_cells = np.sum(np.isin(adata.obs.index, metadata_subset.index))
 
             if num_matching_cells != len(adata.obs):
-                raise Exception(f"VSN ERROR: Dimensions mismatch between {args.input.name} and {args.cell_meta_data_file_paths[0].name}: expected {len(adata.obs)} but got {num_matching_cells} cells matching. Make sur all cells from metadata file can be found in the data and/or make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_paths[0].name}) you provided in params.sc.cell_annotate.cellMetaDataFilePath.")
+                raise Exception(f"VSN ERROR: Dimensions mismatch between {args.input.name} and {args.cell_meta_data_file_paths[0].name}: expected {len(adata.obs)} but got {num_matching_cells} cells matching. Make sur all cells from metadata file can be found in the data and/or make sure the sample IDs inferred from the data files (e.g.: {args.sample_id}) exist in the column {args.sample_column_name} of the following metadata file ({args.cell_meta_data_file_paths[0].name}) you provided in params.utils.cell_annotate.cellMetaDataFilePath.")
 
         # Annotate
         adata.obs[annotation_column_name] = None

@@ -493,7 +493,7 @@ Steps:
                 if(params.getToolParams("scanpy").containsKey("filter")) {
                     out = QC_FILTER( out ).filtered // Remove concat
                 }
-                if(params.sc.containsKey("file_concatenator")) {
+                if(params.getUtilsParams("file_concatenator")) {
                     out = SC__FILE_CONCATENATOR( 
                         out.map {
                             it -> it[1]
@@ -527,7 +527,7 @@ Steps:
                 
                 // Conversion
                 // Convert h5ad to X (here we choose: loom format)
-                if(params.sc.containsKey("file_concatenator")) {
+                if(params.hasUtilsParams("file_concatenator")) {
                     filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
                     scopeloom = FILE_CONVERTER(
                         BEC_HARMONY.out.data.groupTuple(),

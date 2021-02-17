@@ -40,7 +40,7 @@ workflow decontx {
             throw new Exception("VSN ERROR: The given strategy in params.<sc|tools>.celda.decontx is not valid. Choose: filter or correct.")
         }
 
-        if(params.utils.containsKey("publish")) {
+        if(params.hasUtilsParams("publish")) {
             PUBLISH(
                 processed,
                 "CELDA_DECONTX_"+ params.getToolParams("celda").decontx.strategy.toUpperCase(),

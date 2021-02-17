@@ -35,7 +35,7 @@ Make sure the following parameters are correctly set:
 - `params.tools.scenic.cistarget.tracksAnnotation` if commented, track-based cisTarget won't run
 - `params.tools.scenic.numRuns` if running SCENIC in multi-runs mode
 - `singularity.runOptions` Specify the paths to mount
-- `params.sc.scope.tree`
+- `params.utils.scope.tree`
 
 Additionally, you can update the other paraemeters for the different steps.
 

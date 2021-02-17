@@ -33,7 +33,7 @@ workflow single_sample {
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
 
         // Select a default clustering when in parameter exploration mode
-        if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+        if(params.hasToolParams('directs') && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING(
                 SCANPY__SINGLE_SAMPLE.out.final_processed_scope_loom
             )

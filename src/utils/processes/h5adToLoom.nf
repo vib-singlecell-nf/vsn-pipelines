@@ -21,18 +21,19 @@ process SC__H5AD_TO_LOOM {
 			path(data)
 
 	output:
-		tuple val(sampleId), \
-		path("${sampleId}.SC__H5AD_TO_LOOM.loom")
+		tuple \
+			val(sampleId), \
+			path("${sampleId}.SC__H5AD_TO_LOOM.loom")
 
 	script:
 		"""
 		${binDir}/h5ad_to_loom.py \
-			${(params.sc.containsKey('scope') && params.sc.scope.genome.length() > 0) ? '--nomenclature "' + params.sc.scope.genome + '"' : ''} \
-			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_1.length() > 0 ) ? '--scope-tree-level-1 "' + params.sc.scope.tree.level_1 + '"'  : ''} \
-			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_2.length() > 0 ) ? '--scope-tree-level-2 "' + params.sc.scope.tree.level_2 + '"'  : ''} \
-			${(params.sc.containsKey('scope') && params.sc.scope.tree.level_3.length() > 0 ) ? '--scope-tree-level-3 "' + params.sc.scope.tree.level_3 + '"'  : ''} \
-			${(params.sc.containsKey('scope') && params.sc.scope.containsKey('markers') && params.sc.scope.markers.log_fc_threshold.length() > 0 ) ? '--markers-log-fc-threshold ' + params.sc.scope.markers.log_fc_threshold : ''} \
-			${(params.sc.containsKey('scope') && params.sc.scope.containsKey('markers') && params.sc.scope.markers.fdr_threshold.length() > 0 ) ? '--markers-fdr-threshold ' + params.sc.scope.markers.fdr_threshold : ''} \
+			${(params.hasUtilsParams('scope') && params.getUtilsParams('scope').genome.length() > 0) ? '--nomenclature "' + params.getUtilsParams('scope').genome + '"' : ''} \
+			${(params.hasUtilsParams('scope') && params.getUtilsParams('scope').tree.level_1.length() > 0 ) ? '--scope-tree-level-1 "' + params.getUtilsParams('scope').tree.level_1 + '"'  : ''} \
+			${(params.hasUtilsParams('scope') && params.getUtilsParams('scope').tree.level_2.length() > 0 ) ? '--scope-tree-level-2 "' + params.getUtilsParams('scope').tree.level_2 + '"'  : ''} \
+			${(params.hasUtilsParams('scope') && params.getUtilsParams('scope').tree.level_3.length() > 0 ) ? '--scope-tree-level-3 "' + params.getUtilsParams('scope').tree.level_3 + '"'  : ''} \
+			${(params.hasUtilsParams('scope') && params.getUtilsParams('scope')?.markers?.log_fc_threshold) ? '--markers-log-fc-threshold ' + params.getUtilsParams('scope').markers.log_fc_threshold : ''} \
+			${(params.hasUtilsParams('scope') && params.getUtilsParams('scope')?.markers?.fdr_threshold) ? '--markers-fdr-threshold ' + params.getUtilsParams('scope').markers.fdr_threshold : ''} \
 			$data \
 			$rawFilteredData \
 			"${sampleId}.SC__H5AD_TO_LOOM.loom"

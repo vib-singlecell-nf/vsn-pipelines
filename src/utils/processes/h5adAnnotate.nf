@@ -44,7 +44,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_annotate : params.getToolParams(tool)["cell_annotate"]
+            isParamNull(tool) ? params.getUtilsParams("cell_annotate") : params.getToolParams(tool)["cell_annotate"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -97,7 +97,7 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA {
             path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.sample_annotate)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("sample_annotate"))
         processParams = sampleParams.local
 
         // method / type param
@@ -131,12 +131,12 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA {
         sampleColumnName = ''
         if(processParams.containsKey("by")) {
             if(!processParams.by.containsKey("sampleColumnName")) {
-                throw new Exception("VSN ERROR: Missing sampleColumnName param in params.sc.sample_annotate.by.")
+                throw new Exception("VSN ERROR: Missing sampleColumnName param in params.utils.sample_annotate.by.")
             }
             sampleColumnName = processParams.by.sampleColumnName
         } else {
             if(!processParams.containsKey("sampleColumnName")) {
-                throw new Exception("VSN ERROR: Missing sampleColumnName param in params.sc.sample_annotate.")
+                throw new Exception("VSN ERROR: Missing sampleColumnName param in params.utils.sample_annotate.")
             }
             // make it backward compatible (see sample_annotate_old_v1.config)
             sampleColumnName = processParams.sampleColumnName

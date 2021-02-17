@@ -211,9 +211,9 @@ Simply adding `-profile scenic_multiruns` during the config step will activate t
 Runs the ``cellranger`` workflow (``makefastq``, then ``count``).
 Input parameters are specified within the config file:
 
-* ``params.sc.cellranger.mkfastq.csv``: path to the CSV samplesheet
-* ``params.sc.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
-* ``params.sc.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
+* ``params.tools.cellranger.mkfastq.csv``: path to the CSV samplesheet
+* ``params.tools.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
+* ``params.tools.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
 
 **cellranger_count_metadata**
 -----------------------------

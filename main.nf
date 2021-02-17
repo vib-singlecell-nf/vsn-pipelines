@@ -1195,15 +1195,15 @@ workflow _cell_annotate_filter {
         getDataChannel | \
             SC__FILE_CONVERTER
 
-        if(!params.sc.containsKey("cell_annotate"))
-            throw new Exception("VSN ERROR: The cell_annotate param is missing in params.sc.")
+        if(!params.hasUtilsParams("cell_annotate"))
+            throw new Exception("VSN ERROR: The cell_annotate param is missing in params.utils.")
 
         // Annotate & publish
         ANNOTATE_BY_CELL_METADATA( 
             SC__FILE_CONVERTER.out, 
             null,
         )
-        if(params.sc.cell_annotate.containsKey("publish") && params.sc.cell_annotate.publish) {
+        if(params.getUtilsParams("cell_annotate").containsKey("publish") && params.getUtilsParams("cell_annotate").publish) {
             PUBLISH_H5AD_CELL_ANNOTATED(
                 ANNOTATE_BY_CELL_METADATA.out,
                 "ANNOTATE_BY_CELL_METADATA",
@@ -1213,8 +1213,8 @@ workflow _cell_annotate_filter {
             )
         }
 
-        if(!params.sc.containsKey("cell_filter"))
-            throw new Exception("VSN ERROR: The cell_filter param is missing in params.sc.")
+        if(!params.hasUtilsParams("cell_filter"))
+            throw new Exception("VSN ERROR: The cell_filter param is missing in params.utils.")
 
         // Filter (& clean) & publish
         FILTER_BY_CELL_METADATA(
@@ -1222,7 +1222,7 @@ workflow _cell_annotate_filter {
             null
         )
 
-        if(params.getToolParams("cell_filter").containsKey("publish") && params.getToolParams("cell_filter").publish) {
+        if(params.getUtilsParams("cell_filter")?.publish) {
             PUBLISH_H5AD_CELL_FILTERED(
                 FILTER_BY_CELL_METADATA.out,
                 "FILTER_BY_CELL_METADATA",
@@ -1231,7 +1231,7 @@ workflow _cell_annotate_filter {
                 false
             )
         }
-        if(params.utils.containsKey("publish") && publish) {
+        if(params.hasUtilsParams("publish") && publish) {
             PUBLISH_H5AD_CELL_FILTERED(
                 FILTER_BY_CELL_METADATA.out,
                 "CELL_ANNOTATE_FILTER",
@@ -1265,15 +1265,15 @@ workflow cell_annotate_filter_and_sample_annotate {
         out = _cell_annotate_filter(false)
 
         // Annotate cells based on an indexed sample-based metadata table
-        if(!params.sc.containsKey("sample_annotate"))
-            throw new Exception("VSN ERROR: The sample_annotate param is missing in params.sc.")
+        if(!params.hasUtilsParams("sample_annotate"))
+            throw new Exception("VSN ERROR: The sample_annotate param is missing in params.utils.")
 
-        if (!hasMetadataFilePath(params.sc.sample_annotate)) {
+        if (!hasMetadataFilePath(params.getUtilsParams("sample_annotate"))) {
             throw new Exception("VSN ERROR: The metadataFilePath param is missing in sample_annotate.")
         }
         out = SC__ANNOTATE_BY_SAMPLE_METADATA( out )
 
-        if(params.sc.file_cleaner) {
+        if(params.getUtilsParams("file_cleaner")) {
             out = SC__H5AD_BEAUTIFY( out )
         }
 

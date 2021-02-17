@@ -27,12 +27,12 @@ workflow FILTER_BY_CELL_METADATA {
         //   - The given tool is performing itself a cell-based filtering
         //   - params.sc[tool] should exist
         // - tool == null:
-        //   - params.sc.cell_filter should exist
+        //   - params.utils.cell_filter should exist
         tool
 
     main:
         def workflowParams = isParamNull(tool) ? 
-            params.getToolParams("cell_filter") :
+            params.getUtilsParams("cell_filter") :
             params.getToolParams(tool)["cell_filter"]
 
         Channel

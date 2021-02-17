@@ -30,10 +30,10 @@ process SAVE_MULTI_RUNS_TO_LOOM {
 			--cell-id-attribute ${toolParams.cell_id_attribute} \
 			--gene-attribute ${toolParams.gene_attribute} \
 			--title "${sampleId} - pySCENIC (${type})" \
-			--nomenclature "${params.sc.scope.genome}" \
-			--scope-tree-level-1 "${params.sc.scope.tree.level_1}" \
-			--scope-tree-level-2 "${params.sc.scope.tree.level_2}" \
-			--scope-tree-level-3 "${params.sc.scope.tree.level_3}"
+			--nomenclature "${params.getUtilsParams('scope').genome}" \
+			--scope-tree-level-1 "${params.getUtilsParams('scope').tree.level_1}" \
+			--scope-tree-level-2 "${params.getUtilsParams('scope').tree.level_2}" \
+			--scope-tree-level-3 "${params.getUtilsParams('scope').tree.level_3}"
 		"""
 
 }

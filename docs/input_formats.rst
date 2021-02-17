@@ -112,7 +112,7 @@ or
 
 will recursively find all 10x samples in that directory.
 
-The pipeline will use either the ``outs/filtered_feature_bc_matrix/`` or the ``outs/raw_feature_bc_matrix/`` depending on the setting of the ``params.sc.file_converter.useFilteredMatrix`` (``true`` uses filtered; ``false`` uses raw).
+The pipeline will use either the ``outs/filtered_feature_bc_matrix/`` or the ``outs/raw_feature_bc_matrix/`` depending on the setting of the ``params.utils.file_converter.useFilteredMatrix`` (``true`` uses filtered; ``false`` uses raw).
 
 ----
 

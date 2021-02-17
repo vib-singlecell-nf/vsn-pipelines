@@ -8,7 +8,7 @@ Typically, cell- and gene-level filtering is one of the first steps performed in
 This usually results in the pipeline being run in two passes.
 In the **first pass**, the default filters are applied (which are probably not valid for new datasets), and a separate QC report is generated for each sample.
 These QC reports can be inspected and the filters can be adjusted in the config file
-either for all samples (by editing the ``params.sc.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
+either for all samples (by editing the ``params.tools.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
 Then, the **second pass** restarts the pipeline with the correct filtering parameters applied (use ``nextflow run ... -resume`` to skip already completed steps).
 
 Other notes
@@ -172,7 +172,7 @@ The ``utils_cell_annotate`` profile is adding the following part to the config:
         }
     }
 
-Two methods (``params.sc.cell_annotate.method``) are available:
+Two methods (``params.utils.cell_annotate.method``) are available:
 
 - ``aio``
 - ``obo``
@@ -274,7 +274,7 @@ The ``utils_cell_filter`` profile is required when generating the config file. T
 Part of an end-to-end pipeline
 ******************************
 
-For more detailed information about the parameters to set in ``params.sc.cell_filter``, please check the `cell_filter parameter details <Parameters of cell_filter>`_ section below.
+For more detailed information about the parameters to set in ``params.utils.cell_filter``, please check the `cell_filter parameter details <Parameters of cell_filter>`_ section below.
 
 As an independent workflow
 **************************
@@ -287,7 +287,7 @@ Please check the `cell_filter`_ workflow or `cell_annotate_filter`_ workflow to 
 Parameters of cell_filter
 *************************
 
-Two methods (``params.sc.cell_filter.method``) are available:
+Two methods (``params.utils.cell_filter.method``) are available:
 
 - ``internal``
 - ``external``
@@ -377,7 +377,7 @@ If you want to apply custom parameters for some specific samples and have a "gen
         }
     }
 
-Using this config, the parameter ``params.sc.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
+Using this config, the parameter ``params.tools.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
 This strategy can be applied to any other parameter of the config.
 
 
@@ -386,7 +386,7 @@ Parameter exploration
 
 Since ``v0.9.0``, it is possible to explore several combinations of parameters. The latest version of the VSN-Pipelines allows to explore the following parameters:
 
-- ``params.sc.scanpy.clustering``
+- ``params.tools.scanpy.clustering``
 
   - ``method`` ::
 
@@ -399,7 +399,7 @@ Since ``v0.9.0``, it is possible to explore several combinations of parameters. 
 Select default clustering
 *************************
 
-In case the parameter exploration mode is used within the ``params.sc.scanpy.clustering`` parameter, it will generated a range of different clusterings. 
+In case the parameter exploration mode is used within the ``params.tools.scanpy.clustering`` parameter, it will generated a range of different clusterings. 
 For non-expert, it's often difficult to know which clustering to pick. It's however possible to use the ``DIRECTS`` module in order to select a default clustering. In order, to use 
 this automated clustering selection method, add the ``directs`` profile when generating the main config using ``nextflow config``. The config will get populated with:
 

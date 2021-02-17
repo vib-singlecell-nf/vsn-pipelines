@@ -90,7 +90,7 @@ workflow mnncorrect {
         if(params.getToolParams("scanpy").containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
-        if(params.sc.containsKey("file_concatenator")) {
+        if(params.hasUtilsParams("file_concatenator")) {
             out = SC__FILE_CONCATENATOR( 
                 out.map {
                     it -> it[1]
@@ -131,7 +131,7 @@ workflow mnncorrect {
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
 
         // Select a default clustering when in parameter exploration mode
-        if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+        if(params.hasToolParams('directs') && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
         } else {
             scopeloom = FINALIZE.out.scopeloom
@@ -143,7 +143,7 @@ workflow mnncorrect {
 
         project = CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
-            file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
+            file(workflow.projectDir + params.getUtilsParams("workflow_configuration").report_ipynb)
         )
         
         // Collect the reports:

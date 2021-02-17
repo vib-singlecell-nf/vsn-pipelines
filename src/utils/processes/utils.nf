@@ -143,7 +143,7 @@ def runRConverter = {
 def getConverterContainer = { params, type ->
     switch(type) {
         case "cistopic":
-            return params.sc.cistopic.container
+            return params.tools.cistopic.container
         case "r":
             return "vibsinglecellnf/scconverter:0.0.1"
         break;
@@ -197,7 +197,7 @@ process SC__FILE_CONVERTER {
             path("${sampleId}.SC__FILE_CONVERTER.${outputExtension}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("file_converter"))
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("file_converter"))
         processParams = sampleParams.local
 
         switch(inputDataType) {
@@ -305,7 +305,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
             path("${sampleId}.SC__FILE_CONVERTER_FROM_SCE.${outputDataType}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("file_converter"))
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("file_converter"))
         processParams = sampleParams.local
         def _outputDataType = outputDataType
         converterToUse = getConverter(
@@ -342,7 +342,7 @@ process SC__FILE_CONCATENATOR {
         tuple val(params.global.project_name), path("${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}")
 
     script:
-        processParams = params.sc.file_concatenator
+        processParams = params.getUtilsParams("file_concatenator")
         """
         ${binDir}/sc_file_concatenator.py \
             --file-format $processParams.off \
@@ -369,7 +369,7 @@ process SC__STAR_CONCATENATOR() {
             path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.star_concatenator)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("star_concatenator"))
         processParams = sampleParams.local
         id = params.global.project_name
         """
@@ -401,13 +401,13 @@ def getOutputFileName(params, tag, f, fileOutputSuffix, isParameterExplorationMo
         return isParamNull(fileOutputSuffix) ? 
             "${tag}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}" :
             "${tag}.${fileOutputSuffix}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}"
-    if(params.utils.containsKey("publish")
-        && params.utils.publish.containsKey("pipelineOutputSuffix")) {
-        if(params.utils.publish.pipelineOutputSuffix == 'none')
+    def utilsPublishParams = params.getUtilsParams("publish")
+    if(utilsPublishParams?.pipelineOutputSuffix) {
+        if(utilsPublishParams.pipelineOutputSuffix == 'none')
             return "${tag}.${f.extension}"
-        if(params.utils.publish.pipelineOutputSuffix.length() == 0)
+        if(utilsPublishParams.pipelineOutputSuffix.length() == 0)
             throw new Exception("VSN ERROR: The parameter 'params.utils.publish.outputFileSuffix' cannot be empty. If you don't want to add a suffix to the final output, please set this param to 'none'.")
-        return params.utils.publish.pipelineOutputSuffix
+        return utilsPublishParams.pipelineOutputSuffix
     }
     if(isParamNull(fileOutputSuffix))
         return "${f.baseName}.${f.extension}"
@@ -483,9 +483,9 @@ process COMPRESS_HDF5() {
             val(stashedParams)
 
 	shell:
-        def compressionLevel = params.utils.containsKey("publish") &&
-            params.utils.publish.containsKey("compressionLevel") ? 
-            params.utils.publish.compressionLevel : 
+        def compressionLevel = params.hasUtilsParams("publish") &&
+            params.getUtilsParams("publish")?.compressionLevel ? 
+            params.getUtilsParams("publish").compressionLevel : 
             6
 
         outputFileName = getOutputFileName(
