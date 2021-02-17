@@ -4,7 +4,7 @@ include {
     isParamNull;
 } from './../../utils/processes/utils.nf' params(params)
 
-toolParams = params.sc.cellranger
+toolParams = params.tools.cellranger
 
 
 def generateCellRangerCountCommandDefaults = {
