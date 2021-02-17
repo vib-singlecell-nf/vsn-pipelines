@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.tools.scenic
+def toolParams = params.getToolParams("scenic")
 
 process PUBLISH_LOOM {
 
@@ -57,7 +57,6 @@ process MERGE_MOTIF_TRACK_LOOMS {
         tuple val(sampleId), path(toolParams.scenicOutputLoom)
 
     script:
-        toolParams = params.tools.scenic
         """
         ${binDir}merge_motif_track_loom.py \
             --loom_motif ${motifLoom} \
@@ -83,7 +82,6 @@ process APPEND_SCENIC_LOOM {
         tuple val(sampleId), path("${sampleId}.${toolParams.scenicScopeOutputLoom}")
 
     script:
-        toolParams = params.tools.scenic
         """
         ${binDir}append_results_to_existing_loom.py \
             --loom_scope ${scopeLoom} \

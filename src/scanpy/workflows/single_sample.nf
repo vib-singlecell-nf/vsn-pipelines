@@ -73,6 +73,7 @@ workflow SINGLE_SAMPLE {
         // Prefilter the data
         out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
 
+        // To avoid Variable `params` already defined in the process scope
         def scanpyParams = params.getToolParams("scanpy")
 
         filtered = scanpyParams?.filter ? QC_FILTER( out ).filtered : out

@@ -2,8 +2,8 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.tools.scenic
-processParams = params.tools.scenic.cistarget
+def toolParams = params.getToolParams("scenic")
+def processParams = toolParams.cistarget
 
 process CISTARGET {
 

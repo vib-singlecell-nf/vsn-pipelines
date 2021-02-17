@@ -2,8 +2,8 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.tools.scenic
-processParams = params.tools.scenic.aggregate_features
+def toolParams = params.getToolParams("scenic")
+def processParams = toolParams.aggregate_features
 
 process AGGR_MULTI_RUNS_FEATURES {
 

@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.tools.scenic
+def toolParams = params.getToolParams("scenic")
 
 process SAVE_MULTI_RUNS_TO_LOOM {
 
