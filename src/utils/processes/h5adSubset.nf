@@ -11,7 +11,7 @@ include {
 
 process SC__PREPARE_OBS_FILTER {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -33,7 +33,7 @@ process SC__PREPARE_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.getUtilsParams("cell_filter") : params.getToolParams(tool)["cell_filter"]
+            isParamNull(tool) ? params.utils.cell_filter : params.getToolParams(tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -43,7 +43,7 @@ process SC__PREPARE_OBS_FILTER {
             input = f
         } else if (processParams.method == 'external') {
             if(!filterConfig.cellMetaDataFilePath) {
-                throw new Exception("VSN ERROR: A filter in params.sc.cell_filter does not provide a cellMetaDataFilePath entry.")
+                throw new Exception("VSN ERROR: A filter in params.tools.cell_filter does not provide a cellMetaDataFilePath entry.")
             }
             input = filterConfig.cellMetaDataFilePath
         } else {
@@ -70,7 +70,7 @@ process SC__PREPARE_OBS_FILTER {
 
 process SC__APPLY_OBS_FILTER {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -91,7 +91,7 @@ process SC__APPLY_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.getUtilsParams("cell_filter") : params.getToolParams(tool)["cell_filter"]
+            isParamNull(tool) ? params.utils.cell_filter : params.getToolParams(tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'

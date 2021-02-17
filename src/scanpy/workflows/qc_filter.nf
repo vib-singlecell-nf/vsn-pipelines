@@ -35,7 +35,7 @@ workflow QC_FILTER {
                 SC__SCANPY__COMPUTE_QC_STATS.out.join(filtered).map { 
                     it -> tuple(*it[0..(it.size()-1)], null)
                 },
-                file(workflow.projectDir + params.sc.scanpy.filter.report_ipynb),
+                file(workflow.projectDir + params.tools.scanpy.filter.report_ipynb),
                 'SC_QC_filtering_report',
                 false
             )

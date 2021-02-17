@@ -76,7 +76,7 @@ workflow {
                     SC__ANNOTATE_BY_SAMPLE_METADATA;
                 } from './processes/h5adAnnotate' params(params)
                 // Run
-                if(params.hasUtilsParams("sample_annotate")) {
+                if(params.utils?.sample_annotate) {
                     getDataChannel | \
                         SC__FILE_CONVERTER | \
                         SC__ANNOTATE_BY_SAMPLE_METADATA
@@ -90,7 +90,7 @@ workflow {
                     STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA;
                 } from './workflows/annotateByCellMetadata' params(params)
                 // Run
-                if(params.hasUtilsParams("cell_annotate")) {
+                if(params.utils?.cell_annotate) {
                     getDataChannel | \
                         SC__FILE_CONVERTER
                     ANNOTATE_BY_CELL_METADATA( 
@@ -107,7 +107,7 @@ workflow {
                     FILTER_BY_CELL_METADATA;
                 } from './workflows/filterByCellMetadata' params(params)
                 // Run 
-                if(params.hasUtilsParams("cell_filter")) {
+                if(params.utils?.cell_filter) {
                     getDataChannel | \
                         SC__FILE_CONVERTER
                     FILTER_BY_CELL_METADATA(
@@ -125,7 +125,7 @@ workflow {
                     FILTER_BY_CELL_METADATA;
                 } from './workflows/filterByCellMetadata' params(params)
                 // Run
-                if(params.hasUtilsParams("cell_annotate")) {
+                if(params.utils?.cell_annotate) {
                     getDataChannel | \
                         SC__FILE_CONVERTER
 
@@ -149,7 +149,7 @@ workflow {
                 } from './processes/sra' params(params)
                 // Run
                 sra = getSRAChannel( params.data.sra )
-                db = file(params.getUtilsParams("sra_metadata").sraDbOutDir + "/SRAmetadb.sqlite")
+                db = file(params.utils.sra_metadata.sraDbOutDir + "/SRAmetadb.sqlite")
                 SRA_TO_METADATA( sra, db )
             break;
             case "GET_METADATA_FROM_SRA_WEB":
@@ -221,7 +221,7 @@ workflow {
                     SC__H5AD_BEAUTIFY;
                 } from './processes/h5adUpdate' params(params)
                 // Run
-                if(params.hasUtilsParams("file_cleaner")) {
+                if(params.utils?.file_cleaner) {
                     getDataChannel | \
                     map {
                         it -> tuple(it[0], it[1], null)

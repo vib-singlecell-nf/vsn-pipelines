@@ -13,7 +13,7 @@ process SC__DROP_SEQ_TOOLS__TAG_READ_WITH_GENE_EXON {
         tuple val(sample), path("*.merged_gene-exon-tagged.bam")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("dropseqtools").tag_read_with_gene_exon)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.dropseqtools.tag_read_with_gene_exon)
 		processParams = sampleParams.local
         """
         source $DWMAX/documents/aertslab/scripts/src_dwmax/bash-utils/utils.sh

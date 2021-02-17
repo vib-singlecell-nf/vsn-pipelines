@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
     binDir = ""
 }
 
-toolParams = params.getToolParams("sratoolkit")
+toolParams = params.tools.sratoolkit
 
 process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
 

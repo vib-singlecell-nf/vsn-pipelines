@@ -143,12 +143,12 @@ def runRConverter = {
 def getConverterContainer = { params, type ->
     switch(type) {
         case "cistopic":
-            return params.getToolParams("cistopic").container
+            return params.tools.cistopic.container
         case "r":
             return "vibsinglecellnf/scconverter:0.0.1"
         break;
         case "python":
-            return params.getToolParams("scanpy").container
+            return params.tools.scanpy.container
     }
 }
 
@@ -197,7 +197,7 @@ process SC__FILE_CONVERTER {
             path("${sampleId}.SC__FILE_CONVERTER.${outputExtension}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("file_converter"))
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.file_converter)
         processParams = sampleParams.local
 
         switch(inputDataType) {
@@ -305,7 +305,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
             path("${sampleId}.SC__FILE_CONVERTER_FROM_SCE.${outputDataType}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("file_converter"))
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.file_converter)
         processParams = sampleParams.local
         def _outputDataType = outputDataType
         converterToUse = getConverter(
@@ -331,7 +331,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
 process SC__FILE_CONCATENATOR {
 
     cache 'deep'
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -342,7 +342,7 @@ process SC__FILE_CONCATENATOR {
         tuple val(params.global.project_name), path("${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}")
 
     script:
-        processParams = params.getUtilsParams("file_concatenator")
+        processParams = params.utils.file_concatenator
         """
         ${binDir}/sc_file_concatenator.py \
             --file-format $processParams.off \
@@ -354,7 +354,7 @@ process SC__FILE_CONCATENATOR {
 
 process SC__STAR_CONCATENATOR() {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -369,7 +369,7 @@ process SC__STAR_CONCATENATOR() {
             path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("star_concatenator"))
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.star_concatenator)
         processParams = sampleParams.local
         id = params.global.project_name
         """
@@ -401,7 +401,7 @@ def getOutputFileName(params, tag, f, fileOutputSuffix, isParameterExplorationMo
         return isParamNull(fileOutputSuffix) ? 
             "${tag}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}" :
             "${tag}.${fileOutputSuffix}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}"
-    def utilsPublishParams = params.getUtilsParams("publish")
+    def utilsPublishParams = params.utils.publish
     if(utilsPublishParams?.pipelineOutputSuffix) {
         if(utilsPublishParams.pipelineOutputSuffix == 'none')
             return "${tag}.${f.extension}"
@@ -483,9 +483,9 @@ process COMPRESS_HDF5() {
             val(stashedParams)
 
 	shell:
-        def compressionLevel = params.hasUtilsParams("publish") &&
-            params.getUtilsParams("publish")?.compressionLevel ? 
-            params.getUtilsParams("publish").compressionLevel : 
+        def compressionLevel = params.utils?.publish &&
+            params.utils.publish?.compressionLevel ? 
+            params.utils.publish.compressionLevel : 
             6
 
         outputFileName = getOutputFileName(

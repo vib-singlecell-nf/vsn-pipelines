@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
  */
 process FASTP__CLEAN_AND_FASTQC {
 
-    container params.getToolParams("fastp").container
+    container params.tools.fastp.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 

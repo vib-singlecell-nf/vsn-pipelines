@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
 
 process FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL {
     
-    container params.getToolParams("flybaser").container
+    container params.tools.flybaser.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
     label 'compute_resources__default'
 
@@ -23,7 +23,7 @@ process FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL {
             path("${sampleId}.FLYBASER__CONVERT_FBGN_TO_GENE_SYMBOL.tsv")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("flybaser").convert_fbgn_to_gene_symbol)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.flybaser.convert_fbgn_to_gene_symbol)
 		processParams = sampleParams.local
         """
         ${binDir}convertFBgnToGeneSymbol.R \

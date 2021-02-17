@@ -16,7 +16,7 @@ workflow {
     main:
         switch(params.test) {
             case "SC__DIRECTS__SELECT_DEFAULT_CLUSTERING":
-                test = Channel.of(tuple('TEST', params.getToolParams("directs").inputLoom, null))
+                test = Channel.of(tuple('TEST', params.tools.directs.inputLoom, null))
                 SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( test )
             break;
             default:

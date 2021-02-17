@@ -16,7 +16,7 @@ include {
  */
 process SC__SCANPY__GENERATE_REPORT {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__report'
 
@@ -29,7 +29,7 @@ process SC__SCANPY__GENERATE_REPORT {
 		tuple val(sampleId), path("${sampleId}.${reportTitle}.ipynb")
 
 	script:
-		def reportParams = new Yaml().dump(annotations_to_plot: params.getToolParams("scanpy").report.annotations_to_plot)
+		def reportParams = new Yaml().dump(annotations_to_plot: params.tools.scanpy.report.annotations_to_plot)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
@@ -51,7 +51,7 @@ process SC__SCANPY__GENERATE_REPORT {
  */
 process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/notebooks/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "res_": resolution}", mode: 'symlink', overwrite: true
     label 'compute_resources__report'
 
@@ -77,7 +77,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 		stashedParams = [method, resolution]
 		if(!isParamNull(stashedParams))
 			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
-		def reportParams = new Yaml().dump(annotations_to_plot: params.getToolParams("scanpy").report.annotations_to_plot)
+		def reportParams = new Yaml().dump(annotations_to_plot: params.tools.scanpy.report.annotations_to_plot)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
@@ -93,7 +93,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING_GENERATE_REPORT {
 // QC report takes two inputs, so needs it own process
 process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__report'
 
@@ -116,7 +116,7 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
   	script:
 		if(!isParamNull(stashedParams))
 			uuid = stashedParams.findAll { it != 'NULL' }.join('_')
-		def reportParams = new Yaml().dump(annotations_to_plot: params.getToolParams("scanpy").report.annotations_to_plot)
+		def reportParams = new Yaml().dump(annotations_to_plot: params.tools.scanpy.report.annotations_to_plot)
 		"""
 		papermill ${ipynb} \
 		    --report-mode \
@@ -131,7 +131,7 @@ process SC__SCANPY__GENERATE_DUAL_INPUT_REPORT {
 
 process SC__SCANPY__REPORT_TO_HTML {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	// copy final "merged_report" to notbooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true
@@ -152,7 +152,7 @@ process SC__SCANPY__REPORT_TO_HTML {
 
 process SC__SCANPY__MERGE_REPORTS {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	// copy final "merged_report" to notebooks root:
 	publishDir "${params.global.outdir}/notebooks", pattern: '*merged_report*', mode: 'link', overwrite: true

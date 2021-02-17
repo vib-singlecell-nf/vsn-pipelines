@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 
-toolParams = params.getToolParams("cellranger_atac")
+toolParams = params.tools.cellranger_atac
 
 def runCellRangerAtacCount = {
     id,

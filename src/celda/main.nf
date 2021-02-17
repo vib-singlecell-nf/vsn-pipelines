@@ -30,20 +30,20 @@ workflow decontx {
         data = getDataChannel \
             | SC__FILE_CONVERTER
 
-        if(params.getToolParams("celda").decontx.strategy == "filter") {
+        if(params.tools.celda.decontx.strategy == "filter") {
             out = DECONTX_FILTER ( data )
             processed = out.decontx_filtered
-        } else if (params.getToolParams("celda").decontx.strategy == "correct") {
+        } else if (params.tools.celda.decontx.strategy == "correct") {
             out = DECONTX_CORRECT ( data )
             processed = out.decontx_corrected
         } else {
-            throw new Exception("VSN ERROR: The given strategy in params.<sc|tools>.celda.decontx is not valid. Choose: filter or correct.")
+            throw new Exception("VSN ERROR: The given strategy in params.tools.celda.decontx is not valid. Choose: filter or correct.")
         }
 
-        if(params.hasUtilsParams("publish")) {
+        if(params.utils?.publish) {
             PUBLISH(
                 processed,
-                "CELDA_DECONTX_"+ params.getToolParams("celda").decontx.strategy.toUpperCase(),
+                "CELDA_DECONTX_"+ params.tools.celda.decontx.strategy.toUpperCase(),
                 "h5ad",
                 null,
                 false

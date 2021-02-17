@@ -4,7 +4,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/popscle/bin/"
 
 process SC__POPSCLE__DEMUXLET {
 
-    container params.getToolParams("popscle").container
+    container params.tools.popscle.container
     publishDir "${params.global.outdir}/data", mode: 'symlink'
     label 'compute_resources__cpu'
 
@@ -16,7 +16,7 @@ process SC__POPSCLE__DEMUXLET {
         tuple val(sampleId), path("${sampleId}_demuxlet*")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("popscle").demuxlet)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.popscle.demuxlet)
 		processParams = sampleParams.local
 
         """
@@ -30,7 +30,7 @@ process SC__POPSCLE__DEMUXLET {
 
 process SC__POPSCLE__FREEMUXLET {
 
-    container params.getToolParams("popscle").container
+    container params.tools.popscle.container
     publishDir "${params.global.outdir}/data", mode: 'symlink'
     label 'compute_resources__cpu'
 
@@ -41,7 +41,7 @@ process SC__POPSCLE__FREEMUXLET {
         tuple val(sampleId), path("${sampleId}_freemuxlet*")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("popscle").freemuxlet)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.popscle.freemuxlet)
 		processParams = sampleParams.local
 
         """

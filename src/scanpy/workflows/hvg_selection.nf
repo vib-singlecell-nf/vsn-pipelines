@@ -36,7 +36,7 @@ workflow HVG_SELECTION {
         hvg = data \
             | SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES \
             | SC__SCANPY__SUBSET_HIGHLY_VARIABLE_GENES
-        out = params.getToolParams("scanpy").containsKey("regress_out") 
+        out = params.tools.scanpy.containsKey("regress_out") 
             ? SC__SCANPY__REGRESS_OUT( hvg ) : hvg
         scaled = SC__SCANPY__FEATURE_SCALING( out )
         PUBLISH_H5AD_HVG_SCALED(
@@ -52,7 +52,7 @@ workflow HVG_SELECTION {
         report = GENERATE_REPORT(
             "HVG",
             SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES.out,
-            file(workflow.projectDir + params.getToolParams("scanpy").feature_selection.report_ipynb),
+            file(workflow.projectDir + params.tools.scanpy.feature_selection.report_ipynb),
             false
         )
 

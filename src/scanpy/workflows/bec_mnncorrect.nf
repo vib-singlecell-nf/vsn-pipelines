@@ -65,7 +65,7 @@ workflow BEC_MNNCORRECT {
     main:
 
         // To avoid Variable `params` already defined in the process scope
-        def scanpyParams = params.getToolParams("scanpy")
+        def scanpyParams = params.tools.scanpy
 
         out = scanpyParams.containsKey("regress_out") 
             ? SC__SCANPY__REGRESS_OUT( hvg ) : data

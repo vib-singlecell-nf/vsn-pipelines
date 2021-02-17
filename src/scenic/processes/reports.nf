@@ -7,7 +7,7 @@ takes a template ipynb and adata as input,
 outputs ipynb named by the value in ${reportTitle}
 */
 
-def toolParams = params.getToolParams("scenic")
+def toolParams = params.tools.scenic
 
 process GENERATE_REPORT {
 

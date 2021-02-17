@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process SC__DROP_SEQ_TOOLS__DIGITAL_EXPRESSION {
 
-    container params.getToolParams("dropseqtools").container
+    container params.tools.dropseqtools.container
     publishDir "03.count", mode: 'symlink'
     label 'compute_resources__default'
 

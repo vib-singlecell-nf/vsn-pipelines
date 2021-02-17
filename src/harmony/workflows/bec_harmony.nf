@@ -95,7 +95,7 @@ workflow BEC_HARMONY {
 
         // Run clustering
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
@@ -131,7 +131,7 @@ workflow BEC_HARMONY {
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
-            file(workflow.projectDir + params.getToolParams("harmony").report_ipynb),
+            file(workflow.projectDir + params.tools.harmony.report_ipynb),
             "SC_BEC_HARMONY_report",
             clusteringParams.isParameterExplorationModeOn()
         )

@@ -35,7 +35,7 @@ workflow soupx {
         processed = SOUPX_CORRECT( data )
 
 
-        if(params.hasUtilsParams("publish")) {
+        if(params.utils?.publish) {
             PUBLISH(
                 processed,
                 "SOUPX_CORRECT",

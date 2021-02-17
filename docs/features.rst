@@ -51,7 +51,7 @@ This will add a different scenic entry in the config:
 .. code:: bash
 
     params {
-        sc {
+        tools {
             scenic {
                 container = 'vibsinglecellnf/scenic:0.9.19'
                 report_ipynb = '/src/scenic/bin/reports/scenic_report.ipynb'
@@ -105,7 +105,7 @@ If you want to change those thresholds applied on the markers genes, edit the ``
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scope {
                 markers {
                     log_fc_threshold = 0.5
@@ -159,7 +159,7 @@ The ``utils_cell_annotate`` profile is adding the following part to the config:
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             cell_annotate {
                 off = 'h5ad'
                 method = ''
@@ -215,7 +215,7 @@ The profile ``utils_sample_annotate`` should be added when generating the main c
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             sample_annotate {
                 iff = '10x_cellranger_mex'
                 off = 'h5ad' 
@@ -255,7 +255,7 @@ The ``utils_cell_filter`` profile is required when generating the config file. T
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             cell_filter {
                 off = 'h5ad'
                 method = ''
@@ -331,7 +331,7 @@ You'll just have to repeat the following structure for the parameters which you 
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scanpy {
             container = 'vibsinglecellnf/scanpy:1.8.1'
             filter {
@@ -362,7 +362,7 @@ If you want to apply custom parameters for some specific samples and have a "gen
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scanpy {
             container = 'vibsinglecellnf/scanpy:1.8.1'
             filter {
@@ -427,7 +427,7 @@ By default, don't regress any variable out. To enable this features, the ``scanp
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scanpy {
                 regress_out {
                     variablesToRegressOut = []

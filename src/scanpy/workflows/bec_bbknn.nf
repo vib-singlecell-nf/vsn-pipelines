@@ -59,7 +59,7 @@ workflow BEC_BBKNN {
     main:
 
         // To avoid Variable `params` already defined in the process scope
-        def scanpyParams = params.getToolParams("scanpy")
+        def scanpyParams = params.tools.scanpy
 
         SC__SCANPY__BATCH_EFFECT_CORRECTION( 
             dimReductionData.map { 
@@ -126,7 +126,7 @@ workflow BEC_BBKNN {
 
         bbknn_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
-            file(workflow.projectDir + params.getToolParams("scanpy").batch_effect_correct.report_ipynb),
+            file(workflow.projectDir + params.tools.scanpy.batch_effect_correct.report_ipynb),
             "SC_BEC_BBKNN_report",
             clusteringParams.isParameterExplorationModeOn()
         )

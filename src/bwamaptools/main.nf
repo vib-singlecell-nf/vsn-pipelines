@@ -57,7 +57,7 @@ workflow BWA_MAPPING_PE {
            1) create a channel linking bwa index files from genome.fa in params, and
            2) combine this channel with the items in the data channel
         */
-        bwa_inputs = get_bwa_index(params.getToolParams("bwamaptools").bwa_fasta).combine(data)
+        bwa_inputs = get_bwa_index(params.tools.bwamaptools.bwa_fasta).combine(data)
 
         bam = SC__BWAMAPTOOLS__BWA_MEM_PE(bwa_inputs)
 

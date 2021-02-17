@@ -30,10 +30,10 @@ workflow single_sample {
         SCANPY__SINGLE_SAMPLE( SC__FILE_CONVERTER.out )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
 
         // Select a default clustering when in parameter exploration mode
-        if(params.hasToolParams('directs') && clusteringParams.isParameterExplorationModeOn()) {
+        if(params.tools?.directs && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING(
                 SCANPY__SINGLE_SAMPLE.out.final_processed_scope_loom
             )

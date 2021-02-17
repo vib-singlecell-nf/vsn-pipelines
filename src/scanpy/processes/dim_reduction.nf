@@ -89,7 +89,7 @@ def SC__SCANPY__DIM_REDUCTION_PARAMS(params) {
 
 process SC__SCANPY__DIM_REDUCTION {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__cpu'
 
@@ -108,7 +108,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			val(nComps)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").dim_reduction.get(params.method))
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.dim_reduction.get(params.method))
 		processParams = sampleParams.local
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470

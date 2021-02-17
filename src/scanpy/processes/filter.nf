@@ -6,7 +6,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin" :
 
 process SC__SCANPY__COMPUTE_QC_STATS {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -17,7 +17,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
         tuple val(sampleId), path("${sampleId}.SC__SCANPY__COMPUTE_QC_STATS.${processParams.off}")
 
 	script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").filter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.filter)
 		processParams = sampleParams.local
         """
         ${binDir}/filter/sc_cell_gene_filtering.py \
@@ -38,7 +38,7 @@ process SC__SCANPY__COMPUTE_QC_STATS {
 
 process SC__SCANPY__GENE_FILTER {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -49,7 +49,7 @@ process SC__SCANPY__GENE_FILTER {
         tuple val(sampleId), path("${sampleId}.SC__SCANPY__GENE_FILTER.${processParams.off}")
 
 	script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").filter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.filter)
 		processParams = sampleParams.local
         """
         ${binDir}/filter/sc_cell_gene_filtering.py \
@@ -64,7 +64,7 @@ process SC__SCANPY__GENE_FILTER {
 
 process SC__SCANPY__CELL_FILTER {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -75,7 +75,7 @@ process SC__SCANPY__CELL_FILTER {
         tuple val(sampleId), path("${sampleId}.SC__SCANPY__CELL_FILTER.${processParams.off}")
     
 	script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").filter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.filter)
 		processParams = sampleParams.local
         """
         ${binDir}/filter/sc_cell_gene_filtering.py \

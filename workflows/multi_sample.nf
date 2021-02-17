@@ -81,7 +81,7 @@ workflow multi_sample {
         * Data processing
         */
         // To avoid Variable `params` already defined in the process scope
-        def scanpyParams = params.getToolParams("scanpy")
+        def scanpyParams = params.tools.scanpy
 
         out = data | \
             SC__FILE_CONVERTER | \
@@ -90,7 +90,7 @@ workflow multi_sample {
         if(scanpyParams.containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
-        if(params.hasUtilsParams("file_concatenator")) {
+        if(params.utils?.file_concatenator) {
             out = SC__FILE_CONCATENATOR( 
                 out.map {
                     it -> it[1]
@@ -114,7 +114,7 @@ workflow multi_sample {
 
         // Finalize
         FINALIZE(
-            params.hasUtilsParams("file_concatenator") ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
+            params.utils?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
             CLUSTER_IDENTIFICATION.out.marker_genes,
             'MULTI_SAMPLE.final_output',
         )
@@ -123,7 +123,7 @@ workflow multi_sample {
         def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(scanpyParams.clustering) )
 
         // Select a default clustering when in parameter exploration mode
-        if(params.hasToolParams('directs') && clusteringParams.isParameterExplorationModeOn()) {
+        if(params.tools?.directs && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
         } else {
             scopeloom = FINALIZE.out.scopeloom
@@ -146,7 +146,7 @@ workflow multi_sample {
 
         samples = data.map { it -> it[0] }
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
-            file(workflow.projectDir + params.getUtilsParams("workflow_configuration").report_ipynb)
+            file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
         ipynbs = QC_FILTER.out.report.map {

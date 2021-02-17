@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 process SC__STAR__SOLO_MAP_COUNT {
 
-  container params.getToolParams("star").container
+  container params.tools.star.container
   label 'compute_resources__star_map_count'
 
   input:
@@ -24,10 +24,10 @@ process SC__STAR__SOLO_MAP_COUNT {
       --soloType Droplet \
       --genomeDir ${transcriptome} \
       --runThreadN ${task.cpus} \
-      ${(params.getToolParams("star").map_count.containsKey('limitBAMsortRAM')) ? '--limitBAMsortRAM ' + params.getToolParams("star").map_count.limitBAMsortRAM: ''} \
-      ${(params.getToolParams("star").map_count.containsKey('outSAMtype')) ? '--outSAMtype ' + params.getToolParams("star").map_count.outSAMtype: ''} \
-      ${(params.getToolParams("star").map_count.containsKey('quantMode')) ? '--quantMode ' + params.getToolParams("star").map_count.quantMode: ''} \
-      ${(params.getToolParams("star").map_count.containsKey('outReadsUnmapped')) ? '--outReadsUnmapped ' + params.getToolParams("star").map_count.outReadsUnmapped: ''} \
+      ${(params.tools.star.map_count.containsKey('limitBAMsortRAM')) ? '--limitBAMsortRAM ' + params.tools.star.map_count.limitBAMsortRAM: ''} \
+      ${(params.tools.star.map_count.containsKey('outSAMtype')) ? '--outSAMtype ' + params.tools.star.map_count.outSAMtype: ''} \
+      ${(params.tools.star.map_count.containsKey('quantMode')) ? '--quantMode ' + params.tools.star.map_count.quantMode: ''} \
+      ${(params.tools.star.map_count.containsKey('outReadsUnmapped')) ? '--outReadsUnmapped ' + params.tools.star.map_count.outReadsUnmapped: ''} \
       --readFilesIn ${fastqs} \
       ${(fastqs.name.endsWith(".gz")) ? '--readFilesCommand zcat' : ''} \
       --outFileNamePrefix ${_sampleName}

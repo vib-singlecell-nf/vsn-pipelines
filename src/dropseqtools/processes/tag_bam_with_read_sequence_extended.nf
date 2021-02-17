@@ -1,7 +1,7 @@
 
 process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE {
 
-	container params.getToolParams("dropseqtools").container
+	container params.tools.dropseqtools.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
@@ -13,7 +13,7 @@ process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLBARCODE {
 		tuple file('*.unaligned_tagged_Cellular.bam_summary.txt'), emit: report
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("dropseqtools").tag_unaligned_bam_with_cellbarcode)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.dropseqtools.tag_unaligned_bam_with_cellbarcode)
 		processParams = sampleParams.local
 		"""
 		TagBamWithReadSequenceExtended \
@@ -43,7 +43,7 @@ process SC__DROP_SEQ_TOOLS__TAG_UNALIGNED_BAM_WITH_CELLMOLECULAR {
 		tuple file('*.unaligned_tagged_Molecular.bam_summary.txt'), emit: report
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("dropseqtools").tag_unaligned_bam_with_cellmolecular)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.dropseqtools.tag_unaligned_bam_with_cellmolecular)
 		processParams = sampleParams.local
 		"""
 		source $DWMAX/documents/aertslab/scripts/src_dwmax/bash-utils/utils.sh

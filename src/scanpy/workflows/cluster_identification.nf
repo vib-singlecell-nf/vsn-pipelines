@@ -32,9 +32,9 @@ workflow CLUSTER_IDENTIFICATION {
 
     main:
         // To run multiple clustering, we need at least 1 argument that is a list
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
         // Run sanity checks
-        if(params.getToolParams("scanpy").clustering?.preflight_checks) {
+        if(params.tools.scanpy.clustering?.preflight_checks) {
             $data = SC__SCANPY__CLUSTERING_PREFLIGHT_CHECKS( data.map { it -> tuple(it[0], it[1]) } )
         } else {
             $data = data
@@ -60,7 +60,7 @@ workflow CLUSTER_IDENTIFICATION {
         report = GENERATE_REPORT(
             "CLUSTERING",
             out,
-            file(workflow.projectDir + params.getToolParams("scanpy").clustering.report_ipynb),
+            file(workflow.projectDir + params.tools.scanpy.clustering.report_ipynb),
             clusteringParams.isParameterExplorationModeOn()
         )
 

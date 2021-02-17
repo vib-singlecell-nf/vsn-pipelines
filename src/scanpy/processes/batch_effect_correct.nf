@@ -4,7 +4,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" 
 
 process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -21,7 +21,7 @@ process SC__SCANPY__BATCH_EFFECT_CORRECTION {
 			val(stashedParams)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").batch_effect_correct)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.batch_effect_correct)
 		processParams = sampleParams.local
 		"""
 		${binDir}aggregate/sc_batch_effect_correction.py \

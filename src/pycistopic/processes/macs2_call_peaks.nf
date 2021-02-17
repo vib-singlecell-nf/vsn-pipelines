@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.getToolParams("pycistopic")
+toolParams = params.tools.pycistopic
 
 process SC__PYCISTOPIC__MACS2_CALL_PEAKS {
 

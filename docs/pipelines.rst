@@ -77,7 +77,7 @@ Cuurently there are 3 methods available to call doublets from Scrublet doublet s
 .. code:: bash
 
     params {
-        sc {
+        tools {
             scublet {
                 threshold = [
                   "<sample-name>": <custom-threshold>
@@ -512,7 +512,7 @@ Make sure the following parts of the generated config are properly set:
          cellranger_mex = '~/out/counts/*/outs/'
       }
     }
-    sc {
+    tools {
         scanpy {
             container = 'vibsinglecellnf/scanpy:1.8.1'
         }
@@ -567,7 +567,7 @@ Make sure the following parts of the generated config are properly set:
          cellranger_mex = '~/out/counts/*/outs/'
       }
     }
-    sc {
+    tools {
         scanpy {
             container = 'vibsinglecellnf/scanpy:1.8.1'
         }

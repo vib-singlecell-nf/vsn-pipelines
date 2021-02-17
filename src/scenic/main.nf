@@ -6,7 +6,7 @@ include {
 
 resolveParams(params, true)
 
-def isAppendOnlyMode = params.getToolParams("scenic").containsKey("existingScenicLoom")
+def isAppendOnlyMode = params.tools.scenic.containsKey("existingScenicLoom")
 def ALLOWED_GENOME_ASSEMBLIES = ['dm6','hg19','hg38', 'mm10']
 
 //////////////////////////////////////////////////////
@@ -69,8 +69,8 @@ include {
  */ 
 
 // Create channel for the different runs
-if(params.getToolParams("scenic").containsKey("numRuns")) {
-    runs = Channel.from( 1..params.getToolParams("scenic").numRuns )
+if(params.tools.scenic.containsKey("numRuns")) {
+    runs = Channel.from( 1..params.tools.scenic.numRuns )
 } else {
     runs = Channel.from( 1..1 )
 }
@@ -83,44 +83,44 @@ workflow scenic {
 
     main:
         /* GRN */
-        tfs = file(params.getToolParams("scenic").grn.tfs)
+        tfs = file(params.tools.scenic.grn.tfs)
         grn = ARBORETO_WITH_MULTIPROCESSING( filteredLoom.combine(runs), tfs )
         grn_with_correlation = ADD_PEARSON_CORRELATION(grn)
 
         /* cisTarget motif analysis */
         // channel for SCENIC databases resources:
         motifsDb = Channel
-            .fromPath( params.getToolParams("scenic").cistarget.motifsDb )
+            .fromPath( params.tools.scenic.cistarget.motifsDb )
             .collect() // use all files together in the ctx command
-        motifsAnnotation = file(params.getToolParams("scenic").cistarget.motifsAnnotation)
+        motifsAnnotation = file(params.tools.scenic.cistarget.motifsAnnotation)
         ctx_mtf = CISTARGET__MOTIF( grn_with_correlation, motifsDb, motifsAnnotation, 'mtf' )
 
         /* cisTarget track analysis */
-        if(params.getToolParams("scenic").cistarget.tracksDb) {
+        if(params.tools.scenic.cistarget.tracksDb) {
             tracksDb = Channel
-                .fromPath( params.getToolParams("scenic").cistarget.tracksDb )
+                .fromPath( params.tools.scenic.cistarget.tracksDb )
                 .collect() // use all files together in the ctx command
-            tracksAnnotation = file(params.getToolParams("scenic").cistarget.tracksAnnotation)
+            tracksAnnotation = file(params.tools.scenic.cistarget.tracksAnnotation)
             ctx_trk = CISTARGET__TRACK( grn_with_correlation, tracksDb, tracksAnnotation, 'trk' )
         }
 
         /* AUCell, motif regulons */
         auc_mtf = AUCELL__MOTIF( ctx_mtf, 'mtf' )
 
-        if(params.getToolParams("scenic").cistarget.tracksDb) {
+        if(params.tools.scenic.cistarget.tracksDb) {
             /* AUCell, track regulons */
             auc_trk = AUCELL__TRACK( ctx_trk, 'trk' )
         }
 
         // multi-runs aggregation:
-        if(params.getToolParams("scenic").containsKey("numRuns") && params.getToolParams("scenic").numRuns > 1) {
+        if(params.tools.scenic.containsKey("numRuns") && params.tools.scenic.numRuns > 1) {
             scenic_loom_mtf = MULTI_RUNS_TO_LOOM__MOTIF(
                 filteredLoom,
                 ctx_mtf,
                 auc_mtf,
                 'mtf'
             )
-            if(params.getToolParams("scenic").cistarget.tracksDb) {
+            if(params.tools.scenic.cistarget.tracksDb) {
                 scenic_loom_trk = MULTI_RUNS_TO_LOOM__TRACK(
                     filteredLoom,
                     ctx_trk,
@@ -135,7 +135,7 @@ workflow scenic {
                 out = VISUALIZE(scenic_loom_mtf)
             }
         } else {
-            if(params.getToolParams("scenic").cistarget.tracksDb) {
+            if(params.tools.scenic.cistarget.tracksDb) {
                 out = VISUALIZE(
                     MERGE_MOTIF_TRACK_LOOMS(
                         auc_mtf
@@ -163,10 +163,10 @@ workflow scenic_append {
         scopeLoom
 
     main:
-        if(params.getToolParams("scenic").containsKey("existingScenicLoom")) {
+        if(params.tools.scenic.containsKey("existingScenicLoom")) {
             scenicLoom = getChannelFromFilePath(
-                params.getToolParams("scenic").existingScenicLoom,
-                params.getToolParams("scenic").sampleSuffixWithExtension
+                params.tools.scenic.existingScenicLoom,
+                params.tools.scenic.sampleSuffixWithExtension
             )
             if(!params.containsKey('quiet')) {
                 Channel.from('').view {
@@ -194,9 +194,9 @@ workflow scenic_append {
                 throw new Exception("Cannot append SCENIC loom to SCope loom because the IDs do not match.")
             }
         )
-        if(!params.getToolParams("scenic").skipReports) {
+        if(!params.tools.scenic.skipReports) {
             report_notebook = GENERATE_REPORT(
-                file(workflow.projectDir + params.getToolParams("scenic").report_ipynb),
+                file(workflow.projectDir + params.tools.scenic.report_ipynb),
                 APPEND_SCENIC_LOOM.out,
                 "SCENIC_report"
             )
@@ -213,8 +213,8 @@ workflow scenic_append {
 workflow {
 
     main:
-        if(!("filteredLoom" in params.getToolParams("scenic")))
+        if(!("filteredLoom" in params.tools.scenic))
             throw new Exception("The given filteredLoom required parameter does not exist in the params.tools.scenic scope.")
-        scenic( Channel.of( tuple(params.global.project_name, file(params.getToolParams("scenic").filteredLoom)) ) )
+        scenic( Channel.of( tuple(params.global.project_name, file(params.tools.scenic.filteredLoom)) ) )
 
 }

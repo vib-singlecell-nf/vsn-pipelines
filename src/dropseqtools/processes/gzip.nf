@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process GZIP {
 
-    container params.getToolParams("dropseqtools").container
+    container params.tools.dropseqtools.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 

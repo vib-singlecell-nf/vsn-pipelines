@@ -97,7 +97,7 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 
 process SC__SCANPY__CLUSTERING_PREFLIGHT_CHECKS {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	label 'compute_resources__mem'
 
 	input:
@@ -111,7 +111,7 @@ process SC__SCANPY__CLUSTERING_PREFLIGHT_CHECKS {
 			path(f)
 
   	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").clustering)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.clustering)
 		processParams = sampleParams.local
 		methodAsArguments = processParams?.methods ? processParams.methods.collect({ '--method' + ' ' + it }).join(' ') : '--method ' + processParams.method
 		resolutionAsArguments = processParams?.resolutions ? processParams?.resolutions.collect({ '--resolution' + ' ' + it }).join(' ') : '--resolution ' + processParams.resolution
@@ -134,7 +134,7 @@ def SC__SCANPY__CLUSTERING_PARAMS(params) {
  */
 process SC__SCANPY__CLUSTERING {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -145,7 +145,7 @@ process SC__SCANPY__CLUSTERING {
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__CLUSTERING.${processParams.off}")
 
   	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").clustering)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.clustering)
 		processParams = sampleParams.local
 		"""
 		${binDir}/cluster/sc_clustering.py \
@@ -163,7 +163,7 @@ process SC__SCANPY__CLUSTERING {
  */
 process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/data/intermediate/clustering/${isParamNull(method) ? "default": method.toLowerCase()}/${isParamNull(resolution) ? "default" : "res_" + resolution}", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -183,7 +183,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 			val(resolution)
 
   	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").clustering)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.clustering)
 		processParams = sampleParams.local
 		def _processParams = new SC__SCANPY__CLUSTERING_PARAMS()
 		_processParams.setEnv(this)

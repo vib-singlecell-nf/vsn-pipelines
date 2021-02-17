@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.getToolParams("trimgalore")
+toolParams = params.tools.trimgalore
 
 process SC__TRIMGALORE__TRIM {
 

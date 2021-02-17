@@ -8,7 +8,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 process SC__H5AD_UPDATE_X_PCA {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
     label 'compute_resources__mem'
 
 	input:
@@ -34,7 +34,7 @@ process SC__H5AD_UPDATE_X_PCA {
 
 process SC__H5AD_CLEAN {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
     label 'compute_resources__mem'
 
 	input:
@@ -61,7 +61,7 @@ process SC__H5AD_CLEAN {
 
 process SC__H5AD_BEAUTIFY {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -78,7 +78,7 @@ process SC__H5AD_BEAUTIFY {
 			val(stashedParams)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("file_cleaner"))
+		def sampleParams = params.parseConfig(sampleId, params.global, params.utils.file_cleaner)
         processParams = sampleParams.local
 
 		obsColumnsToRemoveAsArgument = processParams.containsKey("obsColumnsToRemove") ? 

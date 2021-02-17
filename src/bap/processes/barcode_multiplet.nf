@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.getToolParams("bap")
+toolParams = params.tools.bap
 
 process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
 

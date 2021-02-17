@@ -92,7 +92,7 @@ Steps:
     .. code:: groovy
 
         params {
-            sc {
+            tools {
                 harmony {
                     container = 'vibsinglecellnf/harmony:1.0'
                     report_ipynb = "${params.misc.test.enabled ? '../../..' : ''}/src/harmony/bin/reports/sc_harmony_report.ipynb"
@@ -239,7 +239,7 @@ Steps:
 
         process SC__HARMONY__HARMONY_MATRIX {
             
-            container params.getToolParams("harmony").container
+            container params.tools.harmony.container
             publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
             clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
@@ -250,7 +250,7 @@ Steps:
                 tuple val(sampleId), path("${sampleId}.SC__HARMONY__HARMONY_MATRIX.tsv")
 
             script:
-                def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("harmony"))
+                def sampleParams = params.parseConfig(sampleId, params.global, params.tools.harmony)
                 processParams = sampleParams.local
                 varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
                 """
@@ -364,7 +364,7 @@ Steps:
 
                 // Run clustering
                 // Define the parameters for clustering
-                def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+                def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
                 CLUSTER_IDENTIFICATION(
                     normalizedTransformedData,
                     DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
@@ -400,7 +400,7 @@ Steps:
                 )
                 harmony_report = GENERATE_DUAL_INPUT_REPORT(
                     becDualDataPrePost,
-                    file(workflow.projectDir + params.getToolParams("harmony").report_ipynb),
+                    file(workflow.projectDir + params.tools.harmony.report_ipynb),
                     "SC_BEC_HARMONY_report",
                     clusteringParams.isParameterExplorationModeOn()
                 )
@@ -490,10 +490,10 @@ Steps:
                     SC__FILE_CONVERTER | \
                     FILTER_AND_ANNOTATE_AND_CLEAN
 
-                if(params.getToolParams("scanpy").containsKey("filter")) {
+                if(params.tools.scanpy.containsKey("filter")) {
                     out = QC_FILTER( out ).filtered // Remove concat
                 }
-                if(params.getUtilsParams("file_concatenator")) {
+                if(params.utils.file_concatenator) {
                     out = SC__FILE_CONCATENATOR( 
                         out.map {
                             it -> it[1]
@@ -502,7 +502,7 @@ Steps:
                         ) 
                     )
                 }
-                if(params.getToolParams("scanpy").containsKey("data_transformation") && params.getToolParams("scanpy").containsKey("normalization")) {
+                if(params.tools.scanpy.containsKey("data_transformation") && params.tools.scanpy.containsKey("normalization")) {
                     out = NORMALIZE_TRANSFORM( out )
                 }
                 out = HVG_SELECTION( out )
@@ -527,7 +527,7 @@ Steps:
                 
                 // Conversion
                 // Convert h5ad to X (here we choose: loom format)
-                if(params.hasUtilsParams("file_concatenator")) {
+                if(params.utils?.file_concatenator) {
                     filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
                     scopeloom = FILE_CONVERTER(
                         BEC_HARMONY.out.data.groupTuple(),
@@ -552,7 +552,7 @@ Steps:
 
                 // Collect the reports:
                 // Define the parameters for clustering
-                def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+                def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
                 // Pairing clustering reports with bec reports
                 if(!clusteringParams.isParameterExplorationModeOn()) {
                     clusteringBECReports = BEC_HARMONY.out.cluster_report.map {
@@ -722,8 +722,8 @@ Workflows import multiple processes and define the workflow by name:
     workflow CELLRANGER {
 
         main:
-            SC__CELLRANGER__MKFASTQ(file(params.getToolParams("cellranger").mkfastq.csv), path(params.getToolParams("cellranger").mkfastq.runFolder))
-            SC__CELLRANGER__COUNT(file(params.getToolParams("cellranger").count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
+            SC__CELLRANGER__MKFASTQ(file(params.tools.cellranger.mkfastq.csv), path(params.tools.cellranger.mkfastq.runFolder))
+            SC__CELLRANGER__COUNT(file(params.tools.cellranger.count.transcriptome), SC__CELLRANGER__MKFASTQ.out.flatten())
         emit:
             SC__CELLRANGER__COUNT.out
 
@@ -775,7 +775,7 @@ The parameter structure internally (post-merge) is:
             project_name = "MCF7"
             ...
         }
-        sc {
+        tools {
             utils {
                 file_converter {
                     ...

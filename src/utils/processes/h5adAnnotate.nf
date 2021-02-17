@@ -23,7 +23,7 @@ def getMode = { toolName ->
 
 process SC__ANNOTATE_BY_CELL_METADATA {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${getPublishDir(params.global.outdir,tool)}", mode: "${getMode(tool)}", overwrite: true
     label 'compute_resources__default'
 
@@ -44,7 +44,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.getUtilsParams("cell_annotate") : params.getToolParams(tool)["cell_annotate"]
+            isParamNull(tool) ? params.utils.cell_annotate : params.getToolParams(tool)["cell_annotate"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -82,7 +82,7 @@ def hasMetadataFilePath(processParams) {
 
 process SC__ANNOTATE_BY_SAMPLE_METADATA {
 
-    container params.getToolParams("scanpy").container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -97,7 +97,7 @@ process SC__ANNOTATE_BY_SAMPLE_METADATA {
             path("${sampleId}.SC__ANNOTATE_BY_SAMPLE_METADATA.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getUtilsParams("sample_annotate"))
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.sample_annotate)
         processParams = sampleParams.local
 
         // method / type param

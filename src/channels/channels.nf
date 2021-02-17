@@ -36,8 +36,8 @@ workflow getDataChannel {
         } else {
             // If not dynamically set, we use h5ad by default
             outputFileFormat = "h5ad"
-            if(params.getUtilsParams("file_converter").containsKey("off")) {
-                outputFileFormat = params.getUtilsParams("file_converter").off
+            if(params.utils.file_converter.containsKey("off")) {
+                outputFileFormat = params.utils.file_converter.off
             }
         }
 

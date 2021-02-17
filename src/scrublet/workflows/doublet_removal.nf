@@ -86,7 +86,7 @@ workflow DOUBLET_REMOVAL {
         
 
         SC__SCRUBLET__DOUBLET_DETECTION_REPORT(
-            file(workflow.projectDir + params.getToolParams("scrublet").doublet_detection.report_ipynb),
+            file(workflow.projectDir + params.tools.scrublet.doublet_detection.report_ipynb),
                 SC__SCRUBLET__DOUBLET_DETECTION.out.map {
                 // Extract the Scrublet object file
                 it -> tuple(it[0], it[2])

@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
 
-    container params.getToolParams("dropseqtools").container
+    container params.tools.dropseqtools.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
@@ -14,7 +14,7 @@ process SC__DROP_SEQ_TOOLS__TRIM_SMART_UNALIGNED_TAGGED_FILTERED_BAM {
         tuple file('*.adapter_trimming_report.txt'), emit: report
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("dropseqtools").trim_smart_unaligned_tagged_filtered_bam)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.dropseqtools.trim_smart_unaligned_tagged_filtered_bam)
 		processParams = sampleParams.local
         """
         TrimStartingSequence \

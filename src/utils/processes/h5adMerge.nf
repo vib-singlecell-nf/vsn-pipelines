@@ -7,7 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 process SC__H5AD_MERGE {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 

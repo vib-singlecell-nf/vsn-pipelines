@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/archr/bin/" : ""
 
-toolParams = params.getToolParams("archr")
+toolParams = params.tools.archr
 
 process SC__ARCHR__CREATE_ARROW_UNFILTERED {
 

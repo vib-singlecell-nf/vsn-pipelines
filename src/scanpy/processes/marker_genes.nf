@@ -13,7 +13,7 @@ include {
  */
 process SC__SCANPY__MARKER_GENES {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
   
@@ -29,7 +29,7 @@ process SC__SCANPY__MARKER_GENES {
     	tuple val(sampleId), path("${sampleId}.SC__SCANPY__MARKER_GENES.${processParams.off}")
   
   	script:
-    	def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").marker_genes)
+    	def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.marker_genes)
 		processParams = sampleParams.local
 		"""
 		${binDir}/cluster/sc_marker_genes.py \
@@ -48,7 +48,7 @@ process SC__SCANPY__MARKER_GENES {
  */
 process SC__SCANPY__PARAM_EXPLORE_MARKER_GENES {
 
-  	container params.getToolParams("scanpy").container
+  	container params.tools.scanpy.container
   	publishDir "${params.global.outdir}/data/intermediate/markers/${isParamNull(clusteringMethod) ? "default": clusteringMethod.toLowerCase()}/${isParamNull(clusteringResolution) ? "res_": clusteringResolution}", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
   
@@ -70,7 +70,7 @@ process SC__SCANPY__PARAM_EXPLORE_MARKER_GENES {
 			val(clusteringResolution)
   
   	script:
-    	def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").marker_genes)
+    	def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.marker_genes)
 		processParams = sampleParams.local
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470

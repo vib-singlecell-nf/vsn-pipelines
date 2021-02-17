@@ -4,7 +4,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scanpy/bin/" 
 
 process SC__SCANPY__REGRESS_OUT {
 
-	container params.getToolParams("scanpy").container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__cpu'
 
@@ -19,7 +19,7 @@ process SC__SCANPY__REGRESS_OUT {
 			path("${sampleId}.SC__SCANPY__REGRESS_OUT.${processParams.off}")
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scanpy").regress_out)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.regress_out)
 		processParams = sampleParams.local
 		variablesToRegressOutAsArguments = processParams.variablesToRegressOut.collect({ '--variable-to-regress-out' + ' ' + it }).join(' ')
 		"""

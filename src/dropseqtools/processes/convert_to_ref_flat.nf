@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process SC__DROP_SEQ_TOOLS__CONVERT_TO_REFFLAT {
     
-    container params.getToolParams("dropseqtools").container
+    container params.tools.dropseqtools.container
     publishDir "${params.global.outdir}/00.refdata", mode: 'symlink'
     label 'compute_resources__default'
 
