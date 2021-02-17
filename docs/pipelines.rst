@@ -326,9 +326,9 @@ NOTES:
 Runs the ``demuxlet`` or ``freemuxlet`` workflows (``dsc-pileup`` [with prefiltering], then ``freemuxlet`` or ``demuxlet``)
 Input parameters are specified within the config file:
 
-* ``params.sc.popscle.vcf``: path to the VCF file for demultiplexing
-* ``params.sc.popscle.freemuxlet.nSamples``: Number of clusters to extract (should match the number of samples pooled)
-* ``params.sc.popscle.demuxlet.field``: Field in the VCF with genotype information
+* ``params.tools.popscle.vcf``: path to the VCF file for demultiplexing
+* ``params.tools.popscle.freemuxlet.nSamples``: Number of clusters to extract (should match the number of samples pooled)
+* ``params.tools.popscle.demuxlet.field``: Field in the VCF with genotype information
 
 
 ----
