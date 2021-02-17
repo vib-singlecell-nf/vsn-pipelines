@@ -74,11 +74,14 @@ workflow harmony {
         /*******************************************
         * Data processing
         */
+        // To avoid Variable `params` already defined in the process scope
+        def scanpyParams = params.getToolParams("scanpy")
+
         out = data | \
             SC__FILE_CONVERTER | \
             FILTER_AND_ANNOTATE_AND_CLEAN
 
-        if(params.getToolParams("scanpy").containsKey("filter")) {
+        if(scanpyParams.containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
         if(params.hasUtilsParams("file_concatenator")) {
@@ -90,7 +93,7 @@ workflow harmony {
                 ) 
             )
         }
-        if(params.getToolParams("scanpy").containsKey("data_transformation") && params.getToolParams("scanpy").containsKey("normalization")) {
+        if(scanpyParams.containsKey("data_transformation") && scanpyParams.containsKey("normalization")) {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
@@ -115,13 +118,13 @@ workflow harmony {
         
         // Finalize
         FINALIZE(
-            params.sc?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
+            params.hasUtilsParams("file_concatenator") ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
             BEC_HARMONY.out.data,
             'HARMONY.final_output'
         )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(scanpyParams.clustering) )
 
         // Select a default clustering when in parameter exploration mode
         if(params.hasToolParams('directs') && clusteringParams.isParameterExplorationModeOn()) {
