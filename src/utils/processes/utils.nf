@@ -369,7 +369,7 @@ process SC__STAR_CONCATENATOR() {
             path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star_concatenator)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.star_concatenator)
         processParams = sampleParams.local
         id = params.global.project_name
         """

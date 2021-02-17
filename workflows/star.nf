@@ -29,14 +29,14 @@ include {
 workflow star {
 
     main:
-        SC__STAR__LOAD_GENOME( file(params.sc.star.map_count.index) )
+        SC__STAR__LOAD_GENOME( file(params.tools.star.map_count.index) )
         SC__STAR__MAP_COUNT( 
-            file(params.sc.star.map_count.index),
+            file(params.tools.star.map_count.index),
             SC__STAR__LOAD_GENOME.out,
-            getSingleEndChannel(params.sc.star.map_count.fastqs)
+            getSingleEndChannel(params.tools.star.map_count.fastqs)
         )
         SC__STAR__UNLOAD_GENOME(
-            file(params.sc.star.map_count.index),
+            file(params.tools.star.map_count.index),
             SC__STAR__MAP_COUNT.out.isDone.collect()
         )
         SC__STAR_CONCATENATOR( SC__STAR__MAP_COUNT.out.counts.map { it[1] }.collect() )
