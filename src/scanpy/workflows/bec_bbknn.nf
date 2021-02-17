@@ -57,6 +57,10 @@ workflow BEC_BBKNN {
         clusterIdentificationPreBatchEffectCorrection
 
     main:
+
+        // To avoid Variable `params` already defined in the process scope
+        def scanpyParams = params.getToolParams("scanpy")
+
         SC__SCANPY__BATCH_EFFECT_CORRECTION( 
             dimReductionData.map { 
                 it -> tuple(it[0], it[1], it[2]) 
@@ -71,7 +75,7 @@ workflow BEC_BBKNN {
         )
 
         // Define the parameters for dimensionality reduction
-        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(params.getToolParams("scanpy").dim_reduction.umap) )
+        def dimRedParams = SC__SCANPY__DIM_REDUCTION_PARAMS( clean(scanpyParams.dim_reduction.umap) )
         SC__SCANPY__DIM_REDUCTION__UMAP( 
             SC__SCANPY__BATCH_EFFECT_CORRECTION.out.combine(
                 dimRedParams.$()
@@ -87,7 +91,7 @@ workflow BEC_BBKNN {
         )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.getToolParams("scanpy").clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(scanpyParams.clustering) )
         CLUSTER_IDENTIFICATION(
             normalizedTransformedData,
             SC__SCANPY__DIM_REDUCTION__UMAP.out,
