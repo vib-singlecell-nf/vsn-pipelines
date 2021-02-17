@@ -28,12 +28,12 @@ process SC__H5AD_TO_LOOM {
 	script:
 		"""
 		${binDir}/h5ad_to_loom.py \
-			${(params.utils?.scope.genome.length() > 0) ? '--nomenclature "' + params.utils?.scope.genome + '"' : ''} \
-			${(params.utils?.scope.tree.level_1.length() > 0 ) ? '--scope-tree-level-1 "' + params.utils.scope.tree.level_1 + '"'  : ''} \
-			${(params.utils?.scope.tree.level_2.length() > 0 ) ? '--scope-tree-level-2 "' + params.utils.scope.tree.level_2 + '"'  : ''} \
-			${(params.utils?.scope.tree.level_3.length() > 0 ) ? '--scope-tree-level-3 "' + params.utils.scope.tree.level_3 + '"'  : ''} \
-			${(params.utils?.scope.?.markers?.log_fc_threshold) ? '--markers-log-fc-threshold ' + params.utils.scope.markers.log_fc_threshold : ''} \
-			${(params.utils?.scope.?.markers?.fdr_threshold) ? '--markers-fdr-threshold ' + params.utils.scope.markers.fdr_threshold : ''} \
+			${params.utils?.scope.genome.length() > 0 ? '--nomenclature "' + params.utils?.scope.genome + '"' : ''} \
+			${params.utils?.scope.tree.level_1.length() > 0 ? '--scope-tree-level-1 "' + params.utils.scope.tree.level_1 + '"'  : ''} \
+			${params.utils?.scope.tree.level_2.length() > 0 ? '--scope-tree-level-2 "' + params.utils.scope.tree.level_2 + '"'  : ''} \
+			${params.utils?.scope.tree.level_3.length() > 0  ? '--scope-tree-level-3 "' + params.utils.scope.tree.level_3 + '"'  : ''} \
+			${params.utils?.scope?.markers?.log_fc_threshold ? '--markers-log-fc-threshold ' + params.utils.scope.markers.log_fc_threshold : ''} \
+			${params.utils?.scope?.markers?.fdr_threshold ? '--markers-fdr-threshold ' + params.utils.scope.markers.fdr_threshold : ''} \
 			$data \
 			$rawFilteredData \
 			"${sampleId}.SC__H5AD_TO_LOOM.loom"
