@@ -44,7 +44,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.utils.cell_annotate : params.getToolParams(tool)["cell_annotate"]
+            isParamNull(tool) ? params.utils.cell_annotate : params.tools[tool]["cell_annotate"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
