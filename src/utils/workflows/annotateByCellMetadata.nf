@@ -35,7 +35,7 @@ workflow ANNOTATE_BY_CELL_METADATA {
 
     main:
         def workflowParams = isParamNull(tool) ?
-            params.tools.cell_annotate :
+            params.utils.cell_annotate :
             getToolParams(params.tools, tool)["cell_annotate"]
         def method = workflowParams.method
         if(method == 'aio') {

@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 //  Process imports:
 include {
     isParamNull;
+    getToolParams;
 } from './../processes/utils.nf' params(params)
 include {
     SC__PREPARE_OBS_FILTER;
@@ -32,7 +33,7 @@ workflow FILTER_BY_CELL_METADATA {
 
     main:
         def workflowParams = isParamNull(tool) ?
-            params.tools.cell_filter :
+            params.utils.cell_filter :
             getToolParams(params.tools, tool)["cell_filter"]
         Channel
             .from(workflowParams.filters)
