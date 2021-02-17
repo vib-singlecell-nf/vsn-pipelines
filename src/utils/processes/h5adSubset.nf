@@ -7,6 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 include {
     isParamNull;
     isCollectionOrArray;
+    getToolParams;
 } from './utils' params(params)
 
 process SC__PREPARE_OBS_FILTER {
