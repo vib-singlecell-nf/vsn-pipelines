@@ -43,7 +43,7 @@ process SC__PREPARE_OBS_FILTER {
             input = f
         } else if (processParams.method == 'external') {
             if(!filterConfig.cellMetaDataFilePath) {
-                throw new Exception("VSN ERROR: A filter in params.tools.cell_filter does not provide a cellMetaDataFilePath entry.")
+                throw new Exception("VSN ERROR: A filter in params.utils.cell_filter does not provide a cellMetaDataFilePath entry.")
             }
             input = filterConfig.cellMetaDataFilePath
         } else {

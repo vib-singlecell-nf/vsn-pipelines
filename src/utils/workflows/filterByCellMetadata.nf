@@ -27,7 +27,7 @@ workflow FILTER_BY_CELL_METADATA {
         //   - The given tool is performing itself a cell-based filtering
         //   - params.tools[tool] should exist
         // - tool == null:
-        //   - params.tools.cell_filter should exist
+        //   - params.utils.cell_filter should exist
         tool
 
     main:

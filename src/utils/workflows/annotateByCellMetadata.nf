@@ -29,7 +29,7 @@ workflow ANNOTATE_BY_CELL_METADATA {
         //   - The given tool is performing itself a cell-based annotation
         //   - params.tools[tool] should exist
         // - tool == null:
-        //   - params.tools.cell_annotate should exist
+        //   - params.utils.cell_annotate should exist
         tool
 
     main:
