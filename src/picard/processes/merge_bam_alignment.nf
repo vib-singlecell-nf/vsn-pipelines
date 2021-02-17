@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process PICARD__MERGE_BAM_ALIGNMENT {
 
-    container params.picard.container
+    container params.tools.picard.container
     publishDir "${params.global.outdir}/02.map", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
@@ -17,7 +17,7 @@ process PICARD__MERGE_BAM_ALIGNMENT {
         tuple val(sample), path("*.merged.bam")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.picard.merge_bam_alignment)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.picard.merge_bam_alignment)
 		processParams = sampleParams.local
         """
         java -Djava.io.tmpdir=$tmpDir -jar \
