@@ -10,6 +10,15 @@ def boolean isCollectionOrArray(object) {
     [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
 }
 
+def getToolParams(params, toolKey) {
+    if(!toolKey.contains(".")) {
+        return params[toolKey]
+    }
+    def entry = params
+    toolKey.split('\\.').each { entry = entry?.get(it) }
+    return entry
+}
+
 def isParamNull(param) {
     return param == null || param == "NULL"
 }

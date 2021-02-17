@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 //  Process imports:
 include {
     isParamNull;
+    getToolParams;
 } from './../processes/utils.nf' params(params)
 include {
     getChannel;
@@ -34,8 +35,8 @@ workflow ANNOTATE_BY_CELL_METADATA {
 
     main:
         def workflowParams = isParamNull(tool) ?
-            params.utils.cell_annotate :
-            params.tools[tool]["cell_annotate"]
+            params.tools.cell_annotate :
+            getToolParams(params.tools, tool)["cell_annotate"]
         def method = workflowParams.method
         if(method == 'aio') {
             out = SC__ANNOTATE_BY_CELL_METADATA( 
