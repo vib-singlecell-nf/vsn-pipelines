@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process SC__SCRUBLET__DOUBLET_DETECTION_REPORT {
 
-	container params.tools.scrublet.container
+	container params.getToolParams("scrublet").container
 	publishDir "${params.global.outdir}/notebooks/intermediate", mode: 'link', overwrite: true
 	label 'compute_resources__report'
 

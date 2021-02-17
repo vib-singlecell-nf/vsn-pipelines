@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 //binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/singlecelltoolkit/bin/" : ""
 
-toolParams = params.tools.singlecelltoolkit
+toolParams = params.getToolParams("singlecelltoolkit")
 
 process SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION {
 

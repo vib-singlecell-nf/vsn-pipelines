@@ -29,9 +29,9 @@ workflow cellranger_atac {
     } from './src/cellranger-atac/main.nf' params(params)
     
     CELLRANGER_ATAC(
-        file(params.tools.cellranger_atac.mkfastq.csv),
-        file(params.tools.cellranger_atac.mkfastq.runFolder),
-        file(params.tools.cellranger_atac.count.reference)
+        file(params.getToolParams("cellranger_atac").mkfastq.csv),
+        file(params.getToolParams("cellranger_atac").mkfastq.runFolder),
+        file(params.getToolParams("cellranger_atac").count.reference)
     )
 
 }

@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 //binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.tools.sinto
+toolParams = params.getToolParams("sinto")
 
 process SC__SINTO__FRAGMENTS {
 

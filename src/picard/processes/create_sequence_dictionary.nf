@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process PICARD__CREATE_SEQUENCE_DICTIONARY {
 
-    container params.tools.picard.container
+    container params.getToolParams("picard").container
     publishDir "${params.global.outdir}/00.refdata", mode: 'symlink'
     label 'compute_resources__default'
 

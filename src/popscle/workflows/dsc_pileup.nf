@@ -22,7 +22,7 @@ workflow DSC_PILEUP_FILTERED {
         data
 
     main:
-        vcf = file(params.tools.popscle.vcf)
+        vcf = file(params.getToolParams("popscle").vcf)
         SC__POPSCLE__PREFILTER_DSC_PILEUP(data, vcf)
         SC__POPSCLE__DSC_PILEUP(SC__POPSCLE__PREFILTER_DSC_PILEUP.out, vcf)
     

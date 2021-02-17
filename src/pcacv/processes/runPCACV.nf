@@ -7,7 +7,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pcacv/bin" : 
 
 process PCACV__FIND_OPTIMAL_NPCS {
     
-    container params.tools.pcacv.container
+    container params.getToolParams("pcacv").container
     publishDir "${params.global.outdir}/data/pcacv", mode: 'link'
     label 'compute_resources__pcacv'
 
@@ -27,7 +27,7 @@ process PCACV__FIND_OPTIMAL_NPCS {
             emit: files
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.pcacv.find_optimal_npcs)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("pcacv").find_optimal_npcs)
         processParams = sampleParams.local
         """
         export OPENBLAS_NUM_THREADS=1

@@ -47,7 +47,7 @@ def SC__SCRUBLET__DOUBLET_DETECTION_PARAMS(params) {
 
 process SC__SCRUBLET__DOUBLET_DETECTION {
 
-	container params.tools.scrublet.container
+	container params.getToolParams("scrublet").container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -68,7 +68,7 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 			val(nPrinComps)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scrublet.doublet_detection)
+		def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("scrublet").doublet_detection)
 		processParams = sampleParams.local
 		def _processParams = new SC__SCRUBLET__DOUBLET_DETECTION_PARAMS()
 		_processParams.setEnv(this)

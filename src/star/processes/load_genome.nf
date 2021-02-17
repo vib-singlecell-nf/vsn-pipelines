@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process SC__STAR__LOAD_GENOME {
 
-  	container params.tools.star.container
+  	container params.getToolParams("star").container
     label 'compute_resources__default'
 
 	input:

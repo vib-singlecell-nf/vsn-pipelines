@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 
-toolParams = params.tools.cellranger
+toolParams = params.getToolParams("cellranger")
 
 process SC__CELLRANGER__MKFASTQ {
 

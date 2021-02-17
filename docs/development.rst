@@ -239,7 +239,7 @@ Steps:
 
         process SC__HARMONY__HARMONY_MATRIX {
             
-            container params.tools.harmony.container
+            container params.getToolParams("harmony").container
             publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
             clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
 
@@ -250,7 +250,7 @@ Steps:
                 tuple val(sampleId), path("${sampleId}.SC__HARMONY__HARMONY_MATRIX.tsv")
 
             script:
-                def sampleParams = params.parseConfig(sampleId, params.global, params.tools.harmony)
+                def sampleParams = params.parseConfig(sampleId, params.global, params.getToolParams("harmony"))
                 processParams = sampleParams.local
                 varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
                 """
@@ -400,7 +400,7 @@ Steps:
                 )
                 harmony_report = GENERATE_DUAL_INPUT_REPORT(
                     becDualDataPrePost,
-                    file(workflow.projectDir + params.tools.harmony.report_ipynb),
+                    file(workflow.projectDir + params.getToolParams("harmony").report_ipynb),
                     "SC_BEC_HARMONY_report",
                     clusteringParams.isParameterExplorationModeOn()
                 )

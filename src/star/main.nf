@@ -22,9 +22,9 @@ include {
 workflow star {
 
     main:
-        SC__STAR__LOAD_GENOME( file(params.tools.star.map_count.transcriptome) )
-        SC__STAR__MAP_COUNT( file(params.tools.star.map_count.transcriptome), SC__STAR__LOAD_GENOME.out, path(params.tools.star.map_count.fastqs) )
-        SC__STAR__UNLOAD_GENOME( file(params.tools.star.map_count.transcriptome), SC__STAR__MAP_COUNT.out[0] )
+        SC__STAR__LOAD_GENOME( file(params.getToolParams("star").map_count.transcriptome) )
+        SC__STAR__MAP_COUNT( file(params.getToolParams("star").map_count.transcriptome), SC__STAR__LOAD_GENOME.out, path(params.getToolParams("star").map_count.fastqs) )
+        SC__STAR__UNLOAD_GENOME( file(params.getToolParams("star").map_count.transcriptome), SC__STAR__MAP_COUNT.out[0] )
 
     emit:
         SC__STAR__MAP_COUNT.out

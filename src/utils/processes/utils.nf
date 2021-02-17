@@ -143,7 +143,7 @@ def runRConverter = {
 def getConverterContainer = { params, type ->
     switch(type) {
         case "cistopic":
-            return params.tools.cistopic.container
+            return params.getToolParams("cistopic").container
         case "r":
             return "vibsinglecellnf/scconverter:0.0.1"
         break;

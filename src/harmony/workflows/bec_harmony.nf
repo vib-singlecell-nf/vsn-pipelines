@@ -131,7 +131,7 @@ workflow BEC_HARMONY {
         )
         harmony_report = GENERATE_DUAL_INPUT_REPORT(
             becDualDataPrePost,
-            file(workflow.projectDir + params.tools.harmony.report_ipynb),
+            file(workflow.projectDir + params.getToolParams("harmony").report_ipynb),
             "SC_BEC_HARMONY_report",
             clusteringParams.isParameterExplorationModeOn()
         )
