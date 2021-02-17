@@ -763,7 +763,7 @@ workflow scenic {
     } from "./src/utils/workflows/utils" params(params)
 
     SCENIC( 
-        Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
+        Channel.of( tuple(params.global.project_name, file(params.tools.scenic.filteredLoom))) 
     )
 
     if(params.utils?.publish) {

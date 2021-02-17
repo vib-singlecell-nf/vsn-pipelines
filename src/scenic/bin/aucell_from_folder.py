@@ -95,7 +95,7 @@ signatures = utils.read_signatures_from_tsv_dir(
 )
 
 if len(signatures) == 0:
-    raise Exception(f"No signature passing filtering. Please consider to adapt 'min_genes_regulon = {args.min_genes_regulon}' and 'min_regulon_gene_occurrence = {args.min_regulon_gene_occurrence}' (see params.sc.scenic.aucell). Make sure these settings are smaller than numRuns (params.sc.scenic).")
+    raise Exception(f"No signature passing filtering. Please consider to adapt 'min_genes_regulon = {args.min_genes_regulon}' and 'min_regulon_gene_occurrence = {args.min_regulon_gene_occurrence}' (see params.tools.scenic.aucell). Make sure these settings are smaller than numRuns (params.tools.scenic).")
 
 auc_threshold = args.auc_threshold
 

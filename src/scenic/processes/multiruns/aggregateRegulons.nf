@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.sc.scenic
+toolParams = params.tools.scenic
 
 process AGGR_MULTI_RUNS_REGULONS {
 

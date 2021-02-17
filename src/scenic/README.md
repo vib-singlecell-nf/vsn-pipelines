@@ -27,13 +27,13 @@ nextflow config \
 Make sure the following parameters are correctly set:
 - `params.global.project_name`
 - `params.global.qsubaccount` if running on a cluster (SGE cluster)
-- `params.sc.scenic.filteredLoom`
-- `params.sc.scenic.grn.tfs`
-- `params.sc.scenic.cistarget.motifsDb`
-- `params.sc.scenic.cistarget.motifAnnotation`
-- `params.sc.scenic.cistarget.tracksDb` if commented, track-based cisTarget won't run
-- `params.sc.scenic.cistarget.tracksAnnotation` if commented, track-based cisTarget won't run
-- `params.sc.scenic.numRuns` if running SCENIC in multi-runs mode
+- `params.tools.scenic.filteredLoom`
+- `params.tools.scenic.grn.tfs`
+- `params.tools.scenic.cistarget.motifsDb`
+- `params.tools.scenic.cistarget.motifAnnotation`
+- `params.tools.scenic.cistarget.tracksDb` if commented, track-based cisTarget won't run
+- `params.tools.scenic.cistarget.tracksAnnotation` if commented, track-based cisTarget won't run
+- `params.tools.scenic.numRuns` if running SCENIC in multi-runs mode
 - `singularity.runOptions` Specify the paths to mount
 - `params.sc.scope.tree`
 
