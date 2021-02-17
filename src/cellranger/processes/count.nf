@@ -28,21 +28,25 @@ def generateCellRangerCountCommandDefaults = {
 		_chemistry = processParams.chemistry
 	}
 
-	_includeIntrons = null
+	def _includeIntrons = null
 	if(processParams.containsKey('includeIntrons')) {
 		if (processParams.includeIntrons == true) {
 			_includeIntrons = true
-		} else {
+		} else if (processParams.includeIntrons == false) {
 			_includeIntrons = false
+		} else {
+			throw new Exception("includeIntrons option must be a boolean (true | false)")
 		}
 	}
 
-	_noBam = null
+	def _noBam = null
 	if(processParams.containsKey('noBam')) {
 		if (processParams.noBam == true) {
 			_noBam = true
-		} else {
+		} else if (processParams.noBam == false) {
 			_noBam = false
+		} else {
+			throw new Exception("noBam option must be a boolean (true | false)")
 		}
 	}
 	return (
