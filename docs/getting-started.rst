@@ -30,9 +30,14 @@ Make sure you have the following software installed,
     - Docker_
     - Singularity_
 
+**NOTE**: Due to licensing restrictions, to use the cellranger components of VSN you must build and/or provide a container with ``cellranger`` and ``bcl2fastq2`` installed yourself.
+A sample ``Dockerfile`` can be found in ``./src/cellranger/``, you must download bcl2fastq2 from the Illumina_ website, and cellranger from the `10x Genomics`_ website yourself to build this container.
+
 .. _Nextflow: https://www.nextflow.io/
 .. _Docker: https://docs.docker.com/
 .. _Singularity: https://www.sylabs.io/singularity/
+.. _Illumina: https://emea.support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.html
+.. _`10x Genomics`: https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
 
 Quick start
 ***********

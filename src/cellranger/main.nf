@@ -7,6 +7,9 @@ include {
     SC__CELLRANGER__MKFASTQ;
 } from './processes/mkfastq' params(params)
 include {
+    SC__CELLRANGER__PREFLIGHT;
+} from './processes/preflight' params(params)
+include {
     SC__CELLRANGER__COUNT;
 } from './processes/count' params(params)
 include {
@@ -24,6 +27,7 @@ workflow CELLRANGER {
         runFolder
         transcriptome
     main:
+        SC__CELLRANGER__PREFLIGHT()
         data = MKFASTQ(mkfastq_csv, runFolder)
 
         // Allow to combine old demultiplexed data with new data
@@ -54,6 +58,7 @@ workflow CELLRANGER {
 workflow CELLRANGER_WITH_METADATA {
 
     main:
+        SC__CELLRANGER__PREFLIGHT()
         CELLRANGER_COUNT_WITH_METADATA(file("metadata_test.tsv"))
 
     emit:

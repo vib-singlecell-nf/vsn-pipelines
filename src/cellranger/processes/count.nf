@@ -27,6 +27,28 @@ def generateCellRangerCountCommandDefaults = {
 	} else if (processParams.containsKey('chemistry')) {
 		_chemistry = processParams.chemistry
 	}
+
+	def _includeIntrons = null
+	if(processParams.containsKey('includeIntrons')) {
+		if (processParams.includeIntrons == true) {
+			_includeIntrons = true
+		} else if (processParams.includeIntrons == false) {
+			_includeIntrons = false
+		} else {
+			throw new Exception("includeIntrons option must be a boolean (true | false)")
+		}
+	}
+
+	def _noBam = null
+	if(processParams.containsKey('noBam')) {
+		if (processParams.noBam == true) {
+			_noBam = true
+		} else if (processParams.noBam == false) {
+			_noBam = false
+		} else {
+			throw new Exception("noBam option must be a boolean (true | false)")
+		}
+	}
 	return (
 		"""
 		cellranger count \
@@ -38,6 +60,8 @@ def generateCellRangerCountCommandDefaults = {
 			${(processParams.containsKey('r1Length')) ? '--r1-length ' + processParams.r1Length: ''} \
 			${(processParams.containsKey('r2Length')) ? '--r2-length ' + processParams.r2Length: ''} \
 			${(processParams.containsKey('lanes')) ? '--lanes ' + processParams.lanes: ''} \
+			${_includeIntrons ? '--include-introns ': ''} \
+			${_noBam ? '--no-bam ': ''} \
             --localcores=${task.cpus} \
             --localmem=${task.memory.toGiga()} \
 		"""
@@ -148,7 +172,9 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 
 		csvData = "fastqs,sample,library_type\n"
 		fastqs.eachWithIndex { fastq, ix -> 
-			csvData += "\$PWD/${fastq},${sampleNames[ix]},${assays[ix]}\n"
+			if (sampleNames[ix] != null) {
+				csvData += "\$PWD/${fastq},${sampleNames[ix]},${assays[ix]}\n"
+			}
 		}
 
 		"""
