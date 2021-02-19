@@ -9,13 +9,14 @@ process SC__PYCISTOPIC__COMPUTE_QC_STATS {
 
     publishDir "${params.global.outdir}/intermediate/pycistopic/qc/", mode: 'symlink'
     container toolParams.container
-    label 'compute_resources__default'
+    label 'compute_resources__default','compute_resources__24hqueue'
 
     input:
         tuple val(sampleId),
               path(fragments),
               path(fragments_index),
-              val(peaks)
+              path(peaks)
+        path(biomart_annot)
 
     output:
         tuple val(sampleId),
@@ -36,6 +37,7 @@ process SC__PYCISTOPIC__COMPUTE_QC_STATS {
             --regions ${peaks} \
             --n_frag ${processParams.n_frag} \
             --threads ${task.cpus} \
+            --biomart_annot_pkl ${biomart_annot} \
             --output_metadata ${output_metadata} \
             --output_metadata_pkl ${output_metadata_pkl} \
             --output_profile_data_pkl ${output_profile_data_pkl}

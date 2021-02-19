@@ -5,6 +5,7 @@ nextflow.enable.dsl=2
 include { SC__ARCHR__CREATE_ARROW_UNFILTERED; } from './../../src/archr/processes/createArrow_unfiltered.nf' params(params)
 include { SC__ARCHR__CELL_CALLING; } from './../../src/archr/processes/cell_calling.nf' params(params)
 
+include { SC__PYCISTOPIC__BIOMART_ANNOT; } from './../../src/pycistopic/processes/biomart_annot.nf' params(params)
 include { SC__PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf' params(params)
 include { SC__PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf' params(params)
 include { SC__PYCISTOPIC__PLOT_QC_STATS; } from './../../src/pycistopic/processes/plot_qc_stats.nf' params(params)
@@ -31,6 +32,9 @@ workflow ATAC_QC_PREFILTER {
         }
         .set{ data_split }
 
+        biomart = SC__PYCISTOPIC__BIOMART_ANNOT()
+        biomart.view()
+
         peaks = SC__PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam)
         PUBLISH_PEAKS(peaks.map { it -> tuple(it[0], it[1]) }, 'peaks', 'narrowPeak', 'macs2', false)
 
@@ -38,11 +42,11 @@ workflow ATAC_QC_PREFILTER {
                   .map { it -> tuple(it[0], it[1], it[2], it[4]) }
                   .set{ fragpeaks }
 
-        qc_stats = SC__PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks)
+        qc_stats = SC__PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks, biomart)
         PUBLISH_METADATA(qc_stats.map { it -> tuple(it[0], it[1]) }, 'metadata.tsv', 'gz', 'pycistopic', false)
 
         qc_stats_plot = SC__PYCISTOPIC__PLOT_QC_STATS(qc_stats)
-        PUBLISH_QC_SAMPLE_METRICS(qc_stats_plot, 'qc_sample_metrics.pdf', 'pdf', 'pycistopic', false)
+        PUBLISH_QC_SAMPLE_METRICS(qc_stats_plot, 'qc_sample_metrics', 'pdf', 'pycistopic', false)
 
 }
 

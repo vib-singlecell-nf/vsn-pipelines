@@ -37,6 +37,11 @@ parser.add_argument(
     help='Threshold on the number of fragments to keep for a barcode.'
 )
 parser.add_argument(
+    "--biomart_annot_pkl",
+    type=str,
+    help='Biomart annotations, pickle format.'
+)
+parser.add_argument(
     "--output_metadata",
     type=str,
     help='Output file, tsv format.'
@@ -63,15 +68,11 @@ args = parser.parse_args()
 
 ################################################################################
 
-dataset = pbm.Dataset(name='hsapiens_gene_ensembl',  host='http://www.ensembl.org')
-annot = dataset.query(attributes=['chromosome_name', 'transcription_start_site', 'strand', 'external_gene_name', 'transcript_biotype'])
-filter = annot['Chromosome/scaffold name'].str.contains('CHR|GL|JH|MT', na=False)
-annot = annot[~filter]
-annot['Chromosome/scaffold name'] = annot['Chromosome/scaffold name'].str.replace(r'(\b\S)', r'chr\1')
-annot.columns=['Chromosome', 'Start', 'Strand', 'Gene', 'Transcript_type']
-annot = annot[annot.Transcript_type == 'protein_coding']
+# Load biomart annotations:
+infile = open(args.biomart_annot_pkl, 'rb')
+annot = pickle.load(infile)
+infile.close()
 
-##################################################
 
 
 fragments_dict = { 
