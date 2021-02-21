@@ -442,7 +442,7 @@ process SC__PUBLISH {
     input:
         tuple \
             val(tag), \
-            path(f), \
+            path(f, stageAs: 'input_file'), \
             val(stashedParams)
         val(fileOutputSuffix)
         val(toolName)
@@ -463,13 +463,9 @@ process SC__PUBLISH {
             isParameterExplorationModeOn,
             stashedParams
         )
-        /* avoid cases where the input and output files have identical names:
-           Move the input file to a unique name, then create a link to
-           the input file */
         """
-        mv $f tmp
         if [ ! -f ${outputFileName} ]; then
-            ln -L tmp "${outputFileName}"
+            ln -s input_file "${outputFileName}"
         fi
         """
 }
