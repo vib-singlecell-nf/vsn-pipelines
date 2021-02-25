@@ -29,7 +29,7 @@ workflow get_bwa_index {
 
         bwa_index_path = Paths.get(
                                    Paths.get(fasta_path).getParent().toString(),
-                                   "*.{amb,ann,bwt,fai,flat,gdx,pac,sa}"
+                                   "*.{amb,ann,bwt,fai,flat,gdx,pac,sa,0123,bwt.2bit.64}"
                                    )
         bwa_index = Channel.fromPath(bwa_index_path,
                                      glob: true,

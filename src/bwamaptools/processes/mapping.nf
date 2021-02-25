@@ -26,7 +26,7 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
         def samtools_cpus = (task.cpus > 6) ? 6 : task.cpus
         """
         set -euo pipefail
-        bwa mem \
+        ${toolParams.bwa_version} mem \
             -t ${task.cpus} \
             ${bwa_fasta} \
             ${fastq_PE1} \
