@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.singlecelltoolkit
 
-process SC__SINGLECELLTOOLKIT__BARCODE_10X_FASTQ {
+process SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ {
 
     container toolParams.container
     label 'compute_resources__cpu'
@@ -21,7 +21,7 @@ process SC__SINGLECELLTOOLKIT__BARCODE_10X_FASTQ {
               path("${sampleId}_dex_R2.fastq.gz")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
+        def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_10x_scatac_fastqs)
         processParams = sampleParams.local
         """
         barcode_10x_scatac_fastqs.sh \
@@ -30,8 +30,8 @@ process SC__SINGLECELLTOOLKIT__BARCODE_10X_FASTQ {
             ${fastq_PE2} \
             ${sampleId}_dex \
             false \
-            false \
-            "_"
+            true \
+            ${processParams.uncorrected_bc_tag}_${processParams.barcode_quality_tag}
         """
 }
 

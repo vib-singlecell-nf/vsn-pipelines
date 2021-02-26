@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 //////////////////////////////////////////////////////
 // process imports:
 include { SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/processes/barcode_correction.nf' params(params)
-include { SC__SINGLECELLTOOLKIT__BARCODE_10X_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
+include { SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
 include { SC__TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
 
 // workflow imports:
@@ -70,7 +70,7 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                 println("No whitelist files were found in 'params.tools.singlecelltoolkit.barcode_correction.whitelist'. Skipping barcode correction for standard-type samples.")
             }
             // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SC__SINGLECELLTOOLKIT__BARCODE_10X_FASTQ(
+            fastq_dex = SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ(
                 data.standard.map { it -> tuple(it[0], it[2], it[3], it[4]) }
             )
         } else {
@@ -88,7 +88,7 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
 
 
             // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SC__SINGLECELLTOOLKIT__BARCODE_10X_FASTQ(
+            fastq_dex = SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ(
                 data.standard.join(fastq_bc_corrected).map { it -> tuple(it[0], it[2], it[5], it[4]) }
             )
 
