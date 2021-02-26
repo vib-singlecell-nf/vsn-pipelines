@@ -7,7 +7,6 @@ import java.nio.file.Paths
 
 include { SC__BWAMAPTOOLS__BWA_MEM_PE; } from './processes/mapping.nf' params(params)
 include { SC__BWAMAPTOOLS__INDEX_BAM; } from './processes/index.nf' params(params)
-include { SC__BWAMAPTOOLS__ADD_BARCODE_TAG; } from './processes/add_barcode_as_tag.nf' params(params)
 include { SC__BWAMAPTOOLS__MAPPING_SUMMARY } from './processes/mapping_summary.nf' params(params)
 include {
     PUBLISH as PUBLISH_BAM;
@@ -59,25 +58,17 @@ workflow BWA_MAPPING_PE {
         */
         bwa_inputs = get_bwa_index(params.tools.bwamaptools.bwa_fasta).combine(data)
 
-        bam = SC__BWAMAPTOOLS__BWA_MEM_PE(bwa_inputs)
-
-        bam_with_tag = SC__BWAMAPTOOLS__ADD_BARCODE_TAG(bam)
-
-        bam_index = SC__BWAMAPTOOLS__INDEX_BAM(bam_with_tag)
-
-        // join bam index into the bam channel:
-        bamout = bam_with_tag.join(bam_index)
-
-        // get mapping summary stats
-        SC__BWAMAPTOOLS__MAPPING_SUMMARY(bamout)
+        SC__BWAMAPTOOLS__BWA_MEM_PE(bwa_inputs) |
+            SC__BWAMAPTOOLS__INDEX_BAM |
+            SC__BWAMAPTOOLS__MAPPING_SUMMARY
 
         // publish output:
-        PUBLISH_BAM(bam_with_tag, 'bwa.out.possorted', 'bam', 'bam', false)
-        PUBLISH_BAM_INDEX(bam_index, 'bwa.out.possorted.bam', 'bai', 'bam', false)
+        PUBLISH_BAM(SC__BWAMAPTOOLS__INDEX_BAM.out, 'bwa.out.possorted', 'bam', 'bam', false)
+        PUBLISH_BAM_INDEX(SC__BWAMAPTOOLS__INDEX_BAM.out.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
         PUBLISH_MAPPING_SUMMARY(SC__BWAMAPTOOLS__MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
 
     emit:
-        bamout
+        SC__BWAMAPTOOLS__INDEX_BAM.out
 
 }
 

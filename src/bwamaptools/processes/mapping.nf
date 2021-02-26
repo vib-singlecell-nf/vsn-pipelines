@@ -28,6 +28,7 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
         set -euo pipefail
         ${toolParams.bwa_version} mem \
             -t ${task.cpus} \
+            -C \
             ${bwa_fasta} \
             ${fastq_PE1} \
             ${fastq_PE2} \
@@ -35,6 +36,5 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
         | samtools sort -@ ${samtools_cpus} -u -O bam - \
         | samtools markdup -@ ${samtools_cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
         """
-
 }
 

@@ -15,6 +15,7 @@ process SC__BWAMAPTOOLS__INDEX_BAM {
 
     output:
         tuple val(sampleId),
+              path(bam),
               path("*.bai")
 
     script:
