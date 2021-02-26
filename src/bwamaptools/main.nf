@@ -5,9 +5,15 @@ import java.nio.file.Paths
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include { SC__BWAMAPTOOLS__BWA_MEM_PE; } from './processes/mapping.nf' params(params)
-include { SC__BWAMAPTOOLS__INDEX_BAM; } from './processes/index.nf' params(params)
-include { SC__BWAMAPTOOLS__MAPPING_SUMMARY } from './processes/mapping_summary.nf' params(params)
+include {
+    SC__BWAMAPTOOLS__BWA_MEM_PE as BWA_MEM_PE;
+} from './processes/mapping.nf' params(params)
+include {
+    SC__BWAMAPTOOLS__INDEX_BAM as INDEX_BAM;
+} from './processes/index.nf' params(params)
+include {
+    SC__BWAMAPTOOLS__MAPPING_SUMMARY as MAPPING_SUMMARY;
+} from './processes/mapping_summary.nf' params(params)
 include {
     PUBLISH as PUBLISH_BAM;
     PUBLISH as PUBLISH_BAM_INDEX;
@@ -58,17 +64,17 @@ workflow BWA_MAPPING_PE {
         */
         bwa_inputs = get_bwa_index(params.tools.bwamaptools.bwa_fasta).combine(data)
 
-        SC__BWAMAPTOOLS__BWA_MEM_PE(bwa_inputs) |
-            SC__BWAMAPTOOLS__INDEX_BAM |
-            SC__BWAMAPTOOLS__MAPPING_SUMMARY
+        BWA_MEM_PE(bwa_inputs) |
+            INDEX_BAM |
+            MAPPING_SUMMARY
 
         // publish output:
-        PUBLISH_BAM(SC__BWAMAPTOOLS__INDEX_BAM.out, 'bwa.out.possorted', 'bam', 'bam', false)
-        PUBLISH_BAM_INDEX(SC__BWAMAPTOOLS__INDEX_BAM.out.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
-        PUBLISH_MAPPING_SUMMARY(SC__BWAMAPTOOLS__MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
+        PUBLISH_BAM(INDEX_BAM.out, 'bwa.out.possorted', 'bam', 'bam', false)
+        PUBLISH_BAM_INDEX(INDEX_BAM.out.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
+        PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
 
     emit:
-        SC__BWAMAPTOOLS__INDEX_BAM.out
+        INDEX_BAM.out
 
 }
 
