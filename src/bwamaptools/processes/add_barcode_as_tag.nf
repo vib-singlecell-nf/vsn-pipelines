@@ -40,7 +40,7 @@ process SC__BWAMAPTOOLS__ADD_BARCODE_TAG {
                 sub(/^[^${processParams.delimiter_to_get_barcode_block}]+${processParams.delimiter_to_get_barcode_block}/,"",\$0);
                 print \$0 ucorr_bc corr_bc;
               }' \
-            | samtools view -bS - -o ${sampleId}.bwa.possorted.bam
+            | samtools view -b -o ${sampleId}.bwa.possorted.bam -
         """
 }
 
