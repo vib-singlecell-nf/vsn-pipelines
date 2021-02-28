@@ -9,6 +9,7 @@ include { SC__PYCISTOPIC__BIOMART_ANNOT; } from './../../src/pycistopic/processe
 include { SC__PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf' params(params)
 include { SC__PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf' params(params)
 include { SC__PYCISTOPIC__PLOT_QC_STATS; } from './../../src/pycistopic/processes/plot_qc_stats.nf' params(params)
+include { SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS; } from './../../src/pycistopic/processes/barcode_level_statistics.nf' params(params)
 
 include {
     PUBLISH as PUBLISH_PEAKS;
@@ -47,6 +48,8 @@ workflow ATAC_QC_PREFILTER {
 
         qc_stats_plot = SC__PYCISTOPIC__PLOT_QC_STATS(qc_stats)
         PUBLISH_QC_SAMPLE_METRICS(qc_stats_plot, 'qc_sample_metrics', 'pdf', 'pycistopic', false)
+
+        SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS(qc_stats)
 
 }
 

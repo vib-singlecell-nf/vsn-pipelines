@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-#import pybiomart as pbm
 import pandas as pd
 import pickle
+import numpy as np
 
-#from pycisTopic.qc import compute_qc_stats
+from pycisTopic.qc import plot_barcode_metrics
 
 ################################################################################
 
@@ -21,6 +21,11 @@ parser.add_argument(
     "--metadata_pkl",
     type=str,
     help='Metadata, pickle format.'
+)
+parser.add_argument(
+    "--selected_barcodes",
+    type=str,
+    help='Output file containing selected barcodes.'
 )
 
 ### fragments filters:
@@ -87,34 +92,21 @@ parser.add_argument(
     help='Upper threshold on duplication rate for keeping a barcode.'
 )
 
-parser <- add_option(
-  parser,
-  c("--filter_tss"),
-  action = "store",
-  default = 4,
-  help = "Filter on TSS Enrichment [%default]"
-)
-parser <- add_option(
-  parser,
-  c("--filter_frags"),
-  action = "store",
-  default = 1000,
-  help = "Filter on fragments/cell [%default]"
-)
-
-
-
-
 args = parser.parse_args()
 
 ################################################################################
+
+# the pycisTopic filter setting is in log10 scale
+if args.filter_frags_lower is not None:
+    args.filter_frags_lower = np.log10(args.filter_frags_lower)
+if args.filter_frags_upper is not None:
+    args.filter_frags_upper = np.log10(args.filter_frags_upper)
 
 
 # Load barcode metrics
 infile = open(args.metadata_pkl, 'rb')
 metadata_bc = pickle.load(infile)
 infile.close()
-
 
 
 # Return figure to plot together with other metrics, and cells passing filters. Figure will be saved as pdf.
@@ -129,7 +121,7 @@ FRIP_NR_FRAG_fig, FRIP_NR_FRAG_filter=plot_barcode_metrics(metadata_bc[args.samp
                                        return_cells=True,
                                        return_fig=True,
                                        plot=False,
-                                       save='FRIP-VS-NRFRAG.pdf')
+                                       save='./'+args.sampleId+'__FRIP-vs-nFrag.pdf')
 
 # Return figure to plot together with other metrics, and cells passing filters
 TSS_NR_FRAG_fig, TSS_NR_FRAG_filter=plot_barcode_metrics(metadata_bc[args.sampleId],
@@ -143,7 +135,7 @@ TSS_NR_FRAG_fig, TSS_NR_FRAG_filter=plot_barcode_metrics(metadata_bc[args.sample
                                       return_cells=True,
                                       return_fig=True,
                                       plot=False,
-                                      save='TSS-VS-NRFRAG.pdf')
+                                      save='./'+args.sampleId+'__TSS-vs-nFrag.pdf')
 
 # Return figure to plot together with other metrics, but not returning cells (no filter applied for the duplication rate  per barcode)
 DR_NR_FRAG_fig=plot_barcode_metrics(metadata_bc[args.sampleId],
@@ -156,8 +148,14 @@ DR_NR_FRAG_fig=plot_barcode_metrics(metadata_bc[args.sampleId],
                                       cmap='viridis',
                                       return_cells=False,
                                       return_fig=True,
-                                      plot=False)
+                                      plot=False,
+                                      save='./'+args.sampleId+'__duprate-vs-nFrag.pdf')
 
 # intersection of barcodes to keep:
-bc_passing_filters = {'10x_multiome_brain':[]}
-bc_passing_filters['10x_multiome_brain'] = list((set(FRIP_NR_FRAG_filter) & set(TSS_NR_FRAG_filter)) ^ set(SCRUBLET_doublets))
+bc_passing_filters = list(set(FRIP_NR_FRAG_filter) & set(TSS_NR_FRAG_filter))
+
+
+### outputs:
+
+pd.DataFrame(bc_passing_filters).to_csv(args.selected_barcodes, sep='\t', index=False, header=False)
+
