@@ -90,6 +90,19 @@ if(!is.null(args$seed)) {
   warnings("No seed is set, this will likely give none reproducible results.")
 }
 
+# Required for reproducibility in case numeric parameters are passed (e.g.: theta, lambda)
+args <- lapply(X = args, FUN = function(arg) {
+  if(is.numeric(x = arg)) {
+    if(arg %% 1 == 0) {
+      return (as.integer(x = arg))
+    } else {
+      return (arg)
+    }
+  }
+  return (arg)
+})
+
+
 input_ext <- tools::file_ext(args$input)
 
 if(input_ext == "h5ad") {
