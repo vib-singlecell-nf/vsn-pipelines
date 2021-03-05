@@ -4,6 +4,9 @@ nextflow.enable.dsl=2
 // process imports:
 include { SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/processes/barcode_correction.nf' params(params)
 include { SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
+include {
+    SC__SINGLECELLTOOLKIT__EXTRACT_AND_CORRECT_BIORAD_BARCODE as SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE;
+} from './../../src/singlecelltoolkit/processes/extract_and_correct_biorad_barcode.nf' params(params)
 include { SC__TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
 
 // workflow imports:
@@ -51,8 +54,13 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                         standard: true // capture all other technology types here
                       }
 
-        // run biorad barcode correction and debarcoding separately:
-        fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+        /* run biorad barcode correction and debarcoding separately: */
+        // using BAP:
+        //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+
+        // using singlecelltoolkit:
+        fastq_dex_br = SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+
 
         /* Barcode correction */
         // gather barcode whitelists from params into a channel:
