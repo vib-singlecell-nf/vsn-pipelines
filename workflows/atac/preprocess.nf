@@ -16,8 +16,7 @@ include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode
 
 include {
     PUBLISH as PUBLISH_BC_STATS;
-    PUBLISH as PUBLISH_FASTQS_PE1;
-    PUBLISH as PUBLISH_FASTQS_PE2;
+    PUBLISH as PUBLISH_BR_BC_STATS;
     PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
     PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
     PUBLISH as PUBLISH_FRAGMENTS;
@@ -100,16 +99,15 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
         //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
         // using singlecelltoolkit:
         fastq_dex_br = SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'fastq', false)
 
 
         // concatenate the read channels:
-        fastq_dex = fastq_dex.concat(fastq_dex_br)
+        fastq_dex = fastq_dex.concat(fastq_dex_br.map{ it -> tuple(it[0], it[1],it[2])})
 
         // run adapter trimming:
         fastq_dex_trim = SC__TRIMGALORE__TRIM(fastq_dex)
         // publish fastq output:
-        PUBLISH_FASTQS_PE1(fastq_dex_trim, 'R1.fastq', 'gz', 'fastq', false)
-        PUBLISH_FASTQS_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[2]) }, 'R2.fastq', 'gz', 'fastq', false)
         PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'R1.trimming_report', 'txt', 'fastq', false)
         PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, 'R2.trimming_report', 'txt', 'fastq', false)
 
