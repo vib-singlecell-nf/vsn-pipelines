@@ -54,13 +54,6 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                         standard: true // capture all other technology types here
                       }
 
-        /* run biorad barcode correction and debarcoding separately: */
-        // using BAP:
-        //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-
-        // using singlecelltoolkit:
-        fastq_dex_br = SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-
 
         /* Barcode correction */
         // gather barcode whitelists from params into a channel:
@@ -101,6 +94,13 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
             )
 
         }
+
+        /* run BioRad barcode correction and debarcoding separately: */
+        // using BAP:
+        //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+        // using singlecelltoolkit:
+        fastq_dex_br = SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+
 
         // concatenate the read channels:
         fastq_dex = fastq_dex.concat(fastq_dex_br)
