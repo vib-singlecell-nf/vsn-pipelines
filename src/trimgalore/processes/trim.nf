@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.trimgalore
 
-process SC__TRIMGALORE__TRIM {
+process TRIMGALORE__TRIM {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'

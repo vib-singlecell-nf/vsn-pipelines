@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.bwamaptools
 
-process SC__BWAMAPTOOLS__INDEX_BAM {
+process BWAMAPTOOLS__INDEX_BAM {
 
     container toolParams.container
     label 'compute_resources__default'
@@ -26,7 +26,7 @@ process SC__BWAMAPTOOLS__INDEX_BAM {
         """
 }
 
-process SC__BWAMAPTOOLS__INDEX_BED {
+process BWAMAPTOOLS__INDEX_BED {
 
     container toolParams.container
     label 'compute_resources__default'

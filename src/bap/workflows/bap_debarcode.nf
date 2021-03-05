@@ -3,8 +3,8 @@ nextflow.enable.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 include { 
-    SC__BAP__BIORAD_DEBARCODE;
-    SC__BAP__MERGE_FASTQS;
+    BAP__BIORAD_DEBARCODE as BIORAD_DEBARCODE;
+    BAP__MERGE_FASTQS as MERGE_FASTQS;
 } from './../processes/biorad_debarcode.nf' params(params)
 
 include {
@@ -22,13 +22,13 @@ workflow BAP__BIORAD_DEBARCODE {
 
     main:
 
-        SC__BAP__BIORAD_DEBARCODE(data) |
-            SC__BAP__MERGE_FASTQS
+        BIORAD_DEBARCODE(data) |
+            MERGE_FASTQS
 
-        PUBLISH_BC_STATS_BR(SC__BAP__BIORAD_DEBARCODE.out.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'fastq', false)
+        PUBLISH_BC_STATS_BR(BIORAD_DEBARCODE.out.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'fastq', false)
 
     emit:
-        SC__BAP__MERGE_FASTQS.out
+        MERGE_FASTQS.out
 
 }
 

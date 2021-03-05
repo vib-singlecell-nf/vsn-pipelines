@@ -6,7 +6,7 @@ toolParams = params.tools.sinto
 
 barcode_tag = params.containsKey('tools_sinto_fragments_barcodetag') ? params.tools_sinto_fragments_barcodetag : toolParams.fragments.barcodetag
 
-process SC__SINTO__FRAGMENTS {
+process SINTO__FRAGMENTS {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
@@ -40,7 +40,7 @@ process SC__SINTO__FRAGMENTS {
 }
 
 
-process SC__SINTO__SORT_FRAGMENTS {
+process SINTO__SORT_FRAGMENTS {
 
     container toolParams.container
     label 'compute_resources__mem'

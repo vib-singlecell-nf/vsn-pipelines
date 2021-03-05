@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.bwamaptools
 
-process SC__BWAMAPTOOLS__BWA_MEM_PE {
+process BWAMAPTOOLS__BWA_MEM_PE {
 
     container toolParams.container
     label 'compute_resources__bwa_mem'

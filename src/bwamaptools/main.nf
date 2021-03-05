@@ -6,13 +6,13 @@ import java.nio.file.Paths
 //  Import sub-workflows from the modules:
 
 include {
-    SC__BWAMAPTOOLS__BWA_MEM_PE as BWA_MEM_PE;
+    BWAMAPTOOLS__BWA_MEM_PE as BWA_MEM_PE;
 } from './processes/mapping.nf' params(params)
 include {
-    SC__BWAMAPTOOLS__INDEX_BAM as INDEX_BAM;
+    BWAMAPTOOLS__INDEX_BAM as INDEX_BAM;
 } from './processes/index.nf' params(params)
 include {
-    SC__BWAMAPTOOLS__MAPPING_SUMMARY as MAPPING_SUMMARY;
+    BWAMAPTOOLS__MAPPING_SUMMARY as MAPPING_SUMMARY;
 } from './processes/mapping_summary.nf' params(params)
 include {
     PUBLISH as PUBLISH_BAM;

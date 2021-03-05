@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.singlecelltoolkit
 
-process SC__SINGLECELLTOOLKIT__EXTRACT_AND_CORRECT_BIORAD_BARCODE {
+process SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE {
 
     container toolParams.container
     label 'compute_resources__default'

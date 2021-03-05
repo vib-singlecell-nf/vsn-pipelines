@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.singlecelltoolkit
 
-process SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ {
+process SCTK__BARCODE_10X_SCATAC_FASTQ {
 
     container toolParams.container
     label 'compute_resources__cpu'

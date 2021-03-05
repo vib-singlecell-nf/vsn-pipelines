@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.singlecelltoolkit
 
-process SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION {
+process SCTK__BARCODE_CORRECTION {
 
     container toolParams.container
     label 'compute_resources__default'

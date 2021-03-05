@@ -2,12 +2,10 @@ nextflow.enable.dsl=2
 
 //////////////////////////////////////////////////////
 // process imports:
-include { SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/processes/barcode_correction.nf' params(params)
-include { SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
-include {
-    SC__SINGLECELLTOOLKIT__EXTRACT_AND_CORRECT_BIORAD_BARCODE as SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE;
-} from './../../src/singlecelltoolkit/processes/extract_and_correct_biorad_barcode.nf' params(params)
-include { SC__TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
+include { SCTK__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/processes/barcode_correction.nf' params(params)
+include { SCTK__BARCODE_10X_SCATAC_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
+include { SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE; } from './../../src/singlecelltoolkit/processes/extract_and_correct_biorad_barcode.nf' params(params)
+include { TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
 
 // workflow imports:
 include { BWA_MAPPING_PE; } from './../../src/bwamaptools/main.nf' params(params)
@@ -27,7 +25,7 @@ include {
 //////////////////////////////////////////////////////
 //  Define the workflow 
 
-workflow ATAC_PREPROCESS_WITH_METADATA {
+workflow ATAC_PREPROCESS {
 
     take:
         metadata
@@ -70,25 +68,24 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                 println("No whitelist files were found in 'params.tools.singlecelltoolkit.barcode_correction.whitelist'. Skipping barcode correction for standard-type samples.")
             }
             // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ(
+            fastq_dex = SCTK__BARCODE_10X_SCATAC_FASTQ(
                 data.standard.map { it -> tuple(it[0], it[2], it[3], it[4]) }
             )
         } else {
-
             // join wl to the data channel:
             data_wl = wl.cross( data.standard.map { it -> tuple(it[1], it[0], it[2], it[3], it[4]) } ) // technology, sampleId, R1, R2, R3
-                    .map { it -> tuple(it[1][1], it[1][0],           // sampleId, technology
-                                       it[1][2], it[1][3], it[1][4], // R1, R2, R3
-                                       it[0][1]                      // whitelist
-                                       ) }
+                        .map { it -> tuple(it[1][1], it[1][0],           // sampleId, technology
+                                           it[1][2], it[1][3], it[1][4], // R1, R2, R3
+                                           it[0][1]                      // whitelist
+                                           ) }
 
             // run barcode correction against a whitelist:
-            fastq_bc_corrected = SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
+            fastq_bc_corrected = SCTK__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
             PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, 'corrected.bc_stats', 'log', 'fastq', false)
 
 
             // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SC__SINGLECELLTOOLKIT__BARCODE_10X_SCATAC_FASTQ(
+            fastq_dex = SCTK__BARCODE_10X_SCATAC_FASTQ(
                 data.standard.join(fastq_bc_corrected).map { it -> tuple(it[0], it[2], it[5], it[4]) }
             )
 
@@ -98,7 +95,7 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
         // using BAP:
         //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
         // using singlecelltoolkit:
-        fastq_dex_br = SCTX__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+        fastq_dex_br = SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
         PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'fastq', false)
 
 
@@ -106,7 +103,7 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
         fastq_dex = fastq_dex.concat(fastq_dex_br.map{ it -> tuple(it[0], it[1],it[2])})
 
         // run adapter trimming:
-        fastq_dex_trim = SC__TRIMGALORE__TRIM(fastq_dex)
+        fastq_dex_trim = TRIMGALORE__TRIM(fastq_dex)
         // publish fastq output:
         PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'R1.trimming_report', 'txt', 'fastq', false)
         PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, 'R2.trimming_report', 'txt', 'fastq', false)

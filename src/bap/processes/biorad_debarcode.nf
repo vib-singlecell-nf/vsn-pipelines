@@ -4,7 +4,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/
 
 toolParams = params.tools.bap
 
-process SC__BAP__BIORAD_DEBARCODE {
+process BAP__BIORAD_DEBARCODE {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
@@ -34,7 +34,7 @@ process SC__BAP__BIORAD_DEBARCODE {
 }
 
 
-process SC__BAP__MERGE_FASTQS {
+process BAP__MERGE_FASTQS {
 
     container toolParams.container
     label 'compute_resources__default'

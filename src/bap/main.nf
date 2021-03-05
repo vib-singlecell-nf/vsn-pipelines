@@ -3,7 +3,9 @@ nextflow.enable.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include { SC__BAP__BARCODE_MULTIPLET_PIPELINE; } from './processes/barcode_multiplet.nf' params(params)
+include {
+    BAP__BARCODE_MULTIPLET_PIPELINE as BARCODE_MULTIPLET_PIPELINE;
+} from './processes/barcode_multiplet.nf' params(params)
 include {
     BAM_TO_FRAGMENTS as BAP_BAM_TO_FRAGMENTS;
 } from './../../src/sinto/main.nf' addParams(tools_sinto_fragments_barcodetag: params.tools.bap.barcode_multiplet.drop_tag)
@@ -27,14 +29,14 @@ workflow get_bam {
 }
 
 
-workflow BAP__BARCODE_MULTIPLET_PIPELINE {
+workflow BAP__BARCODE_MULTIPLET_WF {
 
     take:
         bam
 
     main:
 
-        bap = SC__BAP__BARCODE_MULTIPLET_PIPELINE(bam.map { it -> tuple(it[0], it[1], it[2]) })
+        bap = BARCODE_MULTIPLET_PIPELINE(bam.map { it -> tuple(it[0], it[1], it[2]) })
 
         // generate a fragments file:
         fragments = BAP_BAM_TO_FRAGMENTS(bap.map {it -> tuple(it[0], it[1], it[2])})

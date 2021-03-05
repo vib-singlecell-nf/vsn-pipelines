@@ -4,7 +4,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/bwamaptools/b
 
 toolParams = params.tools.bwamaptools
 
-process SC__BWAMAPTOOLS__MAPPING_SUMMARY {
+process BWAMAPTOOLS__MAPPING_SUMMARY {
 
     container toolParams.container
     label 'compute_resources__default','compute_resources__24hqueue'
@@ -27,5 +27,4 @@ process SC__BWAMAPTOOLS__MAPPING_SUMMARY {
             ${bam} \
         """
 }
-
 
