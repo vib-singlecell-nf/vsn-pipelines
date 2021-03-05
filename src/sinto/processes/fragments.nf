@@ -33,7 +33,6 @@ process SINTO__FRAGMENTS {
             ${processParams.containsKey('min_distance') && processParams.min_distance ? '--min_distance ' + processParams.min_distance: ''} \
             ${processParams.containsKey('max_distance') && processParams.max_distance ? '--max_distance ' + processParams.max_distance: ''} \
             ${processParams.containsKey('chunksize') && processParams.chunksize ? '--chunksize ' + processParams.chunksize: ''} \
-            ${processParams.containsKey('temp_dir') && processParams.temp_dir ? '--temp_dir ' + processParams.temp_dir: ''} \
             -p ${task.cpus} \
             -f ${sampleId}.fragments.bed
         """
