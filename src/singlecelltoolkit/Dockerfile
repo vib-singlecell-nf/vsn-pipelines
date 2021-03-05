@@ -1,9 +1,4 @@
-*** System restart required ***
-Last login: Wed Nov 25 10:25:17 2020 from 10.118.229.21
-    u0125489 @ gbw-s-seq10 : ~
-$ tmux a
 FROM ubuntu:20.04
-
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN BUILDPKGS="autoconf automake make gcc perl zlib1g-dev libbz2-dev liblzma-dev libcurl4-gnutls-dev libssl-dev libncurses5-dev \
@@ -12,7 +7,7 @@ RUN BUILDPKGS="autoconf automake make gcc perl zlib1g-dev libbz2-dev liblzma-dev
     curl \
     wget" && \
     apt-get update && \
-    apt-get install -y apt-utils debconf locales ca-certificates && dpkg-reconfigure locales && \
+    apt-get install -y apt-utils debconf locales locales-all ca-certificates && dpkg-reconfigure locales && \
     apt-get install -y --no-install-recommends $BUILDPKGS && \
     apt-get install -y --no-install-recommends clang python3 llvm-6.0 pigz
 
