@@ -20,13 +20,17 @@ process SC__HARMONY__HARMONY_MATRIX {
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.harmony)
-		processParams = sampleParams.local
-        varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
+		def processParams = sampleParams.local
+        // Arguments
+        def varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
         """
         ${binDir}run_harmony.R \
             ${f} \
             --seed ${params.global.seed} \
             ${varsUseAsArguments} \
+            ${processParams?.theta ? "--theta "+ processParams.theta : "" } \
+            ${processParams?.lambda ? "--lambda "+ processParams.lambda : "" } \
+            ${processParams?.epsilonHarmony ? "--epsilon-harmony "+ processParams.epsilonHarmony : "" } \
             --output-prefix "${sampleId}.SC__HARMONY__HARMONY_MATRIX"
         """
 
