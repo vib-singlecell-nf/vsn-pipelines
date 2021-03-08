@@ -425,6 +425,33 @@ The output is a loom file with the results embedded.
 
 ----
 
+
+**harmony_scenic** |harmony_scenic|
+-----------------------------------
+
+.. |harmony_scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/harmony_scenic/badge.svg
+
+Runs the ``harmony`` workflow above, then runs the ``scenic`` workflow on the output, generating a comprehensive loom file with the combined results.
+This could be very resource intensive, depending on the dataset.
+
+|HARMONY SCENIC Workflow|
+
+.. |HARMONY SCENIC Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/harmony_scenic.svg?sanitize=true
+
+
+.. list-table:: Output Files (not exhaustive list)
+    :widths: 10 40
+    :header-rows: 1
+
+    * - Output File
+      - Description
+    * - `out/data/*.HARMONY.h5ad`
+      - `Scanpy`-ready h5ad file containing all results from a `harmony` workflow run. The `raw.X` slot contains the log-normalized data (if normalization & transformation steps applied) while the `X` slot contains the log-normalized scaled data.
+    * - `out/data/*.HARMONY_SCENIC.loom`
+      - `SCope`-ready loom file containing all results from a `harmony` workflow and a `scenic` workflow run (e.g.: regulon AUC matrix, regulons, ...).
+
+----
+
 **mnncorrect** |mnncorrect|
 ----------------------------
 
@@ -510,8 +537,10 @@ Now we can run it with the following command:
        -entry cell_annotate \
        > nextflow.config
 
-**cell_annotate_filter**
-------------------------
+**cell_annotate_filter** |cell_annotate_filter|
+-----------------------------------------------
+
+.. |cell_annotate_filter| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/cell_annotate_filter/badge.svg
 
 Runs the ``cell_annotate_filter`` workflow which will perform a cell-based annotation of the data using a set of provided .tsv metadata files following by a cell-based filtering.
 We show a use case here below with 10x Genomics data were it will annotate different samples using the ``obo`` method. For more information
