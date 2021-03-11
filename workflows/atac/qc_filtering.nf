@@ -10,6 +10,7 @@ include { SC__PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/proce
 include { SC__PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf' params(params)
 include { SC__PYCISTOPIC__PLOT_QC_STATS; } from './../../src/pycistopic/processes/plot_qc_stats.nf' params(params)
 include { SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS; } from './../../src/pycistopic/processes/barcode_level_statistics.nf' params(params)
+include { SC__PYCISTOPIC__CALL_CELLS; } from './../../src/pycistopic/processes/call_cells.nf' params(params)
 
 include {
     PUBLISH as PUBLISH_PEAKS;
@@ -34,7 +35,6 @@ workflow ATAC_QC_PREFILTER {
         .set{ data_split }
 
         biomart = SC__PYCISTOPIC__BIOMART_ANNOT()
-        biomart.view()
 
         peaks = SC__PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam)
         PUBLISH_PEAKS(peaks.map { it -> tuple(it[0], it[1]) }, 'peaks', 'narrowPeak', 'macs2', false)
@@ -49,7 +49,8 @@ workflow ATAC_QC_PREFILTER {
         qc_stats_plot = SC__PYCISTOPIC__PLOT_QC_STATS(qc_stats)
         PUBLISH_QC_SAMPLE_METRICS(qc_stats_plot, 'qc_sample_metrics', 'pdf', 'pycistopic', false)
 
-        SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS(qc_stats)
+        //SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS(qc_stats)
+        SC__PYCISTOPIC__CALL_CELLS(qc_stats)
 
 }
 

@@ -4,6 +4,7 @@ import argparse
 import pybiomart as pbm
 import pandas as pd
 import pickle
+import os
 
 from pycisTopic.qc import compute_qc_stats
 
@@ -73,8 +74,6 @@ infile = open(args.biomart_annot_pkl, 'rb')
 annot = pickle.load(infile)
 infile.close()
 
-
-
 fragments_dict = { 
     args.sampleId: args.fragments
     }
@@ -96,8 +95,17 @@ metadata_bc_dict, profile_data_dict = compute_qc_stats(
                 tss_window = 50,
                 tss_minimum_signal_window = 100,
                 tss_rolling_window = 10,
-                remove_duplicates = True)
+                remove_duplicates = True,
+                ### ray init args:
+                include_dashboard=False,
+                )
 
+
+# load bap results to use for duplicate rate (if we are using bap output):
+f_bap_qc = os.path.join(os.path.dirname(args.fragments),args.sampleId+'.QCstats.csv')
+if os.path.isfile(f_bap_qc) and all(metadata_bc_dict[args.sampleId]['Dupl_rate_bap'] == 0):
+    bapqc = pd.read_csv(f_bap_qc, index_col=0)
+    metadata_bc_dict[args.sampleId]['Dupl_rate'] = bapqc['duplicateProportion']
 
 ### outputs:
 

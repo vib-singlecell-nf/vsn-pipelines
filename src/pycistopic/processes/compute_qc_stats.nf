@@ -30,13 +30,14 @@ process SC__PYCISTOPIC__COMPUTE_QC_STATS {
         output_metadata_pkl = "${sampleId}_metadata.pickle"
         output_profile_data_pkl = "${sampleId}_profile_data.pickle"
         """
-        export NUMEXPR_MAX_THREADS=${task.cpus}
+        export NUMEXPR_MAX_THREADS=1
+        export OMP_NUM_THREADS=1
         ${binDir}compute_qc_stats.py \
             --sampleId ${sampleId} \
             --fragments ${fragments} \
             --regions ${peaks} \
             --n_frag ${processParams.n_frag} \
-            --threads ${task.cpus} \
+            --threads 1 \
             --biomart_annot_pkl ${biomart_annot} \
             --output_metadata ${output_metadata} \
             --output_metadata_pkl ${output_metadata_pkl} \
