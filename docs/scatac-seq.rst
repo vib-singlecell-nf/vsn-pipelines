@@ -97,7 +97,7 @@ The ``standard`` setting assumes a typical 10x Genomics style format with two re
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 The debarcoding step here uses a 
-`helper script <https://github.com/aertslab/single_cell_toolkit/blob/master/debarcode_10x_scatac_fastqs.sh>`_
+`helper script <https://github.com/aertslab/single_cell_toolkit/blob/2da8cbf09474903d050ecdb073da1afd99347eee/debarcode_10x_scatac_fastqs.sh>`_
 which transforms this input into two paired fastq files with the barcode integrated into the read name:
 
 .. code:: bash
