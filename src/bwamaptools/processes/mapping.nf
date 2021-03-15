@@ -32,7 +32,7 @@ process BWAMAPTOOLS__BWA_MEM_PE {
             ${bwa_fasta} \
             ${fastq_PE1} \
             ${fastq_PE2} \
-        | samtools fixmate -@ ${samtools_cpus} -m -u -O bam - - \
+        | samtools fixmate -m -u -O bam - - \
         | samtools sort -@ ${samtools_cpus} -u -O bam - \
         | samtools markdup -@ ${samtools_cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
         """
