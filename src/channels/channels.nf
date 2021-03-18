@@ -155,7 +155,8 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.loom.file_paths,
-                    params.data.loom.suffix
+                    params.data.loom.suffix,
+                    'NULL'
                 ).map {
                     it -> tuple(it[0], it[1], "loom", outputFileFormat, 'NULL')
                 }
@@ -165,7 +166,8 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.tsv.file_paths,
-                    params.data.tsv.suffix
+                    params.data.tsv.suffix,
+                    'NULL'
                 ).map {
                     it -> tuple(it[0], it[1], "tsv", outputFileFormat, 'NULL')
                 }
@@ -175,7 +177,8 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.csv.file_paths,
-                    params.data.csv.suffix
+                    params.data.csv.suffix,
+                    'NULL'
                 ).map {
                     it -> tuple(it[0], it[1], "csv", outputFileFormat, 'NULL')
                 }
@@ -185,7 +188,8 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.seurat_rds.file_paths,
-                    params.data.seurat_rds.suffix
+                    params.data.seurat_rds.suffix,
+                    'NULL'
                 ).map {
                     it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat, 'NULL')
                 }
