@@ -29,7 +29,7 @@ process AUCELL {
 
     script:
         if(toolParams.numRuns > 2 && task.maxForks > 1 && task.executor == "local")
-            throw new Exception("Running multi-runs SCENIC is quite computationally extensive. Please submit it as a job instead.")
+            println("Running multi-runs SCENIC is quite computationally extensive. Consider submitting this as a job, or limit the number of parallel processes with 'maxForks'.")
 
         outputFileName = "numRuns" in toolParams && toolParams.numRuns > 1 ? 
             sampleId + "__run_" + runId +"__auc_" + type + ".loom": 
