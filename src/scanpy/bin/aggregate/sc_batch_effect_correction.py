@@ -145,7 +145,8 @@ for FILE_PATH_IN in args.input:
 if args.method == 'combat':
     sc.pp.combat(
         adatas[0],
-        key=args.key)
+        key=args.key
+    )
 elif args.method == 'bbknn':
     # Expects:
     # - the PCA to have been computed and stored in adata.obsm['X_pca']
@@ -157,7 +158,8 @@ elif args.method == 'bbknn':
         batch_key=args.batch_key,
         n_pcs=args.n_pcs,
         neighbors_within_batch=args.neighbors_within_batch,
-        trim=args.trim)
+        trim=args.trim
+    )
 elif args.method == 'mnncorrect':
     # Run MNN_CORRECT (mnnpy)
     # GitHub: https://github.com/chriscainx/mnnpy/tree/master

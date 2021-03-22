@@ -50,8 +50,8 @@ parser.add_argument(
     type=int,
     action="store",
     dest="ngenes",
-    default=0,
-    help="The number of genes that appear in the returned tables. Value of 0 will report all genes."
+    default=None,
+    help="The number of genes that appear in the returned tables. Defaults to all genes."
 )
 
 args = parser.parse_args()
