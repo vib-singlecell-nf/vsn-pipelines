@@ -273,17 +273,40 @@ workflow single_sample_qc {
 
     include {
         single_sample_qc as SINGLE_SAMPLE_QC;
-    } from './main' params(params)
+    } from './src/scanpy/main' params(params)
     include {
-        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCOPE;
+        PUBLISH;
     } from "./src/utils/workflows/utils" params(params)
 
     getDataChannel | SINGLE_SAMPLE_QC
 
     if(params.utils?.publish) {
-        PUBLISH_SINGLE_SAMPLE_SCOPE(
+        PUBLISH(
             SINGLE_SAMPLE_QC.out.filtered,
             "SINGLE_SAMPLE_QC",
+            "h5ad",
+            null,
+            false
+        )
+    }  
+
+}
+
+workflow multi_sample_qc {
+
+    include {
+        multi_sample_qc as MULTI_SAMPLE_QC;
+    } from './src/scanpy/main' params(params)
+    include {
+        PUBLISH;
+    } from "./src/utils/workflows/utils" params(params)
+
+    getDataChannel | MULTI_SAMPLE_QC
+
+    if(params.utils?.publish) {
+        PUBLISH(
+            MULTI_SAMPLE_QC.out.filtered,
+            "MULTI_SAMPLE_QC",
             "h5ad",
             null,
             false
