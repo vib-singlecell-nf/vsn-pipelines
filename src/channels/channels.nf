@@ -200,9 +200,10 @@ workflow getDataChannel {
                 getFileChannelWithIndex(
                     params.data.fragments.file_paths,
                     params.data.fragments.suffix,
-                    params.data.fragments.index_extension
+                    params.data.fragments.index_extension,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "fragments", 'NULL')
+                    it -> tuple(it[0], it[1], "fragments", outputFileFormat, 'NULL')
                 }
             )
         }
@@ -211,9 +212,10 @@ workflow getDataChannel {
                 getFileChannelWithIndex(
                     params.data.bam.file_paths,
                     params.data.bam.suffix,
-                    params.data.bam.index_extension
+                    params.data.bam.index_extension,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "bam", 'NULL')
+                    it -> tuple(it[0], it[1], "bam", outputFileFormat, 'NULL' )
                 }
             )
         }
