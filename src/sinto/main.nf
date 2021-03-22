@@ -7,7 +7,9 @@ include {
     SINTO__FRAGMENTS;
     SINTO__SORT_FRAGMENTS;
 } from './processes/fragments.nf' params(params)
-include { BWAMAPTOOLS__INDEX_BED; } from './../../src/bwamaptools/processes/index.nf' params(params)
+include {
+    BWAMAPTOOLS__INDEX_BED;
+} from './../../src/bwamaptools/processes/index.nf' params(params)
 include {
     PUBLISH as PUBLISH_FRAGMENTS;
     PUBLISH as PUBLISH_FRAGMENTS_INDEX;
@@ -24,7 +26,6 @@ workflow BAM_TO_FRAGMENTS {
 
     main:
 
-        //println("${params.tools.sinto.fragments.barcodetag}")
         fragments = SINTO__FRAGMENTS(bam)
         fragments_sort = SINTO__SORT_FRAGMENTS(fragments)
         index = BWAMAPTOOLS__INDEX_BED(fragments_sort)
