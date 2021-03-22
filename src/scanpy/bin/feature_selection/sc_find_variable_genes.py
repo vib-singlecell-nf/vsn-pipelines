@@ -94,12 +94,13 @@ except IOError:
 # Expects logarithmized data: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.api.pp.highly_variable_genes.html#scanpy.api.pp.highly_variable_genes
 
 if args.flavor == "seurat":
+    max_disp = np.inf if args.max_disp is None else args.max_disp
     sc.pp.highly_variable_genes(
         adata,
         min_mean=args.min_mean,
         max_mean=np.inf if args.max_mean is None else args.max_mean,
         min_disp=args.min_disp,
-        max_disp=args.max_disp,
+        max_disp=max_disp,
         flavor=args.flavor
     )
 elif args.flavor == "cell_ranger" or args.flavor == "seurat_v3":
