@@ -125,6 +125,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			--seed ${params.global.seed} \
 			--method ${processParams.method} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
+			${(processParams.containsKey('perplexity')) ? '--perplexity ' + processParams.perplexity : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
 			${_processParams.getNCompsAsArgument(nComps)} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \
