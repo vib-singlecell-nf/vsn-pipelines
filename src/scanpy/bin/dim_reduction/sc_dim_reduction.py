@@ -68,7 +68,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-p", "--n-pcs",
+    "-n", "--n-pcs",
     type=int,
     action="store",
     dest="n_pcs",
