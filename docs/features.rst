@@ -333,7 +333,7 @@ You'll just have to repeat the following structure for the parameters which you 
     params {
         sc {
             scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:0.6.1'
             filter {
                 report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
                 // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter
@@ -364,7 +364,7 @@ If you want to apply custom parameters for some specific samples and have a "gen
     params {
         sc {
             scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:0.6.1'
             filter {
                 report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
                 // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter

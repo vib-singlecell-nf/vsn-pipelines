@@ -487,7 +487,7 @@ Make sure the following parts of the generated config are properly set:
     }
     sc {
         scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:0.6.1'
         }
         cell_annotate {
             off = 'h5ad'
@@ -540,7 +540,7 @@ Make sure the following parts of the generated config are properly set:
     }
     sc {
         scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:0.6.1'
         }
         cell_annotate {
             off = 'h5ad'
