@@ -9,15 +9,19 @@ include {
     BWAMAPTOOLS__BWA_MEM_PE as BWA_MEM_PE;
 } from './processes/mapping.nf' params(params)
 include {
-    BWAMAPTOOLS__INDEX_BAM as INDEX_BAM;
-} from './processes/index.nf' params(params)
-include {
     BWAMAPTOOLS__MAPPING_SUMMARY as MAPPING_SUMMARY;
 } from './processes/mapping_summary.nf' params(params)
+include {
+    MARK_DUPLICATES;
+} from './../../src/picard/processes/mark_duplicates.nf' params(params)
+include {
+    MARK_DUPLICATES_SPARK;
+} from './../../src/gatk/processes/mark_duplicates_spark.nf' params(params)
 include {
     PUBLISH as PUBLISH_BAM;
     PUBLISH as PUBLISH_BAM_INDEX;
     PUBLISH as PUBLISH_MAPPING_SUMMARY;
+    PUBLISH as PUBLISH_MARK_DUPLICATES_SUMMARY;
 } from "../utils/workflows/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
@@ -65,16 +69,18 @@ workflow BWA_MAPPING_PE {
         bwa_inputs = get_bwa_index(params.tools.bwamaptools.bwa_fasta).combine(data)
 
         BWA_MEM_PE(bwa_inputs) |
-            INDEX_BAM |
+            MARK_DUPLICATES_SPARK |
+            map{it -> tuple(it[0],it[1],it[2])} |
             MAPPING_SUMMARY
 
         // publish output:
-        PUBLISH_BAM(INDEX_BAM.out, 'bwa.out.possorted', 'bam', 'bam', false)
-        PUBLISH_BAM_INDEX(INDEX_BAM.out.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
+        PUBLISH_BAM(MARK_DUPLICATES_SPARK.out, 'bwa.out.possorted', 'bam', 'bam', false)
+        PUBLISH_BAM_INDEX(MARK_DUPLICATES_SPARK.out.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
+        PUBLISH_MARK_DUPLICATES_SUMMARY(MARK_DUPLICATES_SPARK.out.map{it -> tuple(it[0], it[3])}, 'mark_duplicates', 'txt', 'bam', false)
         PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
 
     emit:
-        INDEX_BAM.out
+        MARK_DUPLICATES_SPARK.out.map{it -> tuple(it[0],it[1],it[2])}
 
 }
 
