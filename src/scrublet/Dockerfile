@@ -1,4 +1,4 @@
-FROM vibsinglecellnf/scanpy:0.5.2 AS compile-image
+FROM vibsinglecellnf/scanpy:0.6.1 AS compile-image
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN BUILDPKGS="build-essential apt-utils \
@@ -15,7 +15,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # install dependencies:
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir scrublet==0.2.1
+    pip install --no-cache-dir scrublet==0.2.3
 
 FROM python:3.7.4-slim AS build-image
 
