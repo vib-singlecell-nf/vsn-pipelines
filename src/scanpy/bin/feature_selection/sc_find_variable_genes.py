@@ -21,12 +21,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-x", "--method",
+    "-f", "--flavor",
     type=str,
     action="store",
-    dest="method",
-    default="mean_disp_plot",
-    help="Method to choose top variable features. Choose one of : mean_disp_plot"
+    dest="flavor",
+    default="flavor",
+    help="Flavor to choose top variable features. Choose one of : seurat"
 )
 
 parser.add_argument(
@@ -82,7 +82,7 @@ except IOError:
 # Feature selection
 #
 
-if args.method == "mean_disp_plot":
+if args.flavor == "seurat":
     # Identify highly variable genes.
     # Expects logarithmized data: https://icb-scanpy.readthedocs-hosted.com/en/stable/api/scanpy.api.pp.highly_variable_genes.html#scanpy.api.pp.highly_variable_genes
     sc.pp.highly_variable_genes(
@@ -90,7 +90,8 @@ if args.method == "mean_disp_plot":
         min_mean=args.min_mean,
         max_mean=np.inf if args.max_mean is None else args.max_mean,
         min_disp=args.min_disp,
-        max_disp=args.max_disp
+        max_disp=args.max_disp,
+        flavor=args.flavor
     )
     num_variable_genes = sum(adata.var["highly_variable"])
     if num_variable_genes == 0:
@@ -100,7 +101,7 @@ if args.method == "mean_disp_plot":
             "Low number of variables genes found. Make sure the following options (minMean, maxMean, minDisp, maxDisp) are in the right range of your data."
         )
 else:
-    raise Exception("VSN ERROR: Method does not exist.")
+    raise Exception("VSN ERROR: Flavor does not exist.")
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))
