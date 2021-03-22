@@ -22,7 +22,7 @@ process SC__SCANPY__NORMALIZATION {
 		"""
 		${binDir}/transform/sc_normalization.py \
 			${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
-			${(processParams.containsKey('countsPerCellAfter')) ? '--counts-per-cell-after ' + processParams.countsPerCellAfter : ''} \
+			${(processParams.containsKey('targetSum')) ? '--target-sum ' + processParams.targetSum : ''} \
 			$f \
 			"${sampleId}.SC__SCANPY__NORMALIZATION.${processParams.off}"
 		"""
