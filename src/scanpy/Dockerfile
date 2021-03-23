@@ -16,6 +16,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # install dependencies:
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir install wheel && \
     pip install --no-cache-dir -r /tmp/requirements.txt
 
 RUN pip install --no-cache-dir scanpy==1.7.1

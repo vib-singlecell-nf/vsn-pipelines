@@ -5,7 +5,7 @@ appdirs==1.4.4
 async-generator==1.10
 attrs==20.3.0
 backcall==0.2.0
-bbknn==1.4.0
+bbknn==1.4.1
 beautifulsoup4==4.9.3
 bioservices==1.7.11
 black==20.8b1
@@ -96,7 +96,6 @@ scipy==1.6.1
 seaborn==0.11.1
 sinfo==0.3.1
 six==1.15.0
-sklearn==0.24.1
 soupsieve==2.2
 statsmodels==0.12.2
 stdlib-list==0.8.0
