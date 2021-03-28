@@ -2,6 +2,8 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/popscle/bin/" : ""
 
+toolParams = params.sc.popscle
+
 process SC__POPSCLE__DSC_PILEUP {
 
     container params.sc.popscle.container
@@ -45,6 +47,8 @@ process SC__POPSCLE__PREFILTER_DSC_PILEUP {
             ${bam} \
             ${barcodes} \
             ${vcf} \
-            ${sampleId}_filtered_possorted_genome_bam.bam
+            ${sampleId}_filtered_possorted_genome_bam.bam \
+            ${toolParams?.barcode_tag ? toolParams.barcode_tag : ''}
         """
 }
+
