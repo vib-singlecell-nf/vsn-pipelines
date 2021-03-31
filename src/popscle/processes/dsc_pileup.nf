@@ -8,7 +8,7 @@ process SC__POPSCLE__DSC_PILEUP {
 
     container params.sc.popscle.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
-    label 'compute_resources__cpu'
+    label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
         tuple val(sampleId), path(f)
