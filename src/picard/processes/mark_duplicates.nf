@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.picard
 
-process MARK_DUPLICATES {
+process PICARD__MARK_DUPLICATES_AND_SORT {
 
     container toolParams.container
     label 'compute_resources__default','compute_resources__24hqueue'
@@ -29,7 +29,6 @@ process MARK_DUPLICATES {
             BARCODE_TAG=CB \
             COMPRESSION_LEVEL=0 \
             QUIET=true \
-            M=${sampleId}.picard_markdup_metrics.txt \
             ASSUME_SORT_ORDER=queryname \
         | java -jar /picard.jar SortSam \
             I=/dev/stdin \
