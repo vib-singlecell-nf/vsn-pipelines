@@ -16,8 +16,7 @@ process MARK_DUPLICATES_SPARK {
     output:
         tuple val(sampleId),
               path("${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam"),
-              path("${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam.bai"),
-              path("${sampleId}.picard_markdup_metrics.txt")
+              path("${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam.bai")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
@@ -26,7 +25,6 @@ process MARK_DUPLICATES_SPARK {
         gatk MarkDuplicatesSpark \
             -I ${bam} \
             -O ${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam \
-            -M ${sampleId}.picard_markdup_metrics.txt \
             -- \
             --spark-runner LOCAL \
             --spark-master local[${task.cpus}]
