@@ -12,16 +12,19 @@ include {
     BWAMAPTOOLS__MAPPING_SUMMARY as MAPPING_SUMMARY;
 } from './processes/mapping_summary.nf' params(params)
 include {
-    MARK_DUPLICATES;
+    PICARD__MARK_DUPLICATES_AND_SORT;
 } from './../../src/picard/processes/mark_duplicates.nf' params(params)
 include {
-    MARK_DUPLICATES_SPARK;
+    PICARD__ESTIMATE_LIBRARY_COMPLEXITY;
+} from './../../src/picard/processes/estimate_library_complexity.nf' params(params)
+include {
+    GATK__MARK_DUPLICATES_SPARK;
 } from './../../src/gatk/processes/mark_duplicates_spark.nf' params(params)
 include {
     PUBLISH as PUBLISH_BAM;
     PUBLISH as PUBLISH_BAM_INDEX;
     PUBLISH as PUBLISH_MAPPING_SUMMARY;
-    PUBLISH as PUBLISH_MARK_DUPLICATES_SUMMARY;
+    PUBLISH as PUBLISH_LIBRARY_METRICS;
 } from "../utils/workflows/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
@@ -60,6 +63,7 @@ workflow BWA_MAPPING_PE {
 
     take:
         data // a channel of [val(sampleId), path(fastq_PE1), path(fastq_PE2)]
+        mark_duplicates_method
 
     main:
         /* 
@@ -68,19 +72,28 @@ workflow BWA_MAPPING_PE {
         */
         bwa_inputs = get_bwa_index(params.tools.bwamaptools.bwa_fasta).combine(data)
 
-        BWA_MEM_PE(bwa_inputs) |
-            MARK_DUPLICATES_SPARK |
-            map{it -> tuple(it[0],it[1],it[2])} |
-            MAPPING_SUMMARY
+        BWA_MEM_PE(bwa_inputs)
+
+        switch(mark_duplicates_method) {
+            case 'MarkDuplicates':
+                dup_marked_bam = PICARD__MARK_DUPLICATES_AND_SORT(BWA_MEM_PE.out)
+                break
+            case 'MarkDuplicatesSpark':
+                dup_marked_bam = GATK__MARK_DUPLICATES_SPARK(BWA_MEM_PE.out)
+                break
+        }
+
+        MAPPING_SUMMARY(dup_marked_bam)
+        PICARD__ESTIMATE_LIBRARY_COMPLEXITY(BWA_MEM_PE.out)
 
         // publish output:
-        PUBLISH_BAM(MARK_DUPLICATES_SPARK.out, 'bwa.out.possorted', 'bam', 'bam', false)
-        PUBLISH_BAM_INDEX(MARK_DUPLICATES_SPARK.out.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
-        PUBLISH_MARK_DUPLICATES_SUMMARY(MARK_DUPLICATES_SPARK.out.map{it -> tuple(it[0], it[3])}, 'mark_duplicates', 'txt', 'bam', false)
+        PUBLISH_BAM(dup_marked_bam, 'bwa.out.possorted', 'bam', 'bam', false)
+        PUBLISH_BAM_INDEX(dup_marked_bam.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
+        PUBLISH_LIBRARY_METRICS(PICARD__ESTIMATE_LIBRARY_COMPLEXITY.out, 'library_complexity_metrics', 'txt', 'reports', false)
         PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
 
     emit:
-        MARK_DUPLICATES_SPARK.out.map{it -> tuple(it[0],it[1],it[2])}
+        dup_marked_bam
 
 }
 
