@@ -6,6 +6,9 @@ include { SCTK__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/proces
 include { SCTK__BARCODE_10X_SCATAC_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
 include { SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE; } from './../../src/singlecelltoolkit/processes/extract_and_correct_biorad_barcode.nf' params(params)
 include { TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
+include {
+    FASTP__ADAPTER_TRIMMING as FASTP__TRIM;
+} from './../../src/fastp/processes/adapter_trimming.nf' params(params)
 
 // workflow imports:
 include { BWA_MAPPING_PE; } from './../../src/bwamaptools/main.nf' params(params)
@@ -17,6 +20,7 @@ include {
     PUBLISH as PUBLISH_BR_BC_STATS;
     PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
     PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
+    PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
     PUBLISH as PUBLISH_FRAGMENTS;
     PUBLISH as PUBLISH_FRAGMENTS_INDEX;
 } from "../../src/utils/workflows/utils.nf" params(params)
@@ -96,20 +100,28 @@ workflow ATAC_PREPROCESS {
         //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
         // using singlecelltoolkit:
         fastq_dex_br = SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'fastq', false)
+        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'reports', false)
 
 
         // concatenate the read channels:
         fastq_dex = fastq_dex.concat(fastq_dex_br.map{ it -> tuple(it[0], it[1],it[2])})
 
         // run adapter trimming:
-        fastq_dex_trim = TRIMGALORE__TRIM(fastq_dex)
-        // publish fastq output:
-        PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'R1.trimming_report', 'txt', 'fastq', false)
-        PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, 'R2.trimming_report', 'txt', 'fastq', false)
+        switch(params.atac_preprocess_tools.adapter_trimming_method) {
+            case 'Trim_Galore':
+                fastq_dex_trim = TRIMGALORE__TRIM(fastq_dex);
+                PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'R1.trimming_report', 'txt', 'reports', false);
+                PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, 'R2.trimming_report', 'txt', 'reports', false);
+                break;
+            case 'fastp':
+                fastq_dex_trim = FASTP__TRIM(fastq_dex);
+                PUBLISH_FASTQS_TRIMLOG_FASTP(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'fastp.trimming_report', '.html', 'reports', false);
+                break;
+        }
 
         // map with bwa mem:
-        bam = BWA_MAPPING_PE(fastq_dex_trim.map { it -> tuple(it[0..2]) })
+        bam = BWA_MAPPING_PE(fastq_dex_trim.map { it -> tuple(it[0..2]) },
+                             params.atac_preprocess_tools.mark_duplicates_method)
 
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)
