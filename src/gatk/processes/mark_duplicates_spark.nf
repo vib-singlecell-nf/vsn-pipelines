@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.gatk
 
-process MARK_DUPLICATES_SPARK {
+process GATK__MARK_DUPLICATES_SPARK {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
