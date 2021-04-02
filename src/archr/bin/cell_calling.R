@@ -41,13 +41,6 @@ parser <- add_option(
 )
 parser <- add_option(
   parser,
-  c("--density"),
-  action = "store",
-  default = "on",
-  help = "Whether to color plot by density (on or off)  [%default]"
-)
-parser <- add_option(
-  parser,
   c("-g", "--genome"),
   action = "store",
   default = "hg38",
@@ -174,32 +167,7 @@ plot_TSS_nFrags = function(dat, filterTSS, filterFrags, ggtitle) {
     return(p2)
 }
 
-plot_TSS_nFrags_no_density = function(dat, filterTSS, filterFrags, ggtitle) {
-    p2 = ggplot(data=dat, aes(x=log10(nFrags), y=TSSEnrichment)) +
-        geom_point(size=1) +
-        labs(color="Density", title=ggtitle) +
-        scale_color_viridis(option="cividis") +
-        scale_x_continuous(expand=expansion(mult=c(0.02,0.02))) +
-        scale_y_continuous(expand=expansion(mult=c(0.02,0.02))) +
-        xlab("log 10 (Unique fragments)") +
-        ylab("TSS Enrichment") +
-        geom_hline(yintercept=filterTSS, lty = "dashed", size = 0.25) +
-        geom_vline(xintercept=log10(filterFrags), lty = "dashed", size = 0.25) +
-        theme_minimal() +
-        theme(panel.border=element_rect(color="black", fill=NA),
-              panel.grid.major=element_blank(),
-              panel.grid.minor=element_blank(),
-              aspect.ratio=1
-              )
-    return(p2)
-}
-
-
-if(args$density=='on') {
-    p2 = plot_TSS_nFrags(dat, args$filter_tss, args$filter_frags, ggtitle)
-} else {
-    p2 = plot_TSS_nFrags_no_density(dat, args$filter_tss, args$filter_frags, ggtitle)
-}
+p2 = plot_TSS_nFrags(dat, args$filter_tss, args$filter_frags, ggtitle)
 
 pdf(paste0(args$output_directory,"/",sample_id,"-TSSEnrichment_vs_nFrags.pdf"),width=8,height=8)
 p2
@@ -208,6 +176,4 @@ dev.off()
 write.table(dat[dat$Keep==1,],
             paste0(args$output_directory,"/",sample_id,"-qc_stats.txt"), sep='\t', quote=FALSE)
 
-write.table(dat,
-            gzfile(paste0(args$output_directory,"/",sample_id,"-qc_stats_unfiltered.txt.gz")), sep='\t', quote=FALSE)
 

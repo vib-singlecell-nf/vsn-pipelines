@@ -7,7 +7,7 @@ toolParams = params.tools.archr
 process SC__ARCHR__CELL_CALLING {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/data/archr/", mode: params.utils.publish.mode
+    publishDir "${params.global.outdir}/archr/", mode: 'symlink'
     label 'compute_resources__default'
 
     input:
@@ -17,8 +17,7 @@ process SC__ARCHR__CELL_CALLING {
     output:
         tuple val(sampleId),
               path("${sampleId}-TSSEnrichment_vs_nFrags.pdf"),
-              path("${sampleId}-qc_stats.txt"),
-              path("${sampleId}-qc_stats_unfiltered.txt.gz")
+              path("${sampleId}-qc_stats.txt")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.cell_calling)
@@ -29,7 +28,6 @@ process SC__ARCHR__CELL_CALLING {
         --output_dir . \
         --filter_frags ${processParams.filter_frags} \
         --filter_tss ${processParams.filter_tss} \
-        --density ${processParams.density} \
         --seed ${params.global.seed} \
         --threads ${task.cpus} \
         --genome ${toolParams.genome}
