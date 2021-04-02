@@ -29,7 +29,7 @@ RUN mkdir -p /opt/seq && \
     tar xzf seq-linux-x86_64.tar.gz --strip-components 1 -C /opt/seq && \
     rm seq-linux-x86_64.tar.gz
 ENV PATH="/opt/seq/bin:${PATH}"
-# ENV OMP_NUM_THREADS=1
+ENV OMP_NUM_THREADS=4
 ENV SEQ_PYTHON=/usr/lib/x86_64-linux-gnu/libpython3.8.so.1
 
 # install single_cell_toolkit
