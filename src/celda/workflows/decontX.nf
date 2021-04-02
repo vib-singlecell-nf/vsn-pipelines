@@ -59,7 +59,8 @@ workflow DECONTX_FILTER {
         decontx = DECONTX( data )
 
         SC__FILE_CONVERTER_FROM_SCE(
-            decontx.main,
+            // Add no group
+            decontx.main.map { it -> tuple(it[0], it[1], "NULL") },
             "h5ad",
             "counts"
         )
@@ -85,7 +86,7 @@ workflow DECONTX_CORRECT {
         decontx = DECONTX( data )
 
         SC__FILE_CONVERTER_FROM_SCE(
-            decontx.main,
+            decontx.main.map { it -> tuple(it[0], it[1], "NULL") },
             "h5ad",
             "decontXcounts"
         )

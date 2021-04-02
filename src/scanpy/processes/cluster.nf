@@ -14,6 +14,7 @@ include {
 class SC__SCANPY__CLUSTERING_PARAMS {
 
 	Script env = null;
+	Map params = null;
 	LinkedHashMap configParams = null;
 	// Parameters definiton
 	String iff = null;
@@ -28,12 +29,17 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 		this.env = env
 	}
 
+	void setParams(params) {
+		this.params = params
+	}
+
 	void setConfigProcessParams(params) {
 		this.configProcessParams = params
 	}
 
 	void displayMessage(tag) {
-		Channel.from('').view {
+		if(!this.params?.quiet) {
+        	Channel.from('').view {
 			"""
 ------------------------------------------------------------------
 \u001B[32m Parameter exploration of SC__SCANPY__CLUSTERING step... \u001B[0m
@@ -45,7 +51,8 @@ class SC__SCANPY__CLUSTERING_PARAMS {
 \u001B[32m   - values: \u001B[0m \u001B[33m   ${resolutions} \u001B[0m
 ------------------------------------------------------------------
             """
-        }
+        	}
+		}
 	}
 
 	String getMethodAsArgument(method) {
@@ -180,6 +187,7 @@ process SC__SCANPY__PARAM_EXPLORE_CLUSTERING {
 		processParams = sampleParams.local
 		def _processParams = new SC__SCANPY__CLUSTERING_PARAMS()
 		_processParams.setEnv(this)
+		_processParams.setParams(params)
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}/cluster/sc_clustering.py \

@@ -9,20 +9,28 @@ process SC__HARMONY__HARMONY_MATRIX {
     label 'compute_resources__default'
 
     input:
-        tuple val(sampleId), path(f)
+        tuple \
+            val(sampleId), \
+            path(f)
 
     output:
-        tuple val(sampleId), path("${sampleId}.SC__HARMONY__HARMONY_MATRIX.tsv")
+        tuple \
+            val(sampleId), \
+            path("${sampleId}.SC__HARMONY__HARMONY_MATRIX.tsv")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.sc.harmony)
-		processParams = sampleParams.local
-        varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
+		def processParams = sampleParams.local
+        // Arguments
+        def varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
         """
         ${binDir}run_harmony.R \
+            ${f} \
             --seed ${params.global.seed} \
-            --input-file ${f} \
             ${varsUseAsArguments} \
+            ${processParams?.theta ? "--theta "+ processParams.theta : "" } \
+            ${processParams?.lambda ? "--lambda "+ processParams.lambda : "" } \
+            ${processParams?.epsilonHarmony ? "--epsilon-harmony "+ processParams.epsilonHarmony : "" } \
             --output-prefix "${sampleId}.SC__HARMONY__HARMONY_MATRIX"
         """
 

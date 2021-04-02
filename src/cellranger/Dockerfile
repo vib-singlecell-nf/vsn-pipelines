@@ -1,6 +1,6 @@
 FROM debian:buster-slim
 
-ENV CELLRANGER_VER 3.1.0
+ENV CELLRANGER_VER 5.0.1
 
 # Pre-downloaded files:
 # cellranger: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest

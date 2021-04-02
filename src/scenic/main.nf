@@ -168,13 +168,15 @@ workflow scenic_append {
                 params.sc.scenic.existingScenicLoom,
                 params.sc.scenic.sampleSuffixWithExtension
             )
-            Channel.from('').view {
+            if(!params.containsKey('quiet')) {
+                Channel.from('').view {
             """
 ---------------------------------------------------------------------------
 \u001B[32m Existing SCENIC loom detected \u001B[0m
 \u001B[32m SCENIC won't run and this loom will be used as input to APPEND_SCENIC_LOOM \u001B[0m
 ---------------------------------------------------------------------------
             """
+                }
             }
         } else {
             scenicLoom = scenic( filteredLoom ).out

@@ -13,12 +13,17 @@ include {
 class SC__SCRUBLET__DOUBLET_DETECTION_PARAMS {
 
 	Script env = null;
+	Map params = null;
 	LinkedHashMap configParams = null;
 	// Parameters definiton
 	String off = null;
 
 	void setEnv(env) {
 		this.env = env
+	}
+
+	void setParams(params) {
+		this.params = params
 	}
 
 	void setConfigProcessParams(params) {
@@ -67,20 +72,22 @@ process SC__SCRUBLET__DOUBLET_DETECTION {
 		processParams = sampleParams.local
 		def _processParams = new SC__SCRUBLET__DOUBLET_DETECTION_PARAMS()
 		_processParams.setEnv(this)
+		_processParams.setParams(params)
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}/sc_doublet_detection.py \
-			${(processParams.containsKey('useVariableFeatures')) ? '--use-variable-features ' + processParams.useVariableFeatures : ''} \
-            ${(processParams.containsKey('syntheticDoubletUmiSubsampling')) ? '--synthetic-doublet-umi-subsampling ' + processParams.syntheticDoubletUmiSubsampling : ''} \
-            ${(processParams.containsKey('minCounts')) ? '--min-counts ' + processParams.minCounts : ''} \
-            ${(processParams.containsKey('minCells')) ? '--min-cells ' + processParams.minCells : ''} \
-            ${(processParams.containsKey('minGeneVariabilityPctl')) ? '--min-gene-variability-pctl ' + processParams.minGeneVariabilityPctl : ''} \
-            ${(processParams.containsKey('logTransform')) ? '--log-transform ' + processParams.logTransform : ''} \
-            ${(processParams.containsKey('meanCenter')) ? '--mean-center ' + processParams.meanCenter : ''} \
-            ${(processParams.containsKey('normalizeVariance')) ? '--normalize-variance ' + processParams.normalizeVariance : ''} \
+			${processParams?.useVariableFeatures ? '--use-variable-features ' + processParams.useVariableFeatures : ''} \
+            ${processParams?.syntheticDoubletUmiSubsampling ? '--synthetic-doublet-umi-subsampling ' + processParams.syntheticDoubletUmiSubsampling : ''} \
+            ${processParams?.minCounts ? '--min-counts ' + processParams.minCounts : ''} \
+            ${processParams?.minCells ? '--min-cells ' + processParams.minCells : ''} \
+            ${processParams?.minGeneVariabilityPctl ? '--min-gene-variability-pctl ' + processParams.minGeneVariabilityPctl : ''} \
+            ${processParams?.logTransform ? '--log-transform ' + processParams.logTransform : ''} \
+            ${processParams?.meanCenter ? '--mean-center ' + processParams.meanCenter : ''} \
+            ${processParams?.normalizeVariance ? '--normalize-variance ' + processParams.normalizeVariance : ''} \
             ${_processParams.getNPrinCompsAsArgument(nPrinComps)} \
-            ${(processParams.containsKey('technology')) ? '--technology ' + processParams.technology : ''} \
-			${(processParams.containsKey('useVariableFeatures')) ? '--h5ad-with-variable-features-info ' + adataWithHvgInfo : ''} \
+            ${processParams?.technology ? '--technology ' + processParams.technology : ''} \
+			${processParams?.useVariableFeatures ? '--h5ad-with-variable-features-info ' + adataWithHvgInfo : ''} \
+			${processParams?.threshold ? '--threshold ' + processParams.threshold : ''} \
 			--output-prefix "${sampleId}.SC__SCRUBLET__DOUBLET_DETECTION" \
 			$adataRaw
 		"""

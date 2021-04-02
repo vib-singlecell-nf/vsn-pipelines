@@ -16,6 +16,7 @@ include {
 class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 
 	Script env = null;
+	Map params = null;
 	LinkedHashMap configParams = null;
 	// Parameters definiton
 	String iff = null;
@@ -28,22 +29,28 @@ class SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS {
 		this.env = env
 	}
 
+	void setParams(params) {
+		this.params = params
+	}
+
 	void setConfigProcessParams(params) {
 		this.configProcessParams = params
 	}
 
 	void displayMessage(tag = null) {
-		Channel.from('').view {
-			"""
-------------------------------------------------------------------
-\u001B[32m Parameter exploration of SC__SCANPY__NEIGHBORHOOD_GRAPH step... \u001B[0m
-\u001B[32m Tag: ${tag} \u001B[0m
-\u001B[32m Parameters tested: \u001B[0m
-\u001B[32m - nPcs: \u001B[0m \u001B[33m     ${nPcss instanceof List} \u001B[0m
-\u001B[32m   - values: \u001B[0m \u001B[33m   ${nPcss} \u001B[0m
-------------------------------------------------------------------
-            """
-        }
+		if(!this.params?.quiet) {
+			Channel.from('').view {
+				"""
+	------------------------------------------------------------------
+	\u001B[32m Parameter exploration of SC__SCANPY__NEIGHBORHOOD_GRAPH step... \u001B[0m
+	\u001B[32m Tag: ${tag} \u001B[0m
+	\u001B[32m Parameters tested: \u001B[0m
+	\u001B[32m - nPcs: \u001B[0m \u001B[33m     ${nPcss instanceof List} \u001B[0m
+	\u001B[32m   - values: \u001B[0m \u001B[33m   ${nPcss} \u001B[0m
+	------------------------------------------------------------------
+				"""
+			}
+		}
 	}
 
 	String getNPcsAsArgument(nPcs) {
@@ -109,6 +116,7 @@ process SC__SCANPY__NEIGHBORHOOD_GRAPH {
 		// Cannot call constructor with parameter if nPcs is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__NEIGHBORHOOD_GRAPH_PARAMS()
 		_processParams.setEnv(this)
+		_processParams.setParams(params)
 		_processParams.setConfigParams(processParams)
         """
         ${binDir}/nn/sc_neighborhood_graph.py \

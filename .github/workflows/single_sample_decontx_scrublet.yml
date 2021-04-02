@@ -22,7 +22,6 @@ jobs:
         export NXF_VER='20.10.0'
         wget -qO- get.nextflow.io | bash
         sudo mv nextflow /usr/local/bin/
-        echo 0 | sudo tee /proc/sys/fs/protected_hardlinks
     - name: Get sample data
       run: |
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz

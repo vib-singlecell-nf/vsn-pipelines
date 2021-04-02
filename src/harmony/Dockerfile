@@ -1,20 +1,29 @@
-FROM dweemx/sctx-seurat:3.1.2
+FROM continuumio/miniconda3
 
-RUN apt-get -y update && \
-    apt-get install -y libcurl4-openssl-dev libxml2-dev zlib1g-dev libhdf5-dev && \
-    apt-get install -y libssl-dev && \
-    # png.h: No such file or directory
-    apt-get install -y libpng-dev && \ 
-    R -e "install.packages('optparse')" && \
-    R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')" && \
-    R -e "devtools::install_github('immunogenomics/harmony')" && \
-    # Need to run ps
-    apt-get -y install procps && \
-    apt-get -y install libxml2 && \
-    # Clean
-    rm -rf /tmp/* && \
-    apt-get autoremove -y && \
-    apt-get autoclean -y && \
-    rm -rf /var/cache/apt/* && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
+SHELL ["/bin/bash", "--login", "-c"]
+
+ADD environment.yml /tmp/environment.yml
+RUN conda env create -f /tmp/environment.yml
+
+RUN head -1 /tmp/environment.yml | cut -d' ' -f2 > /tmp/version \
+   && ln -s "/opt/conda/envs/$(cat /tmp/version)" /opt/conda/venv
+
+# Initialize conda in bash config files:
+RUN conda init bash
+
+# Activate the environment, and make sure it's activated:
+RUN echo "conda activate $(cat /tmp/version)" >> ~/.bashrc && \
+    conda activate $(cat /tmp/version) && \
+    R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')"
+
+RUN apt-get -y update \
+   # Need to run ps
+   && apt-get -y install procps \
+   && apt-get -y install libxml2 \
+   # Clean
+   && conda clean -afy \
+   && rm -rf /var/cache/apt/* \
+   && rm -rf /var/lib/apt/lists/*
+
+RUN echo "source activate $(cat /tmp/version)" >> ~/.bashrc
+ENV PATH="/opt/conda/venv/bin:${PATH}"

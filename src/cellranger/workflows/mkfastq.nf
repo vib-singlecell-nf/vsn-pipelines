@@ -6,6 +6,9 @@ nextflow.enable.dsl=2
 include {
     SC__CELLRANGER__MKFASTQ;
 } from './../processes/mkfastq' params(params)
+include {
+    SC__CELLRANGER__PREFLIGHT;
+} from './../processes/preflight' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -20,6 +23,7 @@ workflow MKFASTQ {
         mkfastq_csv
         runFolder
     main:
+        SC__CELLRANGER__PREFLIGHT()
         SC__CELLRANGER__MKFASTQ(mkfastq_csv, runFolder)
         .flatMap()
         .map { fastq ->
