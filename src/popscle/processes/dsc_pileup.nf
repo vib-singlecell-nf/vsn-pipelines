@@ -21,6 +21,7 @@ process SC__POPSCLE__DSC_PILEUP {
         """
         popscle dsc-pileup \
             --sam ${f} \
+            ${toolParams?.barcode_tag ? '--tag-group ' +  toolParams.barcode_tag : ''} \
             --vcf ${vcf} \
             --out ${sampleId}_dsc-pileup
         """
