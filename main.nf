@@ -1263,3 +1263,34 @@ workflow filter_and_annotate_and_clean {
     )
 
 }
+
+workflow single_sample_seurat {
+    include {
+        single_sample as SINGLE_SAMPLE;
+    } from './src/seurat/workflows/single_sample' params(params)
+
+    include {
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SCOPE;
+        PUBLISH as PUBLISH_SINGLE_SAMPLE_SEURAT;
+    } from "./src/utils/workflows/utils" params(params)
+    
+    data = getDataChannel | SC__FILE_CONVERTER
+    SINGLE_SAMPLE( data )
+
+    if(params.utils?.publish) {
+        // PUBLISH_SINGLE_SAMPLE_SCOPE(
+        //     SINGLE_SAMPLE.out.scopeloom,
+        //     "SINGLE_SAMPLE_SEURAT",
+        //     "loom",
+        //     null,
+        //     false
+        // )
+        // PUBLISH_SINGLE_SAMPLE_SCANPY(
+        //     SINGLE_SAMPLE.out.seuratrds,
+        //     "SINGLE_SAMPLE_SEURAT",
+        //     "seurat_rds",
+        //     null,
+        //     false
+        // )
+    }  
+}
