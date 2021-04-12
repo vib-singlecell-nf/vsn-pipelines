@@ -1,34 +1,31 @@
 #!/usr/bin/env Rscript
 
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Normalize and scale data using SCT")
-
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--only-var",
-    type = "logical",
-    dest = "only_var",
-    action = "store",
-    default = TRUE,
-    help = "Only scale variable features."
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        help = "Output filename."
+    ),
+    make_option(
+        "--only-var",
+        type = "logical",
+        dest = "only_var",
+        default = TRUE,
+        help = "Only scale variable features."
+    )
 )
 
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({

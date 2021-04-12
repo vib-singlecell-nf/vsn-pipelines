@@ -1,33 +1,30 @@
 #!/usr/bin/env Rscript
 
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Compute a (shared) nearest neighbor graph")
-
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--n-pcs",
-    type = "integer",
-    dest = "n_pcs",
-    action = "store",
-    help = "Use this many PCs."
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        help = "Output filename."
+    ),
+    make_option(
+        "--n-pcs",
+        type = "integer",
+        dest = "n_pcs",
+        help = "Use this many PCs."
+    )
 )
 
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({

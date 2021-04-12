@@ -1,49 +1,49 @@
 #!/usr/bin/env Rscript
 
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 suppressMessages(library("SCopeLoomR", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Convert Seurat RDS file to SCope compatible loom file")
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        action = "store",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        action = "store",
+        help = "Output filename."
+    ),
+    make_option(
+        "--sampleId",
+        type = "character",
+        dest = "sample_id",
+        action = "store",
+        help = "Sample name."
+    ),
+    make_option(
+        "--assay",
+        type = "character",
+        dest = "assay",
+        action = "store",
+        default = "RNA",
+        help = "Assay to use"
+    ),
+    make_option(
+        "--clustering-prefix",
+        dest = "clustering_prefix",
+        action = "store",
+        default = "RNA_snn_res.",
+        help = "Prefix for metadata columns with clustering results."
+    )
+)
 
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--sampleId",
-    type = "character",
-    dest = "sample_id",
-    action = "store",
-    help = "Sample name."
-)
-parser$add_argument(
-    "--assay",
-    type = "character",
-    dest = "assay",
-    action = "store",
-    default = "RNA",
-    help = "Assay to use"
-)
-parser$add_argument(
-    "--clustering-prefix",
-    dest = "clustering_prefix",
-    action = "store",
-    default = "RNA_snn_res.",
-    help = "Prefix for metadata columns with clustering results."
-)
-
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({

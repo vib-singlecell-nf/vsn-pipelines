@@ -1,88 +1,77 @@
 #!/usr/bin/env Rscript
-
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Find high variable features")
-
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--type",
-    type = "character",
-    dest = "type",
-    action = "store",
-    help = "What to filter. Choose one of : feature, cell"
-)
-parser$add_argument(
-    "--min-number-cells",
-    type = "integer",
-    dest = "min_number_cells",
-    action = "store",
-    help = "[FEATURE] Minimal number of cells the feature should be expressed in (counts > 0)."
-)
-parser$add_argument(
-    "--min-n-counts",
-    type = "integer",
-    dest = "min_n_counts",
-    action = "store",
-    default = -1,
-    help = "[CELL] Minimal number of counts for a cell to be kept."
-)
-parser$add_argument(
-    "--max-n-counts",
-    type = "integer",
-    dest = "max_n_counts",
-    action = "store",
-    default = -1,
-    help = "[CELL] Maximal number of counts for a cell to be kept."
-)
-parser$add_argument(
-    "--min-n-features",
-    type = "integer",
-    dest = "min_n_features",
-    action = "store",
-    default = -1,
-    help = "[CELL] Minimal number of features for a cell to be kept."
-)
-parser$add_argument(
-    "--max-n-features",
-    type = "integer",
-    dest = "max_n_features",
-    action = "store",
-    default = -1,
-    help = "[CELL] Maximal number of features for a cell to be kept."
-)
-parser$add_argument(
-    "--max-percent-mito",
-    type = "double",
-    dest = "max_percent_mito",
-    action = "store",
-    default = -1,
-    help = "[CELL] Maximal percent mitochondrial genes a cell can have."
-)
-parser$add_argument(
-    "--mito-prefix",
-    type = "character",
-    dest = "mito_prefix",
-    action = "store",
-    default = "MT-",
-    help = "[CELL] Prefix to deterimine of a feature is mitochondrial or not (case sensitive!)"
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        help = "Output filename."
+    ),
+    make_option(
+        "--type",
+        type = "character",
+        dest = "type",
+        help = "What to filter, Choose one of: cell, feature"
+    ),
+    make_option(
+        "--min-number-cells",
+        type = "integer",
+        dest = "min_number_cells",
+        help = "[FEATURE] Minimal number of cells the feature should be expressed in (counts > 0)."
+    ),
+    make_option(
+        "--min-n-counts",
+        type = "integer",
+        dest = "min_n_counts",
+        default = -1,
+        help = "[CELL] Minimal number of counts for a cell to be kept."
+    ),
+    make_option(
+        "--max-n-counts",
+        type = "integer",
+        dest = "max_n_counts",
+        default = -1,
+        help = "[CELL] Maximal number of counts for a cell to be kept."
+    ),
+    make_option(
+        "--min-n-features",
+        type = "integer",
+        dest = "min_n_features",
+        default = -1,
+        help = "[CELL] Minimal number of features for a cell to be kept."
+    ),
+    make_option(
+        "--max-n-features",
+        type = "integer",
+        dest = "max_n_features",
+        default = -1,
+        help = "[CELL] Maximal number of features for a cell to be kept."
+    ),
+    make_option(
+        "--max-percent-mito",
+        type = "double",
+        dest = "max_percent_mito",
+        default = -1,
+        help = "[CELL] Maximal percent mitochondrial genes a cell can have."
+    ),
+    make_option(
+        "--mito-prefix",
+        type = "character",
+        dest = "mito_prefix",
+        default = "MT-",
+        help = "[CELL] Prefix to deterimine of a feature is mitochondrial or not (case sensitive!)"
+    )
 )
 
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({
@@ -117,7 +106,9 @@ filterCells <- function(
     if (max_n_features < 0) {
         max_n_features <- Inf
     }
-    if (max_percent_mito < 1) {
+    if (max_percent_mito < 0) {
+        max_percent_mito <- Inf
+    } else if (max_percent_mito < 1) {
         max_percent_mito <- max_percent_mito * 100
     }
 

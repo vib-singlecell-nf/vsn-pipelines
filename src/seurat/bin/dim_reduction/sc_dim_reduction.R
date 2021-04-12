@@ -1,73 +1,65 @@
 #!/usr/bin/env Rscript
 
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Find high variable features")
-
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--method",
-    type = "character",
-    dest = "method",
-    action = "store",
-    help = "Reduce the dimensionality of the data. Choose one of : PCA, UMAP, tSNE"
-)
-parser$add_argument(
-    "--seed",
-    type = "integer",
-    dest = "seed",
-    action = "store",
-    default = 0,
-    help = "Use this integer seed for reproducibility."
-)
-parser$add_argument(
-    "--n-comps",
-    type = "integer",
-    dest = "n_comps",
-    action = "store",
-    default = 50,
-    help = "[PCA] Number of principal components to compute."
-)
-parser$add_argument(
-    "--n-pcs",
-    type = "integer",
-    dest = "n_pcs",
-    action = "store",
-    default = 30,
-    help = "[UMAP, tSNE] Use this many PCs."
-)
-parser$add_argument(
-    "--n-neighbors",
-    type = "integer",
-    dest = "n_neighbors",
-    action = "store",
-    default = 30,
-    help = "[UMAP] Use this many neighbors."
-)
-parser$add_argument(
-    "--algorithm",
-    type = "character",
-    dest = "algorithm",
-    action = "store",
-    default = NULL,
-    help = "[UMAP, tSNE] Algorithm to use"
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        help = "Output filename."
+    ),
+    make_option(
+        "--method",
+        type = "character",
+        dest = "method",
+        help = "Reduce the dimensionality of the data. Choose one of : PCA, UMAP, tSNE"
+    ),
+    make_option(
+        "--seed",
+        type = "integer",
+        dest = "seed",
+        default = 0,
+        help = "Use this integer seed for reproducibility."
+    ),
+    make_option(
+        "--n-comps",
+        type = "integer",
+        dest = "n_comps",
+        default = 50,
+        help = "[PCA] Number of principal components to compute."
+    ),
+    make_option(
+        "--n-pcs",
+        type = "integer",
+        dest = "n_pcs",
+        default = 30,
+        help = "[UMAP, tSNE] Use this many PCs."
+    ),
+    make_option(
+        "--n-neighbors",
+        type = "integer",
+        dest = "n_neighbors",
+        default = 30,
+        help = "[UMAP] Use this many neighbors."
+    ),
+    make_option(
+        "--algorithm",
+        type = "character",
+        dest = "algorithm",
+        default = NULL,
+        help = "[UMAP, tSNE] Algorithm to use"
+    )
 )
 
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({

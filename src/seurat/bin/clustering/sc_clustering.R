@@ -1,48 +1,43 @@
 #!/usr/bin/env Rscript
 
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Find high variable features")
-
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--algorithm",
-    type = "character",
-    dest = "algorithm",
-    action = "store",
-    help = "Cluster cells. Choose one of Louvain, Louvain_MLR, SLM, Leiden"
-)
-parser$add_argument(
-    "--resolution",
-    type = "double",
-    dest = "resolution",
-    action = "store",
-    default = 0.8
-)
-parser$add_argument(
-    "--seed",
-    type = "integer",
-    dest = "seed",
-    action = "store",
-    default = 0,
-    help = "Use this integer seed for reproducibility."
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        help = "Output filename."
+    ),
+    make_option(
+        "--algorithm",
+        type = "character",
+        dest = "algorithm",
+        help = "Cluster cells. Choose one of: Louvain, Louvain_MLR, SLM, Leiden"
+    ),
+    make_option(
+        "--resolution",
+        type = "double",
+        dest = "resolution",
+        default = 0.8
+    ),
+    make_option(
+        "--seed",
+        type = "integer",
+        dest = "seed",
+        default = 0,
+        help = "Use this numeric seed for reproducibility."
+    )
 )
 
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({

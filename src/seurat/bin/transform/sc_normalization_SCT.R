@@ -1,66 +1,59 @@
 #!/usr/bin/env Rscript
 
-library("argparse")
+library("optparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Normalize and scale data using SCT")
-
-parser$add_argument(
-    "--input",
-    type = "character",
-    dest = "input",
-    action = "store",
-    help = "A Rds file containing a Seurat object."
-)
-parser$add_argument(
-    "--output",
-    type = "character",
-    dest = "output",
-    action = "store",
-    help = "Output filename."
-)
-parser$add_argument(
-    "--new-assay",
-    type = "character",
-    dest = "new_assay",
-    action = "store",
-    default = "SCT",
-    help = "Name for the assay created by SCT."
-)
-parser$add_argument(
-    "--n-cells",
-    type = "integer",
-    dest = "n_cells",
-    action = "store",
-    default = 5000,
-    help = "Number of subsampling cells used to build NB regression."
-)
-parser$add_argument(
-    "--only-var",
-    type = "logical",
-    dest = "only_var",
-    action = "store",
-    default = TRUE,
-    help = "Only output variable features in scaled data. This can drastically reduce object size."
-)
-parser$add_argument(
-    "--seed",
-    type = "integer",
-    dest = "seed",
-    action = "store",
-    default = 0,
-    help = "Use this integer seed for reproducibility."
-)
-parser$add_argument(
-    "--n-variable-features",
-    type = "character",
-    dest = "n_variable_features",
-    action = "store",
-    default = 3000,
-    help = "Use this many features as variable features after ranking by residual variance"
+option_list <- list(
+    make_option(
+        "--input",
+        type = "character",
+        dest = "input",
+        help = "A Rds file containing a Seurat object."
+    ),
+    make_option(
+        "--output",
+        type = "character",
+        dest = "output",
+        help = "Output filename."
+    ),
+    make_option(
+        "--new-assay",
+        type = "character",
+        dest = "new_assay",
+        default = "SCT",
+        help = "Name for the assay created by SCT."
+    ),
+    make_option(
+        "--n-cells",
+        type = "integer",
+        dest = "n_cells",
+        default = 5000,
+        help = "Number of subsampling cells used to build NB regression."
+    ),
+    make_option(
+        "--only-var",
+        type = "logical",
+        dest = "only_var",
+        default = TRUE,
+        help = "Only output variable features in scaled data. This can drastically reduce object size."
+    ),
+    make_option(
+        "--seed",
+        type = "integer",
+        dest = "seed",
+        default = 0,
+        help = "Use this integer seed for reproducibility."
+    ),
+    make_option(
+        "--n-variable-features",
+        type = "character",
+        dest = "n_variable_features",
+        default = 3000,
+        help = "Use this many features as variable features after ranking by residual variance"
+    )
 )
 
-args <- parser$parse_args()
+args <- parse_args(OptionParser(option_list = option_list))
 print(args)
 
 seuratObj <- tryCatch({

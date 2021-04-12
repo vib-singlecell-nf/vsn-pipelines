@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get -y install procps && \
     apt-get -y install libxml2 libxml2-dev && \
     # R packages
-    R -e "install.packages('argparse')" && \
+    R -e "install.packages('optparse')" && \
     R -e "install.packages('devtools')" && \
     R -e "install.packages('remotes')" && \
     R -e "remotes::install_version('Seurat', '4.0.1')" && \
