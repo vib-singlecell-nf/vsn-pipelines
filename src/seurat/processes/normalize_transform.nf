@@ -21,9 +21,10 @@ process SC__SEURAT__NORMALIZATION {
         processParams = sampleParams.local
         """
         ${binDir}/transform/sc_normalization.R \
+            --input $f \
+            --output ${sampleId}.SC__SEURAT__NORMALIZATION.${processParams.off} \
             ${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
-            ${(processParams.containsKey('countsPerCellAfter')) ? '--counts-per-cell-after ' + processParams.countsPerCellAfter : ''} \
-            $f \
+            ${(processParams.containsKey('scaleFactor')) ? '--scale-factor ' + processParams.scaleFactor : ''}
         """
 }
 
@@ -71,8 +72,8 @@ process SC__SEURAT__SCALING {
         processParams = sampleParams.local
         """
         ${binDir}/transform/sc_scaling.R \
-            ${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
-            ${(processParams.containsKey('countsPerCellAfter')) ? '--counts-per-cell-after ' + processParams.countsPerCellAfter : ''} \
-            $f \
+            --input $f \
+            --output ${sampleId}.SC__SEURAT__SCALING.${processParams.off} \
+            ${(processParams.containsKey('onlyVar')) ? '--only-var ' + processParams.onlyVar : ''}
         """
 }

@@ -27,15 +27,12 @@ workflow NORMALIZE {
         PUBLISH_SEURAT_RDS_NORMALIZED(
             SC__SEURAT__NORMALIZATION.out,
             'SEURAT.normalized_output',
-            'rds',
+            'Rds',
             'seurat',
             false
         )
-
-        SC__SEURAT__SCALING( SC__SEURAT__NORMALIZATION.out )
-
     emit:
-        SC__SEURAT__SCALING.out
+        SC__SEURAT__NORMALIZATION.out
 }
 
 workflow NORMALIZE_SCALE_SCT {
@@ -48,7 +45,7 @@ workflow NORMALIZE_SCALE_SCT {
         PUBLISH_SEURAT_RDS_NORMALIZED(
             SC__SEURAT__NORMALIZATION_SCT.out,
             'SEURAT.normalized_sct_output',
-            'rds',
+            'Rds',
             'seurat',
             false
         )

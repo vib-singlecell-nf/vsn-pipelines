@@ -13,7 +13,7 @@ include {
 } from '../processes/feature_selection.nf' params(params)
 include {
     SC__SEURAT__SCALING;
-} from '../processes/scaling.nf' params(params)
+} from '../processes/normalize_transform.nf' params(params)
 
 workflow HVG_SELECTION {
 
@@ -28,7 +28,7 @@ workflow HVG_SELECTION {
         PUBLISH_SEURAT_RDS_SCALED(
             scaled,
             'SEURAT.hvg_scaled_output',
-            'rds',
+            'Rds',
             'seurat',
             false
         )

@@ -3,7 +3,7 @@
 library("argparse")
 suppressMessages(library("Seurat", quietly = TRUE))
 
-parser <- ArgumentParser(description = "Find high variable features")
+parser <- ArgumentParser(description = "Normalize and scale data using SCT")
 
 parser$add_argument(
     "--input",
@@ -24,17 +24,17 @@ parser$add_argument(
     type = "character",
     dest = "method",
     action = "store",
-    help = "Method to choose top variable features. Choose on off: vst, mvp (mean.var.plot), disp (dispersion)"
+    default = "LogNormalize",
+    help = "Method for normalization. Choose one of: LogNormalize, CLR, RC"
 )
 parser$add_argument(
-    "--n-features",
+    "--scale-factor",
     type = "integer",
-    dest = "n_features",
+    dest = "scale_factor",
     action = "store",
-    default = 2000,
-    help = "Number of features to select as top variable features; only used when method is one of: vst, disp"
+    default = 10000,
+    help = "Sets the scale factor for cell-level normalization."
 )
-
 
 args <- parser$parse_args()
 print(args)
@@ -50,10 +50,10 @@ if (class(x = seuratObj) != "Seurat") {
     stop("VSN ERROR: The object contained in the Rds file is not a Seurat object.")
 }
 
-seuratObj <- FindVariableFeatures(
+seuratObj <- NormalizeData(
     object = seuratObj,
-    method = args$method,
-    nfeatures = args$n_features
+    normalization.method = args$method,
+    scale.factor = args$scale_factor
 )
 
 saveRDS(

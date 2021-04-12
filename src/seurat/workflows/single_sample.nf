@@ -49,10 +49,11 @@ workflow single_sample {
         filtered = params.tools.seurat?.filter ? FILTER( data ).filtered : data
         
         if(params.tools.seurat.normalization.method == "SCT") {
+            // Normalize, scale + HVG in 1 step using SCT
             normalized_scaled = NORMALIZE_SCALE_SCT( filtered )
         } else {
             NORMALIZE( filtered ) | HVG_SELECTION
-            normalized_scaled = HVG_SELECTION.scaled
+            normalized_scaled = HVG_SELECTION.out.scaled
         }
         
         DIM_REDUCTION_PCA( normalized_scaled )

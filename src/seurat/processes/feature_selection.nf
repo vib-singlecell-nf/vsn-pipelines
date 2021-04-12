@@ -22,7 +22,7 @@ process SC__SEURAT__FIND_HIGHLY_VARIABLE_FEATURES {
         ${binDir}/feature_selection/sc_find_variable_features.R \
             --input $f \
             --output ${sampleId}.SC__SEURAT__FIND_HIGHLY_VARIABLE_FEATURES.${processParams.off} \
-            ${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''}
+            ${(processParams.containsKey('method')) ? '--method ' + processParams.method : ''} \
             ${(processParams.containsKey('nFeatures')) ? '--n-features ' + processParams.nFeatures : ''}
         """
         
