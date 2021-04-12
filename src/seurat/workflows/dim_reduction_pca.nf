@@ -24,8 +24,9 @@ workflow DIM_REDUCTION_PCA {
                 )
             )
         } else {
-            data = data.map { it -> tuple(it[0], it[1], null) }
-            out = SC__SEURAT__DIM_REDUCTION__PCA( data )
+            out = SC__SEURAT__DIM_REDUCTION__PCA( 
+                data.map { it -> tuple(it[0], it[1], null) } 
+            )
         }
 
     emit:

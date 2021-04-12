@@ -31,7 +31,8 @@ class SC__SEURAT__DIM_REDUCTION_PARAMS {
     }
 
     String getNCompsAsArgument(nComps) {
-        nComps = nComps.replaceAll("\n", "")
+        if (!this.env.isParamNull(nComps))
+            nComps = nComps.replaceAll("\n", "")
         if (!this.env.isParamNull(nComps) && this.configParams.containsKey('nComps'))
             throw new Exception("SC__SEURAT__DIM_REDUCTION: nComps is both statically (" + this.configParams["nComps"] + ") and dynamically (" + nComps + ") set. Choose one.")
         if (!this.env.isParamNull(nComps))
@@ -41,7 +42,8 @@ class SC__SEURAT__DIM_REDUCTION_PARAMS {
     }
 
     String getNPcsAsArgument(nPcs) {
-        nPcs = nPcs.replaceAll("\n","")
+        if (!this.env.isParamNull(nPcs))
+            nPcs = nPcs.replaceAll("\n","")
         if (!this.env.isParamNull(nPcs) && this.configParams.containsKey('nPcs'))
             throw new Exception("SC__SEURAT__DIM_REDUCTION: nPcs is both statically (" + this.configParams["nPcs"] + ") and dynamically (" + nPcs + ") set for method (" + this.configParams["method"] + "). Choose one.")
         if (!this.env.isParamNull(nPcs))
