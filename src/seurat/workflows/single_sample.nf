@@ -6,6 +6,9 @@ include {
     PUBLISH;
 } from '../../utils/workflows/utils.nf' params(params)
 include {
+    FILE_CONVERTER as FILE_CONVERTER_TO_SCOPE;
+} from '../../utils/workflows/fileConverter.nf' params(params)
+include {
     UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
 } from '../../utils/processes/reports.nf' params(params)
 
@@ -45,7 +48,6 @@ workflow single_sample {
         data
     
     main:
-        // out = FILTER_AND_ANNOTATE_AND_CLEAN( data )
         filtered = params.tools.seurat?.filter ? FILTER( data ).filtered : data
         
         if(params.tools.seurat.normalization.method == "SCT") {
@@ -68,10 +70,17 @@ workflow single_sample {
 
         PUBLISH(
             CLUSTERING.out,
-            params.global.project_name+".single_sample_seurat.test_object",
+            params.global.project_name+".single_sample_seurat.final_output",
             "Rds",
             'seurat',
             false
+        )
+
+        FILE_CONVERTER_TO_SCOPE(
+            CLUSTERING.out,
+            'SINGLE_SAMPLE_SEURAT.final_output',
+            'seuratRdsToSCopeLoom',
+            null
         )
 
     emit:
