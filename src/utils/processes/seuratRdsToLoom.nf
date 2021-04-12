@@ -19,10 +19,9 @@ process SC__SEURAT_RDS_TO_LOOM {
         tuple val(sampleId), path("${sampleId}.SC__SEURAT_RDS_TO_LOOM.loom")
 
     script:
-        // NOTE: this is a WIP and has not been run yet. Chanses of this working are very low
         """
         ${binDir}/seurat_rds_to_loom.R \
-            --input $f
+            --input $f \
             --output "${sampleId}.SC__SEURAT_RDS_TO_LOOM.loom"
 		"""
 }

@@ -12,6 +12,9 @@ include {
     SC__H5AD_MERGE
 } from "./../processes/h5adMerge.nf" params(params)
 include {
+    SC__SEURAT_RDS_TO_LOOM
+} from "./../processes/seuratRdsToLoom.nf" params(params)
+include {
     isParamNull;
     PUBLISH;
 } from "./utils.nf" params(params)
@@ -51,6 +54,12 @@ workflow FILE_CONVERTER {
             )
         } else if(outputFormat == "mergeToScanpyH5ad") {
             out = SC__H5AD_MERGE(
+                data.map {
+                    it -> tuple(it[0], it[1])
+                }
+            )
+        }  else if(outputFormat == "seuratRdsToSCopeLoom") {
+            out = SC__SEURAT_RDS_TO_LOOM(
                 data.map {
                     it -> tuple(it[0], it[1])
                 }

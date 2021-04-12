@@ -32,7 +32,15 @@ parser$add_argument(
     type = "character",
     dest = "assay",
     action = "store",
+    default = "RNA",
     help = "Assay to use"
+)
+parser$add_argument(
+    "--clustering-prefix",
+    dest = "clustering_prefix",
+    action = "store",
+    default = "RNA_snn_res.",
+    help = "Prefix for metadata columns with clustering results."
 )
 
 args <- parser$parse_args()
@@ -58,16 +66,16 @@ default.reduction <- Seurat:::DefaultDimReduc(seuratObj)
 # Create loom file with GEX and default embedding
 build_loom(
     file.name = args$output,
-    dgem = seuratObj@assays$[[args$assay]]@counts,
+    dgem = seuratObj@assays[[args$assay]]@counts,
     title = args$sample_id,
     default.embedding = seuratObj@reductions[[default.reduction]]@cell.embeddings,
     default.embedding.name = default.reduction
 )
 
-loom <- open_lom(args$output, mode = "r+")
+loom <- open_loom(args$output, mode = "r+")
 
 # Add all remaining embeddings
-foreach (names(seuratObj@reductions) as reduction) {
+for (reduction in names(seuratObj@reductions)) {
     if (reduction == default.reduction) next
 
     add_embedding(
@@ -80,7 +88,8 @@ foreach (names(seuratObj@reductions) as reduction) {
 add_seurat_clustering(
     loom = loom,
     seurat = seuratObj,
-    seurat.assay = args$assay
+    seurat.assay = args$assay,
+    seurat.clustering.prefix = args$clustering_prefix
 )
 
 close_loom(loom)
