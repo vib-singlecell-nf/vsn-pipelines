@@ -257,6 +257,7 @@ RunPCACV <- function(
 
 	input_ext <- tools::file_ext(args$`input-file`)
 
+	hv_column_names <- hv_column_names <- c("highly.variable","highly_variable")
 	if(input_ext == "loom") {
 		print("Input type: Loom...")
 		# Get the data matrix from loom 
@@ -273,6 +274,12 @@ RunPCACV <- function(
 			object = object
 			, path = args$`accessor`
 		)
+		meta_features <- object@assays$RNA@meta.features
+		# FIXME: what do we do when there are more than 1 variable feature column in the data 
+		# e.g. after running SCT and FindVariableFeatures on the same dataset. 
+		# This is highly unlikely, but we should still catch it here.
+		variable_column <- grep(".variable", colnames(meta_features), value = T)[[1]]
+		hv_column_names <- variable_column
 	} else if(input_ext == "h5ad") {
 		# Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
 		file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
@@ -304,8 +311,6 @@ RunPCACV <- function(
 	use_variable_features <- as.logical(args$`use-variable-features`)
 
 	if(use_variable_features) {
-		# meta_features <- seurat@assays$RNA@meta.features
-		hv_column_names <- c("highly.variable","highly_variable")
 		hv_column_mask <- hv_column_names %in% colnames(x = meta_features)
 		if(sum(x = hv_column_mask) == 0) {
 			stop("Cannot subset the matrix with the 'highly variable features since 'highly.variable' or 'highly_variable' is not present does not exist in meta.features ('seurat@assays$RNA@meta.features') data.frame.'")
