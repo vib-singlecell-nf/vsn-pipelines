@@ -16,8 +16,11 @@ workflow DIM_REDUCTION_TSNE_UMAP {
     main:
         SC__SEURAT__DIM_REDUCTION__TSNE( data )
         SC__SEURAT__DIM_REDUCTION__UMAP( SC__SEURAT__DIM_REDUCTION__TSNE.out )
+        // Drop nPcs from the output, since we don't need it anymore in any of the following steps
+        dimred_tsne = SC__SEURAT__DIM_REDUCTION__TSNE.out.map { it -> tuple(it[0], it[1]) }
+        dimred_tsne_umap = SC__SEURAT__DIM_REDUCTION__UMAP.out.map { it -> tuple(it[0], it[1]) }
 
     emit:
-        dimred_tsne = SC__SEURAT__DIM_REDUCTION__TSNE.out
-        dimred_tsne_umap = SC__SEURAT__DIM_REDUCTION__UMAP.out
+        dimred_tsne
+        dimred_tsne_umap
 }

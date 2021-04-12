@@ -14,23 +14,20 @@ workflow DIM_REDUCTION_PCA {
         data
 
     main:
-        // if(params.containsKey("pcacv")) {
-        //     PCACV__FIND_OPTIMAL_NPCS( data )
-        //     out = SC__SEURAT__DIM_REDUCTION__PCA(
-        //         data.join(
-        //             PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC.map {
-        //                 it -> tuple(it[0], null, it[1])
-        //             }
-        //         )
-        //     )
-        // } else {
-        //     data = data.map {
-        //         it -> tuple(it[0], it[1], null)
-        //     }
-        // }
-
-        SC__SEURAT__DIM_REDUCTION__PCA( data )
+        if (params.containsKey("pcacv")) {
+            PCACV__FIND_OPTIMAL_NPCS( data )
+            out = SC__SEURAT__DIM_REDUCTION__PCA(
+                data.join(
+                    PCACV__FIND_OPTIMAL_NPCS.out.optimalNumberPC.map {
+                        it -> tuple(it[0], it[1])
+                    }
+                )
+            )
+        } else {
+            data = data.map { it -> tuple(it[0], it[1], null) }
+            out = SC__SEURAT__DIM_REDUCTION__PCA( data )
+        }
 
     emit:
-        SC__SEURAT__DIM_REDUCTION__PCA.out
+        out
 }

@@ -58,8 +58,8 @@ workflow single_sample {
         
         DIM_REDUCTION_PCA( normalized_scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
-        CLUSTERING( NEIGHBORHOOD_GRAPH.out )
-        DIM_REDUCTION_TSNE_UMAP( CLUSTERING.out )
+        DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
+        CLUSTERING( DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap )
         DIFFERENTIAL_GENE_EXPRESSION( CLUSTERING.out )
 
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
@@ -67,7 +67,7 @@ workflow single_sample {
         )
 
         PUBLISH(
-            DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
+            CLUSTERING.out,
             params.global.project_name+".single_sample_seurat.test_object",
             "Rds",
             'seurat',
