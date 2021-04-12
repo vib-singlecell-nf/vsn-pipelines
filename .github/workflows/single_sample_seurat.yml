@@ -1,0 +1,33 @@
+name: single_sample_seurat
+
+on: 
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Nextflow
+      run: |
+        export NXF_VER='20.10.0'
+        wget -qO- get.nextflow.io | bash
+        sudo mv nextflow /usr/local/bin/
+    - name: Get sample data
+      run: |
+        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
+        tar xzvf sample_data_tiny.tar.gz
+    - name: Run single_sample_seurat test
+      run: |
+        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_seurat,test__single_sample_seurat,test__compute_resources,docker -entry single_sample_seurat -ansi-log false
+        cat .nextflow.log
+
