@@ -1294,3 +1294,12 @@ workflow single_sample_seurat {
         // )
     }  
 }
+
+workflow multi_sample_seurat {
+    include {
+        multi_sample as MULTI_SAMPLE;
+    } from './src/seurat/workflows/multi_sample' params(params)
+
+    data = getDataChannel | SC__FILE_CONVERTER
+    MULTI_SAMPLE( data )
+}
