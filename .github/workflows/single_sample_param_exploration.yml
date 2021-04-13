@@ -1,4 +1,4 @@
-name: single_sample_scenic
+name: single_sample_param_exploration
 
 on: 
   push:
@@ -25,10 +25,10 @@ jobs:
         echo 0 | sudo tee /proc/sys/fs/protected_hardlinks
     - name: Get sample data
       run: |
-        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_small.tar.gz
-        tar xzvf sample_data_small.tar.gz
-    - name: Run single_sample_scenic test
+        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
+        tar xzvf sample_data_tiny.tar.gz
+    - name: Run single_sample_param_exploration test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scenic,test__single_sample_scenic,test__compute_resources,docker -entry single_sample_scenic -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile single_sample,test__single_sample_param_exploration,test__compute_resources,docker -entry single_sample -ansi-log false
         cat .nextflow.log
 

@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 CELLRANGER_OUTS_REGEX = /(.+)\/(.+)\/outs/
 CELLRANGER_H5_REGEX = /(.+)\/(.+)\/outs\/(.+)\.h5/
@@ -22,14 +22,14 @@ workflow getOutsChannel {
         if(glob.contains(',')) {
             glob = Arrays.asList(glob.split(',')); 
         }
-        channel = Channel
+        data_channel = Channel
             .fromPath(glob, type: 'dir', checkIfExists: true)
             .map {
                 filePath -> tuple(extractSampleFromOuts( "${filePath}" ), file("${filePath}"))
             }
 
     emit:
-        channel
+        data_channel
 
 }
 
@@ -51,14 +51,14 @@ workflow getH5Channel {
         if(glob.contains(',')) {
             glob = Arrays.asList(glob.split(',')); 
         }
-        channel = Channel
+        data_channel = Channel
             .fromPath(glob, type: 'file', checkIfExists: true)
             .map {
                 filePath -> tuple(extractSampleFromH5( "${filePath}" ), file("${filePath}"))
             }
 
     emit:
-        channel
+        data_channel
 
 }
 
@@ -82,13 +82,13 @@ workflow getMEXChannel {
         if(glob.contains(',')) {
             glob = Arrays.asList(glob.split(',')); 
         }
-        channel = Channel
+        data_channel = Channel
             .fromPath(glob, type: 'dir', checkIfExists: true)
             .map {
                 filePath -> tuple(extractSampleFromMEX( "${filePath}" ), file("${filePath}"))
             }
 
     emit:
-        channel
+        data_channel
 
 }

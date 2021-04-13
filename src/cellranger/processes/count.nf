@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 include {
     isParamNull;
@@ -11,7 +11,8 @@ def generateCellRangerCountCommandDefaults = {
 	processParams,
 	transcriptome,
 	expectCells,
-	chemistry ->
+	chemistry,
+    task ->
 	_expectCells = null
 	// --expect-cells argument
 	if(!isParamNull(expectCells)) {
@@ -53,7 +54,7 @@ def runCellRangerCount = {
 	expectCells = null,
 	chemistry = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry, task) + \
 		"""	\
 		--id=${id} \
 		--sample=${sample} \
@@ -72,7 +73,7 @@ def runCellRangerCountLibraries = {
 	expectCells = null,
 	chemistry = null ->
 	return (
-		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry) + \
+		generateCellRangerCountCommandDefaults(processParams, transcriptome, expectCells, chemistry, task) + \
 		""" \
 		--id ${id} \
 		--libraries ${libraries} \
@@ -121,7 +122,7 @@ process SC__CELLRANGER__COUNT_WITH_LIBRARIES {
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-    label 'compute_resources__cellranger'
+    label 'compute_resources__cellranger_count'
 
     input:
 		path(transcriptome)
@@ -168,7 +169,7 @@ process SC__CELLRANGER__COUNT_WITH_METADATA {
 	cache 'deep'
 	container toolParams.container
 	publishDir "${params.global.outdir}/counts", saveAs: {"${sampleId}/outs"}, mode: 'link', overwrite: true
-    label 'compute_resources__cellranger'
+    label 'compute_resources__cellranger_count'
 
     input:
 		path(transcriptome)

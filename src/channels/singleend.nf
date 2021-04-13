@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 def extractSample(path) {
     pattern = /(.+)\/(.+)_R[1-2](.*)\.fastq(\.gz)?/
