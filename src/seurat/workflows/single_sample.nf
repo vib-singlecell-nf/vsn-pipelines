@@ -84,5 +84,10 @@ workflow single_sample {
         )
 
     emit:
-        data
+        filtered_seurat_rds = filtered
+        scope_loom = FILE_CONVERTER_TO_SCOPE.out
+        seurat_rds = CLUSTERING.out
+        marker_genes = DIFFERENTIAL_GENE_EXPRESSION.out.marker_genes
+        marker_genes_xlsx = DIFFERENTIAL_GENE_EXPRESSION.out.marker_genex_xlsx
+
 }

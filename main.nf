@@ -1268,7 +1268,6 @@ workflow single_sample_seurat {
     include {
         single_sample as SINGLE_SAMPLE;
     } from './src/seurat/workflows/single_sample' params(params)
-
     include {
         PUBLISH as PUBLISH_SINGLE_SAMPLE_SCOPE;
         PUBLISH as PUBLISH_SINGLE_SAMPLE_SEURAT;
@@ -1278,20 +1277,20 @@ workflow single_sample_seurat {
     SINGLE_SAMPLE( data )
 
     if(params.utils?.publish) {
-        // PUBLISH_SINGLE_SAMPLE_SCOPE(
-        //     SINGLE_SAMPLE.out.scopeloom,
-        //     "SINGLE_SAMPLE_SEURAT",
-        //     "loom",
-        //     null,
-        //     false
-        // )
-        // PUBLISH_SINGLE_SAMPLE_SCANPY(
-        //     SINGLE_SAMPLE.out.seuratrds,
-        //     "SINGLE_SAMPLE_SEURAT",
-        //     "seurat_rds",
-        //     null,
-        //     false
-        // )
+        PUBLISH_SINGLE_SAMPLE_SCOPE(
+            SINGLE_SAMPLE.out.scope_loom,
+            "SINGLE_SAMPLE_SEURAT",
+            "loom",
+            null,
+            false
+        )
+        PUBLISH_SINGLE_SAMPLE_SEURAT(
+            SINGLE_SAMPLE.out.seurat_rds,
+            "SINGLE_SAMPLE_SEURAT",
+            "seurat_rds",
+            null,
+            false
+        )
     }  
 }
 
@@ -1299,7 +1298,28 @@ workflow multi_sample_seurat {
     include {
         multi_sample as MULTI_SAMPLE;
     } from './src/seurat/workflows/multi_sample' params(params)
+    include {
+        PUBLISH as PUBLISH_MULTI_SAMPLE_SCOPE;
+        PUBLISH as PUBLISH_MULTI_SAMPLE_SEURAT;
+    } from "./src/utils/workflows/utils" params(params)
 
     data = getDataChannel | SC__FILE_CONVERTER
     MULTI_SAMPLE( data )
+
+    if(params.utils?.publish) {
+        PUBLISH_MULTI_SAMPLE_SCOPE(
+            MULTI_SAMPLE.out.scope_loom,
+            "MULTI_SAMPLE_SEURAT",
+            "loom",
+            null,
+            false
+        )
+        PUBLISH_MULTI_SAMPLE_SEURAT(
+            MULTI_SAMPLE.out.seurat_rds,
+            "MULTI_SAMPLE_SEURAT",
+            "seurat_rds",
+            null,
+            false
+        )
+    }  
 }

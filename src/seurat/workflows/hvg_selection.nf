@@ -27,7 +27,7 @@ workflow HVG_SELECTION {
 
         PUBLISH_SEURAT_RDS_SCALED(
             scaled,
-            'SEURAT.hvg_scaled_output',
+            'SEURAT.scaled_output',
             'Rds',
             'seurat',
             false
