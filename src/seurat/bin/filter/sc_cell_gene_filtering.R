@@ -113,6 +113,12 @@ filterCells <- function(
     }
 
     mito.pattern <- paste0("^", mito_prefix)
+
+    mito.genes <- grep(mito.pattern, rownames(object))
+    if (length(mito.genes) == 0 && max_percent_mito != Inf) {
+        stop(paste0("VSN ERROR: Could not find any mitochondrial genes with the prefix: '" , mito_prefix, "'"))
+    }
+
     object[["pct.mito"]] <- Seurat::PercentageFeatureSet(object, pattern = mito.pattern)
     object <- subset(
         object,
