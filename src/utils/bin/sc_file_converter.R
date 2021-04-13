@@ -314,7 +314,8 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     seurat <- Seurat::CreateSeuratObject(
         counts_matrix,
         min.cells = 0,
-        min.features = 0
+        min.features = 0,
+        project = args$`sample_id`
     )
     saveRDS(
         object = seurat,
