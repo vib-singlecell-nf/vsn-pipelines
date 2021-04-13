@@ -8,6 +8,7 @@ RUN apt-get update && \
     R -e "install.packages('optparse')" && \
     R -e "install.packages('devtools')" && \
     R -e "install.packages('remotes')" && \
+    R -e "install.packages('openxlsx')" && \
     R -e "remotes::install_version('Seurat', '4.0.1')" && \
     R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')" && \
     # Cleanup

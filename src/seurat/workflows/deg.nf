@@ -5,6 +5,9 @@ nextflow.enable.dsl=2
 include {
     SC__SEURAT__MARKER_GENES;
 } from '../processes/marker_genes.nf' params(params)
+include {
+    SC__SEURAT__MARKER_GENES_TO_XLSX;
+} from '../processes/utils.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -15,8 +18,9 @@ workflow DIFFERENTIAL_GENE_EXPRESSION {
         data
     
     main:
-        SC__SEURAT__MARKER_GENES( data )
+        SC__SEURAT__MARKER_GENES( data ) | SC__SEURAT__MARKER_GENES_TO_XLSX
 
     emit:
-        SC__SEURAT__MARKER_GENES.out
+        marker_genes = SC__SEURAT__MARKER_GENES.out
+        marker_genex_xlsx = SC__SEURAT__MARKER_GENES_TO_XLSX.out
 }
