@@ -33,4 +33,5 @@ workflow DIM_REDUCTION_TSNE_UMAP {
     emit:
         dimred_tsne
         dimred_tsne_umap
+        report
 }

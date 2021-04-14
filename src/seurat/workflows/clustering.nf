@@ -18,13 +18,14 @@ workflow CLUSTERING {
         data
     
     main:
-        SC__SEURAT__CLUSTERING( data )
+        clustered = SC__SEURAT__CLUSTERING( data )
         report = GENERATE_REPORT(
             "CLUSTERING",
-            SC__SEURAT__CLUSTERING.out,
+            clustered,
             file(workflow.projectDir + params.tools.seurat.clustering.report_rmd)
         )
 
     emit:
-        SC__SEURAT__CLUSTERING.out
+        clustered
+        report
 }

@@ -62,14 +62,14 @@ workflow single_sample {
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTERING( DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap )
-        DIFFERENTIAL_GENE_EXPRESSION( CLUSTERING.out )
+        DIFFERENTIAL_GENE_EXPRESSION( CLUSTERING.out.clustered )
 
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
         PUBLISH(
-            CLUSTERING.out,
+            CLUSTERING.out.clustered,
             params.global.project_name+".single_sample_seurat.final_output",
             "Rds",
             'seurat',
@@ -77,7 +77,7 @@ workflow single_sample {
         )
 
         FILE_CONVERTER_TO_SCOPE(
-            CLUSTERING.out,
+            CLUSTERING.out.clustered,
             'SINGLE_SAMPLE_SEURAT.final_output',
             'seuratRdsToSCopeLoom',
             null
@@ -86,7 +86,7 @@ workflow single_sample {
     emit:
         filtered_seurat_rds = filtered
         scope_loom = FILE_CONVERTER_TO_SCOPE.out
-        seurat_rds = CLUSTERING.out
+        seurat_rds = CLUSTERING.out.clustered
         marker_genes = DIFFERENTIAL_GENE_EXPRESSION.out.marker_genes
         marker_genes_xlsx = DIFFERENTIAL_GENE_EXPRESSION.out.marker_genex_xlsx
 
