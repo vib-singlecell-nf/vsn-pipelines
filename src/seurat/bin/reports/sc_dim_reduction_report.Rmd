@@ -1,0 +1,64 @@
+---
+title: "Single-Cell Report: Dimensionality Reduction"
+output: html_document
+params:
+    input: "FILE"
+---
+
+```{r}
+suppressMessages(library("Seurat", quietly = TRUE))
+suppressMessages(library("ggplot2", quietly = TRUE))
+```
+
+#### Read Data
+
+```{r}
+seuratObj <- readRDS(file = params$input)
+```
+
+```{r}
+plotMetricsOnDr <- function(object, metric, reduction) {
+    
+    if (! reduction %in% names(object@reductions)) {
+        stop(paste0("Reduction ", reduction, " is not available in this object"))
+        return()
+    }
+    if (! metric %in% colnames(object@meta.data)) {
+        message(paste0("Metric ", metric, " is not available in this object"))
+        return()
+    }
+    
+    plot.data <- as.data.frame(object@reductions[[reduction]]@cell.embeddings[,c(1,2)])
+    axis.labels <- colnames(plot.data)
+    colnames(plot.data) <- c("x", "y")
+    plot.data$metric <- object@meta.data[rownames(plot.data), metric]
+    
+    plot <- ggplot(data = plot.data, aes(x = x, y = y, colour = metric)) +
+        geom_point() +
+        xlab(axis.labels[[1]]) +
+        ylab(axis.labels[[2]]) +
+        scale_color_viridis_c() +
+        ggtitle(metric) +
+        theme(
+            legend.title = element_blank()
+        )
+    
+    print(plot)
+}
+
+plotsForReduction <- function(object, reduction) {
+    metrics <- c("nFeature_RNA", "nCount_RNA", "pct.mito")
+
+    for (metric in metrics) {
+        plotMetricsOnDr(object, metric, reduction)
+    }
+}
+```
+### Dimensionality reductions
+```{r, fig.show="hold", out.width="33%"}
+reductions <- c("pca", "tsne", "umap")
+
+for (reduction in reductions) {
+    plotsForReduction(seuratObj, reduction)
+}
+```

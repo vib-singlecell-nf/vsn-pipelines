@@ -1,18 +1,19 @@
-```
-title: Single-Cell Report: Clustering
-```
-
-# Single-Cell Report: Clustering
+---
+title: "Single-Cell Report: Clustering"
+output: html_document
+params:
+    input: "FILE"
+---
 
 ```{r}
 suppressMessages(library("Seurat", quietly = TRUE))
 suppressMessages(library("ggplot2", quietly = TRUE))
 ```
 
-### Read Data
+#### Read Data
 
 ```{r}
-seuratObj <- readRDS(file = "FILE")
+seuratObj <- readRDS(file = params$input)
 ```
 
 ```{r}
