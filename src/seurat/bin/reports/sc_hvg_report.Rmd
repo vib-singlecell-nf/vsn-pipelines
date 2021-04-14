@@ -1,0 +1,28 @@
+---
+title: "Single-Cell Report: HVG selection"
+output: html_document
+params:
+    input: "FILE"
+    nGenes: 10
+---
+
+```{r}
+suppressMessages(library("Seurat", quietly = TRUE))
+suppressMessages(library("ggplot2", quietly = TRUE))
+```
+
+#### Read Data
+
+```{r}
+seuratObj <- readRDS(file = params$input)
+```
+
+### High variable feature selection
+
+```{r}
+
+topGenes <- head(VariableFeatures(seuratObj), params$nGenes)
+
+plot <- VariableFeaturePlot(seuratObj)
+LabelPoints(plot = plot, points = topGenes, repel = T)
+```

@@ -14,6 +14,9 @@ include {
 include {
     SC__SEURAT__SCALING;
 } from '../processes/normalize_transform.nf' params(params)
+include {
+    GENERATE_REPORT;
+} from './create_report.nf' params(params)
 
 workflow HVG_SELECTION {
 
@@ -32,7 +35,15 @@ workflow HVG_SELECTION {
             'seurat',
             false
         )
+
+        report = GENERATE_REPORT(
+            "HVG",
+            hvg,
+            file(workflow.projectDir + params.tools.seurat.feature_selection.report_rmd)
+        )
+
     emit:
         hvg
         scaled
+        report
 }
