@@ -22,7 +22,7 @@ process SC__SEURAT__GENERATE_REPORT {
 
 process SC__SEURAT__REPORT_TO_HTML {
 
-    // container params.tools.seurat.container
+    container params.tools.seurat.container
     publishDir "${params.global.outdir}/reports", mode: 'link', overwrite: true
     label 'compute_resources__report'
 
