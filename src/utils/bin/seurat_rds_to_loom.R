@@ -31,14 +31,14 @@ option_list <- list(
         type = "character",
         dest = "assay",
         action = "store",
-        default = "RNA",
+        default = NULL,
         help = "Assay to use"
     ),
     make_option(
         "--clustering-prefix",
         dest = "clustering_prefix",
         action = "store",
-        default = "RNA_snn_res.",
+        default = NULL,
         help = "Prefix for metadata columns with clustering results."
     )
 )
@@ -57,8 +57,20 @@ if (class(x = seuratObj) != "Seurat") {
     stop("VSN ERROR: The object contained in the Rds file is not a Seurat object.")
 }
 
+if (is.null(args$assay)) {
+    args$assay <- DefaultAssay(seuratObj)
+}
+
 if (! args$assay %in% names(seuratObj@assays)) {
     stop(paste0("VSN ERROR: Assay ", args$assay, " not available in Seurat object"))
+}
+
+if (is.null(args$clustering_prefix)) {
+    args$clustering_prefix <- paste0(args$assay, "_snn_res.")
+}
+
+if (! sum(grepl(args$clustering_prefix, colnames(seuratObj@meta.data))) > 0) {
+    stop(paste0("VSN ERROR: Invalid clustering prefix ", args$clustering_prefix))
 }
 
 default.reduction <- Seurat:::DefaultDimReduc(seuratObj)
