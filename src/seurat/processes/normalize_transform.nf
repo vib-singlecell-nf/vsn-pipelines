@@ -41,7 +41,7 @@ process SC__SEURAT__NORMALIZATION_SCT {
         tuple val(sampleId), path("${sampleId}.SC__SEURAT__NORMALIZATION_SCT.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.seurat.normalization.sct)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.sct)
         processParams = sampleParams.local
         """
         ${binDir}/transform/sc_normalization_SCT.R \

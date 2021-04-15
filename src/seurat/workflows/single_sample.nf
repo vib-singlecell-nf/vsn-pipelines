@@ -50,9 +50,10 @@ workflow single_sample {
     main:
         filtered = params.tools.seurat?.filter ? FILTER( data ).filtered : data
         
-        if(params.tools.seurat.normalization.method == "SCT") {
+        if (params.containsKey("sct")) {
             // Normalize, scale + HVG in 1 step using SCT
-            normalized_scaled = NORMALIZE_SCALE_SCT( filtered )
+            NORMALIZE_SCALE_SCT( filtered )
+            normalized_scaled = NORMALIZE_SCALE_SCT.out.scaled
         } else {
             NORMALIZE( filtered ) | HVG_SELECTION
             normalized_scaled = HVG_SELECTION.out.scaled

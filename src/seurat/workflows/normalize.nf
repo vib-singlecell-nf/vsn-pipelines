@@ -13,6 +13,9 @@ include {
     SC__SEURAT__NORMALIZATION_SCT
     SC__SEURAT__SCALING;
 } from '../processes/normalize_transform.nf' params(params)
+include {
+    GENERATE_REPORT;
+} from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -41,16 +44,23 @@ workflow NORMALIZE_SCALE_SCT {
         filtered
     
     main:
-        SC__SEURAT__NORMALIZATION_SCT( filtered )
+        scaled = SC__SEURAT__NORMALIZATION_SCT( filtered )
         PUBLISH_SEURAT_RDS_NORMALIZED(
-            SC__SEURAT__NORMALIZATION_SCT.out,
+            scaled,
             'SEURAT.normalized_sct_output',
             'Rds',
             'seurat',
             false
         )
 
+        report = GENERATE_REPORT(
+            "HVG",
+            scaled,
+            file(workflow.projectDir + params.tools.seurat.feature_selection.report_rmd)
+        )
+
     emit:
-        SC__SEURAT__NORMALIZATION_SCT.out
+        scaled
+        report
 
 }
