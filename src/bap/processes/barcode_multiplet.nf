@@ -25,7 +25,7 @@ process BAP__BARCODE_MULTIPLET_PIPELINE {
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_multiplet)
-		processParams = sampleParams.local
+        processParams = sampleParams.local
         """
         bap2 bam \
             --input ${bam} \
