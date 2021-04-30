@@ -31,9 +31,18 @@ RUN mkdir /py_build && cd /py_build && \
 
 # install bap fork (original is https://github.com/caleblareau/bap):
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir biopython rapidfuzz fuzzysearch && \
+    pip install --no-cache-dir biopython rapidfuzz fuzzysearch python-Levenshtein && \
     pip install --no-cache-dir git+https://github.com/cflerin/bap.git
 
+RUN pip install --no-cache-dir \
+    pandas \
+    matplotlib \
+    seaborn \
+    nbconvert \
+    papermill \
+    ipython \
+    ipykernel \
+    jupyter-client
 
 ##################################################
 # final set of packages for usability
