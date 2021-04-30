@@ -13,6 +13,11 @@ include {
     PUBLISH as PUBLISH_BAP_FRAGMENTS_INDEX;
 } from "../../src/utils/workflows/utils.nf" params(params)
 
+include {
+    GENERATE_REPORT;
+    REPORT_TO_HTML;
+} from './processes/report.nf' params(params)
+
 //////////////////////////////////////////////////////
 // Define the workflow
 
@@ -35,6 +40,13 @@ workflow BAP__BARCODE_MULTIPLET_PIPELINE {
     main:
 
         bap = SC__BAP__BARCODE_MULTIPLET_PIPELINE(bam.map { it -> tuple(it[0], it[1], it[2]) })
+
+        GENERATE_REPORT(
+            file(workflow.projectDir + params.tools.bap.barcode_multiplet.report_ipynb),
+            bap.map { it -> tuple(it[0], it[3]) },
+            "BAP_multiplet_report"
+        ) |
+        REPORT_TO_HTML
 
         // generate a fragments file:
         fragments = BAP_BAM_TO_FRAGMENTS(bap.map {it -> tuple(it[0], it[1], it[2])})
