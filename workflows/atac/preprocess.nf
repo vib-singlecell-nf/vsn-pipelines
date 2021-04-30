@@ -16,14 +16,14 @@ include { BAM_TO_FRAGMENTS; } from './../../src/sinto/main.nf' params(params)
 include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode.nf' params(params)
 
 include {
-    PUBLISH as PUBLISH_BC_STATS;
-    PUBLISH as PUBLISH_BR_BC_STATS;
-    PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
-    PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
-    PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
-    PUBLISH as PUBLISH_FRAGMENTS;
-    PUBLISH as PUBLISH_FRAGMENTS_INDEX;
-} from "../../src/utils/workflows/utils.nf" params(params)
+    SIMPLE_PUBLISH as PUBLISH_BC_STATS;
+    SIMPLE_PUBLISH as PUBLISH_BR_BC_STATS;
+    SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
+    SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
+    SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
+    SIMPLE_PUBLISH as PUBLISH_FRAGMENTS;
+    SIMPLE_PUBLISH as PUBLISH_FRAGMENTS_INDEX;
+} from "../../src/utils/processes/utils.nf" params(params)
 
 
 //////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ workflow ATAC_PREPROCESS {
 
             // run barcode correction against a whitelist:
             fastq_bc_corrected = SCTK__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
-            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, 'corrected.bc_stats', 'log', 'fastq', false)
+            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, '.corrected.bc_stats.log', 'fastq')
 
 
             // run barcode demultiplexing on each read+barcode:
@@ -100,7 +100,7 @@ workflow ATAC_PREPROCESS {
         //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
         // using singlecelltoolkit:
         fastq_dex_br = SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, 'corrected.bc_stats', 'log', 'reports', false)
+        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, '.corrected.bc_stats.log', 'reports')
 
 
         // concatenate the read channels:
@@ -110,12 +110,12 @@ workflow ATAC_PREPROCESS {
         switch(params.atac_preprocess_tools.adapter_trimming_method) {
             case 'Trim_Galore':
                 fastq_dex_trim = TRIMGALORE__TRIM(fastq_dex);
-                PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'R1.trimming_report', 'txt', 'reports', false);
-                PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, 'R2.trimming_report', 'txt', 'reports', false);
+                PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.R1.trimming_report.txt', 'reports');
+                PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, '.R2.trimming_report.txt', 'reports');
                 break;
             case 'fastp':
                 fastq_dex_trim = FASTP__TRIM(fastq_dex);
-                PUBLISH_FASTQS_TRIMLOG_FASTP(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'fastp.trimming_report', '.html', 'reports', false);
+                PUBLISH_FASTQS_TRIMLOG_FASTP(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.fastp.trimming_report.html', 'reports');
                 break;
         }
 
@@ -126,8 +126,8 @@ workflow ATAC_PREPROCESS {
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)
         // publish fragments output:
-        PUBLISH_FRAGMENTS(fragments, 'sinto.fragments.tsv', 'gz', 'fragments', false)
-        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0], it[2]) }, 'sinto.fragments.tsv.gz', 'tbi', 'fragments', false)
+        PUBLISH_FRAGMENTS(fragments.map{ it -> tuple(it[0..1]) }, '.sinto.fragments.tsv.gz', 'fragments')
+        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0],it[2]) }, '.sinto.fragments.tsv.gz.tbi', 'fragments')
 
     emit:
         bam
