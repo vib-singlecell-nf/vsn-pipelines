@@ -4,8 +4,6 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.sinto
 
-barcode_tag = params.containsKey('tools_sinto_fragments_barcodetag') ? params.tools_sinto_fragments_barcodetag : toolParams.fragments.barcodetag
-
 process SC__SINTO__FRAGMENTS {
 
     container toolParams.container
@@ -27,7 +25,7 @@ process SC__SINTO__FRAGMENTS {
         sinto fragments \
             -b ${bam} \
             -m ${processParams.min_mapq} \
-            ${barcode_tag=='' ? '' : '--barcodetag ' + barcode_tag} \
+            ${processParams.containsKey('barcodetag') && processParams.barcodetag ? '--barcodetag ' + processParams.barcodetag: ''} \
             ${processParams.containsKey('barcode_regex') && processParams.barcode_regex ? '--barcode_regex ' + processParams.barcode_regex: ''} \
             ${processParams.containsKey('use_chrom') && processParams.use_chrom ? '--use_chrom ' + processParams.use_chrom: ''} \
             ${processParams.containsKey('min_distance') && processParams.min_distance ? '--min_distance ' + processParams.min_distance: ''} \
