@@ -12,6 +12,9 @@ include {
     SC__SEURAT__CELL_FILTER;
     SC__SEURAT__FEATURE_FILTER
 } from '../processes/filter.nf' params(params)
+include {
+    GENERATE_DUAL_INPUT_REPORT;
+} from './create_report.nf' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -32,6 +35,13 @@ workflow FILTER {
             'Rds',
             'seurat',
             false
+        )
+
+        report = GENERATE_DUAL_INPUT_REPORT(
+            "FILTERING",
+            data,
+            filtered,
+            file(workflow.projectDir + params.tools.seurat.filter.report_rmd)
         )
 
     emit:

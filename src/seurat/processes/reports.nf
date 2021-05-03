@@ -20,6 +20,27 @@ process SC__SEURAT__GENERATE_REPORT {
         """
 }
 
+process SC__SEURAT__GENERATE_DUAL_INPUT_REPORT {
+
+    container params.tools.seurat.container
+    publishDir "${params.global.outdir}/markdowns", mode: 'link', overwrite: true
+    label 'compute_resources__report'
+
+    input:
+        file(rmd)
+        tuple val(sampleId), path(seurat_rds1)
+        tuple val(sampleId2), path(seurat_rds2)
+        val(reportTitle)
+
+    output:
+        tuple val(sampleId), path("${sampleId}.${reportTitle}.Rmd")
+
+    script:
+        """
+        cat ${rmd} | sed 's/FILE1/${seurat_rds1}/' | sed 's/FILE2/${seurat_rds2}/' > ${sampleId}.${reportTitle}.Rmd
+        """
+}
+
 process SC__SEURAT__REPORT_TO_HTML {
 
     container params.tools.seurat.container
