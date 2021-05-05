@@ -19,13 +19,24 @@ seuratObj <- readRDS(file = params$unfiltered)
 seuratObj.filtered <- readRDS(file = params$filtered)
 ```
 
+#### Get filtering thresholds
+```{r}
+min_n_features <- min(seuratObj.filtered@meta.data$nFeature_RNA)
+max_n_features <- max(seuratObj.filtered@meta.data$nFeature_RNA)
+
+min_n_counts <- min(seuratObj.filtered@meta.data$nCount_RNA)
+max_n_counts <- max(seuratObj.filtered@meta.data$nCount_RNA)
+
+max_percent_mito <- max(seuratObj.filtered@meta.data$pct.mito)
+```
+
 ```{r, include = FALSE}
 
 if (!"pct.mito" %in% colnames(seuratObj@meta.data)) {
     mito.pattern <- paste0("^", params$mito_prefix)
 
     mito.genes <- grep(mito.pattern, rownames(seuratObj))
-    if (length(mito.genes) == 0 && max_percent_mito != Inf) {
+    if (length(mito.genes) == 0 && max_percent_mito != Inf && max_percent_mito != 0) {
         stop(paste0("VSN ERROR: Could not find any mitochondrial genes with the prefix: '" , mito_prefix, "'"))
     }
 
@@ -100,7 +111,7 @@ plotMitoFiltering <- function(object, threshold = T, max_percent_mito) {
             legend.title = element_blank()
         )
 
-    if (threshold) {
+    if (threshold && max_percent_mito != 0) {
         plot <- plot + geom_vline(xintercept = c(max_percent_mito), colour = "red")
     }
 
@@ -112,16 +123,6 @@ plotsForFiltering <- function(object, threshold = T, min_n_features, max_n_featu
     plotCountFiltering(object, threshold, min_n_counts, max_n_counts)
     plotMitoFiltering(object, threshold, max_percent_mito)
 }
-```
-
-```{r}
-min_n_features <- min(seuratObj.filtered@meta.data$nFeature_RNA)
-max_n_features <- max(seuratObj.filtered@meta.data$nFeature_RNA)
-
-min_n_counts <- min(seuratObj.filtered@meta.data$nCount_RNA)
-max_n_counts <- max(seuratObj.filtered@meta.data$nCount_RNA)
-
-max_percent_mito <- max(seuratObj.filtered@meta.data$pct.mito)
 ```
 
 ### Pre-filtering diagnostics
