@@ -57,21 +57,23 @@ workflow multi_sample {
             filtered.map { it -> it[1] }.toList()
         )
         
-        // SCT workflow not supported in multiple sample, since this can have a negative influence on batch effects
+        if (params.containsKey("sct")) {
+            println("VSN WARNING: SCT is not supported when merging datasets since this can have a negative effect on batch effects. Falling back to log-normalize.")
+        }
         NORMALIZE( MERGE.out ) | HVG_SELECTION
         
         DIM_REDUCTION_PCA( HVG_SELECTION.out.scaled )
         NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
         DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
         CLUSTERING( DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap )
-        DIFFERENTIAL_GENE_EXPRESSION( CLUSTERING.out )
+        DIFFERENTIAL_GENE_EXPRESSION( CLUSTERING.out.clustered )
 
         UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
             file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
         )
 
         PUBLISH(
-            CLUSTERING.out,
+            CLUSTERING.out.clustered,
             params.global.project_name+".multi_sample_seurat.final_output",
             "Rds",
             'seurat',
@@ -79,7 +81,7 @@ workflow multi_sample {
         )
 
         FILE_CONVERTER_TO_SCOPE(
-            CLUSTERING.out,
+            CLUSTERING.out.clustered,
             'SINGLE_SAMPLE_SEURAT.final_output',
             'seuratRdsToSCopeLoom',
             null
@@ -88,7 +90,7 @@ workflow multi_sample {
     emit:
         merged_seurat_rds = MERGE.out
         scope_loom = FILE_CONVERTER_TO_SCOPE.out
-        seurat_rds = CLUSTERING.out
+        seurat_rds = CLUSTERING.out.clustered
         marker_genes = DIFFERENTIAL_GENE_EXPRESSION.out.marker_genes
         marker_genes_xlsx = DIFFERENTIAL_GENE_EXPRESSION.out.marker_genex_xlsx
 }
