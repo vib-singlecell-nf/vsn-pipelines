@@ -29,7 +29,7 @@ for (file.path in positional.args) {
 }
 
 if (length(objects) <= 1) {
-    stop(paste0("VSN ERROR: cannot merge ", length(objects), " objects. Needs atleast 2 objects!"))
+    stop(paste0("VSN ERROR: cannot merge ", length(objects), " objects. Needs at least 2 objects!"))
 }
 
 merged <- merge(objects[[1]], y = objects[-1])
