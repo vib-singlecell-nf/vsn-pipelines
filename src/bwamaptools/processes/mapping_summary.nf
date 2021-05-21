@@ -19,7 +19,7 @@ process BWAMAPTOOLS__MAPPING_SUMMARY {
               path("${sampleId}.mapping_stats.tsv")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, toolParams.add_barcode_as_tag)
+        def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         processParams = sampleParams.local
         """
         ${binDir}mapping_summary.sh \
