@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.picard
+toolParams = params.tools.picard
 
 process PICARD__ESTIMATE_LIBRARY_COMPLEXITY {
 
