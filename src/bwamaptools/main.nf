@@ -21,11 +21,12 @@ include {
     GATK__MARK_DUPLICATES_SPARK;
 } from './../../src/gatk/processes/mark_duplicates_spark.nf' params(params)
 include {
-    PUBLISH as PUBLISH_BAM;
-    PUBLISH as PUBLISH_BAM_INDEX;
-    PUBLISH as PUBLISH_MAPPING_SUMMARY;
-    PUBLISH as PUBLISH_LIBRARY_METRICS;
-} from "../utils/workflows/utils.nf" params(params)
+    SIMPLE_PUBLISH as PUBLISH_BAM;
+    SIMPLE_PUBLISH as PUBLISH_BAM_INDEX;
+    SIMPLE_PUBLISH as PUBLISH_MAPPING_SUMMARY;
+    SIMPLE_PUBLISH as PUBLISH_LIBRARY_METRICS;
+} from "../utils/processes/utils.nf" params(params)
+//} from "../utils/workflows/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
 // Define the workflow
@@ -62,8 +63,9 @@ workflow get_bwa_index {
 workflow BWA_MAPPING_PE {
 
     take:
-        data // a channel of [val(sampleId), path(fastq_PE1), path(fastq_PE2)]
-        mark_duplicates_method
+        data // a channel of [val(unique_sampleId), val(sampleId), path(fastq_PE1), path(fastq_PE2)]
+        // unique_sampleId is used to label the read group field "SM" and (part of) "LB",
+        // while sampleId represents each split fastq file for a unique sample.
 
     main:
         /* 
@@ -72,25 +74,39 @@ workflow BWA_MAPPING_PE {
         */
         bwa_inputs = get_bwa_index(params.tools.bwamaptools.bwa_fasta).combine(data)
 
-        BWA_MEM_PE(bwa_inputs)
+        aligned_bam = BWA_MEM_PE(bwa_inputs)
+
+    emit:
+        aligned_bam
+
+}
+
+
+workflow MARK_DUPLICATES {
+
+    take:
+        data // a channel of [val(sampleId), path(bam) ]
+        mark_duplicates_method
+
+    main:
 
         switch(mark_duplicates_method) {
             case 'MarkDuplicates':
-                dup_marked_bam = PICARD__MARK_DUPLICATES_AND_SORT(BWA_MEM_PE.out)
+                dup_marked_bam = PICARD__MARK_DUPLICATES_AND_SORT(data)
                 break
             case 'MarkDuplicatesSpark':
-                dup_marked_bam = GATK__MARK_DUPLICATES_SPARK(BWA_MEM_PE.out)
+                dup_marked_bam = GATK__MARK_DUPLICATES_SPARK(data)
                 break
         }
 
         MAPPING_SUMMARY(dup_marked_bam)
-        PICARD__ESTIMATE_LIBRARY_COMPLEXITY(BWA_MEM_PE.out)
+        PICARD__ESTIMATE_LIBRARY_COMPLEXITY(data)
 
         // publish output:
-        PUBLISH_BAM(dup_marked_bam, 'bwa.out.possorted', 'bam', 'bam', false)
-        PUBLISH_BAM_INDEX(dup_marked_bam.map{it -> tuple(it[0], it[2])}, 'bwa.out.possorted.bam', 'bai', 'bam', false)
-        PUBLISH_LIBRARY_METRICS(PICARD__ESTIMATE_LIBRARY_COMPLEXITY.out, 'library_complexity_metrics', 'txt', 'reports', false)
-        PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, 'mapping_stats', 'tsv', 'bam', false)
+        PUBLISH_BAM(dup_marked_bam.map{it -> tuple(it[0], it[1])}, '.bwa.out.possorted.bam', 'bam')
+        PUBLISH_BAM_INDEX(dup_marked_bam.map{it -> tuple(it[0], it[2])}, '.bwa.out.possorted.bam.bai', 'bam')
+        PUBLISH_LIBRARY_METRICS(PICARD__ESTIMATE_LIBRARY_COMPLEXITY.out, '.library_complexity_metrics.txt', 'reports')
+        PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, '.mapping_stats.tsv', 'bam')
 
     emit:
         dup_marked_bam
