@@ -11,9 +11,16 @@ include {
 } from './../../src/fastp/processes/adapter_trimming.nf' params(params)
 
 // workflow imports:
-include { BWA_MAPPING_PE; } from './../../src/bwamaptools/main.nf' params(params)
+include {
+    BWA_MAPPING_PE;
+    MARK_DUPLICATES;
+} from './../../src/bwamaptools/main.nf' params(params)
 include { BAM_TO_FRAGMENTS; } from './../../src/sinto/main.nf' params(params)
 include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode.nf' params(params)
+
+include {
+    PICARD__MERGE_SAM_FILES;
+} from './../../src/picard/processes/merge_sam_files.nf' params(params)
 
 include {
     SIMPLE_PUBLISH as PUBLISH_BC_STATS;
@@ -43,18 +50,19 @@ workflow ATAC_PREPROCESS {
                           )
                       .map {
                           row -> tuple(
-                              row.sample_name,
+                              row.sample_name + "___" + file(row.fastq_PE1_path)
+                                  .getSimpleName()
+                                  .replaceAll(row.sample_name,""),
                               row.technology,
-                              row.fastq_PE1_path,
-                              row.fastq_barcode_path,
-                              row.fastq_PE2_path
+                              file(row.fastq_PE1_path, checkIfExists: true),
+                              file(row.fastq_barcode_path, checkIfExists: true),
+                              file(row.fastq_PE2_path, checkIfExists: true)
                               )
                       }
                       .branch {
                         biorad:   it[1] == 'biorad'
                         standard: true // capture all other technology types here
                       }
-
 
         /* Barcode correction */
         // gather barcode whitelists from params into a channel:
@@ -120,8 +128,32 @@ workflow ATAC_PREPROCESS {
         }
 
         // map with bwa mem:
-        bam = BWA_MAPPING_PE(fastq_dex_trim.map { it -> tuple(it[0..2]) },
-                             params.atac_preprocess_tools.mark_duplicates_method)
+        aligned_bam = BWA_MAPPING_PE(
+            fastq_dex_trim.map { it -> tuple(it[0].split("___")[0], // [val(unique_sampleId),
+                                             *it[0..2] ) // val(sampleId), path(fastq_PE1), path(fastq_PE2)]
+                  })
+
+
+        // split by sample:
+        aligned_bam.map{ it -> tuple(it[0].split("___")[0], it[1]) } // [ sampleId, bam ]
+                   .groupTuple()
+                   .branch {
+                       to_merge: it[1].size() > 1
+                       no_merge: it[1].size() == 1
+                   }
+                   .set { aligned_bam_size_split }
+
+        // merge samples with multiple files:
+        merged_bam = PICARD__MERGE_SAM_FILES(aligned_bam_size_split.to_merge)
+
+        // re-combine with single files:
+        merged_bam.mix(aligned_bam_size_split.no_merge
+                .map { it -> tuple(it[0], *it[1]) }
+                )
+                .set { aligned_bam_sample_merged }
+
+        bam = MARK_DUPLICATES(aligned_bam_sample_merged,
+                params.atac_preprocess_tools.mark_duplicates_method)
 
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)
@@ -132,6 +164,5 @@ workflow ATAC_PREPROCESS {
     emit:
         bam
         fragments
-
 }
 
