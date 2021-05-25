@@ -16,7 +16,8 @@ process PICARD__MARK_DUPLICATES_AND_SORT {
     output:
         tuple val(sampleId),
               path("${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam"),
-              path("${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bai")
+              path("${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bai"),
+              path("${sampleId}.bwa.out.fixmate.picard_markdup.metrics.txt")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)

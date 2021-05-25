@@ -93,7 +93,7 @@ workflow ATAC_PREPROCESS {
 
             // run barcode correction against a whitelist:
             fastq_bc_corrected = SCTK__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
-            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, '.corrected.bc_stats.log', 'fastq')
+            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, '.corrected.bc_stats.log', 'reports/barcode')
 
 
             // run barcode demultiplexing on each read+barcode:
@@ -108,7 +108,7 @@ workflow ATAC_PREPROCESS {
         //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
         // using singlecelltoolkit:
         fastq_dex_br = SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, '.corrected.bc_stats.log', 'reports')
+        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, '.corrected.bc_stats.log', 'reports/barcode')
 
 
         // concatenate the read channels:
@@ -118,12 +118,12 @@ workflow ATAC_PREPROCESS {
         switch(params.atac_preprocess_tools.adapter_trimming_method) {
             case 'Trim_Galore':
                 fastq_dex_trim = TRIMGALORE__TRIM(fastq_dex);
-                PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.R1.trimming_report.txt', 'reports');
-                PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, '.R2.trimming_report.txt', 'reports');
+                PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.R1.trimming_report.txt', 'reports/trim');
+                PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, '.R2.trimming_report.txt', 'reports/trim');
                 break;
             case 'fastp':
                 fastq_dex_trim = FASTP__TRIM(fastq_dex);
-                PUBLISH_FASTQS_TRIMLOG_FASTP(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.fastp.trimming_report.html', 'reports');
+                PUBLISH_FASTQS_TRIMLOG_FASTP(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.fastp.trimming_report.html', 'reports/trim');
                 break;
         }
 
