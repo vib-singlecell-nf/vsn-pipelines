@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.picard
+toolParams = params.tools.picard
 
 process PICARD__MARK_DUPLICATES_AND_SORT {
 
@@ -26,6 +26,7 @@ process PICARD__MARK_DUPLICATES_AND_SORT {
         java -jar /picard.jar MarkDuplicates \
             I=${bam} \
             O=/dev/stdout \
+            METRICS_FILE=${sampleId}.bwa.out.fixmate.picard_markdup.metrics.txt \
             BARCODE_TAG=CB \
             COMPRESSION_LEVEL=0 \
             QUIET=true \
