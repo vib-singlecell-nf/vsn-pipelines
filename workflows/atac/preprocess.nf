@@ -19,8 +19,8 @@ include { BAM_TO_FRAGMENTS; } from './../../src/sinto/main.nf' params(params)
 include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode.nf' params(params)
 
 include {
-    PICARD__MERGE_SAM_FILES;
-} from './../../src/picard/processes/merge_sam_files.nf' params(params)
+    PICARD__MERGE_SAM_FILES_AND_SORT;
+} from './../../src/gatk/processes/merge_sam_files.nf' params(params)
 
 include {
     SIMPLE_PUBLISH as PUBLISH_BC_STATS;
@@ -144,7 +144,7 @@ workflow ATAC_PREPROCESS {
                    .set { aligned_bam_size_split }
 
         // merge samples with multiple files:
-        merged_bam = PICARD__MERGE_SAM_FILES(aligned_bam_size_split.to_merge)
+        merged_bam = PICARD__MERGE_SAM_FILES_AND_SORT(aligned_bam_size_split.to_merge)
 
         // re-combine with single files:
         merged_bam.mix(aligned_bam_size_split.no_merge

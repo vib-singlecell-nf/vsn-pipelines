@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.tools.picard
+toolParams = params.tools.gatk
 
 process PICARD__ESTIMATE_LIBRARY_COMPLEXITY {
 
@@ -21,10 +21,10 @@ process PICARD__ESTIMATE_LIBRARY_COMPLEXITY {
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.estimate_library_complexity)
         processParams = sampleParams.local
         """
-        java -jar /picard.jar EstimateLibraryComplexity \
-            I=${bam} \
-            O=${sampleId}.picard_library_complexity_metrics.txt \
-            BARCODE_TAG=${processParams.barcode_tag} \
+        gatk EstimateLibraryComplexity \
+            -I ${bam} \
+            -O ${sampleId}.picard_library_complexity_metrics.txt \
+            --BARCODE_TAG ${processParams.barcode_tag} \
         """
 }
 

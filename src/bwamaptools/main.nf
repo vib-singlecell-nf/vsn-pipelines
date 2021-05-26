@@ -13,10 +13,10 @@ include {
 } from './processes/mapping_summary.nf' params(params)
 include {
     PICARD__MARK_DUPLICATES_AND_SORT;
-} from './../../src/picard/processes/mark_duplicates.nf' params(params)
+} from './../../src/gatk/processes/mark_duplicates.nf' params(params)
 include {
     PICARD__ESTIMATE_LIBRARY_COMPLEXITY;
-} from './../../src/picard/processes/estimate_library_complexity.nf' params(params)
+} from './../../src/gatk/processes/estimate_library_complexity.nf' params(params)
 include {
     GATK__MARK_DUPLICATES_SPARK;
 } from './../../src/gatk/processes/mark_duplicates_spark.nf' params(params)
@@ -27,7 +27,6 @@ include {
     SIMPLE_PUBLISH as PUBLISH_MARKDUPS_METRICS;
     SIMPLE_PUBLISH as PUBLISH_LIBRARY_METRICS;
 } from "../utils/processes/utils.nf" params(params)
-//} from "../utils/workflows/utils.nf" params(params)
 
 //////////////////////////////////////////////////////
 // Define the workflow

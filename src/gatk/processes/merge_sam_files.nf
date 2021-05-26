@@ -2,9 +2,9 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.tools.picard
+toolParams = params.tools.gatk
 
-process PICARD__MERGE_SAM_FILES {
+process PICARD__MERGE_SAM_FILES_AND_SORT {
 
     container toolParams.container
     label 'compute_resources__default','compute_resources__24hqueue'
@@ -21,13 +21,13 @@ process PICARD__MERGE_SAM_FILES {
         //def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         //processParams = sampleParams.local
         """
-        java -jar /picard.jar MergeSamFiles \
-            ${"I="+bams.join(" I=")} \
-            O=/dev/stdout \
-        | java -jar /picard.jar SortSam \
-            I=/dev/stdin \
-            O=${sampleId}.bwa.out.fixmate.merged.bam \
-            SORT_ORDER=queryname
+        gatk MergeSamFiles \
+            ${"-I "+bams.join(" -I ")} \
+            -O /dev/stdout \
+        | gatk SortSam \
+            -I /dev/stdin \
+            -O ${sampleId}.bwa.out.fixmate.merged.bam \
+            --SORT_ORDER queryname
         """
 }
 

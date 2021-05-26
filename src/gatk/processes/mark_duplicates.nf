@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/" : ""
 
-toolParams = params.tools.picard
+toolParams = params.tools.gatk
 
 process PICARD__MARK_DUPLICATES_AND_SORT {
 
@@ -24,19 +24,19 @@ process PICARD__MARK_DUPLICATES_AND_SORT {
         processParams = sampleParams.local
         """
         set -euo pipefail
-        java -jar /picard.jar MarkDuplicates \
-            I=${bam} \
-            O=/dev/stdout \
-            METRICS_FILE=${sampleId}.bwa.out.fixmate.picard_markdup.metrics.txt \
-            BARCODE_TAG=CB \
-            COMPRESSION_LEVEL=0 \
-            QUIET=true \
-            ASSUME_SORT_ORDER=queryname \
-        | java -jar /picard.jar SortSam \
-            I=/dev/stdin \
-            O=${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam \
-            SORT_ORDER=coordinate \
-            CREATE_INDEX=true
+        gatk MarkDuplicates \
+            -I ${bam} \
+            -O /dev/stdout \
+            --METRICS_FILE ${sampleId}.bwa.out.fixmate.picard_markdup.metrics.txt \
+            --BARCODE_TAG CB \
+            --COMPRESSION_LEVEL 0 \
+            --QUIET true \
+            --ASSUME_SORT_ORDER queryname \
+        | gatk SortSam \
+            -I /dev/stdin \
+            -O ${sampleId}.bwa.out.fixmate.picard_markdup.possorted.bam \
+            --SORT_ORDER coordinate \
+            --CREATE_INDEX true
         """
 }
 
