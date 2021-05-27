@@ -42,6 +42,9 @@ workflow ATAC_QC_PREFILTER {
         data_split.fragments.join(peaks)
                   .map { it -> tuple(it[0], it[1], it[2], it[4]) }
                   .set{ fragpeaks }
+        fragpeaks.map { it -> tuple(it[0], it[1], it[3]) }
+                 .collectFile(name: 'input_files.txt')
+                 .view()
 
         qc_stats = SC__PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks, biomart)
         PUBLISH_METADATA(qc_stats.map { it -> tuple(it[0], it[1]) }, 'metadata.tsv', 'gz', 'pycistopic', false)

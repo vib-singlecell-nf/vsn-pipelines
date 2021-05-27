@@ -13,21 +13,31 @@ from pycisTopic.qc import compute_qc_stats
 parser = argparse.ArgumentParser(description='Compute QC stats')
 
 parser.add_argument(
+    "--input_files",
+    type=str,
+    required=True,
+    nargs='+',
+    help='Input files in the form of [SampleId, path_to_fragments, path_to_peaks]. Multiple inputs are possible.'
+)
+parser.add_argument(
     "--sampleId",
     type=str,
     required=True,
+    nargs='+',
     help='Sample ID.'
 )
 parser.add_argument(
     "--fragments",
     type=str,
     required=True,
+    nargs='+',
     help='Input fragments file.'
 )
 parser.add_argument(
     "--regions",
     type=str,
     required=True,
+    nargs='+',
     help='Path to regions file.'
 )
 parser.add_argument(
@@ -73,6 +83,10 @@ args = parser.parse_args()
 infile = open(args.biomart_annot_pkl, 'rb')
 annot = pickle.load(infile)
 infile.close()
+
+
+print(args.input_files)
+
 
 fragments_dict = { 
     args.sampleId: args.fragments
