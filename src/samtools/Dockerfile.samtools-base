@@ -1,0 +1,37 @@
+FROM debian:buster-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        apt-utils debconf locales locales-all && \
+    dpkg-reconfigure locales && \
+    apt-get install -y --reinstall ca-certificates && \
+    apt-get install -y --no-install-recommends \
+        cmake \
+        make \
+        gcc \
+        libbz2-dev \
+        zlib1g-dev \
+        liblzma-dev \
+        libdeflate-dev \
+        bzip2 \
+        pigz \
+        curl \
+        procps \
+        less
+
+# zlib-ng
+ENV ZLIBNG 2.0.2
+RUN curl -L -o /tmp/zlib-ng-${ZLIBNG}.tar.gz https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ZLIBNG}.tar.gz && \
+    cd /tmp && tar xvf zlib-ng-${ZLIBNG}.tar.gz && \
+    cd zlib-ng-${ZLIBNG} && \
+    cmake -DZLIB_COMPAT=ON -DINSTALL_UTILS=ON . && \
+    cmake --build . --config Release && \
+    ctest --verbose -C Release && \
+    cmake --build . --target install && \
+    cd .. && rm -r zlib-ng-${ZLIBNG}*
+
+RUN rm -rf /var/cache/apt/* && \
+    rm -rf /var/lib/apt/lists/* && \
+    ldconfig
+
