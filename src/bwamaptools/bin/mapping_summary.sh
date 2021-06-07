@@ -15,7 +15,7 @@ fi
 samtools stat -@ "${nbr_threads}" "${bam}" > "${sampleId}.stat"
 
 # Uniquely mapped reads (BWA):
-UMR=$(samtools view -@ "${nbr_threads}" -F 0x4 -F 0x100 -F 0x800 "${bam}" | grep -v -e 'XA:Z:' -e 'SA:Z:' | wc -l);
+UMR=$(samtools view -@ "${nbr_threads}" -c -F 0x4 -F 0x100 -F 0x800 -e '! [XA] && ! [SA]' "${bam}");
 
 # Fraction of total read pairs mapped confidently to genome (>30 mapq):
 CMR=$(samtools view -@ "${nbr_threads}" -c -F 0x4 -F 0x100 -F 0x800 -q 30 "${bam}");
