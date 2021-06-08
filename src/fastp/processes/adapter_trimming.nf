@@ -9,9 +9,6 @@ process FASTP__ADAPTER_TRIMMING {
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
-    when:
-        params.atac_preprocess_tools.adapter_trimming_method == 'fastp'
-
     input:
         tuple val(sampleId),
               path(fastq_PE1),
