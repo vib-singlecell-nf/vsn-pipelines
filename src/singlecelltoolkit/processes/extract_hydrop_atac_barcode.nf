@@ -12,25 +12,25 @@ process SCTK__EXTRACT_HYDROP_ATAC_BARCODE {
     input:
         tuple val(sampleId),
               val(technology),
-              path(fastq_R1),
-              path(fastq_R2),
-              path(fastq_R3)
+              path(fastq_PE1),
+              path(fastq_bc),
+              path(fastq_PE2)
 
     output:
         tuple val(sampleId),
               val(technology),
-              path(fastq_R1),
+              path(fastq_PE1),
               path("${sampleId}_hydrop_barcode_R2.fastq.gz"),
-              path(fastq_R3)
+              path(fastq_PE2)
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         //processParams = sampleParams.local
         """
         extract_hydrop_atac_barcode_from_R2_fastq.sh \
-            ${fastq_R2} \
+            ${fastq_bc} \
             ${sampleId}_hydrop_barcode_R2.fastq.gz \
-            igzip
+            pigz
         """
 }
 
