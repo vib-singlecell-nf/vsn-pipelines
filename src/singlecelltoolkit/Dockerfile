@@ -5,8 +5,21 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         python3 \
         python3-venv \
+        nasm \
+        libtool \
         wget && \
         update-alternatives --install /usr/bin/python python /usr/bin/python3.7 100
+
+# install igzip (https://github.com/intel/isa-l)
+RUN git clone --depth=1 https://github.com/intel/isa-l.git /tmp/isa-l && \
+    cd /tmp/isa-l && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -r isa-l
+
 
 RUN python -m venv /opt/venv
 # Make sure we use the virtualenv:
@@ -22,8 +35,9 @@ RUN pip install --no-cache-dir --upgrade pip wheel && \
         matplotlib \
         numpy
 
+
 # install seq (https://github.com/seq-lang/seq/):
-ENV SEQ_VERSION=0.9.11
+ENV SEQ_VERSION=0.10.1
 RUN mkdir -p /opt/seq && \
     wget https://github.com/seq-lang/seq/releases/download/v${SEQ_VERSION}/seq-linux-x86_64.tar.gz && \
     tar xzf seq-linux-x86_64.tar.gz --strip-components 1 -C /opt/seq && \
