@@ -11,6 +11,7 @@ process SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE {
 
     input:
         tuple val(sampleId),
+              val(technology),
               path(fastq_PE1),
               path(fastq_PE2)
 

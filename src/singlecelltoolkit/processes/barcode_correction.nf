@@ -11,12 +11,18 @@ process SCTK__BARCODE_CORRECTION {
 
     input:
         tuple val(sampleId),
+              val(technology),
+              path(fastq_PE1),
               path(fastq_bc),
+              path(fastq_PE2),
               path(bc_whitelist)
 
     output:
         tuple val(sampleId),
+              val(technology),
+              path(fastq_PE1),
               path("${sampleId}_bc_corrected.fastq.gz"),
+              path(fastq_PE2),
               path("${sampleId}_bc_corrected.fastq.gz.corrected.bc_stats.tsv")
 
     script:

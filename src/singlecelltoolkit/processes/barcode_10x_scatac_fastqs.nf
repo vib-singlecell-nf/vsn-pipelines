@@ -11,6 +11,7 @@ process SCTK__BARCODE_10X_SCATAC_FASTQ {
 
     input:
         tuple val(sampleId),
+              val(technology),
               path(fastq_PE1),
               path(fastq_bc),
               path(fastq_PE2)
