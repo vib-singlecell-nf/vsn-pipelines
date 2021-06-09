@@ -1,37 +1,42 @@
 nextflow.enable.dsl=2
 
-//////////////////////////////////////////////////////
-// process imports:
-include { SCTK__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/processes/barcode_correction.nf' params(params)
-include { SCTK__BARCODE_10X_SCATAC_FASTQ; } from './../../src/singlecelltoolkit/processes/barcode_10x_scatac_fastqs.nf' params(params)
-include { SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE; } from './../../src/singlecelltoolkit/processes/extract_and_correct_biorad_barcode.nf' params(params)
-include { SCTK__EXTRACT_HYDROP_ATAC_BARCODE; } from './../../src/singlecelltoolkit/processes/extract_hydrop_atac_barcode.nf' params(params)
-include { TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
+// process imports
+include {
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE;
+} from './../../src/singlecelltoolkit/processes/extract_hydrop_atac_barcode.nf'
+include {
+    TRIMGALORE__TRIM;
+} from './../../src/trimgalore/processes/trim.nf'
 include {
     FASTP__ADAPTER_TRIMMING as FASTP__TRIM;
-} from './../../src/fastp/processes/adapter_trimming.nf' params(params)
-
-// workflow imports:
-include {
-    BWA_MAPPING_PE;
-    MARK_DUPLICATES;
-} from './../../src/bwamaptools/main.nf' params(params)
-include { BAM_TO_FRAGMENTS; } from './../../src/sinto/main.nf' params(params)
-include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode.nf' params(params)
+} from './../../src/fastp/processes/adapter_trimming.nf'
 
 include {
-    PICARD__MERGE_SAM_FILES_AND_SORT;
-} from './../../src/gatk/processes/merge_sam_files.nf' params(params)
-
-include {
-    SIMPLE_PUBLISH as PUBLISH_BC_STATS;
-    SIMPLE_PUBLISH as PUBLISH_BR_BC_STATS;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
     SIMPLE_PUBLISH as PUBLISH_FRAGMENTS;
     SIMPLE_PUBLISH as PUBLISH_FRAGMENTS_INDEX;
-} from "../../src/utils/processes/utils.nf" params(params)
+} from '../../src/utils/processes/utils.nf'
+
+// workflow imports:
+include {
+    BWA_MAPPING_PE;
+    MARK_DUPLICATES;
+} from './../../src/bwamaptools/main.nf'
+include {
+    PICARD__MERGE_SAM_FILES_AND_SORT;
+} from './../../src/gatk/processes/merge_sam_files.nf'
+include {
+    BAM_TO_FRAGMENTS;
+} from './../../src/sinto/main.nf'
+
+
+include {
+    barcode_correction as bc_corr_std;
+    barcode_correction as bc_corr_hyd;
+    biorad_bc;
+} from './../../src/singlecelltoolkit/main.nf'
 
 
 //////////////////////////////////////////////////////
@@ -43,6 +48,7 @@ workflow ATAC_PREPROCESS {
         metadata
 
     main:
+
         // import metadata
         data = Channel.from(metadata)
                       .splitCsv(
@@ -56,7 +62,7 @@ workflow ATAC_PREPROCESS {
                                   .replaceAll(row.sample_name,""),
                               row.technology,
                               file(row.fastq_PE1_path, checkIfExists: true),
-                              file(row.fastq_barcode_path, checkIfExists: true),
+                              row.fastq_barcode_path,
                               file(row.fastq_PE2_path, checkIfExists: true)
                               )
                       }
@@ -66,60 +72,40 @@ workflow ATAC_PREPROCESS {
                         standard: true // capture all other technology types here
                       }
 
-        /* extract HyDrop ATAC barcode & combine with data.standard */
-        data_combined = data.standard.mix(
-            SCTK__EXTRACT_HYDROP_ATAC_BARCODE(data.hydrop)
-            )
+        /* standard data
+           barcode correction */
+        bc_corr_std(data.standard)
 
-        /* Barcode correction */
-        // gather barcode whitelists from params into a channel:
-        wl = Channel.empty()
-        wl_cnt = 0
-        params.tools.singlecelltoolkit.barcode_correction.whitelist.each { k, v ->
-            if(v != '') {
-                wl = wl.mix( Channel.of(tuple(k, file(v)) ))
-                wl_cnt = wl_cnt + 1
-            }
-        }
+        /* HyDrop ATAC
+           extract barcode and correct */
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE(data.hydrop) \
+            | bc_corr_hyd
 
-        if(wl_cnt == 0) {
-            if(!params.containsKey('quiet')) {
-                println("No whitelist files were found in 'params.tools.singlecelltoolkit.barcode_correction.whitelist'. Skipping barcode correction for standard-type samples.")
-            }
-            // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SCTK__BARCODE_10X_SCATAC_FASTQ(
-                data_combined.map { it -> tuple(it[0], it[2], it[3], it[4]) }
-            )
-        } else {
-            // join wl to the data channel:
-            data_wl = wl.cross( data_combined.map { it -> tuple(it[1], it[0], it[2], it[3], it[4]) } ) // technology, sampleId, R1, R2, R3
-                        .map { it -> tuple(it[1][1], it[1][0],           // sampleId, technology
-                                           it[1][2], it[1][3], it[1][4], // R1, R2, R3
-                                           it[0][1]                      // whitelist
-                                           ) }
+        /* BioRad data
+           extract barcode and correct */
+        biorad_bc(data.biorad)
 
-            // run barcode correction against a whitelist:
-            fastq_bc_corrected = SCTK__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
-            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, '.corrected.bc_stats.log', 'reports/barcode')
+        /* downstream steps */
+        bc_corr_std.out
+            .mix(bc_corr_hyd.out)
+            .mix(biorad_bc.out) \
+            | adapter_trimming \
+            | mapping
+
+    emit:
+        bam = mapping.out.bam
+        fragments = mapping.out.fragments
+}
 
 
-            // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SCTK__BARCODE_10X_SCATAC_FASTQ(
-                data_combined.join(fastq_bc_corrected).map { it -> tuple(it[0], it[2], it[5], it[4]) }
-            )
+/* sub-workflows used above */
 
-        }
+workflow adapter_trimming {
 
-        /* run BioRad barcode correction and debarcoding separately: */
-        // using BAP:
-        //fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-        // using singlecelltoolkit:
-        fastq_dex_br = SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
-        PUBLISH_BR_BC_STATS(fastq_dex_br.map { it -> tuple(it[0], it[3]) }, '.corrected.bc_stats.log', 'reports/barcode')
+    take:
+        fastq_dex
 
-
-        // concatenate the read channels:
-        fastq_dex = fastq_dex.concat(fastq_dex_br.map{ it -> tuple(it[0], it[1],it[2])})
+    main:
 
         // run adapter trimming:
         switch(params.atac_preprocess_tools.adapter_trimming_method) {
@@ -134,14 +120,26 @@ workflow ATAC_PREPROCESS {
                 break;
         }
 
+    emit:
+        fastq_dex_trim
+
+}
+
+
+workflow mapping {
+
+    take:
+        fastq_dex_trim
+
+    main:
+
         // map with bwa mem:
         aligned_bam = BWA_MAPPING_PE(
             fastq_dex_trim.map { it -> tuple(it[0].split("___")[0], // [val(unique_sampleId),
                                              *it[0..2] ) // val(sampleId), path(fastq_PE1), path(fastq_PE2)]
                   })
 
-
-        // split by sample:
+        // split by sample size:
         aligned_bam.map{ it -> tuple(it[0].split("___")[0], it[1]) } // [ sampleId, bam ]
                    .groupTuple()
                    .branch {
@@ -154,10 +152,8 @@ workflow ATAC_PREPROCESS {
         merged_bam = PICARD__MERGE_SAM_FILES_AND_SORT(aligned_bam_size_split.to_merge)
 
         // re-combine with single files:
-        merged_bam.mix(aligned_bam_size_split.no_merge
-                .map { it -> tuple(it[0], *it[1]) }
-                )
-                .set { aligned_bam_sample_merged }
+        merged_bam.mix(aligned_bam_size_split.no_merge.map { it -> tuple(it[0], *it[1]) })
+                  .set { aligned_bam_sample_merged }
 
         bam = MARK_DUPLICATES(aligned_bam_sample_merged,
                 params.atac_preprocess_tools.mark_duplicates_method)
@@ -171,5 +167,6 @@ workflow ATAC_PREPROCESS {
     emit:
         bam
         fragments
+
 }
 
