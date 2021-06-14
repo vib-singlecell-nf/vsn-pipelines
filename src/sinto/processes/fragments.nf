@@ -4,9 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.sinto
 
-barcode_tag = params.containsKey('tools_sinto_fragments_barcodetag') ? params.tools_sinto_fragments_barcodetag : toolParams.fragments.barcodetag
-
-process SC__SINTO__FRAGMENTS {
+process SINTO__FRAGMENTS {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
@@ -27,20 +25,19 @@ process SC__SINTO__FRAGMENTS {
         sinto fragments \
             -b ${bam} \
             -m ${processParams.min_mapq} \
-            ${barcode_tag=='' ? '' : '--barcodetag ' + barcode_tag} \
+            ${processParams.containsKey('barcodetag') && processParams.barcodetag ? '--barcodetag ' + processParams.barcodetag: ''} \
             ${processParams.containsKey('barcode_regex') && processParams.barcode_regex ? '--barcode_regex ' + processParams.barcode_regex: ''} \
             ${processParams.containsKey('use_chrom') && processParams.use_chrom ? '--use_chrom ' + processParams.use_chrom: ''} \
             ${processParams.containsKey('min_distance') && processParams.min_distance ? '--min_distance ' + processParams.min_distance: ''} \
             ${processParams.containsKey('max_distance') && processParams.max_distance ? '--max_distance ' + processParams.max_distance: ''} \
             ${processParams.containsKey('chunksize') && processParams.chunksize ? '--chunksize ' + processParams.chunksize: ''} \
-            ${processParams.containsKey('temp_dir') && processParams.temp_dir ? '--temp_dir ' + processParams.temp_dir: ''} \
             -p ${task.cpus} \
             -f ${sampleId}.fragments.bed
         """
 }
 
 
-process SC__SINTO__SORT_FRAGMENTS {
+process SINTO__SORT_FRAGMENTS {
 
     container toolParams.container
     label 'compute_resources__mem'

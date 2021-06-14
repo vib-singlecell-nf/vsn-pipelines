@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.bwamaptools
 
-process SC__BWAMAPTOOLS__BWA_MEM_PE {
+process BWAMAPTOOLS__BWA_MEM_PE {
 
     container toolParams.container
     label 'compute_resources__bwa_mem'
@@ -12,29 +12,28 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
     input:
         tuple path(bwa_fasta),
               path(bwa_index),
+              val(unique_sampleId),
               val(sampleId),
               path(fastq_PE1),
               path(fastq_PE2)
 
     output:
         tuple val(sampleId),
-              path("${sampleId}.bwa.out.possorted.bam")
+              path("${sampleId}.bwa.out.fixmate.bam")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
+        def sampleParams = params.parseConfig(unique_sampleId, params.global, toolParams)
         processParams = sampleParams.local
-        def samtools_cpus = (task.cpus > 6) ? 6 : task.cpus
         """
-        set -euo pipefail
-        bwa mem \
+        id=\$(zcat ${fastq_PE1} | head -n 1 | cut -f 1-4 -d':' | sed 's/@//')
+        ${toolParams.bwa_version} mem \
             -t ${task.cpus} \
+            -C \
+            -R "@RG\\tID:\${id}\\tSM:${unique_sampleId}\\tLB:\${id}"__"${unique_sampleId}\\tPL:ILLUMINA" \
             ${bwa_fasta} \
             ${fastq_PE1} \
             ${fastq_PE2} \
-        | samtools fixmate -@ ${samtools_cpus} -m -u -O bam - - \
-        | samtools sort -@ ${samtools_cpus} -u -O bam - \
-        | samtools markdup -@ ${samtools_cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
+        | samtools fixmate -m -O bam - ${sampleId}.bwa.out.fixmate.bam
         """
-
 }
 

@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
  */
 process FASTP__CLEAN_AND_FASTQC {
 
-    container params.fastp.container
+    container params.tools.fastp.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
@@ -17,7 +17,7 @@ process FASTP__CLEAN_AND_FASTQC {
         tuple file('*_fastp.{json,html}'), emit: report
     
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.fastp)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.tools.fastp)
 		processParams = sampleParams.local
         """
         fastp --thread ${processParams.thread} \
