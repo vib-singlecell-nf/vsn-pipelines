@@ -47,12 +47,28 @@ parser$add_argument(
     help = "Sample ID of the given input file."
 )
 parser$add_argument(
+    '--group-name',
+    type="character",
+    dest='group_name',
+    action = "store",
+    default = NULL,
+    help = "Name of the group which the given input files are from. A new column named by this group_name will be added in anndata.obs"
+)
+parser$add_argument(
+    '--group-value',
+    type="character",
+    dest='group_value',
+    action = "store",
+    default = NULL,
+    help = "Value of the group which the given input files are from. The group_name column in anndata.obs will be populated with this group_value."
+)
+parser$add_argument(
     '--tag-cell-with-sample-id',
     type="character",
     dest='tag_cell_with_sample_id',
     action = "store",
     default = TRUE,
-    help = "Sample ID of the given input file."
+    help = "Append the sample ID to the cell barcodes."
 )
 parser$add_argument(
     '--remove-10x-gem-well',
@@ -105,6 +121,68 @@ isTrue <- function(x) {
 	)
 }
 
+UpdateSeuratCellMetadata <- function(seurat, args) {
+    # Add sample ID as obs entry
+	seurat <- AddMetaData(
+		object = seurat,
+		metadata = as.character(x = args$`sample_id`),
+		col.name = 'sample_id'
+    )
+
+    # Tag cell with sample ID
+    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
+        if(isTrue(x = args$`remove_10x_gem_well`)) {
+            new.names <- gsub(
+                pattern = "-([0-9]+)$",
+                replace = paste0("-", args$`sample_id`),
+                x = colnames(x = seurat)
+            )
+        } else {
+            new.names <- paste0(colnames(x = seurat), "___", args$`sample_id`)
+        }
+		seurat <- Seurat::RenameCells(
+			object = seurat,
+			new.names = new.names
+		)
+    }
+    
+    # Add group_value as obs entry with group_name as column name
+    if(!is.null(args$`group_name`) & !is.null(args$`group_value`)) {
+        seurat <- AddMetaData(
+            object = seurat,
+            metadata = as.character(x = args$`group_value`),
+            col.name = as.character(x = args$`group_name`)
+        )
+    }
+    return (seurat)
+}
+
+UpdateSCECellMetadata <- function(sce, args) {
+    # Add sample ID as colData entry
+	col_data <- SummarizedExperiment::colData(x = sce)
+    col_data$sample_id <- args$`sample_id`
+    
+    # Tag cell with sample ID
+    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
+        if(isTrue(x = args$`remove_10x_gem_well`)) {
+            new.names <- gsub(
+                pattern = "-([0-9]+)$",
+                replace = paste0("-", args$`sample_id`),
+                x = colnames(x = sce)
+            )
+        } else {
+            new.names <- paste0(colnames(x = sce), "___", args$`sample_id`)
+        }
+        colnames(x = sce) <- new.names
+    }
+    # Add group_value as obs entry with group_name as column name
+    if(!is.null(args$`group_name`) & !is.null(args$`group_value`)) {
+        col_data[[args$`group_name`]] <-args$`group_value`
+    }
+    SummarizedExperiment::colData(x = sce) <- col_data
+    return (sce)
+}
+
 # Define the arguments properly
 FILE_PATH_IN <- args$`input`
 FILE_NAME_SPLITTED <- strsplit(
@@ -126,22 +204,6 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     if(class(x = seurat) != "Seurat") {
       	stop("VSN ERROR: The object contained in the Rds file is not a Seurat object.")
     }
-    # Tag cell with sample ID
-    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
-        if(isTrue(x = args$`remove_10x_gem_well`)) {
-            new.names <- gsub(
-                pattern = "-([0-9]+)$",
-                replace = paste0("-", args$`sample_id`),
-                x = colnames(x = seurat)
-            )
-        } else {
-            new.names <- paste0(colnames(x = seurat), "___", args$`sample_id`)
-        }
-		seurat <- Seurat::RenameCells(
-			object = seurat,
-			new.names = new.names
-		)
-    }
     # Reset Seurat slots
     if(isTrue(x = args$`seurat_reset`)) {
 		print("Resetting @graphs in seurat object...")
@@ -157,12 +219,9 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
 		print(paste0("Resetting @assays$",args$`seurat_assay`,"@scale.data in seurat object..."))
 		seurat@assays[[args$`seurat_assay`]]@scale.data <- matrix(ncol = 0, nrow = 0)
     }
-    # Add sample ID as obs entry
-	seurat <- AddMetaData(
-		object = seurat,
-		metadata = as.character(x = args$`sample_id`),
-		col.name = 'sample_id'
-    )
+
+    # Update Seurat object cell metadata
+    seurat <- UpdateSeuratCellMetadata(seurat, args)
     # Check if all meta.data columns are 1-dimensional (i.e.: dim(x = ...) should not return NULL)
     are_metadata_cols_dim_not_null <- do.call(
 		what="c", 
@@ -177,6 +236,7 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
         metadata_cols_dim_not_null_colnames <- colnames(x = seurat@meta.data[, which(x = are_metadata_cols_dim_not_null)])
         stop(paste0("VSN ERROR: Some columns (", paste(metadata_cols_dim_not_null_colnames, collapse=" and "),") from the given Seurat object in the meta.data slot are not 1-dimensional."))
     }
+
     # Sort genes
     seurat <- seurat[sort(x = row.names(x = seurat)),]
     
@@ -200,28 +260,16 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     if(class(x = sce) != "SingleCellExperiment") {
       	stop("VSN ERROR: The object contained in the Rds file is not a SingleCellExperiment object.")
     }
+
     # Set/update row.names with gene symbols
     row_data <- SummarizedExperiment::rowData(x = sce)
     if("Symbol" %in% colnames(x = row_data)) {
 	    row.names(x = sce) <- row_data$Symbol
     }
-    # Tag cell with sample ID
-    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
-        if(isTrue(x = args$`remove_10x_gem_well`)) {
-            new.names <- gsub(
-                pattern = "-([0-9]+)$",
-                replace = paste0("-", args$`sample_id`),
-                x = colnames(x = sce)
-            )
-        } else {
-            new.names <- paste0(colnames(x = sce), "___", args$`sample_id`)
-        }
-        colnames(x = sce) <- new.names
-    }
-    # Add sample ID as colData entry
-	col_data <- SummarizedExperiment::colData(x = sce)
-    col_data$sample_id <- args$`sample_id`
-    SummarizedExperiment::colData(x = sce) <- col_data
+
+    # Update SingleCellExperiment object cell metadata
+    sce <- UpdateSCECellMetadata(sce, args)
+
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     sceasy::convertFormat(
@@ -236,30 +284,18 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
     sce <- DropletUtils::read10xCounts(
       	samples = FILE_PATH_IN
     )
+
     # Set/update row.names with gene symbols
     row_data <- SummarizedExperiment::rowData(x = sce)
     if("Symbol" %in% colnames(x = row_data)) {
 	    row.names(x = sce) <- row_data$Symbol
     }
+
     # Set col.names with barcode ID
     colnames(x = sce) <- SummarizedExperiment::colData(x = sce)$Barcode
-    # Tag cell with sample ID
-    if(isTrue(x = args$`tag_cell_with_sample_id`)) {
-        if(isTrue(x = args$`remove_10x_gem_well`)) {
-            new.names <- gsub(
-                pattern = "-([0-9]+)$",
-                replace = paste0("-", args$`sample_id`),
-                x = colnames(x = sce)
-            )
-        } else {
-            new.names <- paste0(colnames(x = sce), "___", args$`sample_id`)
-        }
-        colnames(x = sce) <- new.names
-    }
-    # Add sample ID as colData entry
-	col_data <- SummarizedExperiment::colData(x = sce)
-    col_data$sample_id <- args$`sample_id`
-    SummarizedExperiment::colData(x = sce) <- col_data
+
+    # Update SingleCellExperiment object cell metadata
+    sce <- UpdateSCECellMetadata(sce, args)
     # Sort genes
     sce <- sce[sort(x = row.names(x = sce)),]
     saveRDS(

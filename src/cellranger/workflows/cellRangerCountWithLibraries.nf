@@ -8,6 +8,9 @@ import java.nio.file.Paths
 include {
     SC__CELLRANGER__COUNT_WITH_LIBRARIES;
 } from './../processes/count' params(params)
+include {
+    SC__CELLRANGER__PREFLIGHT;
+} from './../processes/preflight' params(params)
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -59,7 +62,8 @@ workflow CELLRANGER_COUNT_WITH_LIBRARIES {
             )
         }
         .set { data }
-
+        
+        SC__CELLRANGER__PREFLIGHT()
         SC__CELLRANGER__COUNT_WITH_LIBRARIES( transcriptome, featureRef, data )
 
     emit:

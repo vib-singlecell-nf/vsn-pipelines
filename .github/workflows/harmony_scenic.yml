@@ -1,4 +1,4 @@
-name: single_sample_scenic
+name: harmony_scenic
 
 on: 
   push:
@@ -22,12 +22,16 @@ jobs:
         export NXF_VER='20.10.0'
         wget -qO- get.nextflow.io | bash
         sudo mv nextflow /usr/local/bin/
+        echo 0 | sudo tee /proc/sys/fs/protected_hardlinks
     - name: Get sample data
       run: |
+        mkdir testdata
         wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_small.tar.gz
         tar xzvf sample_data_small.tar.gz
-    - name: Run single_sample_scenic test
+        cp -r sample_data testdata/sample1
+        mv sample_data testdata/sample2
+    - name: Run harmony_scenic test
       run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile single_sample_scenic,test__single_sample_scenic,test__compute_resources,docker -entry single_sample_scenic -ansi-log false
+        nextflow run ${GITHUB_WORKSPACE} -profile harmony_scenic,test__harmony_scenic,test__compute_resources,docker -entry harmony_scenic -ansi-log false
         cat .nextflow.log
 

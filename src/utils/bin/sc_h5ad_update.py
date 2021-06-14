@@ -7,6 +7,7 @@ import pandas as pd
 import scanpy as sc
 import numpy as np
 import json
+import re
 from scipy.sparse import csr_matrix
 
 parser = argparse.ArgumentParser(description='')
@@ -100,6 +101,7 @@ if args.obs_column_mapper is not None:
     # Renaming will be performed as in https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.rename.html
     # Mapper e.g.: {"ColumnA": "NewColumnAName", "ColumnB": "NewColumnBName"}
     obs_column_mapper = json.loads(args.obs_column_mapper)
+    print(obs_column_mapper)
     adata.obs = adata.obs.rename(columns=obs_column_mapper)
 
 if args.obs_column_value_mapper is not None:
@@ -117,7 +119,10 @@ if args.obs_column_value_mapper is not None:
 
 if args.obs_column_to_remove is not None:
     print("Removing some columns in the obs slot of the given AnnData...")
-    adata.obs = adata.obs.drop(args.obs_column_to_remove, axis=1)
+    for obs_column_pattern_to_remove in args.obs_column_to_remove:
+        remove_columns_mask = [bool(re.match(obs_column_pattern_to_remove, obs_column)) for obs_column in adata.obs.columns]
+        columns_to_remove = adata.obs.columns[remove_columns_mask]
+        adata.obs = adata.obs.drop(columns_to_remove, axis=1)
 
 # I/O
 adata.write_h5ad("{}.h5ad".format(FILE_PATH_OUT_BASENAME))

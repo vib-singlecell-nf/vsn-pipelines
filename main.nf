@@ -81,9 +81,6 @@ workflow mnncorrect {
 
 def getHarmonyBatchVariables = { params ->
     batchVariables = params.sc.harmony.varsUse
-    if(batchVariables.size() > 1) {
-        throw new Exception("Currently it is not supported to run with multiple batch variables.")
-    }
     return batchVariables
 }
 
@@ -99,7 +96,7 @@ workflow harmony {
     } from "./src/utils/workflows/utils" params(params)
 
     batchVariables = getHarmonyBatchVariables(params)
-    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables.join("_").toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
@@ -1123,6 +1120,13 @@ workflow cell_annotate {
 
 workflow cell_annotate_filter {
 
+    main:
+        _cell_annotate_filter(true)
+
+}
+
+workflow _cell_annotate_filter {
+
     take:
         // Expects publish : boolean
         publish
@@ -1209,7 +1213,7 @@ workflow cell_annotate_filter_and_sample_annotate {
 
 
         // Run
-        out = cell_annotate_filter(false)
+        out = _cell_annotate_filter(false)
 
         // Annotate cells based on an indexed sample-based metadata table
         if(!params.sc.containsKey("sample_annotate"))

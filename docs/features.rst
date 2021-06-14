@@ -467,3 +467,15 @@ The following command, will create a Nextflow config which the pipeline will und
 
 - ``[data-profile]``: Can be one of the different possible data profiles e.g.: ``h5ad``
 - ``[...]``: Can be other profiles like ``bbknn``, ``harmony``, ``pcacv``, ...
+
+
+Quiet mode
+----------
+
+By default, VSN will output some additional messages to the terminal, such as the global seed, and the names and paths of the samples detected by the input channel.
+These messages can be suppressed by using the ``--quiet`` flag when starting the nextflow process:
+
+.. code:: bash
+
+    nextflow -C example.config run vib-singlecell-nf/vsn-pipelines -entry single_sample --quiet
+

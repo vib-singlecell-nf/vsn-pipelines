@@ -9,10 +9,10 @@ include {
     getChannel as getFileChannel;
     getChannelWithIndex as getFileChannelWithIndex;
 } from './file' params(params)
+include {
+    isCollectionOrArray;
+} from './../utils/processes/utils'
 
-boolean isCollectionOrArray(object) {    
-    [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
-}
 
 def isOuts = { glob ->
     // Avoid file() which will resolve the glob
@@ -47,7 +47,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex_outs", outputFileFormat, 'NULL')
                     }
                 )
             } else {
@@ -55,7 +55,7 @@ workflow getDataChannel {
                     getTenXCellRangerMEXChannel(
                         params.data.tenx.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_mex", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_mex", outputFileFormat, 'NULL')
                     }
                 )
             }
@@ -66,7 +66,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx_atac.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex_outs", outputFileFormat, 'NULL')
                     }
                 )
             } else {
@@ -74,7 +74,7 @@ workflow getDataChannel {
                     getTenXCellRangerMEXChannel(
                         params.data.tenx_atac.cellranger_mex
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat, 'NULL')
                     }
                 )
             }
@@ -85,7 +85,7 @@ workflow getDataChannel {
                     getTenXCellRangerOutsChannel(
                         params.data.tenx.cellranger_h5
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5_outs", outputFileFormat, 'NULL')
                     }
                 )
             } else {
@@ -93,7 +93,7 @@ workflow getDataChannel {
                     getTenXCellRangerH5Channel( 
                         params.data.tenx.cellranger_h5
                     ).map {
-                        it -> tuple(it[0], it[1], "10x_cellranger_h5", outputFileFormat)
+                        it -> tuple(it[0], it[1], "10x_cellranger_h5", outputFileFormat, 'NULL')
                     }
                 )
             }
@@ -102,19 +102,52 @@ workflow getDataChannel {
             dataH5ad = params.data.h5ad
             def filePaths = null
             def suffix = null
+            def groups = null
             if(!dataH5ad.containsKey("file_paths") && !dataH5ad.containsKey("suffix")) {
                 filePaths = dataH5ad.collect { k,v -> v["file_paths"] }.flatten()
                 suffix = dataH5ad.collect { k,v -> v["suffix"] }.flatten()
+                numGroups = dataH5ad.size()
+                numUniqueSuffixes = suffix.unique { a, b -> a <=> b }.size()
+                if(numGroups != numUniqueSuffixes) {
+                    throw new Exception("VSN ERROR: Number of data groups ("+ numGroups +") should be equal to the number of unique suffixes ("+ numUniqueSuffixes +"). Fix the group definitions in params.data.")
+                }
+                // Check if any suffix overlap
+                for(int i=0; i<suffix.size(); i++) {
+                    for(int j=0; j<suffix.size(); j++) {
+                        if(i==j) continue
+                        if(suffix[i].length() > suffix[j].length()) {
+                            if(suffix[i].contains(suffix[j])) {
+                                throw new Exception("VSN ERROR: some suffixes are overlapping ("+ suffix[j] +" with "+ suffix[i] +")")
+                            }
+                        } else {
+                            if(suffix[j].contains(suffix[i])) {
+                                throw new Exception("VSN ERROR: some suffixes are overlapping ("+ suffix[i] +" with "+ suffix[j] +")")
+                            }
+                        }
+                    }  
+                }
+                // optional
+                groups = dataH5ad.collect { 
+                    k,v -> "group" in v ? v["group"] : 'NULL' 
+                }
             } else {
                 filePaths = dataH5ad.file_paths
                 suffix = dataH5ad.suffix
+                groups = null
             }
             data = data.concat(
                 getFileChannel(
                     filePaths,
-                    suffix
+                    suffix,
+                    groups
                 ).map {
-                    it -> tuple(it[0], it[1], "h5ad", outputFileFormat)
+                    it -> tuple(
+                        it[0], // sample ID
+                        it[1], // file path
+                        "h5ad", // input format
+                        outputFileFormat,
+                        it[2] // group
+                    )
                 }
             )
         }
@@ -122,9 +155,10 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.loom.file_paths,
-                    params.data.loom.suffix
+                    params.data.loom.suffix,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], "loom", outputFileFormat)
+                    it -> tuple(it[0], it[1], "loom", outputFileFormat, 'NULL')
                 }
             )
         }
@@ -132,9 +166,10 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.tsv.file_paths,
-                    params.data.tsv.suffix
+                    params.data.tsv.suffix,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], "tsv", outputFileFormat)
+                    it -> tuple(it[0], it[1], "tsv", outputFileFormat, 'NULL')
                 }
             )
         }
@@ -142,9 +177,10 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.csv.file_paths,
-                    params.data.csv.suffix
+                    params.data.csv.suffix,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], "csv", outputFileFormat)
+                    it -> tuple(it[0], it[1], "csv", outputFileFormat, 'NULL')
                 }
             )
         }
@@ -152,9 +188,10 @@ workflow getDataChannel {
             data = data.concat(
                 getFileChannel( 
                     params.data.seurat_rds.file_paths,
-                    params.data.seurat_rds.suffix
+                    params.data.seurat_rds.suffix,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat)
+                    it -> tuple(it[0], it[1], "seurat_rds", outputFileFormat, 'NULL')
                 }
             )
         }
@@ -163,9 +200,10 @@ workflow getDataChannel {
                 getFileChannelWithIndex(
                     params.data.fragments.file_paths,
                     params.data.fragments.suffix,
-                    params.data.fragments.index_extension
+                    params.data.fragments.index_extension,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "fragments")
+                    it -> tuple(it[0], it[1], "fragments", outputFileFormat, 'NULL')
                 }
             )
         }
@@ -174,9 +212,10 @@ workflow getDataChannel {
                 getFileChannelWithIndex(
                     params.data.bam.file_paths,
                     params.data.bam.suffix,
-                    params.data.bam.index_extension
+                    params.data.bam.index_extension,
+                    'NULL'
                 ).map {
-                    it -> tuple(it[0], it[1], it[2], "bam")
+                    it -> tuple(it[0], it[1], "bam", outputFileFormat, 'NULL' )
                 }
             )
         }

@@ -35,7 +35,7 @@ workflow FILTER_AND_ANNOTATE_AND_CLEAN {
         }
         // Filter cells based on an indexed cell-based metadata table
         if(params.sc.containsKey("cell_filter")) {
-            out = FILTER_BY_CELL_METADATA( out )
+            out = FILTER_BY_CELL_METADATA( out, 'NULL' )
         }
         // Annotate cells based on an indexed cell-based metadata table
         if(params.sc.containsKey("cell_annotate")) {

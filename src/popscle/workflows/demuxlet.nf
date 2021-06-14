@@ -24,7 +24,8 @@ workflow cellranger_output_to_bam_barcodes {
                                file(it[1]+"/possorted*bam.bam"),
                                file(it[1]+"/filtered_*_bc_matrix/barcodes.tsv*")
                                ] }
-                               .view()
+
+        if(!params.containsKey('quiet')) out.view()
 
     emit:
         out
