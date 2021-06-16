@@ -2,21 +2,22 @@ nextflow.enable.dsl=2
 
 //////////////////////////////////////////////////////
 // process imports:
-include { SC__ARCHR__CREATE_ARROW_UNFILTERED; } from './../../src/archr/processes/createArrow_unfiltered.nf' params(params)
-include { SC__ARCHR__CELL_CALLING; } from './../../src/archr/processes/cell_calling.nf' params(params)
+include { SC__ARCHR__CREATE_ARROW_UNFILTERED; } from './../../src/archr/processes/createArrow_unfiltered.nf'
+include { SC__ARCHR__CELL_CALLING; } from './../../src/archr/processes/cell_calling.nf'
 
-include { SC__PYCISTOPIC__BIOMART_ANNOT; } from './../../src/pycistopic/processes/biomart_annot.nf' params(params)
-include { SC__PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf' params(params)
-include { SC__PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf' params(params)
-include { SC__PYCISTOPIC__PLOT_QC_STATS; } from './../../src/pycistopic/processes/plot_qc_stats.nf' params(params)
-include { SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS; } from './../../src/pycistopic/processes/barcode_level_statistics.nf' params(params)
-include { SC__PYCISTOPIC__CALL_CELLS; } from './../../src/pycistopic/processes/call_cells.nf' params(params)
+include { PYCISTOPIC__BIOMART_ANNOT; } from './../../src/pycistopic/processes/biomart_annot.nf'
+include { PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf'
+include { PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf'
+include {
+    PYCISTOPIC__QC_REPORT;
+    REPORT_TO_HTML;
+} from './../../src/pycistopic/processes/call_cells.nf'
 
 include {
     PUBLISH as PUBLISH_PEAKS;
     PUBLISH as PUBLISH_METADATA;
     PUBLISH as PUBLISH_QC_SAMPLE_METRICS;
-} from "../../src/utils/workflows/utils.nf" params(params)
+} from "../../src/utils/workflows/utils.nf"
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -29,31 +30,32 @@ workflow ATAC_QC_PREFILTER {
     main:
 
         data.branch {
-            fragments: it[3] == 'fragments'
-            bam: it[3] == 'bam'
+            fragments: it[2] == 'fragments'
+            bam:       it[2] == 'bam'
         }
         .set{ data_split }
 
-        biomart = SC__PYCISTOPIC__BIOMART_ANNOT()
+        biomart = PYCISTOPIC__BIOMART_ANNOT()
 
-        peaks = SC__PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam)
+        peaks = PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam.map { it -> tuple(it[0], it[1][0], it[1][1] ) } )
         PUBLISH_PEAKS(peaks.map { it -> tuple(it[0], it[1]) }, 'peaks', 'narrowPeak', 'macs2', false)
 
-        data_split.fragments.join(peaks)
-                  .map { it -> tuple(it[0], it[1], it[2], it[4]) }
-                  .set{ fragpeaks }
-        fragpeaks.map { it -> tuple(it[0], it[1], it[3]) }
-                 .collectFile(name: 'input_files.txt')
-                 .view()
+        data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }
+                            .join(peaks)
+                            //.map { it -> [ tuple(*it[0..1], it[3]) ] }
+                            .map { it -> ["${it[0]},${it[1]},${it[3]}"] }
+                            .collect()
+                            .set { fragpeaks }
 
-        qc_stats = SC__PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks, biomart)
-        PUBLISH_METADATA(qc_stats.map { it -> tuple(it[0], it[1]) }, 'metadata.tsv', 'gz', 'pycistopic', false)
+        qc_stats = PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks, biomart)
 
-        qc_stats_plot = SC__PYCISTOPIC__PLOT_QC_STATS(qc_stats)
-        PUBLISH_QC_SAMPLE_METRICS(qc_stats_plot, 'qc_sample_metrics', 'pdf', 'pycistopic', false)
-
-        //SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS(qc_stats)
-        SC__PYCISTOPIC__CALL_CELLS(qc_stats)
+        PYCISTOPIC__QC_REPORT(
+            file(workflow.projectDir + params.tools.pycistopic.call_cells.report_ipynb),
+            data_split.fragments.map { it -> it[0] }.collect(), // all sampleIds
+            qc_stats,
+            "pycisTopic_QC_report"
+        ) |
+        REPORT_TO_HTML
 
 }
 
