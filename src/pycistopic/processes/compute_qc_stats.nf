@@ -5,43 +5,31 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pycistopic/bi
 toolParams = params.tools.pycistopic
 processParams = params.tools.pycistopic.compute_qc_stats
 
-process SC__PYCISTOPIC__COMPUTE_QC_STATS {
+process PYCISTOPIC__COMPUTE_QC_STATS {
 
-    publishDir "${params.global.outdir}/intermediate/pycistopic/qc/", mode: 'symlink'
+    //publishDir "${params.global.outdir}/intermediate/pycistopic/qc/", mode: 'symlink'
     container toolParams.container
-    label 'compute_resources__default','compute_resources__24hqueue'
+    label 'compute_resources__pycisTopic'
 
     input:
-        tuple val(sampleId),
-              path(fragments),
-              path(fragments_index),
-              path(peaks)
+        val(input)
         path(biomart_annot)
 
     output:
-        tuple val(sampleId),
-              path(output_metadata),
-              path(output_metadata_pkl),
-              path(output_profile_data_pkl)
+        tuple path("project_metadata.pickle"),
+              path("project_profile_data.pickle")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
-        output_metadata = "${sampleId}_metadata.tsv.gz"
-        output_metadata_pkl = "${sampleId}_metadata.pickle"
-        output_profile_data_pkl = "${sampleId}_profile_data.pickle"
         """
         export NUMEXPR_MAX_THREADS=1
         export OMP_NUM_THREADS=1
         ${binDir}compute_qc_stats.py \
-            --sampleId ${sampleId} \
-            --fragments ${fragments} \
-            --regions ${peaks} \
+            ${"--input_files "+input.join(" --input_files ")} \
             --n_frag ${processParams.n_frag} \
-            --threads 1 \
+            --threads ${task.cpus} \
             --biomart_annot_pkl ${biomart_annot} \
-            --output_metadata ${output_metadata} \
-            --output_metadata_pkl ${output_metadata_pkl} \
-            --output_profile_data_pkl ${output_profile_data_pkl}
+            --output_metadata_pkl project_metadata.pickle \
+            --output_profile_data_pkl project_profile_data.pickle
         """
 }
 
