@@ -5,7 +5,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pycistopic/bi
 toolParams = params.tools.pycistopic
 processParams = params.tools.pycistopic.compute_qc_stats
 
-process SC__PYCISTOPIC__PLOT_QC_STATS {
+process PYCISTOPIC__PLOT_QC_STATS {
 
     container toolParams.container
     label 'compute_resources__default'

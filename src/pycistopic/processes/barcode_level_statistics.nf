@@ -5,7 +5,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pycistopic/bi
 toolParams = params.tools.pycistopic
 //processParams = params.tools.pycistopic.barcode_level_statistics
 
-process SC__PYCISTOPIC__BARCODE_LEVEL_STATISTICS {
+process PYCISTOPIC__BARCODE_LEVEL_STATISTICS {
 
     publishDir "${params.global.outdir}/intermediate/pycistopic/qc/", mode: 'symlink'
     container toolParams.container

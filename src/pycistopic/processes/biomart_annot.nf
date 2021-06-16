@@ -5,7 +5,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pycistopic/bi
 toolParams = params.tools.pycistopic
 processParams = params.tools.pycistopic.biomart_annot
 
-process SC__PYCISTOPIC__BIOMART_ANNOT {
+process PYCISTOPIC__BIOMART_ANNOT {
 
     publishDir "${params.global.outdir}/intermediate/pycistopic/biomart/", mode: 'symlink'
     container toolParams.container

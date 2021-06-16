@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 toolParams = params.tools.pycistopic
 processParams = params.tools.pycistopic.macs2_call_peaks
 
-process SC__PYCISTOPIC__MACS2_CALL_PEAKS {
+process PYCISTOPIC__MACS2_CALL_PEAKS {
 
     container toolParams.container
     label 'compute_resources__default'
@@ -13,8 +13,7 @@ process SC__PYCISTOPIC__MACS2_CALL_PEAKS {
     input:
         tuple val(sampleId),
               path(bam),
-              path(bam_index),
-              val(filetype)
+              path(bam_index)
 
     output:
         tuple val(sampleId),
