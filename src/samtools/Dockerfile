@@ -1,4 +1,4 @@
-FROM vibsinglecellnf/samtools:base-0.1
+FROM vibsinglecellnf/samtools:base-0.2
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN BUILDPKGS="git \
@@ -37,11 +37,13 @@ RUN curl -L -o /tmp/samtools-${SAMTOOLS_VERSION}.tar.bz2 \
     mkdir -p /tmp/samtools-${SAMTOOLS_VERSION} && \
     tar jxvf /tmp/samtools-${SAMTOOLS_VERSION}.tar.bz2 -C /tmp/samtools-${SAMTOOLS_VERSION} --strip-components 1 && \
     cd /tmp/samtools-${SAMTOOLS_VERSION} && \
-    ./configure && \
+    ./configure \
+        --with-htslib=system && \
     make && \
     make install && \
     cd .. && rm -rf samtools-${SAMTOOLS_VERSION}*
 
 RUN rm -rf /var/cache/apt/* && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    ldconfig
 

@@ -21,7 +21,7 @@ RUN apt-get update && \
         less
 
 # zlib-ng
-ENV ZLIBNG 2.0.2
+ENV ZLIBNG 2.0.4
 RUN curl -L -o /tmp/zlib-ng-${ZLIBNG}.tar.gz https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ZLIBNG}.tar.gz && \
     cd /tmp && tar xvf zlib-ng-${ZLIBNG}.tar.gz && \
     cd zlib-ng-${ZLIBNG} && \
