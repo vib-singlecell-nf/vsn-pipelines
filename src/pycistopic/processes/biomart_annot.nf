@@ -17,7 +17,8 @@ process PYCISTOPIC__BIOMART_ANNOT {
     script:
         """
         ${binDir}biomart_annot.py \
-            --biomart_dataset_name ${processParams.biomart_dataset_name}
+            --biomart_dataset_name ${processParams.biomart_dataset_name} \
+            --biomart_host ${processParams.biomart_host}
         """
 }
 
