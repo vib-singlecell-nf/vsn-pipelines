@@ -28,6 +28,42 @@ parser.add_argument(
     help='Threshold on the number of fragments to keep for a barcode.'
 )
 parser.add_argument(
+    "--tss_flank_window",
+    type=int,
+    required=True,
+    default=2000,
+    help='Flanking window around the TSS.'
+)
+parser.add_argument(
+    "--tss_window",
+    type=int,
+    required=True,
+    default=50,
+    help='Window around the TSS used to count fragments in the TSS when calculating the TSS enrichment per barcode.'
+)
+parser.add_argument(
+    "--tss_minimum_signal_window",
+    type=int,
+    required=True,
+    default=100,
+    help='Tail window use to normalize the TSS enrichment (average signal in the X bp in the extremes of the TSS window).'
+)
+parser.add_argument(
+    "--tss_rolling_window",
+    type=int,
+    required=True,
+    default=10,
+    help='Rolling window used to smooth signal.'
+)
+parser.add_argument(
+    "--min_norm",
+    type=int,
+    required=True,
+    default=0.1,
+    help='Minimum normalization score. If the average minimum signal value is below this value, this number is used to normalize the TSS signal. This approach penalizes cells with fewer reads.'
+)
+
+parser.add_argument(
     "--biomart_annot_pkl",
     type=str,
     help='Biomart annotations, pickle format.'
@@ -75,11 +111,11 @@ metadata_bc_dict, profile_data_dict = compute_qc_stats(
                 valid_bc=None,
                 n_frag=args.n_frag,
                 n_bc=None,
-                tss_flank_window=1000,
-                tss_window=50,
-                tss_minimum_signal_window = 100,
-                tss_rolling_window = 10,
-                min_norm=0.1,
+                tss_flank_window=args.tss_flank_window,
+                tss_window=args.tss_window,
+                tss_minimum_signal_window=args.tss_minimum_signal_window,
+                tss_rolling_window=args.tss_rolling_window,
+                min_norm=args.min_norm,
                 remove_duplicates = True,
                 #_temp_dir=
                 )
