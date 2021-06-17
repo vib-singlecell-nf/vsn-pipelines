@@ -1,4 +1,4 @@
-FROM vibsinglecellnf/samtools:1.12
+FROM vibsinglecellnf/samtools:0.2-1.12
 
 RUN echo 'deb http://deb.debian.org/debian testing main' > /etc/apt/sources.list.d/testing.list && \
     apt-get update && \
