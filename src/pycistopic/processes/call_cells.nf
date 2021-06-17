@@ -68,7 +68,7 @@ process PYCISTOPIC__QC_REPORT {
         papermill ${ipynb} \
             --report-mode \
             ${reportTitle}.ipynb \
-            -p SAMPLE "${sampleId.join(",")}" \
+            -p SAMPLES "${sampleId.join(",")}" \
             -p WORKFLOW_PARAMETERS '${pycistopic_params}' \
         """
 }
