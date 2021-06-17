@@ -33,9 +33,9 @@ include {
 
 
 include {
-    barcode_correction as bc_corr_std;
-    barcode_correction as bc_corr_hyd;
-    biorad_bc;
+    barcode_correction as bc_correct_standard;
+    barcode_correction as bc_correct_hydrop;
+    biorad_bc as bc_correct_biorad;
 } from './../../src/singlecelltoolkit/main.nf'
 
 
@@ -74,21 +74,21 @@ workflow ATAC_PREPROCESS {
 
         /* standard data
            barcode correction */
-        bc_corr_std(data.standard)
+        bc_correct_standard(data.standard)
 
         /* HyDrop ATAC
            extract barcode and correct */
         SCTK__EXTRACT_HYDROP_ATAC_BARCODE(data.hydrop) \
-            | bc_corr_hyd
+            | bc_correct_hydrop
 
         /* BioRad data
            extract barcode and correct */
-        biorad_bc(data.biorad)
+        bc_correct_biorad(data.biorad)
 
         /* downstream steps */
-        bc_corr_std.out
-            .mix(bc_corr_hyd.out)
-            .mix(biorad_bc.out) \
+        bc_correct_standard.out
+            .mix(bc_correct_hydrop.out)
+            .mix(bc_correct_biorad.out) \
             | adapter_trimming \
             | mapping
 
