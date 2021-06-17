@@ -1,4 +1,4 @@
-FROM vibsinglecellnf/samtools:1.12
+FROM vibsinglecellnf/samtools:0.2-1.12
 
 ENV DEBIAN_FRONTEND=noninteractive
 
