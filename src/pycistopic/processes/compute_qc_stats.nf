@@ -30,7 +30,7 @@ process PYCISTOPIC__COMPUTE_QC_STATS {
             --tss_window ${processParams.tss_window} \
             --tss_minimum_signal_window ${processParams.tss_minimum_signal_window} \
             --tss_rolling_window ${processParams.tss_rolling_window} \
-            --min_norm ${processParams.tss_rolling_window} \
+            --min_norm ${processParams.min_norm} \
             --threads ${task.cpus} \
             --biomart_annot_pkl ${biomart_annot} \
             --output_metadata_pkl project_metadata.pickle \
