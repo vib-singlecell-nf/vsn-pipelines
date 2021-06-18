@@ -7,7 +7,7 @@ processParams = params.tools.pycistopic.compute_qc_stats
 
 process PYCISTOPIC__COMPUTE_QC_STATS {
 
-    //publishDir "${params.global.outdir}/intermediate/pycistopic/qc/", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode
     container toolParams.container
     label 'compute_resources__pycisTopic'
 

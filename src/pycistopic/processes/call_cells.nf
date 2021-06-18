@@ -49,7 +49,9 @@ process PYCISTOPIC__CALL_CELLS {
 process PYCISTOPIC__QC_REPORT {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/notebooks/", mode: params.utils.publish.mode
+    publishDir "${params.global.outdir}/notebooks/", mode: params.utils.publish.mode, pattern: '*ipynb'
+    publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode, pattern: 'selected_barcodes'
+    publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode, pattern: 'selected_barcodes_nFrag'
     label 'compute_resources__report'
 
     input:
@@ -60,7 +62,9 @@ process PYCISTOPIC__QC_REPORT {
         val(reportTitle)
 
     output:
-        path("${reportTitle}.ipynb")
+        tuple path("${reportTitle}.ipynb"),
+              path("selected_barcodes/"),
+              path("selected_barcodes_nFrag/")
 
     script:
         pycistopic_params = toJson(toolParams)

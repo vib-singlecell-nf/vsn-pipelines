@@ -14,10 +14,9 @@ include {
 } from './../../src/pycistopic/processes/call_cells.nf'
 
 include {
-    PUBLISH as PUBLISH_PEAKS;
-    PUBLISH as PUBLISH_METADATA;
-    PUBLISH as PUBLISH_QC_SAMPLE_METRICS;
-} from "../../src/utils/workflows/utils.nf"
+    SIMPLE_PUBLISH as PUBLISH_PEAKS;
+    SIMPLE_PUBLISH as PUBLISH_SUMMITS;
+} from '../../src/utils/processes/utils.nf'
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
@@ -38,7 +37,8 @@ workflow ATAC_QC_PREFILTER {
         biomart = PYCISTOPIC__BIOMART_ANNOT()
 
         peaks = PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam.map { it -> tuple(it[0], it[1][0], it[1][1] ) } )
-        PUBLISH_PEAKS(peaks.map { it -> tuple(it[0], it[1]) }, 'peaks', 'narrowPeak', 'macs2', false)
+        PUBLISH_PEAKS(peaks.map { it -> tuple(it[0], it[1]) }, '.peaks.narrowPeak', 'macs2')
+        PUBLISH_SUMMITS(peaks.map { it -> tuple(it[0], it[2]) }, '.summits.bed', 'macs2')
 
         data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }
                             .join(peaks)
@@ -54,8 +54,9 @@ workflow ATAC_QC_PREFILTER {
             data_split.fragments.map { it -> it[0] }.collect(), // all sampleIds
             qc_stats,
             "pycisTopic_QC_report"
-        ) |
-        REPORT_TO_HTML
+        ) \
+        | map { it -> it[0] }
+        | REPORT_TO_HTML
 
 }
 
