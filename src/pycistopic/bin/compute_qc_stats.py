@@ -57,7 +57,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--min_norm",
-    type=int,
+    type=float,
     required=True,
     default=0.1,
     help='Minimum normalization score. If the average minimum signal value is below this value, this number is used to normalize the TSS signal. This approach penalizes cells with fewer reads.'
