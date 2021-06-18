@@ -73,6 +73,8 @@ process PYCISTOPIC__QC_REPORT {
             --report-mode \
             ${reportTitle}.ipynb \
             -p SAMPLES "${sampleId.join(",")}" \
+            -p METADATAPKL "${metadata_pickle}" \
+            -p PROFDATAPKL "${profile_data_pickle}" \
             -p WORKFLOW_PARAMETERS '${pycistopic_params}' \
         """
 }

@@ -16,8 +16,8 @@ process PYCISTOPIC__COMPUTE_QC_STATS {
         path(biomart_annot)
 
     output:
-        tuple path("project_metadata.pickle"),
-              path("project_profile_data.pickle")
+        tuple path("${params.global.project_name}__metadata.pickle"),
+              path("${params.global.project_name}__profile_data.pickle")
 
     script:
         """
@@ -33,8 +33,8 @@ process PYCISTOPIC__COMPUTE_QC_STATS {
             --min_norm ${processParams.min_norm} \
             --threads ${task.cpus} \
             --biomart_annot_pkl ${biomart_annot} \
-            --output_metadata_pkl project_metadata.pickle \
-            --output_profile_data_pkl project_profile_data.pickle
+            --output_metadata_pkl ${params.global.project_name}__metadata.pickle \
+            --output_profile_data_pkl ${params.global.project_name}__profile_data.pickle
         """
 }
 

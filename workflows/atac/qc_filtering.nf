@@ -53,7 +53,7 @@ workflow ATAC_QC_PREFILTER {
             file(workflow.projectDir + params.tools.pycistopic.call_cells.report_ipynb),
             data_split.fragments.map { it -> it[0] }.collect(), // all sampleIds
             qc_stats,
-            "pycisTopic_QC_report"
+            params.global.project_name + "pycisTopic_QC_report"
         ) \
         | map { it -> it[0] }
         | REPORT_TO_HTML
