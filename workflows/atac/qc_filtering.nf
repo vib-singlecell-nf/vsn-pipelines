@@ -9,6 +9,10 @@ include { PYCISTOPIC__BIOMART_ANNOT; } from './../../src/pycistopic/processes/bi
 include { PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf'
 include { PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf'
 include {
+    SCTK__SATURATION;
+    SCTK__SATURATION as SCTK__SATURATION_BC_WL;
+} from './../../src/singlecelltoolkit/processes/saturation.nf'
+include {
     PYCISTOPIC__QC_REPORT;
     REPORT_TO_HTML;
 } from './../../src/pycistopic/processes/call_cells.nf'
@@ -16,6 +20,10 @@ include {
 include {
     SIMPLE_PUBLISH as PUBLISH_PEAKS;
     SIMPLE_PUBLISH as PUBLISH_SUMMITS;
+    SIMPLE_PUBLISH as PUBLISH_SATURATION_TSV;
+    SIMPLE_PUBLISH as PUBLISH_SATURATION_PNG;
+    SIMPLE_PUBLISH as PUBLISH_SATURATION_BC_WL_TSV;
+    SIMPLE_PUBLISH as PUBLISH_SATURATION_BC_WL_PNG;
 } from '../../src/utils/processes/utils.nf'
 
 //////////////////////////////////////////////////////
@@ -58,6 +66,16 @@ workflow ATAC_QC_PREFILTER {
         | map { it -> it[0] }
         | REPORT_TO_HTML
 
+        /* saturation */
+        SCTK__SATURATION(data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
+        SCTK__SATURATION_BC_WL(data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
+            PYCISTOPIC__QC_REPORT.out, 'RUN')
+        /* publish saturation outputs */
+        PUBLISH_SATURATION_TSV(SCTK__SATURATION.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation')
+        PUBLISH_SATURATION_PNG(SCTK__SATURATION.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation')
+        //
+        PUBLISH_SATURATION_BC_WL_TSV(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation_bc_wl')
+        PUBLISH_SATURATION_BC_WL_PNG(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation_bc_wl')
 }
 
 
