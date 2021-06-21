@@ -26,8 +26,42 @@ include {
     SIMPLE_PUBLISH as PUBLISH_SATURATION_BC_WL_PNG;
 } from '../../src/utils/processes/utils.nf'
 
+
 //////////////////////////////////////////////////////
 //  Define the workflow 
+
+
+workflow cellranger_output_to_bam_fragments {
+    /*
+    Cell Ranger ATAC::
+       possorted_bam.bam, fragments.tsv.gz
+    Cell Ranger ARC::
+       atac_possorted_bam.bam, atac_fragments.tsv.gz
+    */
+
+    take:
+        data // standard data channel [ sampleId, path, type, format]
+
+    main:
+
+        bam = data.map{ it -> tuple(it[0], [
+                                    file(it[1]+"/*possorted*bam.bam")[0],
+                                    file(it[1]+"/*possorted*bam.bam.bai")[0],
+                                    ]) }
+        fragments = data.map{ it -> tuple(it[0], [
+                                    *file(it[1]+"/*fragments.tsv.gz"),
+                                    *file(it[1]+"/*fragments.tsv.gz.tbi"),
+                                    ]) }
+
+        if(!params.containsKey('quiet')) bam.view()
+        if(!params.containsKey('quiet')) fragments.view()
+
+    emit:
+        bam
+        fragments
+
+}
+
 
 workflow ATAC_QC_PREFILTER {
 
@@ -37,29 +71,42 @@ workflow ATAC_QC_PREFILTER {
     main:
 
         data.branch {
-            fragments: it[2] == 'fragments'
-            bam:       it[2] == 'bam'
+            fragments:  it[2] == 'fragments'
+            bam:        it[2] == 'bam'
+            cellranger: it[2] == '10x_atac_cellranger_mex_outs'
         }
         .set{ data_split }
 
+        // get cellranger data & merge
+        data_split.cellranger \
+            | cellranger_output_to_bam_fragments
+            | set { data_cr }
+
+        bam = data_split.bam.mix(data_cr.bam)
+        fragments = data_split.fragments.mix(data_cr.fragments)
+
+
         biomart = PYCISTOPIC__BIOMART_ANNOT()
 
-        peaks = PYCISTOPIC__MACS2_CALL_PEAKS(data_split.bam.map { it -> tuple(it[0], it[1][0], it[1][1] ) } )
+        peaks = PYCISTOPIC__MACS2_CALL_PEAKS(bam.map { it -> tuple(it[0], it[1][0], it[1][1] ) } )
         PUBLISH_PEAKS(peaks.map { it -> tuple(it[0], it[1]) }, '.peaks.narrowPeak', 'macs2')
         PUBLISH_SUMMITS(peaks.map { it -> tuple(it[0], it[2]) }, '.summits.bed', 'macs2')
 
-        data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }
-                            .join(peaks)
-                            //.map { it -> [ tuple(*it[0..1], it[3]) ] }
-                            .map { it -> ["${it[0]},${it[1]},${it[3]}"] }
-                            .collect()
-                            .set { fragpeaks }
+        /* pycisTopic qc: pass every fragment/peak file into a single process
+           together. These will be formatted as a string "sampleId,fragments,peak",
+           which is parsed in the python script.
+        */
+        fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) } // [sampleId, fragments, fragments.tbi]
+                 .join(peaks) // combine with peaks for each sample
+                 .map { it -> ["${it[0]},${it[1]},${it[3]}"] } // join as string
+                 .collect() // collapse to a single channel element
+                 .set { fragpeaks }
 
         qc_stats = PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks, biomart)
 
         PYCISTOPIC__QC_REPORT(
             file(workflow.projectDir + params.tools.pycistopic.call_cells.report_ipynb),
-            data_split.fragments.map { it -> it[0] }.collect(), // all sampleIds
+            fragments.map { it -> it[0] }.collect(), // all sampleIds
             qc_stats,
             params.global.project_name + "__pycisTopic_QC_report"
         ) \
@@ -67,8 +114,8 @@ workflow ATAC_QC_PREFILTER {
         | REPORT_TO_HTML
 
         /* saturation */
-        SCTK__SATURATION(data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
-        SCTK__SATURATION_BC_WL(data_split.fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
+        SCTK__SATURATION(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
+        SCTK__SATURATION_BC_WL(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
             PYCISTOPIC__QC_REPORT.out, 'RUN')
         /* publish saturation outputs */
         PUBLISH_SATURATION_TSV(SCTK__SATURATION.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation')
@@ -76,6 +123,7 @@ workflow ATAC_QC_PREFILTER {
         //
         PUBLISH_SATURATION_BC_WL_TSV(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation_bc_wl')
         PUBLISH_SATURATION_BC_WL_PNG(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation_bc_wl')
+
 }
 
 
