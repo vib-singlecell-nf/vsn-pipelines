@@ -7,7 +7,7 @@ toolParams = params.tools.singlecelltoolkit
 process SCTK__SATURATION {
 
     container toolParams.container
-    label 'compute_resources__default'
+    label 'compute_resources__default','compute_resources__24hqueue'
 
     input:
         tuple val(sampleId),
