@@ -16,7 +16,7 @@ include {
 
 def isOuts = { glob ->
     // Avoid file() which will resolve the glob
-    def _isOuts = { arr -> arr.collect { new File(it).getName() == "outs" }.sum(0, { it ? 1 : 0 }) == glob.size() }
+    def _isOuts = { arr -> arr.collect { new File(it).getName() == "outs" }.sum(0, { it ? 1 : 0 }) == arr.size() }
     if(glob.contains(','))
         return _isOuts(Arrays.asList(glob.split(',')))
     if(isCollectionOrArray(glob))
