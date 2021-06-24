@@ -96,13 +96,17 @@ workflow ATAC_QC_PREFILTER {
            together. These will be formatted as a string "sampleId,fragments,peak",
            which is parsed in the python script.
         */
-        fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) } // [sampleId, fragments, fragments.tbi]
-                 .join(peaks) // combine with peaks for each sample
+        fragments.map { it -> tuple(it[0], it[1][0].getName(), it[1][1].getName() ) } // [sampleId, fragments, fragments.tbi]
+                 .join(peaks.map{ it -> tuple(it[0], it[1].getName()) }) // combine with peaks for each sample
                  .map { it -> ["${it[0]},${it[1]},${it[3]}"] } // join as string
                  .collect() // collapse to a single channel element
                  .set { fragpeaks }
 
-        qc_stats = PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks, biomart)
+        qc_stats = PYCISTOPIC__COMPUTE_QC_STATS(fragpeaks,
+                                                biomart,
+                                                fragments.map { it -> it[1][0] }.collect(),
+                                                peaks.map { it -> it[1]}.collect()
+                                                )
 
         PYCISTOPIC__QC_REPORT(
             file(workflow.projectDir + params.tools.pycistopic.call_cells.report_ipynb),

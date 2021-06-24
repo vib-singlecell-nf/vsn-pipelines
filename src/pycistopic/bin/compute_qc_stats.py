@@ -18,7 +18,7 @@ parser.add_argument(
     required=True,
     nargs='+',
     action='append',
-    help='Input files in the form of [SampleId, path_to_fragments, path_to_peaks]. Multiple inputs are possible.'
+    help='Input files in the form of "SampleId,fragments_filename,peaks_filename". Multiple inputs are possible.'
 )
 parser.add_argument(
     "--n_frag",

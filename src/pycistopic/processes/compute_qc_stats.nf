@@ -14,6 +14,8 @@ process PYCISTOPIC__COMPUTE_QC_STATS {
     input:
         val(input)
         path(biomart_annot)
+        path(fragments)
+        path(peaks)
 
     output:
         tuple path("${params.global.project_name}__metadata.pickle"),
