@@ -101,24 +101,29 @@ infile.close()
 
 
 
-metadata_bc_dict, profile_data_dict = compute_qc_stats(
-                fragments_dict=fragments_dict,
-                tss_annotation=annot,
-                stats=['barcode_rank_plot', 'duplicate_rate', 'insert_size_distribution', 'profile_tss', 'frip'],
-                label_list=None,
-                path_to_regions=path_to_regions,
-                n_cpu=args.threads,
-                valid_bc=None,
-                n_frag=args.n_frag,
-                n_bc=None,
-                tss_flank_window=args.tss_flank_window,
-                tss_window=args.tss_window,
-                tss_minimum_signal_window=args.tss_minimum_signal_window,
-                tss_rolling_window=args.tss_rolling_window,
-                min_norm=args.min_norm,
-                remove_duplicates = True,
-                #_temp_dir=
-                )
+try:
+    metadata_bc_dict, profile_data_dict = compute_qc_stats(
+            fragments_dict=fragments_dict,
+            tss_annotation=annot,
+            stats=['barcode_rank_plot', 'duplicate_rate', 'insert_size_distribution', 'profile_tss', 'frip'],
+            label_list=None,
+            path_to_regions=path_to_regions,
+            n_cpu=args.threads,
+            valid_bc=None,
+            n_frag=args.n_frag,
+            n_bc=None,
+            tss_flank_window=args.tss_flank_window,
+            tss_window=args.tss_window,
+            tss_minimum_signal_window=args.tss_minimum_signal_window,
+            tss_rolling_window=args.tss_rolling_window,
+            min_norm=args.min_norm,
+            remove_duplicates = True,
+            #_temp_dir=
+            )
+except FileExistsError as e:
+    print(e)
+    print("For errors with /tmp/ray, use an alternate temporary directory and map this to '/tmp' within the container. For example in Singularity: '-B /alt/tmp/path:/tmp', or with Docker: '-v /alt/tmp/path:/tmp'. Set these mappings in the Singularity/Docker 'runOptions' parameter within your config file.")
+    exit(1)
 
 
 ## load bap results to use for duplicate rate (if we are using bap output):
