@@ -137,12 +137,15 @@ elif args.method == 'aio':
         if len(np.unique(metadata.index)) == metadata.shape[0]:
             # Check existence of 1-to-many relationships between adata.obs.index and metadata.index
             num_matching_cells = np.sum(np.isin(adata.obs.index, metadata.index))
+            num_matching_cells/adata.obs.shape[0]
 
-            if num_matching_cells == adata.obs.shape[0]:
-                print(f"VSN MSG: subsetting metadata based on only on '{args.index_column_name}' column of the metadata {args.cell_meta_data_file_paths[0].name}.")
+            # proceed as long as we can annotate "most" of the cells in the metadata file:
+            if num_matching_cells/adata.obs.shape[0] >= 0.8:
+                print(f"VSN MSG: subsetting metadata based on only '{args.index_column_name}' column of the metadata {args.cell_meta_data_file_paths[0].name}.")
+                print(f"VSN MSG: Annotating {num_matching_cells} ({round(num_matching_cells/adata.obs.shape[0],2)*100}%) of {args.sample_id} cells in the adata with information from the metadata.")
                 metadata_subset = metadata[metadata.index.isin(adata.obs.index.values)]
             else:
-                raise Exception(f"VSN ERROR: There is a dimension mismatch between the dataset {args.input.name} and the metadata {args.cell_meta_data_file_paths[0].name}: expected {len(adata.obs)} but got {num_matching_cells} cells matching.")
+                raise Exception(f"VSN ERROR: There is a dimension mismatch between the dataset {args.input.name} and the metadata {args.cell_meta_data_file_paths[0].name}: expected [80% of {len(adata.obs)}] but got {num_matching_cells} cells matching.")
         else:
             if args.sample_column_name is None:
                 raise Exception("VSN ERROR: Missing the --sample-column-name (sampleColumnName param) which is required for the 'aio' method.")
