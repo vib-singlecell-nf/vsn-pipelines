@@ -6,6 +6,11 @@ RUN BUILDPKGS="build-essential apt-utils libssl-dev libcurl4-openssl-dev zlib1g-
     apt-get install -y $BUILDPKGS
 
 ##################################################
+# prepare R install
+RUN R -e "install.packages( c('devtools','BiocManager', 'dplyr', 'data.table', 'ggplot2', 'R.utils'))"
+RUN R -e "BiocManager::install(c('BiocVersion', 'GenomicRanges', 'SummarizedExperiment', 'GenomicAlignments', 'Rsamtools'), update=TRUE, ask=FALSE)"
+
+##################################################
 # build python
 RUN BUILDPKGS_python="build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget curl" && \
     apt update && \
@@ -24,14 +29,22 @@ RUN mkdir /py_build && cd /py_build && \
     ln -s /usr/local/bin/pip${PYVER_MAJOR} /usr/local/bin/pip && \
     rm -rf /py_build
 
-# install BAP
-RUN pip install biopython rapidfuzz fuzzysearch bap-atac
+# install bap fork (original is https://github.com/caleblareau/bap):
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir biopython rapidfuzz fuzzysearch python-Levenshtein && \
+    pip install --no-cache-dir git+https://github.com/cflerin/bap.git
+
+RUN pip install --no-cache-dir \
+    pandas \
+    matplotlib \
+    seaborn \
+    nbconvert \
+    papermill \
+    ipython \
+    ipykernel \
+    jupyter-client
 
 ##################################################
-# prepare R install
-RUN R -e "install.packages( c('devtools','BiocManager', 'dplyr', 'data.table'))"
-RUN R -e "BiocManager::install(c('BiocVersion', 'GenomicRanges'), update=TRUE, ask=FALSE)"
-
 # final set of packages for usability
 RUN apt-get -y update && \
     apt-get -y --no-install-recommends install \

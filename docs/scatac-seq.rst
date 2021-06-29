@@ -58,6 +58,13 @@ The columns represent:
 - ``fastq_barcode_path``: The full path to the fastq file containing the barcodes. This column can be blank/empty depending on the technology setting.
 - ``fastq_PE2_path``: The full path to the fastq file for the second read in a pair.
 
+Note that there is an easy way to create the metadata header:
+
+.. code:: bash
+
+    echo -e 'sample_name\ttechnology\tfastq_PE1_path\tfastq_barcode_path\tfastq_PE2_path' > metadata.tsv
+
+
 Technology
 **********
 
@@ -69,7 +76,7 @@ Available options are:
 
 The ``standard`` setting assumes a typical 10x Genomics style format with two read pair fastqs and a barcode fastq:
 
-.. code:: none
+.. code:: bash
 
     $ zcat sample_1_R1.fastq.gz | head -n 4
     @A00311:74:HMLK5DMXX:1:1101:2013:1000 1:N:0:ACTCAGAC
@@ -90,10 +97,10 @@ The ``standard`` setting assumes a typical 10x Genomics style format with two re
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 
 The debarcoding step here uses a 
-`helper script <https://github.com/aertslab/single_cell_toolkit/blob/master/debarcode_10x_scatac_fastqs.sh>`_
+`helper script <https://github.com/aertslab/single_cell_toolkit/blob/2da8cbf09474903d050ecdb073da1afd99347eee/debarcode_10x_scatac_fastqs.sh>`_
 which transforms this input into two paired fastq files with the barcode integrated into the read name:
 
-.. code:: none
+.. code:: bash
 
     $ zcat sample_1_dex_R1.fastq.gz | head -n 4
     @CTGTTCGCAAAGCATA:A00311:74:HMLK5DMXX:1:1101:2013:1000 1:N:0:ACTCAGAC
@@ -121,7 +128,7 @@ The whitelists are supplied in the params file (``params.tools.singlecelltoolkit
 The ``biorad`` setting processes BioRad data using `BAP <https://github.com/caleblareau/bap/wiki/Working-with-BioRad-data>`_.
 This takes input data:
 
-.. code:: none
+.. code:: bash
 
     $ zcat sample_2_R1.fastq.gz | head -n 4
     @NB551608:167:HNYFJBGXC:1:11101:11281:1033 1:N:0:TAAGGCGA
@@ -138,7 +145,7 @@ This takes input data:
 
 And produces paired fastq files with the barcode integrated into the read name (with a ``_`` delimiter):
 
-.. code:: none
+.. code:: bash
 
     $ zcat sample_2_dex_R1.fastq.gz | head -n 4
     @GCGTAGAGGAAGTTTCAGCAA_NB551608:167:HNYFJBGXC:1:11101:11281:1033 1:N:0:TAAGGCGA

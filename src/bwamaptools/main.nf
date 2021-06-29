@@ -39,10 +39,10 @@ workflow get_bwa_index {
                            .collect()
                            .toList()
 
-        channel = bwa_fasta.combine(bwa_index)
+        data_channel = bwa_fasta.combine(bwa_index)
 
     emit:
-        channel
+        data_channel
 
 }
 
