@@ -4,6 +4,10 @@ scATAC-seq Preprocessing
 
 This pipeline takes fastq files from paired end single cell ATAC-seq, and applies preprocessing steps to align the reads to a reference genome, and produce a bam file and scATAC-seq fragments file.
 
+This workflow is currently available in the ``develop_atac`` branch (use the ``-r develop_atac`` option when running ``nextflow pull`` and ``nextflow run``).
+
+----
+
 Pipeline Steps
 **************
 
@@ -275,6 +279,8 @@ And produces paired fastq files with the barcode integrated into the read name (
     ##A####################################
 
 
+----
+
 Running the workflow
 ********************
 
@@ -345,8 +351,17 @@ Temporary directory mapping
 ___________________________
 
 For large BAM files, the system default temp location may become full.
-A workaround is to map ``/tmp`` to an alternate path using the volume mount options in Docker or Singularity. For example in the container engine options:
-  - Singularity run options: ``runOptions = '--cleanenv -H $PWD -B /data,/tmp:/path/to/tmp'``
-  - Docker run options: ``runOptions = '-i -v /data:/data -v /tmp:/path/to/tmp'``
+   A workaround is to include a volume mapping to the alternate ``/tmp`` ``-B /alternate/path/to/tmp:/tmp`` using the volume mount options in Docker or Singularity.
+   For example in the container engine options:
+  - Singularity run options: ``runOptions = '--cleanenv -H $PWD -B /data,/alternate/path/to/tmp:/tmp'``
+  - Docker run options: ``runOptions = '-i -v /data:/data -v /alternate/path/to/tmp:/tmp'``
 
+Alternate Nextflow work location
+________________________________
+
+Direct the Nextflow work directory to an alternate path (e.g. a scratch drive) using the ``NXF_WORK`` environmental variable::
+
+    nwork=/path/to/scratch/example_project
+    mkdir $nwork
+    export NXF_WORK=$nwork
 
