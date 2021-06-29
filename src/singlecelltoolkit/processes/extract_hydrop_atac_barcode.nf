@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.singlecelltoolkit
 
-process SCTK__BARCODE_CORRECTION {
+process SCTK__EXTRACT_HYDROP_ATAC_BARCODE {
 
     container toolParams.container
     label 'compute_resources__default'
@@ -14,25 +14,23 @@ process SCTK__BARCODE_CORRECTION {
               val(technology),
               path(fastq_PE1),
               path(fastq_bc),
-              path(fastq_PE2),
-              path(bc_whitelist)
+              path(fastq_PE2)
 
     output:
         tuple val(sampleId),
               val(technology),
               path(fastq_PE1),
-              path("${sampleId}_bc_corrected.fastq.gz"),
-              path(fastq_PE2),
-              path("${sampleId}_bc_corrected.fastq.gz.corrected.bc_stats.tsv")
+              path("${sampleId}_hydrop_barcode_R2.fastq.gz"),
+              path(fastq_PE2)
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
-        processParams = sampleParams.local
+        //processParams = sampleParams.local
         """
-        correct_barcode_in_fastq.sh \
-            ${bc_whitelist} \
+        extract_hydrop_atac_barcode_from_R2_fastq.sh \
             ${fastq_bc} \
-            ${sampleId}_bc_corrected.fastq.gz
+            ${sampleId}_hydrop_barcode_R2.fastq.gz \
+            pigz
         """
 }
 
