@@ -32,11 +32,13 @@ RUN pip install --no-cache-dir --upgrade pip wheel && \
         uncertainties \
         typing \
         pathlib \
+        polars>=0.8.7 \
         matplotlib \
         numpy
 
 
 # install seq (https://github.com/seq-lang/seq/):
+#0.9.11
 ENV SEQ_VERSION=0.10.1
 RUN mkdir -p /opt/seq && \
     wget https://github.com/seq-lang/seq/releases/download/v${SEQ_VERSION}/seq-linux-x86_64.tar.gz && \
