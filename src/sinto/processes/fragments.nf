@@ -53,7 +53,7 @@ process SC__SINTO__SORT_FRAGMENTS {
 
     script:
         """
-        sort -k1,1 -k2,2n \
+        LC_ALL=C sort -k 1,1 -k 2,2n -k 3,3n \
             ${fragments_bed} \
             | bgzip -c \
             > ${sampleId}.sinto.fragments.tsv.gz

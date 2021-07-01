@@ -70,7 +70,8 @@ workflow DOWNLOAD_FROM_SRA {
                 row.run_accession, \
                 row.sample_name.replaceAll("[\\])]\$","").replaceAll("[\\]\\[)(), /\\.]","_") 
             )
-        }.view()
+        }
+        if(!params.containsKey('quiet')) metadata.view()
         // Download and compress all the SRA runs defined in the metadata
         data = DOWNLOAD_FASTQS_FROM_SRA_ACC_ID( 
             metadata 

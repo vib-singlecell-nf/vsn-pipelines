@@ -7,8 +7,8 @@ toolParams = params.tools.bap
 process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
 
     container toolParams.container
-    publishDir "${params.global.outdir}/bap", mode: 'symlink'
-    label 'compute_resources__cpu'
+    publishDir "${params.global.outdir}/data/bap", mode: params.utils.publish.mode
+    label 'compute_resources__bap_barcode_multiplet_pipeline'
 
     input:
         tuple val(sampleId),
@@ -17,18 +17,34 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
 
     output:
         tuple val(sampleId),
-              path("${sampleId}.SC__TEMPLATE__PROCESS1.h5ad")
+              path("${sampleId}/final/${sampleId}.bap.bam"),
+              path("${sampleId}/final/${sampleId}.bap.bam.bai"),
+              path("${sampleId}/final/*"),
+              path("${sampleId}/knee/*"),
+              path("${sampleId}/logs/*")
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_multiplet)
-		processParams = sampleParams.local
+        processParams = sampleParams.local
         """
         bap2 bam \
-            -i ${bam} \
-            -o bap_output \
-            -r ${toolParams.genome} \
-            -c ${task.cpus} \
-            -bt ${toolParams.barcode}
+            --input ${bam} \
+            --output ${sampleId} \
+            --name ${sampleId} \
+            --ncores ${task.cpus} \
+            --drop-tag ${processParams.drop_tag} \
+            --bead-tag ${processParams.bead_tag} \
+            --minimum-barcode-fragments ${processParams.minimum_barcode_fragments} \
+            ${processParams?.barcode_whitelist ? '--barcode-whitelist ' + processParams.barcode_whitelist : ''} \
+            --minimum-jaccard-index ${processParams.minimum_jaccard_index} \
+            --nc-threshold ${processParams.nc_threshold} \
+            --mapq ${processParams.mapq} \
+            --max-insert ${processParams.max_insert} \
+            ${processParams?.reference_genome ? '--reference-genome ' + processParams.reference_genome : ''} \
+            ${processParams?.bedtools_genome ? '--bedtools-genome ' + processParams.bedtools_genome : ''} \
+            ${processParams?.blacklist_file ? '--blacklist-file ' + processParams.blacklist_file : ''} \
+            ${processParams?.tss_file ? '--tss-file ' + processParams.tss_file : ''} \
+            --mito-chromosome ${processParams.mito_chromosome}
         """
 }
 

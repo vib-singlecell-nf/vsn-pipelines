@@ -23,6 +23,7 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         processParams = sampleParams.local
+        def samtools_cpus = (task.cpus > 6) ? 6 : task.cpus
         """
         set -euo pipefail
         bwa mem \
@@ -30,10 +31,9 @@ process SC__BWAMAPTOOLS__BWA_MEM_PE {
             ${bwa_fasta} \
             ${fastq_PE1} \
             ${fastq_PE2} \
-        | samtools sort -@ ${task.cpus} -n -O bam - \
-        | samtools fixmate -@ ${task.cpus} -m -O bam - - \
-        | samtools sort -@ ${task.cpus} -O bam - \
-        | samtools markdup -@ ${task.cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
+        | samtools fixmate -@ ${samtools_cpus} -m -u -O bam - - \
+        | samtools sort -@ ${samtools_cpus} -u -O bam - \
+        | samtools markdup -@ ${samtools_cpus} -f ${sampleId}.markdup.log - ${sampleId}.bwa.out.possorted.bam
         """
 
 }

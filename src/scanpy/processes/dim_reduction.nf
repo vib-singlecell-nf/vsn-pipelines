@@ -16,6 +16,7 @@ include {
 class SC__SCANPY__DIM_REDUCTION_PARAMS {
 
 	Script env = null;
+	Map params = null;
 	LinkedHashMap configParams = null;
 	// Parameters definiton
 	String iff = null;
@@ -28,12 +29,17 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 		this.env = env
 	}
 
+	void setParams(params) {
+		this.params = params
+	}
+
 	void setConfigProcessParams(params) {
 		this.configProcessParams = params
 	}
 
 	void displayMessage(tag = null) {
-		Channel.from('').view {
+		if(!this.params?.quiet) {
+			Channel.from('').view {
 			"""
 ------------------------------------------------------------------
 \u001B[32m Parameter exploration of SC__SCANPY__DIM_REDUCTION step... \u001B[0m
@@ -43,7 +49,8 @@ class SC__SCANPY__DIM_REDUCTION_PARAMS {
 \u001B[32m   - values: \u001B[0m \u001B[33m   ${nComps} \u001B[0m
 ------------------------------------------------------------------
             """
-        }
+        	}
+		}
 	}
 
 	String getNCompsAsArgument(nComps) {
@@ -111,6 +118,7 @@ process SC__SCANPY__DIM_REDUCTION {
 		// Cannot call constructor with parameter if nComps is not provided (aka NULL), type do not match
 		def _processParams = new SC__SCANPY__DIM_REDUCTION_PARAMS()
 		_processParams.setEnv(this)
+		_processParams.setParams(params)
 		_processParams.setConfigParams(processParams)
 		"""
 		${binDir}/dim_reduction/sc_dim_reduction.py \

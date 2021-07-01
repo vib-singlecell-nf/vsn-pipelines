@@ -144,10 +144,12 @@ In case there are multiple .h5ad files that need to be processed with different 
             GROUP1 {
                 file_paths = "[path-to-group1-files]/*.SUFFIX1.h5ad"
                 suffix = ".SUFFIX1.h5ad"
+                group = ["technology", "10x"]
             }
             GROUP2 {
                 file_paths = "[path-to-group1-files]/*.SUFFIX2.h5ad"
                 suffix = ".SUFFIX2.h5ad"
+                group = ["technology", "smart-seq2"]
             }
         }
     }
@@ -156,7 +158,9 @@ In case there are multiple .h5ad files that need to be processed with different 
 Notes: 
 
 - ``GROUP1``, ``GROUP2`` are just example names here. They can be replaced by any value as long as they are alphanumeric (underscores are allowed).
+- All the different `suffix` defined should unique.
 - ``file_paths`` and ``suffix`` do allow list of paths/globs in the multi-labelled strategy.
+- ``group`` [optional] should be an array of 2 elements where first element define the group name and the second the group value. This will add cell-based annotation for each group of files
 
 ----
 

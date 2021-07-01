@@ -81,9 +81,6 @@ workflow mnncorrect {
 
 def getHarmonyBatchVariables = { params ->
     batchVariables = params.sc.harmony.varsUse
-    if(batchVariables.size() > 1) {
-        throw new Exception("Currently it is not supported to run with multiple batch variables.")
-    }
     return batchVariables
 }
 
@@ -99,7 +96,7 @@ workflow harmony {
     } from "./src/utils/workflows/utils" params(params)
 
     batchVariables = getHarmonyBatchVariables(params)
-    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables.join("_").toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
@@ -835,7 +832,7 @@ workflow cellranger_count_libraries {
 
 workflow cellranger_count_demuxlet {
     include {
-        cellranger_output_to_bam_barcodes;
+        get_bam_barcodes_from_cellranger_rna;
         DEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
     include {
@@ -865,29 +862,29 @@ workflow cellranger_count_demuxlet {
         params.sc.cellranger.count.transcriptome,
         fastq_data
     )
-    cellranger_output_to_bam_barcodes(data) |
+    get_bam_barcodes_from_cellranger_rna(data) |
         DEMUXLET
 }
 
 workflow freemuxlet {
     include {
-        cellranger_output_to_bam_barcodes;
+        data_channel_to_bam_barcodes;
         FREEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
     
     getDataChannel |
-        cellranger_output_to_bam_barcodes |
+        data_channel_to_bam_barcodes |
         FREEMUXLET
 }
 
 workflow demuxlet {
     include {
-        cellranger_output_to_bam_barcodes;
+        data_channel_to_bam_barcodes;
         DEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
 
     getDataChannel |
-        cellranger_output_to_bam_barcodes |
+        data_channel_to_bam_barcodes |
         DEMUXLET
 }
 
@@ -928,7 +925,7 @@ workflow cellranger_multi_sample_demuxlet {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        cellranger_output_to_bam_barcodes;
+        get_bam_barcodes_from_cellranger_rna;
         DEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
 
@@ -938,7 +935,7 @@ workflow cellranger_multi_sample_demuxlet {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
         }
     )
-    cellranger_output_to_bam_barcodes(data) |
+    get_bam_barcodes_from_cellranger_rna(data) |
         DEMUXLET
 
 }
@@ -963,7 +960,7 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        cellranger_output_to_bam_barcodes;
+        get_bam_barcodes_from_cellranger_rna;
         FREEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
 
@@ -973,7 +970,7 @@ workflow cellranger_libraries_freemuxlet_multi_sample {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
     )
-    cellranger_output_to_bam_barcodes(data) |
+    get_bam_barcodes_from_cellranger_rna(data) |
         FREEMUXLET
 
 }
@@ -984,7 +981,7 @@ workflow cellranger_libraries_demuxlet_multi_sample {
         multi_sample as MULTI_SAMPLE;
     } from './workflows/multi_sample' params(params)
     include {
-        cellranger_output_to_bam_barcodes;
+        get_bam_barcodes_from_cellranger_rna;
         DEMUXLET;
     } from './src/popscle/workflows/demuxlet.nf' params(params)
 
@@ -994,7 +991,7 @@ workflow cellranger_libraries_demuxlet_multi_sample {
             tuple(it[0], it[1], "10x_cellranger_mex", "h5ad")
             }
     )
-    cellranger_output_to_bam_barcodes(data) |
+    get_bam_barcodes_from_cellranger_rna(data) |
         DEMUXLET
 }
 
@@ -1123,6 +1120,13 @@ workflow cell_annotate {
 
 workflow cell_annotate_filter {
 
+    main:
+        _cell_annotate_filter(true)
+
+}
+
+workflow _cell_annotate_filter {
+
     take:
         // Expects publish : boolean
         publish
@@ -1209,7 +1213,7 @@ workflow cell_annotate_filter_and_sample_annotate {
 
 
         // Run
-        out = cell_annotate_filter(false)
+        out = _cell_annotate_filter(false)
 
         // Annotate cells based on an indexed sample-based metadata table
         if(!params.sc.containsKey("sample_annotate"))
