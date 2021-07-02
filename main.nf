@@ -1025,6 +1025,21 @@ workflow nemesh {
 
 }
 
+workflow sra {
+
+    main:
+        include {
+            getChannel as getSRAChannel;
+        } from './src/channels/sra' params(params)
+        include {
+            DOWNLOAD_FROM_SRA;
+        } from './src/utils/workflows/downloadFromSRA' params(params)
+        
+        // Run 
+        DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
+
+}
+
 workflow sra_cellranger_bbknn {
 
     main:
