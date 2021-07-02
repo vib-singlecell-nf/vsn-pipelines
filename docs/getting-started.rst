@@ -23,7 +23,7 @@ Make sure you have the following software installed,
 
 - Nextflow_
     
-    - Currently VSN-Pipelines requires Nextflow version ``20.04.1``
+    - Currently VSN-Pipelines requires Nextflow version ``20.10.0`` or higher.
 
 - A container system, either of:
 
