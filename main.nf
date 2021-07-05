@@ -1034,9 +1034,21 @@ workflow sra {
         include {
             DOWNLOAD_FROM_SRA;
         } from './src/utils/workflows/downloadFromSRA' params(params)
+        include {
+            PUBLISH;
+        } from "./src/utils/workflows/utils" params(params)
         
         // Run 
         DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
+        if(params.utils?.publish) {
+            PUBLISH(
+                DOWNLOAD_FROM_SRA.out,
+                null,
+                "fastqs",
+                null,
+                false
+            )
+        }  
 
 }
 
