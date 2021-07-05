@@ -620,7 +620,7 @@ First, generate the config :
       -profile sra,singularity \
       > nextflow.config
 
-NOTE: If you're a VSC user, you might want to add the `vsc` profile.
+NOTE: If you're a VSC user, you might want to add the ``vsc`` profile.
 
 
 Now we can run it with the following command:
