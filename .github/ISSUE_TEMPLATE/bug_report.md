@@ -38,8 +38,8 @@ If applicable, add screenshots to help explain your problem.
 
 **Please complete the following information:**
  - OS: [e.g. Ubuntu]
- - Nextflow Version: [e.g. 20.04.1]
- - vsn-pipelines Version: [e.g. 0.14.2]
+ - Nextflow Version: [e.g. 20.10.0]
+ - vsn-pipelines Version: [e.g. 0.26.1]
 
 **Additional context**
 Add any other context about the problem here.

@@ -7,13 +7,13 @@ workflow getChannel {
         sra
 
     main:
-        channel = Channel.fromList(
+        data_channel = Channel.fromList(
             sra
         ).map {
             it -> tuple(it.id, it.samples)
         }
 
     emit:
-        channel
+        data_channel
 
 }
