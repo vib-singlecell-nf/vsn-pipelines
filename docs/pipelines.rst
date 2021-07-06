@@ -559,7 +559,7 @@ First, generate the config :
 
 Make sure the following parts of the generated config are properly set:
 
-.. code:: bash
+.. code:: groovy
 
     [...]
     data {
@@ -597,9 +597,48 @@ Make sure the following parts of the generated config are properly set:
 
 Now we can run it with the following command:
 
-.. code:: groovy
+.. code:: bash
 
     nextflow -C nextflow.config \
        run ~/vib-singlecell-nf/vsn-pipelines \
        -entry cell_filter
+
+
+**sra** |sra|
+-------------
+
+.. |sra| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/cell_annotate_filter/badge.svg
+
+Runs the ``sra`` workflow which will download all (or user-defined selected) FASTQ files from a particular SRA project ID and format with properly and humand friendly names.
+
+First, generate the config :
+
+.. code:: bash
+
+    nextflow config \
+      ~/vib-singlecell-nf/vsn-pipelines \
+      -profile sra,singularity \
+      > nextflow.config
+
+NOTE: If you're a VSC user, you might want to add the ``vsc`` profile.
+
+
+Now we can run it with the following command:
+
+.. code:: bash
+
+    nextflow -C nextflow.config \
+       run ~/vib-singlecell-nf/vsn-pipelines \
+       -entry cell_filter
+
+    $ nextflow -C nextflow.config run ~/vib-singlecell-nf/vsn-pipelines -entry sra
+    N E X T F L O W  ~  version 20.11.0-edge
+    Launching `~/vib-singlecell-nf/vsn-pipelines/main.nf` [cranky_kare] - revision: c5e34d476a
+    executor >  local (1)
+    [c3/4bf7a2] process > sra:DOWNLOAD_FROM_SRA:SRA_TO_METADATA (1)             [100%] 1 of 1 _
+    [-        ] process > sra:DOWNLOAD_FROM_SRA:DOWNLOAD_FASTQS_FROM_SRA_ACC_ID -
+    [-        ] process > sra:DOWNLOAD_FROM_SRA:NORMALIZE_SRA_FASTQS            -
+    [SRR11442507, scATAC_Control_Superior_and_Middle_Temporal_Gyri_1]
+    [SRR11442506, scATAC_Control_Substantia_Nigra_2]
+    ...
 

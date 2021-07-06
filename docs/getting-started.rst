@@ -23,7 +23,7 @@ Make sure you have the following software installed,
 
 - Nextflow_
     
-    - Currently VSN-Pipelines requires Nextflow version ``20.04.1``
+    - Currently VSN-Pipelines requires Nextflow version ``20.10.0`` or higher.
 
 - A container system, either of:
 
@@ -68,7 +68,7 @@ Example Output
 .. code:: shell
 
     $ nextflow -C nextflow.config run $VSN -entry single_sample
-    N E X T F L O W  ~  version 20.04.1
+    N E X T F L O W  ~  version 20.10.0
     Launching `/staging/leuven/stg_00002/lcb/dwmax/documents/aertslab/GitHub/vib-singlecell-nf/vsn-pipelines/main.nf` [silly_pare] - revision: 77be3ba59d
     WARN: DSL 2 IS AN EXPERIMENTAL FEATURE UNDER DEVELOPMENT -- SYNTAX MAY CHANGE IN FUTURE RELEASE
     executor >  local (83)

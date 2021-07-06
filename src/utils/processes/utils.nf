@@ -434,15 +434,14 @@ process SC__PUBLISH {
 
     publishDir \
         "${getPublishDir(params.global.outdir,toolName)}", \
-        mode: "${params.utils.publish?.mode ? params.utils.publish.mode: 'link'}", \
-        saveAs: { filename -> "${outputFileName}" }
+        mode: "${params.utils.publish?.mode ? params.utils.publish.mode: 'link'}"
 
     label 'compute_resources__minimal'
     
     input:
         tuple \
             val(tag), \
-            path(f, stageAs: 'input_file'), \
+            path(f), \
             val(stashedParams)
         val(fileOutputSuffix)
         val(toolName)
@@ -464,9 +463,10 @@ process SC__PUBLISH {
             stashedParams
         )
         """
-        if [ ! -f ${outputFileName} ]; then
-            ln -s input_file "${outputFileName}"
-        fi
+        # In case f and outputFileName are colliding, rename to f to dummy tmp filename
+        mv ${f} tmp
+        # FIXME: should avoid copying data (currently it's the only option to work without causing #317 and #345)
+        cp -rL tmp "${outputFileName}"
         """
 }
 
