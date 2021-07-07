@@ -604,12 +604,10 @@ Now we can run it with the following command:
        -entry cell_filter
 
 
-**sra** |sra|
--------------
+**sra**
+-------
 
-.. |sra| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/cell_annotate_filter/badge.svg
-
-Runs the ``sra`` workflow which will download all (or user-defined selected) FASTQ files from a particular SRA project ID and format with properly and humand friendly names.
+Runs the ``sra`` workflow which will download all (or user-defined selected) FASTQ files from a particular SRA project and format those with properly and human readable names.
 
 First, generate the config :
 
@@ -620,7 +618,11 @@ First, generate the config :
       -profile sra,singularity \
       > nextflow.config
 
-NOTE: If you're a VSC user, you might want to add the ``vsc`` profile.
+NOTES:
+
+- If you're a VSC user, you might want to add the ``vsc`` profile.
+- The final output (FASTQ files) will available in ``out/data/sra``
+- If you're downloading 10x Genomics scATAC-seq data, make sure to set ``params.sratoolkit.includeTechnicalReads = true`` and properly set ``params.utils.sra_normalize_fastqs.fastq_read_suffixes``. In the case of downloading the scATAC-seq samples of SRP254409, ``fastq_read_suffixes`` would be set to ``["R1", "R2", "I1", "I2"]``.
 
 
 Now we can run it with the following command:
@@ -629,7 +631,7 @@ Now we can run it with the following command:
 
     nextflow -C nextflow.config \
        run ~/vib-singlecell-nf/vsn-pipelines \
-       -entry cell_filter
+       -entry sra
 
     $ nextflow -C nextflow.config run ~/vib-singlecell-nf/vsn-pipelines -entry sra
     N E X T F L O W  ~  version 20.11.0-edge
