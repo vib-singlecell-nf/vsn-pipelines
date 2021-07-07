@@ -27,7 +27,8 @@ process FIX_AND_COMPRESS_SRA_FASTQ {
         # Fixing the FASTQ files is required for future pre-processing (e.g.: scATAC-seq pipelines)
         # We cannot source the script directly:
         # - 1) by default it generates help text to stdout
-        # - 2) if redirecting the stdout of to the trash i.e. /dev/null, Nextflow will think no files have been generated
+        # - 2) if redirecting the stdout to the trash i.e. /dev/null, Nextflow will think no files have been generated
+        # So we need to save the file before executing the script
         curl -fsSL https://raw.githubusercontent.com/aertslab/single_cell_toolkit/master/fix_sra_fastq.sh -o fix_sra_fastq.sh
         chmod a+x ./fix_sra_fastq.sh
         # Fix the FASTQ files and compress them
@@ -35,6 +36,12 @@ process FIX_AND_COMPRESS_SRA_FASTQ {
         NUM_FASTQ_FILES=\$(ls ./*.fastq | wc -l)
         echo "Fixing and compressing \${NUM_FASTQ_FILES} FASTQ files in parallel with \${compress_fastq_threads} compression threads for each task..."
         echo *.fastq | tr ' ' '\n' | xargs -P "\${NUM_FASTQ_FILES}" -n 1 -I {} ./fix_sra_fastq.sh "{}" "{}.gz" pigz
+        echo "Removing all uncompressed FASTQ files"
+        for FASTQ in *.fastq; do
+           echo "Removing uncompressed FASTQ file \${FASTQ}..."
+           rm "$(readlink -f \${FASTQ})"
+        done
+        echo "Done."
         """
 
 }
