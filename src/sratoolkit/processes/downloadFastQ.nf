@@ -31,7 +31,11 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
             rm \${SRA_FILE_LOCK}
         fi
         # Fetch SRA file
-        prefetch -v -p 1 ${sraId}
+        prefetch \
+           -v \
+           -p 1 \
+           ${params.sratoolkit?.maxSize ? '--max-size '+ params.sratoolkit.maxSize: ''} \
+           ${sraId}
         # Convert SRA file to FASTQ files
         fasterq-dump \
            -S \

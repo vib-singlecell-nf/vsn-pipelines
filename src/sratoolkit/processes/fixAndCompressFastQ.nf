@@ -39,7 +39,7 @@ process FIX_AND_COMPRESS_SRA_FASTQ {
         echo "Removing all uncompressed FASTQ files"
         for FASTQ in *.fastq; do
            echo "Removing uncompressed FASTQ file \${FASTQ}..."
-           rm "$(readlink -f \${FASTQ})"
+           rm "\$(readlink -f \${FASTQ})"
         done
         echo "Done."
         """
