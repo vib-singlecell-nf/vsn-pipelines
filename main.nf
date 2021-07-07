@@ -1039,28 +1039,24 @@ workflow sra {
         } from "./src/utils/workflows/utils" params(params)
         
         // Run 
-        DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
+        out = DOWNLOAD_FROM_SRA( getSRAChannel( params.data.sra ) )
         if(params.utils?.publish) {
             PUBLISH(
-                DOWNLOAD_FROM_SRA.out.transpose(),
+                out.transpose(),
                 null,
                 null,
                 "sra",
                 false
             )
-        }  
+        }
+    emit:
+        out
 
 }
 
 workflow sra_cellranger_bbknn {
 
     main:
-        include {
-            getChannel as getSRAChannel;
-        } from './src/channels/sra' params(params)
-        include {
-            SRATOOLKIT__DOWNLOAD_FASTQS;
-        } from './src/utils/workflows/downloadFromSRA' params(params)
         include {
             SC__CELLRANGER__PREPARE_FOLDER;
             SC__CELLRANGER__COUNT;
@@ -1070,8 +1066,8 @@ workflow sra_cellranger_bbknn {
         } from './workflows/bbknn' params(params)
         
         // Run 
-        SRATOOLKIT__DOWNLOAD_FASTQS( getSRAChannel( params.data.sra ) )
-        SC__CELLRANGER__PREPARE_FOLDER( SRATOOLKIT__DOWNLOAD_FASTQS.out.groupTuple() )
+        out = sra()
+        SC__CELLRANGER__PREPARE_FOLDER( out.groupTuple() )
         SC__CELLRANGER__COUNT(
             file(params.sc.cellranger.count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out
