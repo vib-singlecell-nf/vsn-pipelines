@@ -13,8 +13,9 @@ RUN conda init bash
 
 # Activate the environment, and make sure it's activated:
 RUN echo "conda activate $(cat /tmp/version)" >> ~/.bashrc && \
-    conda activate $(cat /tmp/version) && \
-    R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')"
+   conda activate $(cat /tmp/version) && \
+   R -e "devtools::install_github(repo = 'dynverse/anndata', ref = '0.7.5.2')" && \
+   R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')"
 
 RUN apt-get -y update \
    # Need to run ps

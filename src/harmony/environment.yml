@@ -1,4 +1,4 @@
-name: harmony-v1.0
+name: harmony-v1.0-2
 channels:
   - r
   - conda-forge
@@ -8,5 +8,6 @@ dependencies:
   - r-base=4.0.2
   - r-argparse=2.0.1
   - r-devtools
+  - r-reticulate=1.20
   - r-hdf5r
   - r-harmony
