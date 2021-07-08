@@ -11,6 +11,10 @@ library("argparse")
 library("reticulate")
 library("anndata")
 
+# Link Python to this R session
+use_python("/opt/conda/envs/harmony-v1.0-3/bin")
+Sys.setenv(RETICULATE_PYTHON = "/opt/conda/envs/harmony-v1.0-3/bin")
+
 parser <- ArgumentParser(description='Scalable integration of single cell RNAseq data for batch correction and meta analysis')
 parser$add_argument(
     'input',
