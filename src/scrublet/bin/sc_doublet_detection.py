@@ -280,6 +280,7 @@ final_adata.to_csv(
     path_or_buf=f"{FILE_PATH_OUT_BASENAME}.ScrubletDoubletTable.tsv",
     sep="\t",
     index=True,
+    index_label='index',
     header=True
 )
 f = gzip.open(f"{FILE_PATH_OUT_BASENAME}.ScrubletObject.pklz", 'wb')
