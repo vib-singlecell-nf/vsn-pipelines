@@ -49,7 +49,8 @@ workflow ANNOTATE_BY_CELL_METADATA {
             if(metadata == null) {
                 metadata = getChannel(
                     workflowParams.cellMetaDataFilePath,
-                    workflowParams.sampleSuffixWithExtension
+                    workflowParams.sampleSuffixWithExtension,
+                    'NULL'
                 )
             }
             out = SC__ANNOTATE_BY_CELL_METADATA(
