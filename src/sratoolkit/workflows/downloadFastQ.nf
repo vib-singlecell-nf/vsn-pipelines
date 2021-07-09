@@ -8,8 +8,8 @@ include {
     DOWNLOAD_FASTQS_FROM_SRA_ACC_ID;
 } from "../processes/downloadFastQ" params(params)
 include {
-    FIX_AND_COMPRESS_SRA_FASTQ;
-} from "../processes/fixAndCompressFastQ" params(params)
+    FIX_AND_COMPRESS_SRA_FASTQS;
+} from "../../singlecelltoolkit/processes/fix_and_compress_fastqs" params(params)
 
 
 workflow SRATOOLKIT__DOWNLOAD_FASTQS {
