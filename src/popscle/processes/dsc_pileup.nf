@@ -2,11 +2,11 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/popscle/bin/" : ""
 
-toolParams = params.sc.popscle
+toolParams = params.tools.popscle
 
 process SC__POPSCLE__DSC_PILEUP {
 
-    container params.sc.popscle.container
+    container params.tools.popscle.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
@@ -29,7 +29,7 @@ process SC__POPSCLE__DSC_PILEUP {
 
 process SC__POPSCLE__PREFILTER_DSC_PILEUP {
 
-    container params.sc.popscle.container
+    container params.tools.popscle.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
     label 'compute_resources__cpu'
 

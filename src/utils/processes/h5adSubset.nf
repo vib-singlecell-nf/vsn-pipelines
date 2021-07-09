@@ -6,13 +6,13 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : 
 
 include {
     isParamNull;
-    getToolParams;
     isCollectionOrArray;
+    getToolParams;
 } from './utils' params(params)
 
 process SC__PREPARE_OBS_FILTER {
 
-    container params.sc.scanpy.container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -34,7 +34,7 @@ process SC__PREPARE_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : getToolParams(params.sc, tool)["cell_filter"]
+            isParamNull(tool) ? params.utils.cell_filter : params.tools[tool]["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'
@@ -44,7 +44,7 @@ process SC__PREPARE_OBS_FILTER {
             input = f
         } else if (processParams.method == 'external') {
             if(!filterConfig.cellMetaDataFilePath) {
-                throw new Exception("VSN ERROR: A filter in params.sc.cell_filter does not provide a cellMetaDataFilePath entry.")
+                throw new Exception("VSN ERROR: A filter in params.utils.cell_filter does not provide a cellMetaDataFilePath entry.")
             }
             input = filterConfig.cellMetaDataFilePath
         } else {
@@ -71,7 +71,7 @@ process SC__PREPARE_OBS_FILTER {
 
 process SC__APPLY_OBS_FILTER {
 
-    container params.sc.scanpy.container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'link', overwrite: true
     label 'compute_resources__default'
 
@@ -92,7 +92,7 @@ process SC__APPLY_OBS_FILTER {
         def sampleParams = params.parseConfig(
             sampleId,
             params.global,
-            isParamNull(tool) ? params.sc.cell_filter : getToolParams(params.sc, tool)["cell_filter"]
+            isParamNull(tool) ? params.utils.cell_filter : getToolParams(params.tools, tool)["cell_filter"]
         )
 		processParams = sampleParams.local
         toolTag = isParamNull(tool) ? '' : tool.toUpperCase() + '.'

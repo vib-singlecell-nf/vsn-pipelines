@@ -28,15 +28,15 @@ workflow ANNOTATE_BY_CELL_METADATA {
         // Values
         // - tool != null:
         //   - The given tool is performing itself a cell-based annotation
-        //   - params.sc[tool] should exist
+        //   - params.tools[tool] should exist
         // - tool == null:
-        //   - params.sc.cell_annotate should exist
+        //   - params.utils.cell_annotate should exist
         tool
 
     main:
         def workflowParams = isParamNull(tool) ?
-            params.sc.cell_annotate :
-            getToolParams(params.sc, tool)["cell_annotate"]
+            params.utils.cell_annotate :
+            getToolParams(params.tools, tool)["cell_annotate"]
         def method = workflowParams.method
         if(method == 'aio') {
             out = SC__ANNOTATE_BY_CELL_METADATA( 

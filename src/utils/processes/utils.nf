@@ -6,6 +6,10 @@ import static groovy.json.JsonOutput.*
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/utils/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "utils/bin")
 
+def boolean isCollectionOrArray(object) {    
+    [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
+}
+
 def getToolParams(params, toolKey) {
     if(!toolKey.contains(".")) {
         return params[toolKey]
@@ -13,10 +17,6 @@ def getToolParams(params, toolKey) {
     def entry = params
     toolKey.split('\\.').each { entry = entry?.get(it) }
     return entry
-}
-
-def boolean isCollectionOrArray(object) {    
-    [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
 }
 
 def isParamNull(param) {
@@ -152,12 +152,12 @@ def runRConverter = {
 def getConverterContainer = { params, type ->
     switch(type) {
         case "cistopic":
-            return params.sc.cistopic.container
+            return params.tools.cistopic.container
         case "r":
             return "vibsinglecellnf/scconverter:0.0.1"
         break;
         case "python":
-            return params.sc.scanpy.container
+            return params.tools.scanpy.container
     }
 }
 
@@ -206,7 +206,7 @@ process SC__FILE_CONVERTER {
             path("${sampleId}.SC__FILE_CONVERTER.${outputExtension}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.file_converter)
         processParams = sampleParams.local
 
         switch(inputDataType) {
@@ -314,7 +314,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
             path("${sampleId}.SC__FILE_CONVERTER_FROM_SCE.${outputDataType}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.file_converter)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.file_converter)
         processParams = sampleParams.local
         def _outputDataType = outputDataType
         converterToUse = getConverter(
@@ -340,7 +340,7 @@ process SC__FILE_CONVERTER_FROM_SCE {
 process SC__FILE_CONCATENATOR {
 
     cache 'deep'
-    container params.sc.scanpy.container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -351,7 +351,7 @@ process SC__FILE_CONCATENATOR {
         tuple val(params.global.project_name), path("${params.global.project_name}.SC__FILE_CONCATENATOR.${processParams.off}")
 
     script:
-        processParams = params.sc.file_concatenator
+        processParams = params.utils.file_concatenator
         """
         ${binDir}/sc_file_concatenator.py \
             --file-format $processParams.off \
@@ -363,7 +363,7 @@ process SC__FILE_CONCATENATOR {
 
 process SC__STAR_CONCATENATOR() {
 
-    container params.sc.scanpy.container
+    container params.tools.scanpy.container
     publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__mem'
 
@@ -378,7 +378,7 @@ process SC__STAR_CONCATENATOR() {
             path("${params.global.project_name}.SC__STAR_CONCATENATOR.${processParams.off}")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, params.sc.star_concatenator)
+        def sampleParams = params.parseConfig(sampleId, params.global, params.utils.star_concatenator)
         processParams = sampleParams.local
         id = params.global.project_name
         """
@@ -410,13 +410,13 @@ def getOutputFileName(params, tag, f, fileOutputSuffix, isParameterExplorationMo
         return isParamNull(fileOutputSuffix) ? 
             "${tag}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}" :
             "${tag}.${fileOutputSuffix}.${stashedParams.findAll { it != 'NULL' }.join('_')}.${f.extension}"
-    if(params.utils.containsKey("publish")
-        && params.utils.publish.containsKey("pipelineOutputSuffix")) {
-        if(params.utils.publish.pipelineOutputSuffix == 'none')
+    def utilsPublishParams = params.utils.publish
+    if(utilsPublishParams?.pipelineOutputSuffix) {
+        if(utilsPublishParams.pipelineOutputSuffix == 'none')
             return "${tag}.${f.extension}"
-        if(params.utils.publish.pipelineOutputSuffix.length() == 0)
+        if(utilsPublishParams.pipelineOutputSuffix.length() == 0)
             throw new Exception("VSN ERROR: The parameter 'params.utils.publish.outputFileSuffix' cannot be empty. If you don't want to add a suffix to the final output, please set this param to 'none'.")
-        return params.utils.publish.pipelineOutputSuffix
+        return utilsPublishParams.pipelineOutputSuffix
     }
     if(isParamNull(fileOutputSuffix))
         return "${f.baseName}.${f.extension}"
@@ -492,8 +492,8 @@ process COMPRESS_HDF5() {
             val(stashedParams)
 
 	shell:
-        def compressionLevel = params.utils.containsKey("publish") &&
-            params.utils.publish.containsKey("compressionLevel") ? 
+        def compressionLevel = params.utils?.publish &&
+            params.utils.publish?.compressionLevel ? 
             params.utils.publish.compressionLevel : 
             6
 

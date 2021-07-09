@@ -79,11 +79,6 @@ workflow mnncorrect {
 
 }
 
-def getHarmonyBatchVariables = { params ->
-    batchVariables = params.sc.harmony.varsUse
-    return batchVariables
-}
-
 // run multi-sample with bbknn, output a scope loom file
 workflow harmony {
 
@@ -95,7 +90,7 @@ workflow harmony {
         PUBLISH as PUBLISH_SCANPY;
     } from "./src/utils/workflows/utils" params(params)
 
-    batchVariables = getHarmonyBatchVariables(params)
+    batchVariables = params.tools.harmony.varsUse
     outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables.join("_").toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
@@ -129,15 +124,15 @@ workflow harmony_only {
     } from "./src/utils/workflows/utils" params(params)
     
 
-    batchVariables = getHarmonyBatchVariables(params)
-    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+    batchVariables = params.tools.harmony.varsUse
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables.join("_").toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
     if(params.utils?.publish) {
         PUBLISH_HARMONY(
             HARMONY.out.scanpyh5ad,
-            params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" +  batchVariables[0].toUpperCase() : "HARMONY",
+            params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" +  batchVariables.join("_").toUpperCase() : "HARMONY",
             "h5ad",
             null,
             false
@@ -203,8 +198,8 @@ workflow harmony_scenic {
         PUBLISH as PUBLISH_HARMONY_SCENIC;
     } from "./src/utils/workflows/utils" params(params)
 
-    batchVariables = getHarmonyBatchVariables(params)
-    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables[0].toUpperCase() : "HARMONY"
+    batchVariables = params.tools.harmony.varsUse
+    outputSuffix = params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" + batchVariables.join("_").toUpperCase() : "HARMONY"
 
     getDataChannel | HARMONY
 
@@ -506,7 +501,7 @@ workflow single_sample_decontx {
     if(params.utils?.publish) {
         PUBLISH(
             SC__H5AD_TO_LOOM.out,
-            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase(),
+            "SINGLE_SAMPLE_CELDA_DECONTX_"+ params.tools.celda.decontx.strategy.toUpperCase(),
             "loom",
             null,
             false
@@ -582,7 +577,7 @@ workflow single_sample_decontx_scrublet {
         // - potential doublets removed by Scrublet 
         PUBLISH_CELDA_DECONTX_SCRUBLET(
             SCRUBLET__DOUBLET_REMOVAL.out.data_doublets_removed,
-            "CELDA_DECONTX_"+ params.sc.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
+            "CELDA_DECONTX_"+ params.tools.celda.decontx.strategy.toUpperCase() +"_SCRUBLET",
             "h5ad",
             null,
             false
@@ -760,7 +755,7 @@ workflow scenic {
     } from "./src/utils/workflows/utils" params(params)
 
     SCENIC( 
-        Channel.of( tuple(params.global.project_name, file(params.sc.scenic.filteredLoom))) 
+        Channel.of( tuple(params.global.project_name, file(params.tools.scenic.filteredLoom))) 
     )
 
     if(params.utils?.publish) {
@@ -784,9 +779,9 @@ workflow cellranger {
     } from './src/cellranger/main' params(params)
 
     CELLRANGER(
-        file(params.sc.cellranger.mkfastq.csv),
-        file(params.sc.cellranger.mkfastq.runFolder),
-        file(params.sc.cellranger.count.transcriptome)
+        file(params.tools.cellranger.mkfastq.csv),
+        file(params.tools.cellranger.mkfastq.runFolder),
+        file(params.tools.cellranger.count.transcriptome)
     )
 
     emit:
@@ -800,10 +795,10 @@ workflow cellranger_libraries {
     } from './src/cellranger/workflows/cellranger_libraries' params(params)
 
     CELLRANGER_LIBRARIES(
-        file(params.sc.cellranger.mkfastq.csv),
-        file(params.sc.cellranger.mkfastq.runFolder),
-        file(params.sc.cellranger.count.transcriptome),
-        file(params.sc.cellranger.count.featureRef)
+        file(params.tools.cellranger.mkfastq.csv),
+        file(params.tools.cellranger.mkfastq.runFolder),
+        file(params.tools.cellranger.count.transcriptome),
+        file(params.tools.cellranger.count.featureRef)
     )
 
     emit:
@@ -818,8 +813,8 @@ workflow cellranger_count_metadata {
     } from './src/cellranger/workflows/cellRangerCountWithMetadata' params(params)
 
     CELLRANGER_COUNT_WITH_METADATA(
-        file(params.sc.cellranger.count.transcriptome),
-        file(params.sc.cellranger.count.metadata)
+        file(params.tools.cellranger.count.transcriptome),
+        file(params.tools.cellranger.count.metadata)
     )
     emit:
         CELLRANGER_COUNT_WITH_METADATA.out
@@ -843,9 +838,9 @@ workflow cellranger_count_libraries {
     } from './src/cellranger/workflows/cellRangerCountWithLibraries' params(params)
 
     CELLRANGER_COUNT_WITH_LIBRARIES(
-        file(params.sc.cellranger.count.transcriptome),
-        file(params.sc.cellranger.count.featureRef),
-        params.sc.cellranger.count.libraries
+        file(params.tools.cellranger.count.transcriptome),
+        file(params.tools.cellranger.count.featureRef),
+        params.tools.cellranger.count.libraries
     )
 
     emit:
@@ -861,9 +856,9 @@ workflow cellranger_count_demuxlet {
     include {
         SC__CELLRANGER__COUNT as CELLRANGER_COUNT;
     } from './src/cellranger/processes/count'
-    if (params.sc.cellranger.count.fastqs instanceof Map) {
+    if (params.tools.cellranger.count.fastqs instanceof Map) {
         // Remove default key
-        Channel.from(params.sc.cellranger.count.fastqs.findAll {
+        Channel.from(params.tools.cellranger.count.fastqs.findAll {
             it.key != 'default' 
         }.collect { k, v -> 
             // Split possible multiple file paths
@@ -882,7 +877,7 @@ workflow cellranger_count_demuxlet {
         .set { fastq_data }           
     }
     data = CELLRANGER_COUNT(
-        params.sc.cellranger.count.transcriptome,
+        params.tools.cellranger.count.transcriptome,
         fastq_data
     )
     get_bam_barcodes_from_cellranger_rna(data) |
@@ -1092,7 +1087,7 @@ workflow sra_cellranger_bbknn {
         out = sra()
         SC__CELLRANGER__PREPARE_FOLDER( out.groupTuple() )
         SC__CELLRANGER__COUNT(
-            file(params.sc.cellranger.count.transcriptome),
+            file(params.tools.cellranger.count.transcriptome),
             SC__CELLRANGER__PREPARE_FOLDER.out
         )
         BBKNN( 
@@ -1192,15 +1187,15 @@ workflow _cell_annotate_filter {
         getDataChannel | \
             SC__FILE_CONVERTER
 
-        if(!params.sc.containsKey("cell_annotate"))
-            throw new Exception("VSN ERROR: The cell_annotate param is missing in params.sc.")
+        if(!params.utils?.cell_annotate)
+            throw new Exception("VSN ERROR: The cell_annotate param is missing in params.utils.")
 
         // Annotate & publish
         ANNOTATE_BY_CELL_METADATA( 
             SC__FILE_CONVERTER.out, 
             null,
         )
-        if(params.sc.cell_annotate.containsKey("publish") && params.sc.cell_annotate.publish) {
+        if(params.utils.cell_annotate.containsKey("publish") && params.utils.cell_annotate.publish) {
             PUBLISH_H5AD_CELL_ANNOTATED(
                 ANNOTATE_BY_CELL_METADATA.out,
                 "ANNOTATE_BY_CELL_METADATA",
@@ -1210,8 +1205,8 @@ workflow _cell_annotate_filter {
             )
         }
 
-        if(!params.sc.containsKey("cell_filter"))
-            throw new Exception("VSN ERROR: The cell_filter param is missing in params.sc.")
+        if(!params.utils?.cell_filter)
+            throw new Exception("VSN ERROR: The cell_filter param is missing in params.utils.")
 
         // Filter (& clean) & publish
         FILTER_BY_CELL_METADATA(
@@ -1219,7 +1214,7 @@ workflow _cell_annotate_filter {
             null
         )
 
-        if(params.sc.cell_filter.containsKey("publish") && params.sc.cell_filter.publish) {
+        if(params.utils.cell_filter?.publish) {
             PUBLISH_H5AD_CELL_FILTERED(
                 FILTER_BY_CELL_METADATA.out,
                 "FILTER_BY_CELL_METADATA",
@@ -1228,7 +1223,7 @@ workflow _cell_annotate_filter {
                 false
             )
         }
-        if(params.utils.containsKey("publish") && publish) {
+        if(params.utils?.publish && publish) {
             PUBLISH_H5AD_CELL_FILTERED(
                 FILTER_BY_CELL_METADATA.out,
                 "CELL_ANNOTATE_FILTER",
@@ -1262,15 +1257,15 @@ workflow cell_annotate_filter_and_sample_annotate {
         out = _cell_annotate_filter(false)
 
         // Annotate cells based on an indexed sample-based metadata table
-        if(!params.sc.containsKey("sample_annotate"))
-            throw new Exception("VSN ERROR: The sample_annotate param is missing in params.sc.")
+        if(!params.utils?.sample_annotate)
+            throw new Exception("VSN ERROR: The sample_annotate param is missing in params.utils.")
 
-        if (!hasMetadataFilePath(params.sc.sample_annotate)) {
+        if (!hasMetadataFilePath(params.utils.sample_annotate)) {
             throw new Exception("VSN ERROR: The metadataFilePath param is missing in sample_annotate.")
         }
         out = SC__ANNOTATE_BY_SAMPLE_METADATA( out )
 
-        if(params.sc.file_cleaner) {
+        if(params.utils.file_cleaner) {
             out = SC__H5AD_BEAUTIFY( out )
         }
 

@@ -2,8 +2,8 @@ nextflow.enable.dsl=2
 
 // binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.sc.scenic
-processParams = params.sc.scenic.grn
+def toolParams = params.tools.scenic
+def processParams = toolParams.grn
 
 process ADD_PEARSON_CORRELATION {
 

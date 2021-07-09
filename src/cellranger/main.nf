@@ -31,9 +31,9 @@ workflow CELLRANGER {
         data = MKFASTQ(mkfastq_csv, runFolder)
 
         // Allow to combine old demultiplexed data with new data
-        if (params.sc.cellranger.count.fastqs instanceof Map) {
+        if (params.tools.cellranger.count.fastqs instanceof Map) {
             // Remove default key
-            Channel.from(params.sc.cellranger.count.fastqs.findAll {
+            Channel.from(params.tools.cellranger.count.fastqs.findAll {
                 it.key != 'default' 
             }.collect { k, v -> 
                 // Split possible multiple file paths

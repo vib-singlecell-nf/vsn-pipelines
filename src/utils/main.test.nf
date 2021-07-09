@@ -76,7 +76,7 @@ workflow {
                     SC__ANNOTATE_BY_SAMPLE_METADATA;
                 } from './processes/h5adAnnotate' params(params)
                 // Run
-                if(params.sc.sample_annotate) {
+                if(params.utils?.sample_annotate) {
                     getDataChannel | \
                         SC__FILE_CONVERTER | \
                         SC__ANNOTATE_BY_SAMPLE_METADATA
@@ -90,7 +90,7 @@ workflow {
                     STATIC__ANNOTATE_BY_CELL_METADATA as ANNOTATE_BY_CELL_METADATA;
                 } from './workflows/annotateByCellMetadata' params(params)
                 // Run
-                if(params.sc.cell_annotate) {
+                if(params.utils?.cell_annotate) {
                     getDataChannel | \
                         SC__FILE_CONVERTER
                     ANNOTATE_BY_CELL_METADATA( 
@@ -107,7 +107,7 @@ workflow {
                     FILTER_BY_CELL_METADATA;
                 } from './workflows/filterByCellMetadata' params(params)
                 // Run 
-                if(params.sc.cell_filter) {
+                if(params.utils?.cell_filter) {
                     getDataChannel | \
                         SC__FILE_CONVERTER
                     FILTER_BY_CELL_METADATA(
@@ -125,7 +125,7 @@ workflow {
                     FILTER_BY_CELL_METADATA;
                 } from './workflows/filterByCellMetadata' params(params)
                 // Run
-                if(params.sc.cell_annotate) {
+                if(params.utils?.cell_annotate) {
                     getDataChannel | \
                         SC__FILE_CONVERTER
 
@@ -221,7 +221,7 @@ workflow {
                     SC__H5AD_BEAUTIFY;
                 } from './processes/h5adUpdate' params(params)
                 // Run
-                if(params.sc.file_cleaner) {
+                if(params.utils?.file_cleaner) {
                     getDataChannel | \
                     map {
                         it -> tuple(it[0], it[1], null)

@@ -59,10 +59,10 @@ workflow multi_sample_qc {
 
     main:
         if(!params?.sc?.scanpy?.filter) {
-            throw new Exception("VSN ERROR: Missing params.sc.scanpy.filter config.")
+            throw new Exception("VSN ERROR: Missing params.tools.scanpy.filter config.")
         }
         if(!params?.sc?.file_concatenator) {
-            throw new Exception("VSN ERROR: Missing params.sc.file_concatenator config.")
+            throw new Exception("VSN ERROR: Missing params.utils.file_concatenator config.")
         }
 
         out = data | \

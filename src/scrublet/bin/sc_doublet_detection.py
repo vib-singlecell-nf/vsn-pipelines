@@ -217,10 +217,10 @@ if (adata_raw.obs["predicted_doublets"].isnull().values.any() or scrub.predicted
     )
     raise Exception(f"""
 VSN ERROR: Scrublet failed to automatically identify a doublet score threshold for {SAMPLE_NAME}.
-A manual doublet score threshold can be set using the --threshold (params.sc.scrublet.threshold) argument.
+A manual doublet score threshold can be set using the --threshold (params.tools.scrublet.threshold) argument.
 Consider to use sample-based parameter setting as described at https://vsn-pipelines.readthedocs.io/en/develop/features.html#multi-sample-parameters. E.g.:
 params {{
-    sc {{
+    tools {{
         scrublet {{
             threshold = [
                 {SAMPLE_NAME}: [your-custom-threshold-for-that-sample],

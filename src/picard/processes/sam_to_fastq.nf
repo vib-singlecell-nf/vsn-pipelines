@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 process PICARD__BAM_TO_FASTQ {
 
-    container params.picard.container
+    container params.tools.picard.container
     publishDir "${params.global.outdir}/01.clean", mode: 'symlink'
     label 'compute_resources__cpu','compute_resources__24hqueue'
 

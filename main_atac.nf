@@ -29,9 +29,9 @@ workflow cellranger_atac {
     } from './src/cellranger-atac/main.nf' params(params)
     
     CELLRANGER_ATAC(
-        file(params.sc.cellranger_atac.mkfastq.csv),
-        file(params.sc.cellranger_atac.mkfastq.runFolder),
-        file(params.sc.cellranger_atac.count.reference)
+        file(params.tools.cellranger_atac.mkfastq.csv),
+        file(params.tools.cellranger_atac.mkfastq.runFolder),
+        file(params.tools.cellranger_atac.count.reference)
     )
 
 }
@@ -111,7 +111,7 @@ workflow atac_preprocess_freemuxlet {
         freemuxlet as FREEMUXLET;
     } from './workflows/popscle' params(params)
 
-    ATAC_PREPROCESS_WITH_METADATA(file(params.sc.atac.preprocess.metadata))
+    ATAC_PREPROCESS_WITH_METADATA(file(params.tools.atac.preprocess.metadata))
     FREEMUXLET(ATAC_PREPROCESS_WITH_METADATA.out.bam)
 }
 

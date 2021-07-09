@@ -74,14 +74,17 @@ workflow harmony {
         /*******************************************
         * Data processing
         */
+        // To avoid Variable `params` already defined in the process scope
+        def scanpyParams = params.tools.scanpy
+
         out = data | \
             SC__FILE_CONVERTER | \
             FILTER_AND_ANNOTATE_AND_CLEAN
 
-        if(params.sc.scanpy.containsKey("filter")) {
+        if(scanpyParams.containsKey("filter")) {
             out = QC_FILTER( out ).filtered // Remove concat
         }
-        if(params.sc.containsKey("file_concatenator")) {
+        if(params.utils?.file_concatenator) {
             out = SC__FILE_CONCATENATOR( 
                 out.map {
                     it -> it[1]
@@ -90,7 +93,7 @@ workflow harmony {
                 ) 
             )
         }
-        if(params.sc.scanpy.containsKey("data_transformation") && params.sc.scanpy.containsKey("normalization")) {
+        if(scanpyParams.containsKey("data_transformation") && scanpyParams.containsKey("normalization")) {
             out = NORMALIZE_TRANSFORM( out )
         }
         out = HVG_SELECTION( out )
@@ -115,16 +118,16 @@ workflow harmony {
         
         // Finalize
         FINALIZE(
-            params.sc?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
+            params.utils?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
             BEC_HARMONY.out.data,
             'HARMONY.final_output'
         )
 
         // Define the parameters for clustering
-        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.sc.scanpy.clustering) )
+        def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(scanpyParams.clustering) )
 
         // Select a default clustering when in parameter exploration mode
-        if(params.sc.containsKey("directs") && clusteringParams.isParameterExplorationModeOn()) {
+        if(params.tools?.directs && clusteringParams.isParameterExplorationModeOn()) {
             scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
         } else {
             scopeloom = FINALIZE.out.scopeloom
