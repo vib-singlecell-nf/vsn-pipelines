@@ -34,7 +34,7 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
         prefetch \
            -v \
            -p 1 \
-           ${params.sratoolkit?.maxSize ? '--max-size '+ params.sratoolkit.maxSize: ''} \
+           ${params.tools.sratoolkit?.maxSize ? '--max-size '+ params.tools.sratoolkit.maxSize: ''} \
            ${sraId}
         # Convert SRA file to FASTQ files
         fasterq-dump \
@@ -42,7 +42,7 @@ process DOWNLOAD_FASTQS_FROM_SRA_ACC_ID {
            -v \
            -p \
            -e ${task.cpus} \
-           ${params.sratoolkit?.includeTechnicalReads ? '--include-technical' : ''} \
+           ${params.tools.sratoolkit?.includeTechnicalReads ? '--include-technical' : ''} \
            -O . \
            ${sraId}
         """

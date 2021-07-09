@@ -6,7 +6,7 @@ if(!params.containsKey("test")) {
     binDir = ""
 }
 
-toolParams = params.sratoolkit
+toolParams = params.tools.sratoolkit
 
 process FIX_AND_COMPRESS_SRA_FASTQS {
 

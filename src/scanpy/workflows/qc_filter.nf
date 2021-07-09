@@ -30,7 +30,7 @@ workflow QC_FILTER {
             SC__SCANPY__CELL_FILTER | \
             SC__SCANPY__GENE_FILTER
         
-        report = !params.sc.scanpy.filter?.report_ipynb ? Channel.empty() :
+        report = !params.tools.scanpy.filter?.report_ipynb ? Channel.empty() :
             GENERATE_DUAL_INPUT_REPORT(
                 SC__SCANPY__COMPUTE_QC_STATS.out.join(filtered).map { 
                     it -> tuple(*it[0..(it.size()-1)], null)

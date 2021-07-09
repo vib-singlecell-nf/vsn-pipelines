@@ -622,8 +622,8 @@ NOTES:
 
 - If you're a VSC user, you might want to add the ``vsc`` profile.
 - The final output (FASTQ files) will available in ``out/data/sra``
-- If you're downloading 10x Genomics scATAC-seq data, make sure to set ``params.sratoolkit.includeTechnicalReads = true`` and properly set ``params.utils.sra_normalize_fastqs.fastq_read_suffixes``. In the case of downloading the scATAC-seq samples of SRP254409, ``fastq_read_suffixes`` would be set to ``["R1", "R2", "I1", "I2"]``.
-- The download of SRA files is by default limited to 20 Gb. If this limit needs to be increased please set ``params.sratoolkit.maxSize`` accordingly. This limit can be 'removed' by setting the parameter to an arbitrarily high number (e.g.: 9999999999999).
+- If you're downloading 10x Genomics scATAC-seq data, make sure to set ``params.tools.sratoolkit.includeTechnicalReads = true`` and properly set ``params.utils.sra_normalize_fastqs.fastq_read_suffixes``. In the case of downloading the scATAC-seq samples of SRP254409, ``fastq_read_suffixes`` would be set to ``["R1", "R2", "I1", "I2"]``.
+- The download of SRA files is by default limited to 20 Gb. If this limit needs to be increased please set ``params.tools.sratoolkit.maxSize`` accordingly. This limit can be 'removed' by setting the parameter to an arbitrarily high number (e.g.: 9999999999999).
 
 Now we can run it with the following command:
 

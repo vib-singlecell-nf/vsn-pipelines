@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/popscle/bin/" : ""
 
-toolParams = params.sc.popscle
+toolParams = params.tools.popscle
 
 process SC__POPSCLE__DSC_PILEUP {
 
