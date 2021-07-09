@@ -392,7 +392,15 @@ if(optimum_npcs == 1) {
 		stop(paste0("Invalid value for --n-pc-fallback parameter: value should be > 0."))
 	}
 	if(args$`n-pc-fallback` == 0) {
-		stop(paste0("Could not find an optimal number of PCs. You can set --n-pc-fallback parameter (> 0) in order to return a minimum number of PCs."))
+ 		write.table(
+			x = out,
+			file = paste0(args$`output-prefix`, ".PRESS_ERRORS.tsv"),
+			quote = F,
+			sep = "\t",
+			row.names = F,
+			col.names = T
+		)
+		stop(paste0("Could not find an optimal number of PCs. You can either set --n-pc-fallback parameter (> 0) in order to return a minimum number of PCs or adapt the following parameters: --k-fold, --from-n-pc, --to-n-pc, --by-n-pc."))
 	}
 	msg <- paste0("No optimal number of PCs found. The number of PCs returned is defined by --n-pc-fallback: ", args$`n-pc-fallback`)
 	warning(msg)
