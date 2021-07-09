@@ -7,14 +7,14 @@ import java.nio.file.Paths
 //  process imports:
 
 include {
+    SRATOOLKIT__DOWNLOAD_FASTQS;
+} from './../../sratoolkit/workflows/downloadFastQ' params(params)
+include {
     GET_SRA_DB;
 } from './../processes/sra' params(params)
 include {
     SRA_TO_METADATA;
 } from './../processes/sra' params(params)
-include {
-    DOWNLOAD_FASTQS_FROM_SRA_ACC_ID;
-} from './../../sratoolkit/processes/downloadFastQ' params(params)
 include {
     NORMALIZE_SRA_FASTQS;
 } from './../processes/sra' params(params)
@@ -73,7 +73,7 @@ workflow DOWNLOAD_FROM_SRA {
         }
         if(!params.containsKey('quiet')) metadata.view()
         // Download and compress all the SRA runs defined in the metadata
-        data = DOWNLOAD_FASTQS_FROM_SRA_ACC_ID( 
+        data = SRATOOLKIT__DOWNLOAD_FASTQS( 
             metadata 
         ).join(
             metadata

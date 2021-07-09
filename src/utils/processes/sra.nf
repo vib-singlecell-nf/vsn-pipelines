@@ -65,13 +65,18 @@ process SRA_TO_METADATA {
 
 }
 
-def normalizeSRAFastQ(fastQPath, sampleName) {
+def normalizeSRAFastQ(fastQPath, sampleName, fastqReadSuffixes) {
     /*
-     * Rename samples SRRXXXXXX_[1|2].fastq.gz to more comprehensive file name ${sampleName}_S1_L001_R[1|2]_001.fastq.gz
+     * Rename samples SRRXXXXXX_[1-9].fastq.gz to more comprehensive file name ${sampleName}_S1_L001_${fastqReadSuffixes[\1-1]}_001.fastq.gz
      * Here we follow 10xGenomics file naming convention
      */
-    (full, srrId, readType) = (fastQPath =~ /(SRR[0-9]*)_([1-2]).fastq.gz/)[0]
-    normalizedFastQName = "${sampleName}_S1_L001_R${readType}_001.fastq.gz"
+    (full, srrId, readType) = (fastQPath =~ /(SRR[0-9]*)_([1-9]).fastq.gz/)[0]
+
+    if(readType.toInteger()-1 >= fastqReadSuffixes.size()) {
+        throw new Exception("Read suffix for the current FASTQ file from "+ srrId +"SRA ID with index "+ readType + " cannot be extracted from params.utils.sra_normalize_fastqs.fastq_read_suffixes.")
+    }
+    readSuffix = fastqReadSuffixes[readType.toInteger()-1]
+    normalizedFastQName = "${sampleName}_S1_L001_${readSuffix}_001.fastq.gz"
     return [fastQPath, normalizedFastQName]
 }
 
@@ -89,7 +94,7 @@ process NORMALIZE_SRA_FASTQS {
     script:
         def normalizedFastqs = fastqs
             .collect {
-                fastq -> normalizeSRAFastQ(fastq, sampleId)
+                fastq -> normalizeSRAFastQ(fastq, sampleId, params.utils.sra_normalize_fastqs.fastq_read_suffixes)
             }
         def cmd = ''
         for(int i = 0; i < normalizedFastqs.size(); i++)
