@@ -8,6 +8,12 @@ print("#############################################################")
 
 # Loading dependencies scripts
 library("argparse")
+library("reticulate")
+library("anndata")
+
+# Link Python to this R session
+use_python("/opt/conda/envs/harmony-v1.0-3/bin")
+Sys.setenv(RETICULATE_PYTHON = "/opt/conda/envs/harmony-v1.0-3/bin")
 
 parser <- ArgumentParser(description='Scalable integration of single cell RNAseq data for batch correction and meta analysis')
 parser$add_argument(
@@ -106,22 +112,16 @@ args <- lapply(X = args, FUN = function(arg) {
 input_ext <- tools::file_ext(args$input)
 
 if(input_ext == "h5ad") {
-  # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
-  file <- hdf5r::h5file(filename = args$input, mode = 'r')
-  if(!("X_pca" %in% names(x = file[["obsm"]]))) {
+  adata <- anndata::read_h5ad(filename = args$input)
+
+  if(!("X_pca" %in% names(x = adata$obsm))) {
     stop("X_pca slot is not found in the AnnData (h5ad).")
   }
-  obs <- file[['obs']][]
-  pca_embeddings <- t(x = file[["obsm"]][["X_pca"]][,])
-  row.names(x = pca_embeddings) <- obs$index
+  obs <- adata$obs
+  pca_embeddings <- adata$obsm[["X_pca"]]
+  row.names(x = pca_embeddings) <- row.names(x = obs)
   colnames(x = pca_embeddings) <- paste0("PCA_", seq(from = 1, to = ncol(x = pca_embeddings)))
   metadata <- obs
-  # seurat <- Seurat::ReadH5AD(file = args$input)
-  # if(!("pca" %in% names(seurat@reductions)) || is.null(x = seurat@reductions$pca))
-  #   stop("Expects a PCA embeddings data matrix but it does not exist.")
-  # data <- seurat@reductions$pca
-  # pca_embeddings <- data@cell.embeddings
-  # metadata <- seurat@meta.data
 } else {
   stop(paste0("Unrecognized input file format: ", input_ext, "."))
 }

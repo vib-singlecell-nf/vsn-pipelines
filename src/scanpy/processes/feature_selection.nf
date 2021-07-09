@@ -21,7 +21,8 @@ process SC__SCANPY__FIND_HIGHLY_VARIABLE_GENES {
 		processParams = sampleParams.local
 		"""
 		${binDir}/feature_selection/sc_find_variable_genes.py \
-			--method ${processParams.method} \
+			${(processParams.containsKey('flavor')) ? '--flavor ' + processParams.flavor : ''} \
+			${(processParams.containsKey('nTopGenes')) ? '--n-top-genes ' + processParams.nTopGenes : ''} \
 			${(processParams.containsKey('minMean')) ? '--min-mean ' + processParams.minMean : ''} \
 			${(processParams.containsKey('maxMean')) ? '--max-mean ' + processParams.maxMean : ''} \
 			${(processParams.containsKey('minDisp')) ? '--min-disp ' + processParams.minDisp : ''} \

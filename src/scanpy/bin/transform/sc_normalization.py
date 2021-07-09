@@ -24,16 +24,16 @@ parser.add_argument(
     action="store",
     dest="method",
     default="cpx",
-    help="Normalize the data. Choose one of : cpx, regress_out"
+    help="Normalize the data. Choose one of : cpx"
 )
 
 parser.add_argument(
-    "-f", "--counts-per-cell-after",
+    "-f", "--target-sum",
     type=int,
     action="store",
-    dest="counts_per_cell_after",
+    dest="target_sum",
     default=1e4,
-    help="Multiplying factor used when running 'cpx' method."
+    help="Multiplying factor used when running 'cpx' method. If None, after normalization, each observation (cell) has a total count equal to the median of total counts for observations (cells) before normalization."
 )
 
 args = parser.parse_args()
@@ -57,7 +57,10 @@ adata.raw = adata
 
 if args.method == 'cpx':
     # Total-count normalize (library-size correct) to '-r' reads/cell
-    sc.pp.normalize_per_cell(adata, counts_per_cell_after=args.counts_per_cell_after)
+    sc.pp.normalize_total(
+        adata,
+        target_sum=args.target_sum
+    )
 else:
     raise Exception("VSN ERROR: Method does not exist.")
 

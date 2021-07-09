@@ -788,7 +788,7 @@ The parameter structure internally (post-merge) is:
                 }
             }
             scanpy {
-                container = 'docker://vib-singlecell-nf/scanpy:0.5.0'
+                container = 'docker://vib-singlecell-nf/scanpy:1.8.1'
                 filter {
                     ...
                 }
