@@ -23,6 +23,7 @@ process FASTP__ADAPTER_TRIMMING {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
         processParams = sampleParams.local
+        def max_threads = (task.cpus > 6) ? 6 : task.cpus
         """
         fastp \
             --in1 ${fastq_PE1} \
@@ -31,7 +32,7 @@ process FASTP__ADAPTER_TRIMMING {
             --out2 ${sampleId}_dex_R2_val_2.fq.gz \
             --detect_adapter_for_pe \
             --html ${sampleId}_fastp.html \
-            --thread ${task.cpus}
+            --thread ${max_threads}
         """
 }
 

@@ -24,9 +24,10 @@ process TRIMGALORE__TRIM {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.trim)
         processParams = sampleParams.local
+        def max_threads = (task.cpus > 6) ? 6 : task.cpus
         """
         trim_galore \
-            -j ${task.cpus} \
+            -j ${max_threads} \
             -o . \
             ${fastq_PE1} \
             ${fastq_PE2} \

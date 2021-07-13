@@ -24,7 +24,9 @@ process SCTK__BARCODE_10X_SCATAC_FASTQ {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_10x_scatac_fastqs)
         processParams = sampleParams.local
+        def max_threads = (task.cpus > 6) ? 6 : task.cpus
         """
+        export compress_fastq_threads="${max_threads}"
         barcode_10x_scatac_fastqs.sh \
             ${fastq_PE1} \
             ${fastq_bc} \
