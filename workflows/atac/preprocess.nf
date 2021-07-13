@@ -93,8 +93,9 @@ workflow ATAC_PREPROCESS {
             | mapping
 
     emit:
-        bam = mapping.out.bam
-        fragments = mapping.out.fragments
+        // emit in a format compatible with getDataChannel output:
+        bam = mapping.out.bam.map { it -> tuple(it[0], [it[1], it[2]], 'bam') }
+        fragments = mapping.out.fragments.map { it -> tuple(it[0], [it[1], it[2]], 'fragments') }
 }
 
 

@@ -90,6 +90,21 @@ workflow atac_qc_filtering {
 
 }
 
+workflow atac_preprocess_with_qc {
+
+    // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
+    include {
+        ATAC_PREPROCESS;
+    } from './workflows/atac/preprocess.nf' params(params)
+    include {
+        ATAC_QC_PREFILTER;
+    } from './workflows/atac/qc_filtering.nf' params(params)
+
+    pp = ATAC_PREPROCESS(file(params.data.atac_preprocess.metadata))
+    ATAC_QC_PREFILTER(pp.bam.mix(pp.fragments))
+
+}
+
 workflow atac_preprocess_freemuxlet {
 
     // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
