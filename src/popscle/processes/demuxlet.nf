@@ -5,7 +5,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/popscle/bin/"
 process SC__POPSCLE__DEMUXLET {
 
     container params.tools.popscle.container
-    publishDir "${params.global.outdir}/data", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/demuxlet", mode: params.utils.publish.mode
     label 'compute_resources__cpu'
 
     input:
@@ -31,7 +31,7 @@ process SC__POPSCLE__DEMUXLET {
 process SC__POPSCLE__FREEMUXLET {
 
     container params.tools.popscle.container
-    publishDir "${params.global.outdir}/data", mode: 'symlink'
+    publishDir "${params.global.outdir}/data/freemuxlet", mode: params.utils.publish.mode
     label 'compute_resources__cpu'
 
     input:
