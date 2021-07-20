@@ -6,27 +6,6 @@ This pipeline takes fastq files from paired end single cell ATAC-seq, and applie
 
 This workflow is currently available in the ``develop_atac`` branch (use ``nextflow pull vib-singlecell-nf/vsn-pipelines -r develop_atac`` to sync this branch).
 
-
-Optional Steps
-**************
-
-1. Direct the Nextflow work directory to an alternate path (e.g. a scratch drive) using the ``NXF_WORK`` environmental variable::
-
-    nwork=/path/to/scratch/example_project
-    mkdir $nwork
-    export NXF_WORK=$nwork
-
-Note that if you start a new shell, ``NXF_WORK`` must be set again, or the pipeline will not resume properly.
-
-
-2. Temporary directory mapping.
-   For large BAM files, the system default temp location may become full.
-   A workaround is to include a volume mapping to the alternate ``/tmp`` ``-B /alternate/path/to/tmp:/tmp`` using the volume mount options in Docker or Singularity.
-   For example in the container engine options:
-  - Singularity run options: ``runOptions = '--cleanenv -H $PWD -B /data,/alternate/path/to/tmp:/tmp'``
-  - Docker run options: ``runOptions = '-i -v /data:/data -v /alternate/path/to/tmp:/tmp'``
-
-
 ----
 
 Pipeline Steps
@@ -61,8 +40,11 @@ The full steps are:
 
 ----
 
-Pipeline Input Metadata
-***********************
+Pipeline Details
+****************
+
+Input Metadata
+--------------
 
 The input to this pipeline is a (tab-delimited) metadata table with the sample ID, sequencing technology, and locations of the fastq files.
 Note that the fastq file fields must be full paths; this is not shown here for clarity:
@@ -230,16 +212,16 @@ To run use the options:
 
 ----
 
-Technology
-----------
+Technology types
+----------------
 
 The "technology" field in the metadata table controls two things:
 
-1. *How technology-specific pipeline steps are applied.*
-   Currently there are two specific settings (``biorad`` and ``hydrop``) that use alternate pipelines processes (to extract and correct the barcode sequence from the two input fastqs).
+1. **How technology-specific pipeline steps are applied.**
+   Currently there are two specific settings (``biorad`` and ``hydrop``) that use alternate pipelines processes (to extract and correct the barcode sequence from the input fastqs).
    Using any other keyword is allowed, and samples will be run with the standard pipeline steps (barcode correction against a whitelist).
 
-2. *Which whitelist is used for barcode correction.*
+2. **Which whitelist is used for barcode correction.**
    The "technology" field must match a key in the ``params.tools.singlecelltoolkit.barcode_correction.whitelist`` parameter list in the config file for that sample to be associated with a particular barcode whitelist.
    The "technology" field and whitelist key name can be set to any arbitrary string (e.g. ``standard``), with the exception of the technology-specific keywords above.
 
@@ -249,7 +231,7 @@ The main modes are:
 ____________
 
 The ``standard`` setting is the main pipeline mode.
-It assumes a typical 10x Genomics style format with two read pair fastqs and a barcode fastq (note here that the barcode correction has already been performed, writing the ``CB`` tag into the comment of the barcode fastq)::
+It assumes a typical 10x Genomics style format with two read pair fastqs and a barcode fastq (note that in the example here, the barcode correction has already been performed, writing the ``CB`` tag into the comment of the barcode fastq)::
 
     $ zcat sample_1_R1.fastq.gz | head -n 4
     @A00311:74:HMLK5DMXX:1:1101:2013:1000 1:N:0:ACTCAGAC
@@ -321,41 +303,62 @@ and transform it into::
 ``biorad`` 
 __________
 
-The ``biorad`` setting processes BioRad data using `BAP <https://github.com/caleblareau/bap/wiki/Working-with-BioRad-data>`_.
+The ``biorad`` setting processes BioRad data using 
+`this script <https://github.com/aertslab/single_cell_toolkit/blob/master/extract_and_correct_biorad_barcode_in_fastq.sh>`_
+in our `aertslab/single_cell_toolkit <https://github.com/aertslab/single_cell_toolkit>`_
+(previously, this was done with `BAP <https://github.com/caleblareau/bap>`_).
 This takes input data::
 
     $ zcat sample_2_R1.fastq.gz | head -n 4
-    @NB551608:167:HNYFJBGXC:1:11101:11281:1033 1:N:0:TAAGGCGA
-    GCGTANACGTATGCATGACGGAAGTTAGTCACTGAGTCAGCAATCGTCGGCAGCGTCAGATGAGTNTAAGAGACAGGGTCAGGATGCGAGATTGACGGCTGCAATAACTAATAGGAAC
+    @A00794:327:HTJ55DRXX:1:2101:1154:1016 1:N:0:TAAGGCGA
+    GATCACCATATGCATGACATTCACGAGTCACTGAGTAACGCCTCGTCGGCAGCGTCAGATGTGTATAAGAGACAGCTGCAATGGCTGGAGCACACCCCATACTCATTCTGGTCTCCTT
     +
-    AAAAA#EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEAEEEEEEEEEE<EEEE6EA#6E<66AAEEEEEAEEEEEEEEEEEEAEEAEEEEEEEEE<EEEEEEEEEEE/E
+    FFFFFFFFFFFFFFFFFFFFFFFFFFF:FFFFFFF:FFFFFFFFF:FFFFFFFFFFFFFFFFF,FF,FFFFFFFFF:FFFFFFFFFFFFFFFFFFFFFFFFFFF:F:FFFF,FFFFFF
 
     $ zcat sample_2_R2.fastq.gz | head -n 4
-    @NB551608:167:HNYFJBGXC:1:11101:11281:1033 2:N:0:TAAGGCGA
-    NNGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    @A00794:327:HTJ55DRXX:1:2101:1154:1016 2:N:0:TAAGGCGA
+    GTGTTTGGCTGAGGAAAGTGTGTGAAGCCCCGATATGTGA
     +
-    ##A####################################
+    FFF,FFF:FFF:FF,FFFFF:F:FFFFFFFFFFF,,F:FF
 
-
-And produces paired fastq files with the barcode integrated into the read name (with a ``_`` delimiter)::
+and directly produces paired fastq files with the barcode added in the fastq comments field::
 
     $ zcat sample_2_dex_R1.fastq.gz | head -n 4
-    @GCGTAGAGGAAGTTTCAGCAA_NB551608:167:HNYFJBGXC:1:11101:11281:1033 1:N:0:TAAGGCGA
-    GGTCAGGATGCGAGATTGACGGCTGCAATAACTAATAGGAAC
+    @A00794:327:HTJ55DRXX:1:2101:1154:1016 CR:Z:GATCACCATTCACGTAACGCC       CY:Z:FFFFFFFFFFFFFF:FFFFFF      CB:Z:GATCACCATTCACGTAACGCC      br:Z:0,0,0_0,0,0,1
+    CTGCAATGGCTGGAGCACACCCCATACTCATTCTGGTCTCCTT
     +
-    EEAEEEEEEEEEEEEAEEAEEEEEEEEE<EEEEEEEEEEE/E
+    F:FFFFFFFFFFFFFFFFFFFFFFFFFFF:F:FFFF,FFFFFF
 
     $ zcat sample_2_dex_R2.fastq.gz | head -n 4
-    @GCGTAGAGGAAGTTTCAGCAA_NB551608:167:HNYFJBGXC:1:11101:11281:1033 2:N:0:TAAGGCGA
-    NNGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    @A00794:327:HTJ55DRXX:1:2101:1154:1016 CR:Z:GATCACCATTCACGTAACGCC       CY:Z:FFFFFFFFFFFFFF:FFFFFF      CB:Z:GATCACCATTCACGTAACGCC      br:Z:0,0,0_0,0,0,1
+    GTGTTTGGCTGAGGAAAGTGTGTGAAGCCCCGATATGTGA
     +
-    ##A####################################
-
+    FFF,FFF:FFF:FF,FFFFF:F:FFFFFFFFFFF,,F:FF
 
 ----
 
 Running the workflow
 ********************
+
+Technical considerations
+------------------------
+
+1. Direct the Nextflow work directory to an alternate path (e.g. a scratch drive) using the ``NXF_WORK`` environmental variable::
+
+    nwork=/path/to/scratch/example_project
+    mkdir $nwork
+    export NXF_WORK=$nwork
+
+Note that if you start a new shell, ``NXF_WORK`` must be set again, or the pipeline will not resume properly.
+
+
+2. Temporary directory mapping.
+   For large BAM files, the system default temp location may become full.
+   A workaround is to include a volume mapping to the alternate ``/tmp`` ``-B /alternate/path/to/tmp:/tmp`` using the volume mount options in Docker or Singularity.
+   For example in the container engine options:
+  - Singularity run options: ``runOptions = '--cleanenv -H $PWD -B /data,/alternate/path/to/tmp:/tmp'``
+  - Docker run options: ``runOptions = '-i -v /data:/data -v /alternate/path/to/tmp:/tmp'``
+
 
 Configuration
 -------------
@@ -375,7 +378,6 @@ Note that the full path to ``vib-singlecell-nf/vsn-pipelines/main_atac.nf`` must
 
     It is also possible to run the pycisTopic QC steps directly after this ``atac_preprocess`` pipeline, with a single command.
     Please see
-    `here <#input-directly-from-the-preprocessing-pipeline>`_
     `here <scatac-seq_qc.html#input-directly-from-the-preprocessing-pipeline>`_
     for details on how to run with this configuration.
 

@@ -8,8 +8,12 @@ This workflow is currently available in the ``develop_atac`` branch (use ``nextf
 
 ----
 
-Optional Steps
-**************
+
+Running the workflow
+********************
+
+Technical considerations
+------------------------
 
 1. Direct the Nextflow work directory to an alternate path (e.g. a scratch drive) using the ``NXF_WORK`` environmental variable::
 
@@ -32,13 +36,13 @@ Note that if you start a new shell, ``NXF_WORK`` must be set again, or the pipel
 ----
 
 Configuration
-*************
+-------------
 
 For each sample, this pipeline take a bam and a fragments file.
 These can be specified separately, or from a Cell Ranger ATAC/ARC ``outs/`` path.
 
 Input with independent bam and fragments files
-----------------------------------------------
+______________________________________________
 
 Use the profiles ``bam`` and ``fragments``::
 
@@ -75,7 +79,7 @@ Multiple files can be specified with ``*`` in ``file_paths`` or by separating th
 
 
 Input with Cell Ranger ATAC data
---------------------------------
+________________________________
 
 Use the ``tenx_atac`` profile::
 
@@ -95,7 +99,7 @@ Multiple files can be specified with ``*`` in ``tenx_atac`` or by separating the
 
 
 Input directly from the preprocessing pipeline
-----------------------------------------------
+______________________________________________
 
 It is also possible to run these QC steps directly after the ``atac_preprocess`` pipeline, with a single command.
 In this case, all the appropriate configuration profiles must be included at the configuration start::
@@ -117,7 +121,7 @@ To execute the preprocessing and mapping pipeline in one step, use the ``atac_pr
 ----
 
 Execution
-*********
+---------
 
 After configuring, the workflow can be run with:
 
