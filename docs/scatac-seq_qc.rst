@@ -4,7 +4,7 @@ scATAC-seq QC and Cell Calling
 This workflow uses the Python implementation of `cisTopic <https://github.com/aertslab/cisTopic>`_ (pycisTopic) to perform quality control and cell calling.
 The inputs here are a fragments and bam file for each sample.
 
-This workflow is currently available in the ``develop_atac`` branch (use the ``-r develop_atac`` option when running ``nextflow pull`` and ``nextflow run``).
+This workflow is currently available in the ``develop_atac`` branch (use ``nextflow pull vib-singlecell-nf/vsn-pipelines -r develop_atac`` to sync this branch).
 
 ----
 
@@ -16,6 +16,8 @@ Optional Steps
     nwork=/path/to/scratch/example_project
     mkdir $nwork
     export NXF_WORK=$nwork
+
+Note that if you start a new shell, ``NXF_WORK`` must be set again, or the pipeline will not resume properly.
 
 
 2. Important for pycisTopic Ray issues: the system default temp location may become full.
@@ -90,6 +92,27 @@ Input data (the Cell Ranger ``outs/`` path) are specified in the data section::
     }
 
 Multiple files can be specified with ``*`` in ``tenx_atac`` or by separating the paths with a comma.
+
+
+Input directly from the preprocessing pipeline
+----------------------------------------------
+
+It is also possible to run these QC steps directly after the ``atac_preprocess`` pipeline, with a single command.
+In this case, all the appropriate configuration profiles must be included at the configuration start::
+
+    nextflow config vib-singlecell-nf/vsn-pipelines/main_atac.nf \
+        -profile atac_preprocess,atac_qc_filtering,pycistopic_hg38,vsc \
+        > atac_preprocess_and_qc.config
+
+Note that here, we do not include ``bam`` and ``fragments`` profiles that specify the input data locations to the QC steps since these are piped directly from the preprocessing pipeline.
+One caveat to this is that it could potentially make it harder to run the qc pipeline with ``-resume`` later on, especially if the Nextflow ``work/`` directory is not saved due to disk space concerns.
+
+To execute the preprocessing and mapping pipeline in one step, use the ``atac_preprocess_with_qc`` entry point::
+
+    nextflow -C atac_preprocess_and_qc.config run \
+        vib-singlecell-nf/vsn-pipelines/main_atac.nf \
+        -entry atac_preprocess_with_qc -resume --quiet
+
 
 ----
 
