@@ -26,13 +26,15 @@ process SCTK__BARCODE_CORRECTION {
               path("${sampleId}_bc_corrected.fastq.gz.corrected.bc_stats.tsv")
 
     script:
-        def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
+        def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_correction)
         processParams = sampleParams.local
         """
         correct_barcode_in_fastq.sh \
             ${bc_whitelist} \
             ${fastq_bc} \
-            ${sampleId}_bc_corrected.fastq.gz
+            ${sampleId}_bc_corrected.fastq.gz \
+            ${processParams.max_mismatches} \
+            ${processParams.min_frac_bcs_to_find}
         """
 }
 
