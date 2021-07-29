@@ -2,7 +2,8 @@ nextflow.enable.dsl=2
 
 // process imports
 include {
-    SCTK__EXTRACT_HYDROP_ATAC_BARCODE;
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE as SCTK__EXTRACT_HYDROP_ATAC_BARCODE_2x384;
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE as SCTK__EXTRACT_HYDROP_ATAC_BARCODE_3x96;
 } from './../../src/singlecelltoolkit/processes/extract_hydrop_atac_barcode.nf'
 include {
     TRIMGALORE__TRIM;
@@ -81,11 +82,11 @@ workflow ATAC_PREPROCESS {
         /* HyDrop ATAC
            extract barcode and correct */
            // HyDrop 3x96
-        SCTK__EXTRACT_HYDROP_ATAC_BARCODE(data.hydrop_3x96, 'hydrop_3x96') \
-            | bc_correct_hydrop
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE_3x96(data.hydrop_3x96, '3x96') \
+            | bc_correct_hydrop_3x96
            // HyDrop 2x384
-        SCTK__EXTRACT_HYDROP_ATAC_BARCODE(data.hydrop_2x384, 'hydrop_2x384') \
-            | bc_correct_hydrop
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE_2x384(data.hydrop_2x384, '2x384') \
+            | bc_correct_hydrop_2x384
 
         /* BioRad data
            extract barcode and correct */
