@@ -5,6 +5,27 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/pycistopic/bi
 toolParams = params.tools.pycistopic
 processParams = params.tools.pycistopic.compute_qc_stats
 
+process rename_fragments {
+
+    container toolParams.container
+    label 'compute_resources__minimal'
+
+    input:
+        tuple val(sampleId),
+              path(f)
+    output:
+        tuple val(sampleId),
+              path("${sampleId}_${f}*")
+
+    script:
+        """
+        ln -s ${f[0]} ${sampleId}_${f[0]}
+        ln -s ${f[1]} ${sampleId}_${f[1]}
+        """
+
+}
+
+
 process PYCISTOPIC__COMPUTE_QC_STATS {
 
     publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode

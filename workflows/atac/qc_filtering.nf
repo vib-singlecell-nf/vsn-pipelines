@@ -7,7 +7,10 @@ include { SC__ARCHR__CELL_CALLING; } from './../../src/archr/processes/cell_call
 
 include { PYCISTOPIC__BIOMART_ANNOT; } from './../../src/pycistopic/processes/biomart_annot.nf'
 include { PYCISTOPIC__MACS2_CALL_PEAKS; } from './../../src/pycistopic/processes/macs2_call_peaks.nf'
-include { PYCISTOPIC__COMPUTE_QC_STATS; } from './../../src/pycistopic/processes/compute_qc_stats.nf'
+include {
+    rename_fragments;
+    PYCISTOPIC__COMPUTE_QC_STATS;
+} from './../../src/pycistopic/processes/compute_qc_stats.nf'
 include {
     SCTK__SATURATION;
     SCTK__SATURATION as SCTK__SATURATION_BC_WL;
@@ -77,13 +80,23 @@ workflow ATAC_QC_PREFILTER {
         }
         .set{ data_split }
 
-        // get cellranger data & merge
+        // split the cellranger data into separate bam and fragments channels
         data_split.cellranger \
             | cellranger_output_to_bam_fragments
             | set { data_cr }
-
+        /* 'mix' the separate bam and fragments channels with the
+           cellranger bam and fragments files, and use these channels going
+           forward
+         */
         bam = data_split.bam.mix(data_cr.bam)
-        fragments = data_split.fragments.mix(data_cr.fragments)
+        /* for fragments, rename the files to include the sample ID
+           prefix (necessary for cellranger inputs, which all have the same
+           file name). This is not currently necessary for the bam files since
+           they are processed in separate processes.
+         */
+        fragments = rename_fragments(
+            data_split.fragments.mix(data_cr.fragments)
+            )
 
 
         biomart = PYCISTOPIC__BIOMART_ANNOT()
@@ -94,7 +107,8 @@ workflow ATAC_QC_PREFILTER {
 
         /* pycisTopic qc: pass every fragment/peak file into a single process
            together. These will be formatted as a string "sampleId,fragments,peak",
-           which is parsed in the python script.
+           which is parsed in the python script. The fragments and peaks files
+           are staged separately
         */
         fragments.map { it -> tuple(it[0], it[1][0].getName(), it[1][1].getName() ) } // [sampleId, fragments, fragments.tbi]
                  .join(peaks.map{ it -> tuple(it[0], it[1].getName()) }) // combine with peaks for each sample
