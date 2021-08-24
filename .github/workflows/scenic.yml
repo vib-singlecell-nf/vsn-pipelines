@@ -17,6 +17,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: CPU Check
+      run: cat /proc/cpuinfo
     - name: Install Nextflow
       run: |
         export NXF_VER='21.04.3'
