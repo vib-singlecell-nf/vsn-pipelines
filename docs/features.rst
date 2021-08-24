@@ -439,6 +439,51 @@ By default, don't regress any variable out. To enable this features, the ``scanp
 
 Add any variable in ``variablesToRegressOut`` to regress out: e.g.: 'n_counts', 'percent_mito'.
 
+Highly Variable Genes Selection
+-------------------------------
+
+This step is a wrapper around the `Scanpy` ``scanpy.pp.highly_variable_genes`` function and regarding the parameters used it is following the documentation available at `scanpy-pp-highly-variable-genes`_.
+By default, it will use the ``seurat`` flavor to select variable genes and will also keep the same default values for the 4 different thresholds (as the documentation): ``min_mean``, ``max_mean``, ``min_disp``, ``max_disp``.
+
+.. _`scanpy-pp-highly-variable-genes`: https://scanpy.readthedocs.io/en/latest/generated/scanpy.pp.highly_variable_genes.html#scanpy-pp-highly-variable-genes.
+
+.. code:: groovy
+
+    params {
+        tools {
+            scanpy {
+                feature_selection {
+                    report_ipynb = "${params.misc.test.enabled ? '../../..' : ''}/src/scanpy/bin/reports/sc_select_variable_genes_report.ipynb"
+                    flavor = 'seurat'
+                    minMean = 0.0125
+                    maxMean = 3
+                    minDisp = 0.5
+                    off = 'h5ad'
+                }
+            }
+        }
+    }
+
+
+Other flavors are available as ``cell_ranger`` and ``seurat_v3``. In order to use the ``seurat_v3`` flavor, one parameter is required to be specified: ``nTopGenes`` in the config file as follows:
+
+.. code:: groovy
+
+    params {
+        tools {
+            scanpy {
+                feature_selection {
+                    report_ipynb = "${params.misc.test.enabled ? '../../..' : ''}/src/scanpy/bin/reports/sc_select_variable_genes_report.ipynb"
+                    flavor = 'seurat_v3'
+                    nTopGenes = 2000
+                    off = 'h5ad'
+                }
+            }
+        }
+    }
+
+
+
 Skip steps
 ----------
 
