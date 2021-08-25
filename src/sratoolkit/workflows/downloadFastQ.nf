@@ -21,7 +21,7 @@ workflow SRATOOLKIT__DOWNLOAD_FASTQS {
     main:
         out = data | \
             DOWNLOAD_FASTQS_FROM_SRA_ACC_ID | \
-            FIX_AND_COMPRESS_SRA_FASTQ
+            FIX_AND_COMPRESS_SRA_FASTQS
 
     emit:
         // Returns (sraId, *.fastq.gz)
