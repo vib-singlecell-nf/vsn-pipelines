@@ -1,6 +1,6 @@
 name: cell_annotate_filter
 
-on: 
+on:
   push:
     branches:
       - master
@@ -12,22 +12,21 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Nextflow
-      run: |
-        export NXF_VER='20.10.0'
-        wget -qO- get.nextflow.io | bash
-        sudo mv nextflow /usr/local/bin/
-    - name: Get sample data & dummy annotation
-      run: |
-        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
-        tar xzvf sample_data_tiny.tar.gz
-        wget https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/develop/data/sample_data_tiny/sample_data_tiny_dummy_annotation.tsv.gz
-    - name: Run cell_annotate_filter test
-      run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile utils_cell_annotate_filter,test__cell_annotate_filter,test__compute_resources,docker -entry cell_annotate_filter -ansi-log false
-        cat .nextflow.log
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
+        run: |
+          export NXF_VER='21.04.3'
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Get sample data & dummy annotation
+        run: |
+          wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data_tiny.tar.gz
+          tar xzvf sample_data_tiny.tar.gz
+          wget https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/develop/data/sample_data_tiny/sample_data_tiny_dummy_annotation.tsv.gz
+      - name: Run cell_annotate_filter test
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile utils_cell_annotate_filter,test__cell_annotate_filter,test__compute_resources,docker -entry cell_annotate_filter -ansi-log false
+          cat .nextflow.log
