@@ -620,10 +620,10 @@ First, generate the config :
 
 NOTES:
 
+- The download of SRA files is by default limited to 20 Gb. If this limit needs to be increased please set ``params.tools.sratoolkit.maxSize`` accordingly. This limit can be 'removed' by setting the parameter to an arbitrarily high number (e.g.: 9999999999999).
 - If you're a VSC user, you might want to add the ``vsc`` profile.
 - The final output (FASTQ files) will available in ``out/data/sra``
 - If you're downloading 10x Genomics scATAC-seq data, make sure to set ``params.tools.sratoolkit.includeTechnicalReads = true`` and properly set ``params.utils.sra_normalize_fastqs.fastq_read_suffixes``. In the case of downloading the scATAC-seq samples of SRP254409, ``fastq_read_suffixes`` would be set to ``["R1", "R2", "I1", "I2"]``.
-- The download of SRA files is by default limited to 20 Gb. If this limit needs to be increased please set ``params.tools.sratoolkit.maxSize`` accordingly. This limit can be 'removed' by setting the parameter to an arbitrarily high number (e.g.: 9999999999999).
 
 Now we can run it with the following command:
 
@@ -634,8 +634,8 @@ Now we can run it with the following command:
         -entry sra
 
     $ nextflow -C nextflow.config run ~/vib-singlecell-nf/vsn-pipelines -entry sra
-    N E X T F L O W  ~  version 20.11.0-edge
-    Launching `~/vib-singlecell-nf/vsn-pipelines/main.nf` [sleepy_goldstine] - revision: 7527661b07
+    N E X T F L O W  ~  version 21.04.3
+    Launching `~/vib-singlecell-nf/vsn-pipelines/main.nf` [sleepy_goldstine] - revision: ba1dedbf51
     executor >  local (23)
     [12/25b9d4] process > sra:DOWNLOAD_FROM_SRA:SRA_TO_METADATA (1)                                             [100%] 1 of 1 _
     [e2/d5a429] process > sra:DOWNLOAD_FROM_SRA:SRATOOLKIT__DOWNLOAD_FASTQS:DOWNLOAD_FASTQS_FROM_SRA_ACC_ID (4) [ 33%] 3 of 9

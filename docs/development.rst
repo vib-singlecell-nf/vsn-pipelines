@@ -29,12 +29,12 @@ Steps:
 
 #. From your local copy of ``vsn-pipelines`` GitHub repository, create a new branch called ``feature/[github-issue-id]-[description]``.
 
-    In this case,
+In this case,
 
-    - ``[github-issue-id] = 115``
-    - ``[description] = add_harmony_batch_correction_method``
+- ``[github-issue-id] = 115``
+- ``[description] = add_harmony_batch_correction_method``
 
-   It is highly recommended to start from the ``develop`` branch:
+It is highly recommended to start from the ``develop`` branch:
 
     .. code:: bash
 
@@ -43,7 +43,7 @@ Steps:
         git pull
         git checkout -b feature/115-add_harmony_batch_correction_method
 
-#. Use the `template repository`_ in the vib-singlecell-nf organisation to create the framework for the new module in ``src/<tool-name>``:
+#. Use the `template repository`_ in the ``vib-singlecell-nf`` organisation to create the framework for the new module in ``src/<tool-name>``:
 
     .. code:: bash
 
@@ -51,8 +51,7 @@ Steps:
 
     .. _`template repository`: https://github.com/vib-singlecell-nf/template
 
-#. Now, you can start to edit file in the tool module that is now located in ``src/<tool-name>``.
-   Optionally, you can delete the ``.git`` directory in the new module to avoid confusion in future local development:
+#. Now, you can start to edit file in the tool module that is now located in ``src/<tool-name>``. Optionally, you can delete the ``.git`` directory in the new module to avoid confusion in future local development:
 
     .. code:: bash
 
@@ -63,31 +62,63 @@ Steps:
 
     .. code:: dockerfile
 
-        FROM dweemx/sctx-seurat:3.1.2
+        FROM continuumio/miniconda3
 
-        RUN apt-get -y update && \
-            apt-get install -y libcurl4-openssl-dev libxml2-dev zlib1g-dev libhdf5-dev && \
-            apt-get install -y libssl-dev && \
-            # png.h: No such file or directory
-            apt-get install -y libpng-dev && \ 
-            R -e "install.packages('optparse')" && \
-            R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')" && \
-            R -e "devtools::install_github('immunogenomics/harmony')" && \
-            # Need to run ps
-            apt-get -y install procps && \
-            apt-get -y install libxml2 && \
-            # Clean
-            rm -rf /tmp/* && \
-            apt-get autoremove -y && \
-            apt-get autoclean -y && \
-            rm -rf /var/cache/apt/* && \
-            rm -rf /var/lib/apt/lists/* && \
-            apt-get clean
+        SHELL ["/bin/bash", "--login", "-c"]
+        
+        ADD environment.yml /tmp/environment.yml
+        RUN conda env create -f /tmp/environment.yml
+        
+        RUN head -1 /tmp/environment.yml | cut -d' ' -f2 > /tmp/version \
+        && ln -s "/opt/conda/envs/$(cat /tmp/version)" /opt/conda/venv
+        
+        # Initialize conda in bash config files:
+        RUN conda init bash
+        
+        # Activate the environment, and make sure it's activated:
+        RUN echo "conda activate $(cat /tmp/version)" >> ~/.bashrc && \
+        conda activate $(cat /tmp/version) && \
+        R -e "devtools::install_github(repo = 'dynverse/anndata', ref = '0.7.5.2')" && \
+        R -e "devtools::install_github(repo = 'aertslab/SCopeLoomR')"
+        
+        RUN apt-get -y update \
+        # Need to run ps
+        && apt-get -y install procps \
+        && apt-get -y install libxml2 \
+        # Clean
+        && conda clean -afy \
+        && rm -rf /var/cache/apt/* \
+        && rm -rf /var/lib/apt/lists/*
+        
+        RUN echo "source activate $(cat /tmp/version)" >> ~/.bashrc
+        ENV PATH="/opt/conda/venv/bin:${PATH}"
 
+
+
+    .. code:: yaml
+
+        # environment.yml
+        name: harmony-v1.0-3
+        channels:
+        - r
+        - conda-forge
+        - bioconda
+        dependencies:
+        - python=3.7
+        - anndata=0.7.6
+        - r-base=4.0.2
+        - r-argparse=2.0.1
+        - r-devtools
+        - r-reticulate=1.20
+        - r-hdf5r
+        - r-harmony
 
 #. Rename the ``nextflow.config`` file to create the ``harmony.config`` configuration file.
 
-    * Each process's options should be in their own level. With a single process, you do not need one extra level.
+    * Each process's options should be in their own level. With a single process, you do not need one extra level. The ``report_ipynb`` Jupyter Notebook is available here_.
+
+    .. _here: https://github.com/vib-singlecell-nf/harmony/blob/master/bin/reports/sc_harmony_report.ipynb
+
 
     .. code:: groovy
 
@@ -102,131 +133,165 @@ Steps:
         }
 
 
-    The ``report_ipynb`` Jupyter Notebook is available here_.
-
-    .. _here: https://github.com/vib-singlecell-nf/harmony/blob/master/bin/reports/sc_harmony_report.ipynb
-
 #. Create the R script to run Harmony
 
     .. code:: r
 
-        #!/usr/bin/env Rscript
-
-        print("##################################################")
-        print("# Harmony: Algorithm for single cell integration #")
-        print("##################################################")
-
+        print("#############################################################")
+        print("# Harmony: Algorithm for single cell integration            #")
+        print('# GitHub: https://github.com/immunogenomics/harmony         #')
+        print('# Paper: https://www.nature.com/articles/s41592-019-0619-0  #')
+        print("#############################################################")
+        
         # Loading dependencies scripts
-
-        library("optparse")
-        parser <- OptionParser(
-        prog = "run_harmony.R",
-        description = "Scalable integration of single cell RNAseq data for batch correction and meta analysis"
+        library("argparse")
+        library("reticulate")
+        library("anndata")
+        
+        # Link Python to this R session
+        use_python("/opt/conda/envs/harmony-v1.0-3/bin")
+        Sys.setenv(RETICULATE_PYTHON = "/opt/conda/envs/harmony-v1.0-3/bin")
+        
+        parser <- ArgumentParser(description='Scalable integration of single cell RNAseq data for batch correction and meta analysis')
+        parser$add_argument(
+            'input',
+            metavar='INPUT',
+            type="character",
+            help='Input file [default]'
         )
-        parser <- add_option(
-        parser,
-        c("-i", "--input-file"),
-        action = "store",
-        default = NULL,
-        help = "Input file [default]"
+        parser$add_argument(
+            '--output-prefix',
+            type="character",
+            dest='output_prefix',
+            default = "foo",
+            help="Prefix path to save output files. [default %default]"
         )
-        parser <- add_option(
-        parser,
-        c("-a", "--vars-use"),
-        action = "store",
-        default = NULL,
-        help = "If meta_data is dataframe, this defined which variable(s) to remove (character vector)."
+        parser$add_argument(
+            '--seed',
+            type="character",
+            dest='seed',
+            default=617,
+            help='Seed. [default %default]'
         )
-        parser <- add_option(
-        parser,
-        c("-p", "--do-pca"),
-        action = "store",
-        default = FALSE,
-        help = "Whether to perform PCA on input matrix."
+        parser$add_argument(
+            "--vars-use",
+            type="character",
+            dest='vars_use',
+            action="append",
+            default=NULL,
+            help='If meta_data is dataframe, this defined which variable(s) to remove (character vector).'
         )
-        parser <- add_option(
-        parser,
-        c("-o", "--output-prefix"),
-        action = "store",
-        default = "foo",
-        help="Prefix path to save output files. [default %default]"
+        parser$add_argument(
+            '--do-pca',
+            type="logical",
+            dest='do_pca',
+            action="store",
+            default=FALSE,
+            help='Whether to perform PCA on input matrix.'
         )
-        parser <- add_option(
-        parser, 
-        c("-s", "--seed"), 
-        action = "store", 
-        default = 617,
-        help="Seed. [default %default]"
+        parser$add_argument(
+            '--theta',
+            type="double",
+            dest='theta',
+            default=NULL,
+            help='Diversity clustering penalty parameter. Specify for each variable in vars_use Default theta=2. theta=0 does not encourage any diversity. Larger values of theta result in more diverse clusters. [default %default]'
         )
-
-        args <- parse_args(parser)
-
+        parser$add_argument(
+            '--lambda',
+            type="double",
+            dest='lambda',
+            default=NULL,
+            help='Ridge regression penalty parameter. Specify for each variable in vars_use. Default lambda=1. Lambda must be strictly positive. Smaller values result in more aggressive correction. [default %default]'
+        )
+        parser$add_argument(
+            '--epsilon-harmony',
+            type="double",
+            dest='epsilon_harmony',
+            default=1e-04,
+            help='Convergence tolerance for Harmony. Set to -Inf to never stop early. [default %default]'
+        )
+        
+        
+        args <- parser$parse_args()
+        
+        if(args$epsilon_harmony < 0) {
+            args$epsilon_harmony <- -Inf
+            print("Setting epsilon.harmony argument to -Inf...")
+        }
+        
         cat("Parameters: \n")
         print(args)
-
-        if(is.null(args$`vars-use`)) {
+        
+        if(is.null(args$vars_use)) {
             stop("The parameter --vars-use has to be set.")
         }
-
+        
         # Required by irlba::irlba (which harmony depends on) for reproducibility
         if(!is.null(args$seed)) {
-        set.seed(args$seed)
+            set.seed(args$seed)
         } else {
-        warnings("No seed is set, this will likely give none reproducible results.")
+            warnings("No seed is set, this will likely give none reproducible results.")
         }
-
-        input_ext <- tools::file_ext(args$`input-file`)
-
+        
+        # Required for reproducibility in case numeric parameters are passed (e.g.: theta, lambda)
+        args <- lapply(X = args, FUN = function(arg) {
+            if(is.numeric(x = arg)) {
+                if(arg %% 1 == 0) {
+                    return (as.integer(x = arg))
+                } else {
+                    return (arg)
+                }
+            }
+            return (arg)
+        })
+        
+        input_ext <- tools::file_ext(args$input)
+        
         if(input_ext == "h5ad") {
-        # Current fix until https://github.com/satijalab/seurat/issues/2485 is fixed
-        file <- hdf5r::h5file(filename = args$`input-file`, mode = 'r')
-        if(!("X_pca" %in% names(x = file[["obsm"]]))) {
-            stop("X_pca slot is not found in the AnnData (h5ad).")
-        }
-        obs <- file[['obs']][]
-        pca_embeddings <- t(x = file[["obsm"]][["X_pca"]][,])
-        row.names(x = pca_embeddings) <- obs$index
-        colnames(x = pca_embeddings) <- paste0("PCA_", seq(from = 1, to = ncol(x = pca_embeddings)))
-        metadata <- obs
-        # seurat <- Seurat::ReadH5AD(file = args$`input-file`)
-        # if(!("pca" %in% names(seurat@reductions)) || is.null(x = seurat@reductions$pca))
-        #   stop("Expects a PCA embeddings data matrix but it does not exist.")
-        # data <- seurat@reductions$pca
-        # pca_embeddings <- data@cell.embeddings
-        # metadata <- seurat@meta.data
+            adata <- anndata::read_h5ad(filename = args$input)
+            if(!("X_pca" %in% names(x = adata$obsm))) {
+                stop("X_pca slot is not found in the AnnData (h5ad).")
+            }
+            obs <- adata$obs
+            pca_embeddings <- adata$obsm[["X_pca"]]
+            row.names(x = pca_embeddings) <- row.names(x = obs)
+            colnames(x = pca_embeddings) <- paste0("PCA_", seq(from = 1, to = ncol(x = pca_embeddings)))
+            metadata <- obs
         } else {
-        stop(paste0("Unrecognized input file format: ", input_ext, "."))
+            stop(paste0("Unrecognized input file format: ", input_ext, "."))
         }
-
-        print(paste0("PCA embeddings matrix has ", dim(x = data)[1], " rows, ", dim(x = data)[2], " columns."))
-
-        if(sum(args$`vars-use` %in% colnames(x = metadata)) != length(x = args$`vars-use`)) {
+        
+        print(paste0("PCA embeddings matrix has ", dim(x = pca_embeddings)[1], " rows, ", dim(x = pca_embeddings)[2], " columns."))
+        
+        if(sum(args$vars_use %in% colnames(x = metadata)) != length(x = args$vars_use)) {
             stop("Some argument value from the parameter(s) --vars-use are not found in the metadata.")
         }
-
+        
+        print(paste0("Batch variables used for integration: ", paste0(args$vars_use, collapse=", ")))
+        
         # Run Harmony
         # Expects PCA matrix (Cells as rows and PCs as columns.)
         harmony_embeddings <- harmony::HarmonyMatrix(
-        data_mat = pca_embeddings
-        , meta_data = metadata
-        , vars_use = args$`vars-use`
-        , do_pca = args$`do-pca`
-        , verbose = FALSE
+            data_mat = pca_embeddings,
+            meta_data = metadata,
+            vars_use = args$vars_use,
+            do_pca = args$do_pca,
+            theta = args$theta,
+            lambda = args$lambda,
+            epsilon.harmony = args$epsilon_harmony,
+            verbose = FALSE
         )
-
+        
         # Save the results
-
         ## PCA corrected embeddings
-
         write.table(
             x = harmony_embeddings,
-            file = paste0(args$`output-prefix`, ".tsv"),
+            file = paste0(args$output_prefix, ".tsv"),
             quote = FALSE,
             sep = "\t",
             row.names = TRUE,
             col.names = NA
         )
-
 
 
 #. Create the Nextflow process that will run the Harmony R script defined in the previous step.
@@ -238,35 +303,40 @@ Steps:
         binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/harmony/bin/" : ""
 
         process SC__HARMONY__HARMONY_MATRIX {
-            
+    
             container params.tools.harmony.container
             publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink'
-            clusterOptions "-l nodes=1:ppn=${params.global.threads} -l walltime=1:00:00 -A ${params.global.qsubaccount}"
-
+            label 'compute_resources__default'
+        
             input:
-                tuple val(sampleId), path(f)
-
+                tuple \
+                    val(sampleId), \
+                    path(f)
+        
             output:
-                tuple val(sampleId), path("${sampleId}.SC__HARMONY__HARMONY_MATRIX.tsv")
-
+                tuple \
+                    val(sampleId), \
+                    path("${sampleId}.SC__HARMONY__HARMONY_MATRIX.tsv")
+        
             script:
                 def sampleParams = params.parseConfig(sampleId, params.global, params.tools.harmony)
                 processParams = sampleParams.local
                 varsUseAsArguments = processParams.varsUse.collect({ '--vars-use' + ' ' + it }).join(' ')
                 """
                 ${binDir}run_harmony.R \
+                    ${f} \
                     --seed ${params.global.seed} \
-                    --input-file ${f} \
                     ${varsUseAsArguments} \
+                    ${processParams?.theta ? "--theta "+ processParams.theta : "" } \
+                    ${processParams?.lambda ? "--lambda "+ processParams.lambda : "" } \
+                    ${processParams?.epsilonHarmony ? "--epsilon-harmony "+ processParams.epsilonHarmony : "" } \
                     --output-prefix "${sampleId}.SC__HARMONY__HARMONY_MATRIX"
                 """
-
+        
         }
 
 
-#. Create a Nextflow "subworkflow" that will call the Nextflow process defined in the previous step and perform some other tasks (dimensionality reduction, cluster identification, marker genes identification and report generation)
-
-    This step is not required. However it this step is skipped, the code would still need to added into the main ``harmony`` workflow (`workflows/harmony.nf`, see the next step)
+#. Create a Nextflow "subworkflow" that will call the Nextflow process defined in the previous step and perform some other tasks (dimensionality reduction, cluster identification, marker genes identification and report generation). This step is not required. However it is skipped, the code would still need to added into the main ``harmony`` workflow (`workflows/harmony.nf`, see the next step)
 
     .. code:: groovy
 
@@ -286,7 +356,7 @@ Steps:
             PUBLISH as PUBLISH_BEC_DIMRED_OUTPUT;
             PUBLISH as PUBLISH_FINAL_HARMONY_OUTPUT;
         } from "../../utils/workflows/utils.nf" params(params)
-
+        
         include {
             SC__HARMONY__HARMONY_MATRIX;
         } from './../processes/runHarmony.nf' params(params)
@@ -305,23 +375,23 @@ Steps:
         include {
             CLUSTER_IDENTIFICATION;
         } from './../../scanpy/workflows/cluster_identification.nf' params(params) // Don't only import a specific process (the function needs also to be imported)
-
+        
         // reporting:
         include {
             GENERATE_DUAL_INPUT_REPORT
         } from './../../scanpy/workflows/create_report.nf' params(params)
-
+        
         //////////////////////////////////////////////////////
         //  Define the workflow 
-
+        
         workflow BEC_HARMONY {
-
+        
             take:
                 normalizedTransformedData
                 dimReductionData
                 // Expects (sampleId, anndata)
                 clusterIdentificationPreBatchEffectCorrection
-
+        
             main:
                 // Run Harmony
                 harmony_embeddings = SC__HARMONY__HARMONY_MATRIX( 
@@ -334,15 +404,18 @@ Steps:
                         it -> tuple(it[0], it[1]) 
                     }.join(harmony_embeddings) 
                 )
-
+        
                 PUBLISH_BEC_OUTPUT(
-                    SC__H5AD_UPDATE_X_PCA.out,
+                    SC__H5AD_UPDATE_X_PCA.out.map {
+                        // if stashedParams not there, just put null 3rd arg
+                        it -> tuple(it[0], it[1], it.size() > 2 ? it[2]: null)
+                    },
                     "BEC_HARMONY.output",
                     "h5ad",
                     null,
                     false
                 )
-
+        
                 NEIGHBORHOOD_GRAPH(
                     SC__H5AD_UPDATE_X_PCA.out.join(
                         dimReductionData.map { 
@@ -350,10 +423,10 @@ Steps:
                         }
                     )
                 )
-
+        
                 // Run dimensionality reduction
                 DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
-
+        
                 PUBLISH_BEC_DIMRED_OUTPUT(
                     DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
                     "BEC_HARMONY.dimred_output",
@@ -361,7 +434,7 @@ Steps:
                     null,
                     false
                 )
-
+        
                 // Run clustering
                 // Define the parameters for clustering
                 def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
@@ -370,7 +443,7 @@ Steps:
                     DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
                     "Post Batch Effect Correction (Harmony)"
                 )
-
+        
                 marker_genes = CLUSTER_IDENTIFICATION.out.marker_genes.map {
                     it -> tuple(
                         it[0], // sampleId
@@ -378,7 +451,7 @@ Steps:
                         !clusteringParams.isParameterExplorationModeOn() ? null : it[2..(it.size()-1)], // Stash params
                     )
                 }
-
+        
                 PUBLISH_FINAL_HARMONY_OUTPUT( 
                     marker_genes.map {
                         it -> tuple(it[0], it[1], it[2])
@@ -404,19 +477,19 @@ Steps:
                     "SC_BEC_HARMONY_report",
                     clusteringParams.isParameterExplorationModeOn()
                 )
-
+        
             emit:
                 data = CLUSTER_IDENTIFICATION.out.marker_genes
                 cluster_report = CLUSTER_IDENTIFICATION.out.report
                 harmony_report
-
+        
         }
 
-#. In the ``vsn-pipelines``, create a new main workflow called ``harmony.nf`` under ``workflows/``:
+#. In the ``vsn-pipelines``, create a new main workflow called ``harmony.nf`` under ``workflows/``
 
     .. code:: groovy
 
-        nextflow.preview.dsl=2
+        nextflow.enable.dsl=2
 
         ////////////////////////////////////////////////////////
         //  Import sub-workflows/processes from the utils module:
@@ -426,74 +499,81 @@ Steps:
         include {
             clean;
             SC__FILE_CONVERTER;
-            SC__FILE_CONCATENATOR
+            SC__FILE_CONCATENATOR;
         } from '../src/utils/processes/utils.nf' params(params)
         include {
-            COMBINE_BY_PARAMS
+            COMBINE_BY_PARAMS;
         } from '../src/utils/workflows/utils.nf' params(params)
         include {
-            SC__H5AD_TO_FILTERED_LOOM
-        } from '../src/utils/processes/h5adToLoom.nf' params(params)
+            FINALIZE;
+        } from '../src/utils/workflows/finalize.nf' params(params)
         include {
-            FILE_CONVERTER
-        } from '../src/utils/workflows/fileConverter.nf' params(params)
+            FILTER_AND_ANNOTATE_AND_CLEAN;
+        } from '../src/utils/workflows/filterAnnotateClean.nf' params(params)
         include {
-            UTILS__GENERATE_WORKFLOW_CONFIG_REPORT
+            UTILS__GENERATE_WORKFLOW_CONFIG_REPORT;
         } from '../src/utils/processes/reports.nf' params(params)
-
+        
         ////////////////////////////////////////////////////////
         //  Import sub-workflows/processes from the tool module:
         include {
-            QC_FILTER
+            QC_FILTER;
         } from '../src/scanpy/workflows/qc_filter.nf' params(params)
         include {
-            NORMALIZE_TRANSFORM
+            NORMALIZE_TRANSFORM;
         } from '../src/scanpy/workflows/normalize_transform.nf' params(params)
         include {
-            HVG_SELECTION
+            HVG_SELECTION;
         } from '../src/scanpy/workflows/hvg_selection.nf' params(params)
         include {
-            NEIGHBORHOOD_GRAPH
+            NEIGHBORHOOD_GRAPH;
         } from '../src/scanpy/workflows/neighborhood_graph.nf' params(params)
         include {
-            DIM_REDUCTION_PCA
+            DIM_REDUCTION_PCA;
         } from '../src/scanpy/workflows/dim_reduction_pca.nf' params(params)
         include {
-            DIM_REDUCTION_TSNE_UMAP
+            DIM_REDUCTION_TSNE_UMAP;
         } from '../src/scanpy/workflows/dim_reduction.nf' params(params)
         // cluster identification
         include {
-            SC__SCANPY__CLUSTERING_PARAMS
+            SC__SCANPY__CLUSTERING_PARAMS;
         } from '../src/scanpy/processes/cluster.nf' params(params)
         include {
-            CLUSTER_IDENTIFICATION
+            CLUSTER_IDENTIFICATION;
         } from '../src/scanpy/workflows/cluster_identification.nf' params(params)
         include {
-            BEC_HARMONY
+            BEC_HARMONY;
         } from '../src/harmony/workflows/bec_harmony.nf' params(params)
+        include {
+            SC__DIRECTS__SELECT_DEFAULT_CLUSTERING
+        } from '../src/directs/processes/selectDefaultClustering.nf'
         // reporting:
         include {
-            SC__SCANPY__MERGE_REPORTS
+            SC__SCANPY__MERGE_REPORTS;
         } from '../src/scanpy/processes/reports.nf' params(params)
         include {
-            SC__SCANPY__REPORT_TO_HTML
+            SC__SCANPY__REPORT_TO_HTML;
         } from '../src/scanpy/processes/reports.nf' params(params)
-
-
+        
+        
         workflow harmony {
-
+        
             take:
                 data
-
+        
             main:
+                // Data processing
+                // To avoid variable 'params' already defined in the process scope
+                def scanpyParams = params.tools.scanpy
+        
                 out = data | \
                     SC__FILE_CONVERTER | \
                     FILTER_AND_ANNOTATE_AND_CLEAN
-
-                if(params.tools.scanpy.containsKey("filter")) {
+        
+                if(scanpyParams.containsKey("filter")) {
                     out = QC_FILTER( out ).filtered // Remove concat
                 }
-                if(params.utils.file_concatenator) {
+                if(params.utils?.file_concatenator) {
                     out = SC__FILE_CONCATENATOR( 
                         out.map {
                             it -> it[1]
@@ -502,21 +582,21 @@ Steps:
                         ) 
                     )
                 }
-                if(params.tools.scanpy.containsKey("data_transformation") && params.tools.scanpy.containsKey("normalization")) {
+                if(scanpyParams.containsKey("data_transformation") && scanpyParams.containsKey("normalization")) {
                     out = NORMALIZE_TRANSFORM( out )
                 }
                 out = HVG_SELECTION( out )
-                DIM_REDUCTION_PCA( out )
+                DIM_REDUCTION_PCA( out.scaled )
                 NEIGHBORHOOD_GRAPH( DIM_REDUCTION_PCA.out )
                 DIM_REDUCTION_TSNE_UMAP( NEIGHBORHOOD_GRAPH.out )
-
+        
                 // Perform the clustering step w/o batch effect correction (for comparison matter)
                 clusterIdentificationPreBatchEffectCorrection = CLUSTER_IDENTIFICATION( 
                     NORMALIZE_TRANSFORM.out,
                     DIM_REDUCTION_TSNE_UMAP.out.dimred_tsne_umap,
                     "Pre Batch Effect Correction"
                 )
-
+        
                 // Perform the batch effect correction
                 BEC_HARMONY(
                     NORMALIZE_TRANSFORM.out,
@@ -525,34 +605,31 @@ Steps:
                     clusterIdentificationPreBatchEffectCorrection.marker_genes
                 )
                 
-                // Conversion
-                // Convert h5ad to X (here we choose: loom format)
-                if(params.utils?.file_concatenator) {
-                    filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONCATENATOR.out )
-                    scopeloom = FILE_CONVERTER(
-                        BEC_HARMONY.out.data.groupTuple(),
-                        'HARMONY.final_output',
-                        'loom',
-                        SC__FILE_CONCATENATOR.out
-                    )
+                // Finalize
+                FINALIZE(
+                    params.utils?.file_concatenator ? SC__FILE_CONCATENATOR.out : SC__FILE_CONVERTER.out,
+                    BEC_HARMONY.out.data,
+                    'HARMONY.final_output'
+                )
+        
+                // Define the parameters for clustering
+                def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(scanpyParams.clustering) )
+        
+                // Select a default clustering when in parameter exploration mode
+                if(params.tools?.directs && clusteringParams.isParameterExplorationModeOn()) {
+                    scopeloom = SC__DIRECTS__SELECT_DEFAULT_CLUSTERING( FINALIZE.out.scopeloom )
                 } else {
-                    filteredloom = SC__H5AD_TO_FILTERED_LOOM( SC__FILE_CONVERTER.out )
-                    scopeloom = FILE_CONVERTER(
-                        BEC_HARMONY.out.data.groupTuple(),
-                        'HARMONY.final_output',
-                        'loom',
-                        SC__FILE_CONVERTER.out
-                    )
+                    scopeloom = FINALIZE.out.scopeloom
                 }
+        
+                // Reporting
                 
                 project = CLUSTER_IDENTIFICATION.out.marker_genes.map { it -> it[0] }
                 UTILS__GENERATE_WORKFLOW_CONFIG_REPORT(
                     file(workflow.projectDir + params.utils.workflow_configuration.report_ipynb)
                 )
-
+        
                 // Collect the reports:
-                // Define the parameters for clustering
-                def clusteringParams = SC__SCANPY__CLUSTERING_PARAMS( clean(params.tools.scanpy.clustering) )
                 // Pairing clustering reports with bec reports
                 if(!clusteringParams.isParameterExplorationModeOn()) {
                     clusteringBECReports = BEC_HARMONY.out.cluster_report.map {
@@ -586,21 +663,20 @@ Steps:
                 ).map {
                     it -> tuple(it[0], it[1..it.size()-2], it[it.size()-1])
                 }
-
-                // reporting:
+        
                 SC__SCANPY__MERGE_REPORTS(
                     ipynbs,
                     "merged_report",
                     clusteringParams.isParameterExplorationModeOn()
                 )
                 SC__SCANPY__REPORT_TO_HTML(SC__SCANPY__MERGE_REPORTS.out)
-
+        
             emit:
-                filteredloom
-                scopeloom
-
+                filteredloom = FINALIZE.out.filteredloom
+                scopeloom = scopeloom
+                scanpyh5ad = FINALIZE.out.scanpyh5ad
+        
         }
-
 
 
 #. Add a new Nextflow profile in the ``profiles`` section of the main ``nextflow.config`` of the ``vsn-pipelines`` repository:
@@ -616,7 +692,7 @@ Steps:
             ...
         }
 
-#. Finally add a new entry in ``main.nf`` of the ``vsn-pipelines`` repository
+#. Finally add a new entry in ``main.nf`` of the ``vsn-pipelines`` repository.
 
     .. code:: groovy
 
@@ -641,14 +717,15 @@ Steps:
 
         }
 
-    You should now be able to configure (``nextflow config ...``) and run the ``harmony`` pipeline (``nextflow run ...``).
+
+#. You should now be able to configure (``nextflow config ...``) and run the ``harmony`` pipeline (``nextflow run ...``).
 
 #. After confirming that your module is functional, you should create a pull request to merge your changes into the ``develop`` branch.
 
-    - Make sure you have removed all references to ``TEMPLATE`` in your repository
-    - Include some basic documentation for your module so people know what it does and how to use it.
+- Make sure you have removed all references to ``TEMPLATE`` in your repository
+- Include some basic documentation for your module so people know what it does and how to use it.
 
-   The pull request will be reviewed and accepted once it is confirmed to be working. Once the ``develop`` branch is merged into ``master``, the new tool will be part of the new release of VSN Pipelines!
+The pull request will be reviewed and accepted once it is confirmed to be working. Once the ``develop`` branch is merged into ``master``, the new tool will be part of the new release of VSN Pipelines!
 
 Repository structure
 --------------------
@@ -739,7 +816,7 @@ Entire **sub-workflows** can also be imported in other workflows with one comman
 
     include CELLRANGER from '../cellranger/main.nf' params(params)
 
-This leads to the ability to easily define **high-level workflows** in the master nf file: ``vib-singlecell-nf/vsn-pipelines/main.nf``:
+This leads to the ability to easily define **high-level workflows** in the master Nextflow file: ``vib-singlecell-nf/vsn-pipelines/main.nf``:
 
 .. code:: groovy
 

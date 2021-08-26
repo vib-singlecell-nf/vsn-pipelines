@@ -7,8 +7,7 @@ Two-pass strategy
 Typically, cell- and gene-level filtering is one of the first steps performed in the analysis pipelines.
 This usually results in the pipeline being run in two passes.
 In the **first pass**, the default filters are applied (which are probably not valid for new datasets), and a separate QC report is generated for each sample.
-These QC reports can be inspected and the filters can be adjusted in the config file
-either for all samples (by editing the ``params.tools.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
+These QC reports can be inspected and the filters can be adjusted in the config file either for all samples (by editing the ``params.tools.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
 Then, the **second pass** restarts the pipeline with the correct filtering parameters applied (use ``nextflow run ... -resume`` to skip already completed steps).
 
 Other notes
@@ -53,7 +52,7 @@ This will add a different scenic entry in the config:
     params {
         tools {
             scenic {
-                container = 'vibsinglecellnf/scenic:0.9.19'
+                container = 'vibsinglecellnf/scenic:0.11.2'
                 report_ipynb = '/src/scenic/bin/reports/scenic_report.ipynb'
                 existingScenicLoom = ''
                 sampleSuffixWithExtension = '' // Suffix after the sample name in the file path
@@ -124,7 +123,7 @@ When generating the config using ``nextflow config`` (see above), add the ``pcac
 
 Remarks:
 
-- Make sure ``nComps`` config parameter (under ``dim_reduction`` > ``pca``) is not set.
+- Make sure ``nComps`` config parameter (under ``dim_reduction.pca``) is not set.
 - If ``nPcs`` is not set for t-SNE or UMAP config entries, then all the PCs from the PCA will be used in the computation.
 
 Currently, only the Scanpy related pipelines have this feature implemented.
@@ -137,7 +136,7 @@ Cell-based metadata annotation
 
 There are 2 ways of using this feature: either when running an end-to-end pipeline (e.g.: ``single_sample``, ``harmony``, ``bbknn``, ...) or on its own as a independent workflow.
 
-Part of an and-to-end pipeline
+Part of an end-to-end pipeline
 ******************************
 
 The profile ``utils_cell_annotate`` should be added along with the other profiles when generating the main config using the ``nextflow config`` command.
@@ -463,7 +462,8 @@ The following command, will create a Nextflow config which the pipeline will und
 
     nextflow config \
        ~/vib-singlecell-nf/vsn-pipelines \
-       -profile min,[data-profile],scanpy_data_transformation,scanpy_normalization,[...],singularity > nextflow.config
+       -profile min,[data-profile],scanpy_data_transformation,scanpy_normalization,[...],singularity \
+       > nextflow.config
 
 - ``[data-profile]``: Can be one of the different possible data profiles e.g.: ``h5ad``
 - ``[...]``: Can be other profiles like ``bbknn``, ``harmony``, ``pcacv``, ...
