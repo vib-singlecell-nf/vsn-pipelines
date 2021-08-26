@@ -105,7 +105,7 @@ if args.flavor == "seurat":
     )
 elif args.flavor == "cell_ranger" or args.flavor == "seurat_v3":
 
-    if args.flavor == "seurat_v3":
+    if args.flavor == "seurat_v3" and args.n_top_genes is None:
         raise Exception("VSN ERROR: --n-top-genes (nTopGenes in config) is required when flavor is 'seurat_v3',")
 
     sc.pp.highly_variable_genes(
