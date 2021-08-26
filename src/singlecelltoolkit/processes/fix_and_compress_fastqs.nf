@@ -6,11 +6,9 @@ if(!params.containsKey("test")) {
     binDir = ""
 }
 
-toolParams = params.tools.sratoolkit
-
 process FIX_AND_COMPRESS_SRA_FASTQS {
 
-    container toolParams.container
+    container "vibsinglecellnf/singlecelltoolkit:2021-07-29-09cac13"
     publishDir "${params.global.outdir}/data/raw/fastqs_fixed_and_compressed", mode: 'symlink', overwrite: true
     label 'compute_resources__cpu'
 
