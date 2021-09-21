@@ -131,7 +131,7 @@ workflow harmony_only {
 
     if(params.utils?.publish) {
         PUBLISH_HARMONY(
-            HARMONY.out.scanpyh5ad,
+            HARMONY.out,
             params.utils?.publish?.annotateWithBatchVariableName ? "HARMONY" + "_BY_" +  batchVariables.join("_").toUpperCase() : "HARMONY",
             "h5ad",
             null,
