@@ -15,6 +15,7 @@ process SCTK__EXTRACT_HYDROP_ATAC_BARCODE {
               path(fastq_PE1),
               path(fastq_bc),
               path(fastq_PE2)
+        val(hydrop_atac_barcode_design)
 
     output:
         tuple val(sampleId),
@@ -30,6 +31,7 @@ process SCTK__EXTRACT_HYDROP_ATAC_BARCODE {
         extract_hydrop_atac_barcode_from_R2_fastq.sh \
             ${fastq_bc} \
             ${sampleId}_hydrop_barcode_R2.fastq.gz \
+            ${hydrop_atac_barcode_design} \
             pigz
         """
 }

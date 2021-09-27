@@ -32,7 +32,7 @@ workflow BAP__BARCODE_MULTIPLET_WF {
 
     main:
 
-        bap = BARCODE_MULTIPLET_PIPELINE(bam.map { it -> tuple(it[0], it[1], it[2]) })
+        bap = BARCODE_MULTIPLET_PIPELINE(bam.map { it -> tuple(it[0], it[1][0], it[1][1]) })
 
         GENERATE_REPORT(
             file(workflow.projectDir + params.tools.bap.barcode_multiplet.report_ipynb),

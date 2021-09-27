@@ -2,7 +2,8 @@ nextflow.enable.dsl=2
 
 // process imports
 include {
-    SCTK__EXTRACT_HYDROP_ATAC_BARCODE;
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE as SCTK__EXTRACT_HYDROP_ATAC_BARCODE_2x384;
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE as SCTK__EXTRACT_HYDROP_ATAC_BARCODE_3x96;
 } from './../../src/singlecelltoolkit/processes/extract_hydrop_atac_barcode.nf'
 include {
     TRIMGALORE__TRIM;
@@ -34,7 +35,8 @@ include {
 
 include {
     barcode_correction as bc_correct_standard;
-    barcode_correction as bc_correct_hydrop;
+    barcode_correction as bc_correct_hydrop_2x384;
+    barcode_correction as bc_correct_hydrop_3x96;
     biorad_bc as bc_correct_biorad;
 } from './../../src/singlecelltoolkit/main.nf'
 
@@ -67,9 +69,10 @@ workflow ATAC_PREPROCESS {
                               )
                       }
                       .branch {
-                        biorad:   it[1] == 'biorad'
-                        hydrop:   it[1] == 'hydrop'
-                        standard: true // capture all other technology types here
+                        biorad:       it[1] == 'biorad'
+                        hydrop_3x96:  it[1] == 'hydrop_3x96'
+                        hydrop_2x384: it[1] == 'hydrop_2x384'
+                        standard:     true // capture all other technology types here
                       }
 
         /* standard data
@@ -78,8 +81,12 @@ workflow ATAC_PREPROCESS {
 
         /* HyDrop ATAC
            extract barcode and correct */
-        SCTK__EXTRACT_HYDROP_ATAC_BARCODE(data.hydrop) \
-            | bc_correct_hydrop
+           // HyDrop 3x96
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE_3x96(data.hydrop_3x96, '3x96') \
+            | bc_correct_hydrop_3x96
+           // HyDrop 2x384
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE_2x384(data.hydrop_2x384, '2x384') \
+            | bc_correct_hydrop_2x384
 
         /* BioRad data
            extract barcode and correct */
@@ -87,7 +94,8 @@ workflow ATAC_PREPROCESS {
 
         /* downstream steps */
         bc_correct_standard.out
-            .mix(bc_correct_hydrop.out)
+            .mix(bc_correct_hydrop_3x96.out)
+            .mix(bc_correct_hydrop_2x384.out)
             .mix(bc_correct_biorad.out) \
             | adapter_trimming \
             | mapping
