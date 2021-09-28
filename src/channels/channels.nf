@@ -79,6 +79,25 @@ workflow getDataChannel {
                 )
             }
         }
+        if(params.data.containsKey("tenx_arc") && params.data.tenx_arc.containsKey("cellranger_mex")) {
+            if(isOuts(params.data.tenx_arc.cellranger_mex)) {
+                data = data.concat(
+                    getTenXCellRangerOutsChannel(
+                        params.data.tenx_arc.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_arc_cellranger_mex_outs", outputFileFormat, 'NULL')
+                    }
+                )
+            } else {
+                data = data.concat(
+                    getTenXCellRangerMEXChannel(
+                        params.data.tenx_arc.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_arc_cellranger_mex", outputFileFormat, 'NULL')
+                    }
+                )
+            }
+        }
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_h5")) {
             if(isOuts(params.data.tenx.cellranger_h5)) {
                 data = data.concat(
