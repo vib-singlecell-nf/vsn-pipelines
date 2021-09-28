@@ -20,6 +20,7 @@
    :caption: scATAC-seq
 
    scatac-seq
+   scatac-seq_qc
 
 .. toctree::
    :maxdepth: 2

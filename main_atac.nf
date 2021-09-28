@@ -37,25 +37,14 @@ workflow cellranger_atac {
 }
 
 
-workflow cistopic {
-
-    include {
-        cistopic as CISTOPIC
-    } from './src/cistopic/main' params(params)
-    
-    getDataChannel | CISTOPIC
-
-}
-
-
 workflow atac_preprocess {
 
     // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
     include {
-        ATAC_PREPROCESS_WITH_METADATA;
+        ATAC_PREPROCESS;
     } from './workflows/atac/preprocess.nf' params(params)
 
-    ATAC_PREPROCESS_WITH_METADATA(file(params.data.atac_preprocess.metadata))
+    ATAC_PREPROCESS(file(params.data.atac_preprocess.metadata))
 
 }
 
@@ -63,16 +52,16 @@ workflow atac_preprocess {
 workflow atac_preprocess_bap {
 
     include {
-        ATAC_PREPROCESS_WITH_METADATA;
+        ATAC_PREPROCESS;
     } from './workflows/atac/preprocess.nf' params(params)
     include {
         get_bam;
-        BAP__BARCODE_MULTIPLET_PIPELINE;
+        BAP__BARCODE_MULTIPLET_WF;
     } from './src/bap/main.nf' params(params)
 
-    ATAC_PREPROCESS_WITH_METADATA(file(params.data.atac_preprocess.metadata)) |
+    ATAC_PREPROCESS(file(params.data.atac_preprocess.metadata)) |
         get_bam |
-        BAP__BARCODE_MULTIPLET_PIPELINE
+        BAP__BARCODE_MULTIPLET_WF
 
 }
 
@@ -80,10 +69,10 @@ workflow atac_preprocess_bap {
 workflow bap {
 
     include {
-        BAP__BARCODE_MULTIPLET_PIPELINE;
+        BAP__BARCODE_MULTIPLET_WF;
     } from './src/bap/main.nf' params(params)
 
-    getDataChannel | BAP__BARCODE_MULTIPLET_PIPELINE
+    getDataChannel | BAP__BARCODE_MULTIPLET_WF
 
 }
 
@@ -98,6 +87,21 @@ workflow atac_qc_filtering {
     } from './workflows/atac/qc_filtering.nf' params(params)
 
     getDataChannel | ATAC_QC_PREFILTER
+
+}
+
+workflow atac_preprocess_with_qc {
+
+    // generic ATAC-seq preprocessing pipeline: adapter trimming, mapping, fragments file generation
+    include {
+        ATAC_PREPROCESS;
+    } from './workflows/atac/preprocess.nf' params(params)
+    include {
+        ATAC_QC_PREFILTER;
+    } from './workflows/atac/qc_filtering.nf' params(params)
+
+    pp = ATAC_PREPROCESS(file(params.data.atac_preprocess.metadata))
+    ATAC_QC_PREFILTER(pp.bam.mix(pp.fragments))
 
 }
 

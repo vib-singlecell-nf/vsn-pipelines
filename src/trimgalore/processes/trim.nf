@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.trimgalore
 
-process SC__TRIMGALORE__TRIM {
+process TRIMGALORE__TRIM {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
@@ -24,9 +24,10 @@ process SC__TRIMGALORE__TRIM {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.trim)
         processParams = sampleParams.local
+        def max_threads = (task.cpus > 6) ? 6 : task.cpus
         """
         trim_galore \
-            -j ${task.cpus} \
+            -j ${max_threads} \
             -o . \
             ${fastq_PE1} \
             ${fastq_PE2} \

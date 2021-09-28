@@ -4,32 +4,35 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.singlecelltoolkit
 
-process SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ {
+process SCTK__EXTRACT_HYDROP_ATAC_BARCODE {
 
     container toolParams.container
-    label 'compute_resources__cpu'
+    label 'compute_resources__default'
 
     input:
         tuple val(sampleId),
+              val(technology),
               path(fastq_PE1),
               path(fastq_bc),
               path(fastq_PE2)
+        val(hydrop_atac_barcode_design)
 
     output:
         tuple val(sampleId),
-              path("${sampleId}_dex_R1.fastq.gz"),
-              path("${sampleId}_dex_R2.fastq.gz")
+              val(technology),
+              path(fastq_PE1),
+              path("${sampleId}_hydrop_barcode_R2.fastq.gz"),
+              path(fastq_PE2)
 
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams)
-        processParams = sampleParams.local
+        //processParams = sampleParams.local
         """
-        debarcode_10x_scatac_fastqs.sh \
-            ${fastq_PE1} \
+        extract_hydrop_atac_barcode_from_R2_fastq.sh \
             ${fastq_bc} \
-            ${fastq_PE2} \
-            ${sampleId}_dex \
-            _
+            ${sampleId}_hydrop_barcode_R2.fastq.gz \
+            ${hydrop_atac_barcode_design} \
+            pigz
         """
 }
 
