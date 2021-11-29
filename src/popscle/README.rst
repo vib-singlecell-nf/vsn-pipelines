@@ -13,6 +13,16 @@ element 1 is the sampleID and element 2 is the output folder of a 10X run.
 
 Currently the workflows are fixed to the filtered matrices.
 
+To build the Docker image
+-------------------------
+
+Image tag format: ``<date of latest git commit>-<short hash of latest git commit>``.
+
+.. code:: bash
+
+    docker build -t vibsinglecellnf/popscle:2021-05-05-da70fc7 .
+
+This image uses the ``vibsinglecellnf/samtools`` image as a base.
 
 Acknowledgements
 ----------------
