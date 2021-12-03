@@ -134,7 +134,7 @@ See `here <https://vsn-pipelines.readthedocs.io/en/latest/scatac-seq.html>`_ for
     :target: https://vsn-pipelines.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |Nextflow| image:: https://img.shields.io/badge/nextflow-20.10.0-brightgreen.svg
+.. |Nextflow| image:: https://img.shields.io/badge/nextflow-21.04.3-brightgreen.svg
     :target: https://www.nextflow.io/
     :alt: Nextflow
 

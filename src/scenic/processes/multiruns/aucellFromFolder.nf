@@ -2,8 +2,8 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.sc.scenic
-processParams = params.sc.scenic.aucell
+def toolParams = params.tools.scenic
+def processParams = toolParams.aucell
 
 process AUCELL_FROM_FOLDER {
 

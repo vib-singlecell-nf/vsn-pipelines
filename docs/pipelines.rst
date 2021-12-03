@@ -77,7 +77,7 @@ Cuurently there are 3 methods available to call doublets from Scrublet doublet s
 .. code:: bash
 
     params {
-        sc {
+        tools {
             scublet {
                 threshold = [
                   "<sample-name>": <custom-threshold>
@@ -179,7 +179,7 @@ See ``single_sample``, ``decontx`` and ``scrublet`` to know more about the files
 .. |scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic/badge.svg
 
 Runs the ``scenic`` workflow alone, generating a loom file with only the SCENIC results.
-Currently, the required input is a loom file (set by `params.sc.scenic.filteredLoom`).
+Currently, the required input is a loom file (set by `params.tools.scenic.filteredLoom`).
 
 |SCENIC Workflow|
 
@@ -194,7 +194,7 @@ Currently, the required input is a loom file (set by `params.sc.scenic.filteredL
 .. |scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/scenic_multiruns/badge.svg
 .. |single_sample_scenic_multiruns| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic_multiruns/badge.svg
 
-Runs the ``scenic`` workflow multiple times (set by ``params.sc.scenic.numRuns``), generating a loom file with the aggregated results from the multiple SCENIC runs.
+Runs the ``scenic`` workflow multiple times (set by ``params.tools.scenic.numRuns``), generating a loom file with the aggregated results from the multiple SCENIC runs.
 
 Note that this is not a complete entry-point itself, but a configuration option for the `scenic` module.
 Simply adding `-profile scenic_multiruns` during the config step will activate this analysis option for any of the standard entrypoints.
@@ -211,9 +211,9 @@ Simply adding `-profile scenic_multiruns` during the config step will activate t
 Runs the ``cellranger`` workflow (``makefastq``, then ``count``).
 Input parameters are specified within the config file:
 
-* ``params.sc.cellranger.mkfastq.csv``: path to the CSV samplesheet
-* ``params.sc.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
-* ``params.sc.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
+* ``params.tools.cellranger.mkfastq.csv``: path to the CSV samplesheet
+* ``params.tools.cellranger.mkfastq.runFolder``: path of Illumina BCL run folder
+* ``params.tools.cellranger.count.transcriptome``: path to the Cell Ranger compatible transcriptome reference
 
 **cellranger_count_metadata**
 -----------------------------
@@ -326,9 +326,9 @@ NOTES:
 Runs the ``demuxlet`` or ``freemuxlet`` workflows (``dsc-pileup`` [with prefiltering], then ``freemuxlet`` or ``demuxlet``)
 Input parameters are specified within the config file:
 
-* ``params.sc.popscle.vcf``: path to the VCF file for demultiplexing
-* ``params.sc.popscle.freemuxlet.nSamples``: Number of clusters to extract (should match the number of samples pooled)
-* ``params.sc.popscle.demuxlet.field``: Field in the VCF with genotype information
+* ``params.tools.popscle.vcf``: path to the VCF file for demultiplexing
+* ``params.tools.popscle.freemuxlet.nSamples``: Number of clusters to extract (should match the number of samples pooled)
+* ``params.tools.popscle.demuxlet.field``: Field in the VCF with genotype information
 
 
 ----
@@ -512,9 +512,9 @@ Make sure the following parts of the generated config are properly set:
          cellranger_mex = '~/out/counts/*/outs/'
       }
     }
-    sc {
+    tools {
         scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:1.8.1'
         }
         cell_annotate {
             off = 'h5ad'
@@ -567,9 +567,9 @@ Make sure the following parts of the generated config are properly set:
          cellranger_mex = '~/out/counts/*/outs/'
       }
     }
-    sc {
+    tools {
         scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:1.8.1'
         }
         cell_annotate {
             off = 'h5ad'
@@ -604,12 +604,10 @@ Now we can run it with the following command:
        -entry cell_filter
 
 
-**sra** |sra|
--------------
+**sra**
+-------
 
-.. |sra| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/cell_annotate_filter/badge.svg
-
-Runs the ``sra`` workflow which will download all (or user-defined selected) FASTQ files from a particular SRA project ID and format with properly and humand friendly names.
+Runs the ``sra`` workflow which will download all (or user-defined selected) FASTQ files from a particular SRA project and format those with properly and human readable names.
 
 First, generate the config :
 
@@ -617,11 +615,15 @@ First, generate the config :
 
     nextflow config \
       ~/vib-singlecell-nf/vsn-pipelines \
-      -profile sra,singularity \
-      > nextflow.config
+        -profile sra,singularity \
+        > nextflow.config
 
-NOTE: If you're a VSC user, you might want to add the ``vsc`` profile.
+NOTES:
 
+- The download of SRA files is by default limited to 20 Gb. If this limit needs to be increased please set ``params.tools.sratoolkit.maxSize`` accordingly. This limit can be 'removed' by setting the parameter to an arbitrarily high number (e.g.: 9999999999999).
+- If you're a VSC user, you might want to add the ``vsc`` profile.
+- The final output (FASTQ files) will available in ``out/data/sra``
+- If you're downloading 10x Genomics scATAC-seq data, make sure to set ``params.tools.sratoolkit.includeTechnicalReads = true`` and properly set ``params.utils.sra_normalize_fastqs.fastq_read_suffixes``. In the case of downloading the scATAC-seq samples of SRP254409, ``fastq_read_suffixes`` would be set to ``["R1", "R2", "I1", "I2"]``.
 
 Now we can run it with the following command:
 
@@ -629,16 +631,16 @@ Now we can run it with the following command:
 
     nextflow -C nextflow.config \
        run ~/vib-singlecell-nf/vsn-pipelines \
-       -entry cell_filter
+        -entry sra
 
     $ nextflow -C nextflow.config run ~/vib-singlecell-nf/vsn-pipelines -entry sra
-    N E X T F L O W  ~  version 20.11.0-edge
-    Launching `~/vib-singlecell-nf/vsn-pipelines/main.nf` [cranky_kare] - revision: c5e34d476a
-    executor >  local (1)
-    [c3/4bf7a2] process > sra:DOWNLOAD_FROM_SRA:SRA_TO_METADATA (1)             [100%] 1 of 1 _
-    [-        ] process > sra:DOWNLOAD_FROM_SRA:DOWNLOAD_FASTQS_FROM_SRA_ACC_ID -
-    [-        ] process > sra:DOWNLOAD_FROM_SRA:NORMALIZE_SRA_FASTQS            -
-    [SRR11442507, scATAC_Control_Superior_and_Middle_Temporal_Gyri_1]
-    [SRR11442506, scATAC_Control_Substantia_Nigra_2]
+    N E X T F L O W  ~  version 21.04.3
+    Launching `~/vib-singlecell-nf/vsn-pipelines/main.nf` [sleepy_goldstine] - revision: ba1dedbf51
+    executor >  local (23)
+    [12/25b9d4] process > sra:DOWNLOAD_FROM_SRA:SRA_TO_METADATA (1)                                             [100%] 1 of 1 _
+    [e2/d5a429] process > sra:DOWNLOAD_FROM_SRA:SRATOOLKIT__DOWNLOAD_FASTQS:DOWNLOAD_FASTQS_FROM_SRA_ACC_ID (4) [ 33%] 3 of 9
+    [30/cba7a0] process > sra:DOWNLOAD_FROM_SRA:SRATOOLKIT__DOWNLOAD_FASTQS:FIX_AND_COMPRESS_SRA_FASTQ (3)      [100%] 3 of 3
+    [76/97ce6e] process > sra:DOWNLOAD_FROM_SRA:NORMALIZE_SRA_FASTQS (3)                                        [100%] 3 of 3
+    [8c/3125c4] process > sra:PUBLISH:SC__PUBLISH (11)                                                          [100%] 12 of 12
     ...
 

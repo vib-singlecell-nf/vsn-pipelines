@@ -4,7 +4,7 @@ nextflow.enable.dsl=2
 
 toolParams = params.tools.sinto
 
-process SC__SINTO__FRAGMENTS {
+process SINTO__FRAGMENTS {
 
     container toolParams.container
     label 'compute_resources__cpu','compute_resources__24hqueue'
@@ -31,14 +31,13 @@ process SC__SINTO__FRAGMENTS {
             ${processParams.containsKey('min_distance') && processParams.min_distance ? '--min_distance ' + processParams.min_distance: ''} \
             ${processParams.containsKey('max_distance') && processParams.max_distance ? '--max_distance ' + processParams.max_distance: ''} \
             ${processParams.containsKey('chunksize') && processParams.chunksize ? '--chunksize ' + processParams.chunksize: ''} \
-            ${processParams.containsKey('temp_dir') && processParams.temp_dir ? '--temp_dir ' + processParams.temp_dir: ''} \
             -p ${task.cpus} \
             -f ${sampleId}.fragments.bed
         """
 }
 
 
-process SC__SINTO__SORT_FRAGMENTS {
+process SINTO__SORT_FRAGMENTS {
 
     container toolParams.container
     label 'compute_resources__mem'

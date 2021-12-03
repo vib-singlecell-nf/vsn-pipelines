@@ -84,11 +84,11 @@ workflow nemesh {
     data.subscribe { println it }
 
     // Check if custom selected barcodes file has been specified
-    if (params.sc.nemesh.custom_selected_barcodes) {
+    if (params.tools.nemesh.custom_selected_barcodes) {
         Channel
-            .fromPath(params.sc.nemesh.custom_selected_barcodes)
+            .fromPath(params.tools.nemesh.custom_selected_barcodes)
             .map {
-                path -> tuple(path.baseName.split('\\.')[0], params.sc.nemesh.custom_selected_barcodes, path)
+                path -> tuple(path.baseName.split('\\.')[0], params.tools.nemesh.custom_selected_barcodes, path)
             }
             .set { selectedBarcodesByCustom }
         selectedBarcodesByCustom.subscribe { println it }
@@ -138,7 +138,7 @@ workflow nemesh {
     a = FINAL_BAM.combine(SC__DROPLET_UTILS__BARCODE_SELECTION.out.selectedCellBarcodesByKnee, by: 0)
     b = FINAL_BAM.combine(SC__DROPLET_UTILS__BARCODE_SELECTION.out.selectedCellBarcodesByInflection, by: 0)
 
-    if (params.sc.nemesh.custom_selected_barcodes) {
+    if (params.tools.nemesh.custom_selected_barcodes) {
         c = FINAL_BAM.combine(selectedBarcodesByCustom, by: 0)
         SC__DROP_SEQ_TOOLS__DIGITAL_EXPRESSION(
             a.mix(b,c)

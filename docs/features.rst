@@ -7,8 +7,7 @@ Two-pass strategy
 Typically, cell- and gene-level filtering is one of the first steps performed in the analysis pipelines.
 This usually results in the pipeline being run in two passes.
 In the **first pass**, the default filters are applied (which are probably not valid for new datasets), and a separate QC report is generated for each sample.
-These QC reports can be inspected and the filters can be adjusted in the config file
-either for all samples (by editing the ``params.sc.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
+These QC reports can be inspected and the filters can be adjusted in the config file either for all samples (by editing the ``params.tools.scanpy.filter`` settings directly, or for individual samples by using the strategy described in multi-sample parameters.
 Then, the **second pass** restarts the pipeline with the correct filtering parameters applied (use ``nextflow run ... -resume`` to skip already completed steps).
 
 Other notes
@@ -51,9 +50,9 @@ This will add a different scenic entry in the config:
 .. code:: bash
 
     params {
-        sc {
+        tools {
             scenic {
-                container = 'vibsinglecellnf/scenic:0.9.19'
+                container = 'vibsinglecellnf/scenic:0.11.2'
                 report_ipynb = '/src/scenic/bin/reports/scenic_report.ipynb'
                 existingScenicLoom = ''
                 sampleSuffixWithExtension = '' // Suffix after the sample name in the file path
@@ -105,7 +104,7 @@ If you want to change those thresholds applied on the markers genes, edit the ``
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scope {
                 markers {
                     log_fc_threshold = 0.5
@@ -124,7 +123,7 @@ When generating the config using ``nextflow config`` (see above), add the ``pcac
 
 Remarks:
 
-- Make sure ``nComps`` config parameter (under ``dim_reduction`` > ``pca``) is not set.
+- Make sure ``nComps`` config parameter (under ``dim_reduction.pca``) is not set.
 - If ``nPcs`` is not set for t-SNE or UMAP config entries, then all the PCs from the PCA will be used in the computation.
 
 Currently, only the Scanpy related pipelines have this feature implemented.
@@ -137,7 +136,7 @@ Cell-based metadata annotation
 
 There are 2 ways of using this feature: either when running an end-to-end pipeline (e.g.: ``single_sample``, ``harmony``, ``bbknn``, ...) or on its own as a independent workflow.
 
-Part of an and-to-end pipeline
+Part of an end-to-end pipeline
 ******************************
 
 The profile ``utils_cell_annotate`` should be added along with the other profiles when generating the main config using the ``nextflow config`` command.
@@ -159,7 +158,7 @@ The ``utils_cell_annotate`` profile is adding the following part to the config:
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             cell_annotate {
                 off = 'h5ad'
                 method = ''
@@ -172,7 +171,7 @@ The ``utils_cell_annotate`` profile is adding the following part to the config:
         }
     }
 
-Two methods (``params.sc.cell_annotate.method``) are available:
+Two methods (``params.utils.cell_annotate.method``) are available:
 
 - ``aio``
 - ``obo``
@@ -215,7 +214,7 @@ The profile ``utils_sample_annotate`` should be added when generating the main c
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             sample_annotate {
                 iff = '10x_cellranger_mex'
                 off = 'h5ad' 
@@ -255,7 +254,7 @@ The ``utils_cell_filter`` profile is required when generating the config file. T
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             cell_filter {
                 off = 'h5ad'
                 method = ''
@@ -274,7 +273,7 @@ The ``utils_cell_filter`` profile is required when generating the config file. T
 Part of an end-to-end pipeline
 ******************************
 
-For more detailed information about the parameters to set in ``params.sc.cell_filter``, please check the `cell_filter parameter details <Parameters of cell_filter>`_ section below.
+For more detailed information about the parameters to set in ``params.utils.cell_filter``, please check the `cell_filter parameter details <Parameters of cell_filter>`_ section below.
 
 As an independent workflow
 **************************
@@ -287,7 +286,7 @@ Please check the `cell_filter`_ workflow or `cell_annotate_filter`_ workflow to 
 Parameters of cell_filter
 *************************
 
-Two methods (``params.sc.cell_filter.method``) are available:
+Two methods (``params.utils.cell_filter.method``) are available:
 
 - ``internal``
 - ``external``
@@ -331,9 +330,9 @@ You'll just have to repeat the following structure for the parameters which you 
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:1.8.1'
             filter {
                 report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
                 // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter
@@ -362,9 +361,9 @@ If you want to apply custom parameters for some specific samples and have a "gen
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scanpy {
-            container = 'vibsinglecellnf/scanpy:0.5.2'
+            container = 'vibsinglecellnf/scanpy:1.8.1'
             filter {
                 report_ipynb = '/src/scanpy/bin/reports/sc_filter_qc_report.ipynb'
                 // Here we enable the multi-sample feature for the cellFilterMinNgenes parameter
@@ -377,7 +376,7 @@ If you want to apply custom parameters for some specific samples and have a "gen
         }
     }
 
-Using this config, the parameter ``params.sc.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
+Using this config, the parameter ``params.tools.scanpy.cellFilterMinNGenes`` will be applied with a threshold value of ``600`` to ``1k_pbmc_v2_chemistry``.  The rest of the samples will use the value ``800`` to filter the cells having less than that number of genes.
 This strategy can be applied to any other parameter of the config.
 
 
@@ -386,7 +385,7 @@ Parameter exploration
 
 Since ``v0.9.0``, it is possible to explore several combinations of parameters. The latest version of the VSN-Pipelines allows to explore the following parameters:
 
-- ``params.sc.scanpy.clustering``
+- ``params.tools.scanpy.clustering``
 
   - ``method`` ::
 
@@ -399,7 +398,7 @@ Since ``v0.9.0``, it is possible to explore several combinations of parameters. 
 Select default clustering
 *************************
 
-In case the parameter exploration mode is used within the ``params.sc.scanpy.clustering`` parameter, it will generated a range of different clusterings. 
+In case the parameter exploration mode is used within the ``params.tools.scanpy.clustering`` parameter, it will generated a range of different clusterings. 
 For non-expert, it's often difficult to know which clustering to pick. It's however possible to use the ``DIRECTS`` module in order to select a default clustering. In order, to use 
 this automated clustering selection method, add the ``directs`` profile when generating the main config using ``nextflow config``. The config will get populated with:
 
@@ -427,7 +426,7 @@ By default, don't regress any variable out. To enable this features, the ``scanp
 .. code:: groovy
 
     params {
-        sc {
+        tools {
             scanpy {
                 regress_out {
                     variablesToRegressOut = []
@@ -438,6 +437,51 @@ By default, don't regress any variable out. To enable this features, the ``scanp
     }
 
 Add any variable in ``variablesToRegressOut`` to regress out: e.g.: 'n_counts', 'percent_mito'.
+
+Highly Variable Genes Selection
+-------------------------------
+
+This step is a wrapper around the `Scanpy` ``scanpy.pp.highly_variable_genes`` function and regarding the parameters used it is following the documentation available at `scanpy-pp-highly-variable-genes`_.
+By default, it will use the ``seurat`` flavor to select variable genes and will also keep the same default values for the 4 different thresholds (as the documentation): ``min_mean``, ``max_mean``, ``min_disp``, ``max_disp``.
+
+.. _`scanpy-pp-highly-variable-genes`: https://scanpy.readthedocs.io/en/latest/generated/scanpy.pp.highly_variable_genes.html#scanpy-pp-highly-variable-genes.
+
+.. code:: groovy
+
+    params {
+        tools {
+            scanpy {
+                feature_selection {
+                    report_ipynb = "${params.misc.test.enabled ? '../../..' : ''}/src/scanpy/bin/reports/sc_select_variable_genes_report.ipynb"
+                    flavor = 'seurat'
+                    minMean = 0.0125
+                    maxMean = 3
+                    minDisp = 0.5
+                    off = 'h5ad'
+                }
+            }
+        }
+    }
+
+
+Other flavors are available as ``cell_ranger`` and ``seurat_v3``. In order to use the ``seurat_v3`` flavor, one parameter is required to be specified: ``nTopGenes`` in the config file as follows:
+
+.. code:: groovy
+
+    params {
+        tools {
+            scanpy {
+                feature_selection {
+                    report_ipynb = "${params.misc.test.enabled ? '../../..' : ''}/src/scanpy/bin/reports/sc_select_variable_genes_report.ipynb"
+                    flavor = 'seurat_v3'
+                    nTopGenes = 2000
+                    off = 'h5ad'
+                }
+            }
+        }
+    }
+
+
 
 Skip steps
 ----------
@@ -463,7 +507,8 @@ The following command, will create a Nextflow config which the pipeline will und
 
     nextflow config \
        ~/vib-singlecell-nf/vsn-pipelines \
-       -profile min,[data-profile],scanpy_data_transformation,scanpy_normalization,[...],singularity > nextflow.config
+       -profile min,[data-profile],scanpy_data_transformation,scanpy_normalization,[...],singularity \
+       > nextflow.config
 
 - ``[data-profile]``: Can be one of the different possible data profiles e.g.: ``h5ad``
 - ``[...]``: Can be other profiles like ``bbknn``, ``harmony``, ``pcacv``, ...

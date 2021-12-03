@@ -89,7 +89,7 @@ def SC__SCANPY__DIM_REDUCTION_PARAMS(params) {
 
 process SC__SCANPY__DIM_REDUCTION {
 
-	container params.sc.scanpy.container
+	container params.tools.scanpy.container
 	publishDir "${params.global.outdir}/data/intermediate", mode: 'symlink', overwrite: true
     label 'compute_resources__cpu'
 
@@ -108,7 +108,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			val(nComps)
 
 	script:
-		def sampleParams = params.parseConfig(sampleId, params.global, params.sc.scanpy.dim_reduction.get(params.method))
+		def sampleParams = params.parseConfig(sampleId, params.global, params.tools.scanpy.dim_reduction.get(params.method))
 		processParams = sampleParams.local
 		// In parameter exploration mode, file output needs to be tagged with a unique identitifer because of:
 		// - https://github.com/nextflow-io/nextflow/issues/470
@@ -125,6 +125,7 @@ process SC__SCANPY__DIM_REDUCTION {
 			--seed ${params.global.seed} \
 			--method ${processParams.method} \
 			${(processParams.containsKey('svdSolver')) ? '--svd-solver ' + processParams.svdSolver : ''} \
+			${(processParams.containsKey('perplexity')) ? '--perplexity ' + processParams.perplexity : ''} \
 			${(processParams.containsKey('nNeighbors')) ? '--n-neighbors ' + processParams.nNeighbors : ''} \
 			${_processParams.getNCompsAsArgument(nComps)} \
 			${(processParams.containsKey('nPcs')) ? '--n-pcs ' + processParams.nPcs : ''} \

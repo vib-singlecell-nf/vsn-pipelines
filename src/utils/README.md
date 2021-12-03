@@ -6,7 +6,7 @@ The profile `utils_cell_annotate` should be added when generating the main confi
 
 ```
 params {
-    sc {
+    tools {
         cell_annotate {
             iff = '10x_cellranger_mex'
             off = 'h5ad'
@@ -30,7 +30,7 @@ The profile `utils_sample_annotate` should be added when generating the main con
 
 ```
 params {
-    sc {
+    tools {
         sample_annotate {
             iff = '10x_cellranger_mex'
             off = 'h5ad' 

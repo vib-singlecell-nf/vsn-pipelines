@@ -28,12 +28,12 @@ workflow CELLRANGER_LIBRARIES {
 
     main:
         // Sanity Checking
-        libMap = params.sc.cellranger.librariesMap
+        libMap = params.tools.cellranger.librariesMap
         if (! (libMap instanceof Map)) {
             throw new Exception("When running the full cellranger pipeline with libraries, you must specify the librariesMap (see docs).")
         }
 
-        librariesFiles = params.sc.cellranger.count.libraries
+        librariesFiles = params.tools.cellranger.count.libraries
 
         if (!(librariesFiles instanceof Map) && librariesFiles) {
             poolName = params.global.containsKey('project_name') ? params.global.project_name : ''

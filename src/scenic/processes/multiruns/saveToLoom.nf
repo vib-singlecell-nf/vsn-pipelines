@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/scenic/bin/" : ""
 
-toolParams = params.sc.scenic
+def toolParams = params.tools.scenic
 
 process SAVE_MULTI_RUNS_TO_LOOM {
 
@@ -30,10 +30,10 @@ process SAVE_MULTI_RUNS_TO_LOOM {
 			--cell-id-attribute ${toolParams.cell_id_attribute} \
 			--gene-attribute ${toolParams.gene_attribute} \
 			--title "${sampleId} - pySCENIC (${type})" \
-			--nomenclature "${params.sc.scope.genome}" \
-			--scope-tree-level-1 "${params.sc.scope.tree.level_1}" \
-			--scope-tree-level-2 "${params.sc.scope.tree.level_2}" \
-			--scope-tree-level-3 "${params.sc.scope.tree.level_3}"
+			--nomenclature "${params.utils?.scope.genome}" \
+			--scope-tree-level-1 "${params.utils?.scope.tree.level_1}" \
+			--scope-tree-level-2 "${params.utils?.scope.tree.level_2}" \
+			--scope-tree-level-3 "${params.utils?.scope.tree.level_3}"
 		"""
 
 }

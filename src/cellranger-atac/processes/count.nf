@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 
-toolParams = params.sc.cellranger_atac
+toolParams = params.tools.cellranger_atac
 
 def runCellRangerAtacCount = {
     id,
@@ -46,7 +46,7 @@ process SC__CELLRANGER_ATAC__COUNT {
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.count)
         processParams = sampleParams.local
         if(processParams.sample == '') {
-            throw new Exception("Regards params.sc.cellranger_atac.count: sample parameter cannot be empty")
+            throw new Exception("Regards params.tools.cellranger_atac.count: sample parameter cannot be empty")
         }
         runCellRangerAtacCount(
             sampleId,

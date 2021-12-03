@@ -36,8 +36,8 @@ workflow getDataChannel {
         } else {
             // If not dynamically set, we use h5ad by default
             outputFileFormat = "h5ad"
-            if(params.sc.file_converter.containsKey("off")) {
-                outputFileFormat = params.sc.file_converter.off
+            if(params.utils.file_converter.containsKey("off")) {
+                outputFileFormat = params.utils.file_converter.off
             }
         }
 
@@ -75,6 +75,25 @@ workflow getDataChannel {
                         params.data.tenx_atac.cellranger_mex
                     ).map {
                         it -> tuple(it[0], it[1], "10x_atac_cellranger_mex", outputFileFormat, 'NULL')
+                    }
+                )
+            }
+        }
+        if(params.data.containsKey("tenx_arc") && params.data.tenx_arc.containsKey("cellranger_mex")) {
+            if(isOuts(params.data.tenx_arc.cellranger_mex)) {
+                data = data.concat(
+                    getTenXCellRangerOutsChannel(
+                        params.data.tenx_arc.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_arc_cellranger_mex_outs", outputFileFormat, 'NULL')
+                    }
+                )
+            } else {
+                data = data.concat(
+                    getTenXCellRangerMEXChannel(
+                        params.data.tenx_arc.cellranger_mex
+                    ).map {
+                        it -> tuple(it[0], it[1], "10x_arc_cellranger_mex", outputFileFormat, 'NULL')
                     }
                 )
             }

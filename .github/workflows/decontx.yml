@@ -1,6 +1,6 @@
 name: decontx
 
-on: 
+on:
   push:
     branches:
       - master
@@ -12,21 +12,20 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Install Nextflow
-      run: |
-        export NXF_VER='20.10.0'
-        wget -qO- get.nextflow.io | bash
-        sudo mv nextflow /usr/local/bin/
-    - name: Get sample data
-      run: |
-        wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
-        tar xzvf sample_data.tar.gz
-    - name: Run decontx test
-      run: |
-        nextflow run ${GITHUB_WORKSPACE} -profile decontx,test__decontx,test__compute_resources,docker -entry decontx -ansi-log false
-        cat .nextflow.log
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
+        run: |
+          export NXF_VER='21.04.3'
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Get sample data
+        run: |
+          wget https://raw.githubusercontent.com/aertslab/SCENICprotocol/master/example/sample_data.tar.gz
+          tar xzvf sample_data.tar.gz
+      - name: Run decontx test
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile decontx,test__decontx,test__compute_resources,docker -entry decontx -ansi-log false
+          cat .nextflow.log

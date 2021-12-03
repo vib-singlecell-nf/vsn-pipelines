@@ -41,6 +41,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-p", "--perplexity",
+    type=int,
+    action="store",
+    dest="perplexity",
+    default=30,
+    help="[t-SNE], The perplexity is related to the number of nearest neighbors that is used in other manifold learning algorithms."
+)
+
+parser.add_argument(
     "-c", "--n-comps",
     type=int,
     action="store",
@@ -59,7 +68,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-p", "--n-pcs",
+    "-n", "--n-pcs",
     type=int,
     action="store",
     dest="n_pcs",
@@ -140,10 +149,11 @@ elif args.method.lower() == "tsne":
     #     Use the indicated representation. 'X' or any key for .obsm is valid. If None, the representation is chosen automatically: For .n_vars < 50, .X is used, otherwise ‘X_pca’ is used. If ‘X_pca’ is not present, it’s computed with default parameters.
     sc.tl.tsne(
         adata=adata,
-        n_jobs=args.n_jobs,
-        use_fast_tsne=args.use_fast_tsne,
+        perplexity=args.perplexity,
         n_pcs=args.n_pcs,
-        random_state=args.seed
+        random_state=args.seed,
+        use_fast_tsne=args.use_fast_tsne,
+        n_jobs=args.n_jobs
     )
 else:
     raise Exception("VSN ERROR: The dimensionality reduction method {} does not exist.".format(args.method))

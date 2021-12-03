@@ -81,7 +81,7 @@ def check_no_single_cluster(adata, method, resolution):
     num_clusters = len(np.unique(adata.obs[method]))
 
     if num_clusters == 1:
-        raise Exception(f"Single cluster found when running clustering algorithm {method} with resolution {resolution}. Please remove this one from params.sc.scanpy.clustering.resolutions.")
+        raise Exception(f"Single cluster found when running clustering algorithm {method} with resolution {resolution}. Please remove this one from params.tools.scanpy.clustering.resolutions.")
 
 #
 # Clustering the data

@@ -4,7 +4,7 @@ binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/template/bin/
 
 toolParams = params.tools.bap
 
-process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
+process BAP__BARCODE_MULTIPLET_PIPELINE {
 
     container toolParams.container
     publishDir "${params.global.outdir}/data/bap", mode: params.utils.publish.mode
@@ -12,8 +12,8 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
 
     input:
         tuple val(sampleId),
-              path(bam),
-              path(bai)
+              path("input.bam"),
+              path("input.bam.bai")
 
     output:
         tuple val(sampleId),
@@ -28,7 +28,7 @@ process SC__BAP__BARCODE_MULTIPLET_PIPELINE {
         processParams = sampleParams.local
         """
         bap2 bam \
-            --input ${bam} \
+            --input input.bam \
             --output ${sampleId} \
             --name ${sampleId} \
             --ncores ${task.cpus} \

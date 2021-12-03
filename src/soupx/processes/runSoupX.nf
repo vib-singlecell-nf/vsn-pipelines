@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 import java.nio.file.Paths
 
 moduleName = "soupx"
-toolParams = params.sc[moduleName]
+toolParams = params.tools[moduleName]
 binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/${moduleName}/bin" : Paths.get(workflow.scriptFile.getParent().getParent().toString(), "${moduleName}/bin")
 
 

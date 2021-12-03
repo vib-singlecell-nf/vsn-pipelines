@@ -202,7 +202,7 @@ def update_var(adata, args):
     adata.var.index = adata.var.index.astype(str)
     # Check if var index is unique
     if len(np.unique(adata.var.index)) < len(adata.var.index) and not args.make_var_index_unique:
-        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.sc.sc_file_converter) in your config.")
+        raise Exception("VSN ERROR: AnnData var index is not unique. This can be fixed by making it unique. To do so update the following param 'makeVarIndexUnique = true' (under params.utils.sc_file_converter) in your config.")
     if len(np.unique(adata.var.index)) < len(adata.var.index) and args.make_var_index_unique:
         adata.var_names_make_unique()
         print("Making AnnData var index unique...")

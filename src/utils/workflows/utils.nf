@@ -1,6 +1,7 @@
 nextflow.enable.dsl=2
 
 import static groovy.json.JsonOutput.*
+import java.nio.file.Paths
 
 //////////////////////////////////////////////////////
 //  Process imports:
@@ -125,12 +126,39 @@ def setSeed(params) {
 
 def INIT(params) {
 
-    // Set the seed
+    // Version check
+    def repoFilePath = workflow.scriptFile.getParent().toRealPath().toString()
+    String repoVersion = new File(Paths.get(repoFilePath, '/VERSION').toString()).text
+
+    if (params.containsKey('disableVersionCheck')) {
+        Channel.from('').view {
+                """
+------------------------------------------------------------------
+\u001B[33m Version check has been bypassed. \u001B[0m
+\u001B[33m Config version: v${workflow.manifest.version}, VSN version: v${repoVersion}. \u001B[0m
+------------------------------------------------------------------
+                """
+            }
+    }
+    else if (workflow.manifest.version != repoVersion) {
+        throw new Exception(
+                """
+------------------------------------------------------------------
+\u001B[31m The config file you have provided was generated with a different version of VSN (v${workflow.manifest.version}). \u001B[0m
+\u001B[31m Compatibility of configs between versions is NOT guaranteed! \u001B[0m
+\u001B[31m To continue, please regenerate your config using the current version (v${repoVersion}) and rerun.\u001B[0m
+
+\u001B[31m Bypass this check at your own risk with "--disableVersionCheck" \u001B[0m
+------------------------------------------------------------------
+                """
+        )
+    }
     setSeed(params)
     if(!params.containsKey("misc") || !params.misc.containsKey("test")) {
         includeConfig(params, 'conf/test.config')
         params.misc.test.enabled = false
     }
+
     // Save manifest and params for notebook
     // Remove any closure attached to the config (this is for backward compatibility)
     def paramsCopy = params.findAll({!["parseConfig", "parse-config"].contains(it.key)})

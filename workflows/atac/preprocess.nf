@@ -1,36 +1,56 @@
 nextflow.enable.dsl=2
 
-//////////////////////////////////////////////////////
-// process imports:
-include { SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION; } from './../../src/singlecelltoolkit/processes/barcode_correction.nf' params(params)
-include { SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ; } from './../../src/singlecelltoolkit/processes/debarcode_10x_scatac_fastqs.nf' params(params)
-include { SC__TRIMGALORE__TRIM; } from './../../src/trimgalore/processes/trim.nf' params(params)
-
-// workflow imports:
-include { BWA_MAPPING_PE; } from './../../src/bwamaptools/main.nf' params(params)
-include { BAM_TO_FRAGMENTS; } from './../../src/sinto/main.nf' params(params)
-include { BAP__BIORAD_DEBARCODE; } from './../../src/bap/workflows/bap_debarcode.nf' params(params)
+// process imports
+include {
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE as SCTK__EXTRACT_HYDROP_ATAC_BARCODE_2x384;
+    SCTK__EXTRACT_HYDROP_ATAC_BARCODE as SCTK__EXTRACT_HYDROP_ATAC_BARCODE_3x96;
+} from './../../src/singlecelltoolkit/processes/extract_hydrop_atac_barcode.nf'
+include {
+    TRIMGALORE__TRIM;
+} from './../../src/trimgalore/processes/trim.nf'
+include {
+    FASTP__ADAPTER_TRIMMING as FASTP__TRIM;
+} from './../../src/fastp/processes/adapter_trimming.nf'
 
 include {
-    PUBLISH as PUBLISH_BC_STATS;
-    PUBLISH as PUBLISH_FASTQS_PE1;
-    PUBLISH as PUBLISH_FASTQS_PE2;
-    PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
-    PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
-    PUBLISH as PUBLISH_FRAGMENTS;
-    PUBLISH as PUBLISH_FRAGMENTS_INDEX;
-} from "../../src/utils/workflows/utils.nf" params(params)
+    SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
+    SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
+    SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
+    SIMPLE_PUBLISH as PUBLISH_FRAGMENTS;
+    SIMPLE_PUBLISH as PUBLISH_FRAGMENTS_INDEX;
+} from '../../src/utils/processes/utils.nf'
+
+// workflow imports:
+include {
+    BWA_MAPPING_PE;
+    MARK_DUPLICATES;
+} from './../../src/bwamaptools/main.nf'
+include {
+    PICARD__MERGE_SAM_FILES_AND_SORT;
+} from './../../src/gatk/processes/merge_sam_files.nf'
+include {
+    BAM_TO_FRAGMENTS;
+} from './../../src/sinto/main.nf'
+
+
+include {
+    barcode_correction as bc_correct_standard;
+    barcode_correction as bc_correct_hydrop_2x384;
+    barcode_correction as bc_correct_hydrop_3x96;
+    biorad_bc as bc_correct_biorad;
+} from './../../src/singlecelltoolkit/main.nf'
 
 
 //////////////////////////////////////////////////////
 //  Define the workflow 
 
-workflow ATAC_PREPROCESS_WITH_METADATA {
+workflow ATAC_PREPROCESS {
 
     take:
         metadata
 
     main:
+
         // import metadata
         data = Channel.from(metadata)
                       .splitCsv(
@@ -39,80 +59,119 @@ workflow ATAC_PREPROCESS_WITH_METADATA {
                           )
                       .map {
                           row -> tuple(
-                              row.sample_name,
+                              row.sample_name + "___" + file(row.fastq_PE1_path)
+                                  .getSimpleName()
+                                  .replaceAll(row.sample_name,""),
                               row.technology,
-                              row.fastq_PE1_path,
+                              file(row.fastq_PE1_path, checkIfExists: true),
                               row.fastq_barcode_path,
-                              row.fastq_PE2_path
+                              file(row.fastq_PE2_path, checkIfExists: true)
                               )
                       }
                       .branch {
-                        biorad:   it[1] == 'biorad'
-                        standard: true // capture all other technology types here
+                        biorad:       it[1] == 'biorad'
+                        hydrop_3x96:  it[1] == 'hydrop_3x96'
+                        hydrop_2x384: it[1] == 'hydrop_2x384'
+                        standard:     true // capture all other technology types here
                       }
 
-        // run biorad barcode correction and debarcoding separately:
-        fastq_dex_br = BAP__BIORAD_DEBARCODE(data.biorad.map{ it -> tuple(it[0], it[2], it[4]) })
+        /* standard data
+           barcode correction */
+        bc_correct_standard(data.standard)
 
-        /* Barcode correction */
-        // gather barcode whitelists from params into a channel:
-        wl = Channel.empty()
-        wl_cnt = 0
-        params.tools.singlecelltoolkit.barcode_correction.whitelist.each { k, v ->
-            if(v != '') {
-                wl = wl.mix( Channel.of(tuple(k, file(v)) ))
-                wl_cnt = wl_cnt + 1
-            }
-        }
+        /* HyDrop ATAC
+           extract barcode and correct */
+           // HyDrop 3x96
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE_3x96(data.hydrop_3x96, '3x96') \
+            | bc_correct_hydrop_3x96
+           // HyDrop 2x384
+        SCTK__EXTRACT_HYDROP_ATAC_BARCODE_2x384(data.hydrop_2x384, '2x384') \
+            | bc_correct_hydrop_2x384
 
-        if(wl_cnt == 0) {
-            if(!params.containsKey('quiet')) {
-                println("No whitelist files were found in 'params.tools.singlecelltoolkit.barcode_correction.whitelist'. Skipping barcode correction for standard-type samples.")
-            }
-            // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ(
-                data.standard.map { it -> tuple(it[0], it[2], it[3], it[4]) }
-            )
-        } else {
+        /* BioRad data
+           extract barcode and correct */
+        bc_correct_biorad(data.biorad)
 
-            // join wl to the data channel:
-            data_wl = wl.cross( data.standard.map { it -> tuple(it[1], it[0], it[2], it[3], it[4]) } ) // technology, sampleId, R1, R2, R3
-                    .map { it -> tuple(it[1][1], it[1][0],           // sampleId, technology
-                                       it[1][2], it[1][3], it[1][4], // R1, R2, R3
-                                       it[0][1]                      // whitelist
-                                       ) }
+        /* downstream steps */
+        bc_correct_standard.out
+            .mix(bc_correct_hydrop_3x96.out)
+            .mix(bc_correct_hydrop_2x384.out)
+            .mix(bc_correct_biorad.out) \
+            | adapter_trimming \
+            | mapping
 
-            // run barcode correction against a whitelist:
-            fastq_bc_corrected = SC__SINGLECELLTOOLKIT__BARCODE_CORRECTION(data_wl.map{ it -> tuple(it[0], it[3], it[5]) } )
-            PUBLISH_BC_STATS(fastq_bc_corrected.map { it -> tuple(it[0], it[2]) }, 'corrected.bc_stats', 'log', 'fastq', false)
+    emit:
+        // emit in a format compatible with getDataChannel output:
+        bam = mapping.out.bam.map { it -> tuple(it[0], [it[1], it[2]], 'bam') }
+        fragments = mapping.out.fragments.map { it -> tuple(it[0], [it[1], it[2]], 'fragments') }
+}
 
 
-            // run barcode demultiplexing on each read+barcode:
-            fastq_dex = SC__SINGLECELLTOOLKIT__DEBARCODE_10X_FASTQ(
-                data.standard.join(fastq_bc_corrected).map { it -> tuple(it[0], it[2], it[5], it[4]) }
-            )
+/* sub-workflows used above */
 
-        }
+workflow adapter_trimming {
 
-        // concatenate the read channels:
-        fastq_dex = fastq_dex.concat(fastq_dex_br)
+    take:
+        fastq_dex
+
+    main:
 
         // run adapter trimming:
-        fastq_dex_trim = SC__TRIMGALORE__TRIM(fastq_dex)
-        // publish fastq output:
-        PUBLISH_FASTQS_PE1(fastq_dex_trim, 'R1.fastq', 'gz', 'fastq', false)
-        PUBLISH_FASTQS_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[2]) }, 'R2.fastq', 'gz', 'fastq', false)
-        PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, 'R1.trimming_report', 'txt', 'fastq', false)
-        PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, 'R2.trimming_report', 'txt', 'fastq', false)
+        switch(params.atac_preprocess_tools.adapter_trimming_method) {
+            case 'Trim_Galore':
+                fastq_dex_trim = TRIMGALORE__TRIM(fastq_dex);
+                PUBLISH_FASTQS_TRIMLOG_PE1(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.R1.trimming_report.txt', 'reports/trim');
+                PUBLISH_FASTQS_TRIMLOG_PE2(fastq_dex_trim.map{ it -> tuple(it[0], it[4]) }, '.R2.trimming_report.txt', 'reports/trim');
+                break;
+            case 'fastp':
+                fastq_dex_trim = FASTP__TRIM(fastq_dex);
+                PUBLISH_FASTQS_TRIMLOG_FASTP(fastq_dex_trim.map{ it -> tuple(it[0], it[3]) }, '.fastp.trimming_report.html', 'reports/trim');
+                break;
+        }
+
+    emit:
+        fastq_dex_trim
+
+}
+
+
+workflow mapping {
+
+    take:
+        fastq_dex_trim
+
+    main:
 
         // map with bwa mem:
-        bam = BWA_MAPPING_PE(fastq_dex_trim.map { it -> tuple(it[0..2]) })
+        aligned_bam = BWA_MAPPING_PE(
+            fastq_dex_trim.map { it -> tuple(it[0].split("___")[0], // [val(unique_sampleId),
+                                             *it[0..2] ) // val(sampleId), path(fastq_PE1), path(fastq_PE2)]
+                  })
+
+        // split by sample size:
+        aligned_bam.map{ it -> tuple(it[0].split("___")[0], it[1]) } // [ sampleId, bam ]
+                   .groupTuple()
+                   .branch {
+                       to_merge: it[1].size() > 1
+                       no_merge: it[1].size() == 1
+                   }
+                   .set { aligned_bam_size_split }
+
+        // merge samples with multiple files:
+        merged_bam = PICARD__MERGE_SAM_FILES_AND_SORT(aligned_bam_size_split.to_merge)
+
+        // re-combine with single files:
+        merged_bam.mix(aligned_bam_size_split.no_merge.map { it -> tuple(it[0], *it[1]) })
+                  .set { aligned_bam_sample_merged }
+
+        bam = MARK_DUPLICATES(aligned_bam_sample_merged,
+                params.atac_preprocess_tools.mark_duplicates_method)
 
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)
         // publish fragments output:
-        PUBLISH_FRAGMENTS(fragments, 'sinto.fragments.tsv', 'gz', 'fragments', false)
-        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0], it[2]) }, 'sinto.fragments.tsv.gz', 'tbi', 'fragments', false)
+        PUBLISH_FRAGMENTS(fragments.map{ it -> tuple(it[0..1]) }, '.sinto.fragments.tsv.gz', 'fragments')
+        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0],it[2]) }, '.sinto.fragments.tsv.gz.tbi', 'fragments')
 
     emit:
         bam
