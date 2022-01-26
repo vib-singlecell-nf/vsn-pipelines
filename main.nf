@@ -16,6 +16,16 @@ include {
     getDataChannel;
 } from './src/channels/channels' params(params)
 
+// TODO: Actually make this work
+
+workflow bcl2fastq_demultiplex {
+
+    include { demultiplex as BCL2FASTQ__DEMULTIPLEX; } from './src/bcl2fastq' params(params)
+    
+    getDataChannel | demultiplex
+
+}
+
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
 
