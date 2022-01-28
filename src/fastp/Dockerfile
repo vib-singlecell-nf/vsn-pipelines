@@ -1,7 +1,8 @@
-FROM ubuntu:18.04 AS compile-image
+FROM ubuntu:20.04 AS compile-image
 
 # set the environment variables
-ENV fastp_version 0.20.0
+ENV fastp_version 0.23.2
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && apt-get install -y \
    build-essential \
@@ -9,6 +10,8 @@ RUN apt-get update -y && apt-get install -y \
    curl \
    wget \
    unzip \
+   libisal-dev \
+   libdeflate-dev \
    zlib1g-dev && \
    rm -rf /var/cache/apt/* && \
    rm -rf /var/lib/apt/lists/*

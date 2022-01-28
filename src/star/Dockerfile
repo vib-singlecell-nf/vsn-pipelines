@@ -9,7 +9,7 @@ RUN apt-get update && \
     apt-get -y install procps wget less
 
 
-ARG version="2.7.6a"
+ARG version="2.7.10a"
 RUN cd /usr/local/bin && \
     wget https://github.com/alexdobin/STAR/raw/${version}/bin/Linux_x86_64_static/STAR && \
     chmod +x STAR
