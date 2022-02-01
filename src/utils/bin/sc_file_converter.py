@@ -22,6 +22,7 @@ def str2bool(v):
 in_formats = [
     '10x_cellranger_mex',
     '10x_cellranger_h5',
+    'starsolo_outs'
     'tsv',
     'csv'
 ]
@@ -209,7 +210,7 @@ def update_var(adata, args):
     return adata
 
 
-if INPUT_FORMAT == '10x_cellranger_mex' and OUTPUT_FORMAT == 'h5ad':
+if (INPUT_FORMAT == '10x_cellranger_mex' or INPUT_FORMAT == 'starsolo_outs') and OUTPUT_FORMAT == 'h5ad':
     check_10x_cellranger_mex_path(path=FILE_PATH_IN)
     # Convert
     print("Reading 10x data from MEX format...")

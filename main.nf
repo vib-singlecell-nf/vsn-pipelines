@@ -1304,3 +1304,30 @@ workflow filter_and_annotate_and_clean {
     )
 
 }
+
+workflow hydrop_mapping {
+
+    include {
+        hydrop_mapping as HYDROP_MAPPING;
+    } from './workflows/hydrop_mapping' params(params)
+
+    HYDROP_MAPPING()
+}
+
+workflow hydrop_mapping_single_sample {
+
+    include {
+        hydrop_mapping as HYDROP_MAPPING;
+    } from './workflows/hydrop_mapping' params(params)
+    include {
+        single_sample as SINGLE_SAMPLE;
+    } from './workflows/single_sample' params(params)
+
+    data = HYDROP_MAPPING()
+    SINGLE_SAMPLE(
+        data.solo_outputs.map {
+            tuple(it[0], "${it[1]}/Gene/filtered", "starsolo_outs", "h5ad", 'NULL')
+            }
+    )
+
+}

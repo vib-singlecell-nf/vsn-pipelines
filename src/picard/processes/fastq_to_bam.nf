@@ -7,14 +7,13 @@ process PICARD__FASTQ_TO_BAM {
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
-        file(reads)
+        tuple(sample, file(reads))
         file(tmpDir)
     
     output:
         tuple val(sample), path('*.unaligned.bam'), emit: bam
     
     script:
-        sample = reads[0].toString() - ~/(_R1)?(\.clean)?(\.fq)?(\.fastq)?(\.gz)?$/
         """
         java -Djava.io.tmpdir=$tmpDir -jar \
             /picard.jar \

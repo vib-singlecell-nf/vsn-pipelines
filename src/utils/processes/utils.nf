@@ -211,6 +211,7 @@ process SC__FILE_CONVERTER {
 
         switch(inputDataType) {
             case "10x_cellranger_mex":
+            case "starsolo_outs":
                 // Nothing to be done here
             break;
             case "10x_cellranger_mex_outs":

@@ -10,11 +10,11 @@ process FASTP__CLEAN_AND_FASTQC {
     label 'compute_resources__cpu','compute_resources__24hqueue'
 
     input:
-        set val(sample), path(reads)
+        tuple val(sampleId), path(reads)
     
     output:
-        tuple file('*_R{1,2}.clean.fastq.gz'), emit: fastq
-        tuple file('*_fastp.{json,html}'), emit: report
+        tuple val(sampleId), path('*_R{1,2}.clean.fastq.gz'), emit: fastq
+        tuple val(sampleId), path('*_fastp.{json,html}'), emit: report
     
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.tools.fastp)
@@ -23,11 +23,11 @@ process FASTP__CLEAN_AND_FASTQC {
         fastp --thread ${processParams.thread} \
             -i ${reads[0]} \
             -I ${reads[1]} \
-            -o ${sample}_R1.clean.fastq.gz \
-            -O ${sample}_R2.clean.fastq.gz \
+            -o ${sampleId}_R1.clean.fastq.gz \
+            -O ${sampleId}_R2.clean.fastq.gz \
             --length_required ${processParams.clean_and_fastqc.length_required} \
             --adapter_fasta ${processParams.clean_and_fastqc.adapter_fasta} \
-            -j ${sample}_fastp.json \
-            -h ${sample}_fastp.html
+            -j ${sampleId}_fastp.json \
+            -h ${sampleId}_fastp.html
         """
 }
