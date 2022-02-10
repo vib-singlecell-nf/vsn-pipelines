@@ -6,15 +6,20 @@ process SC__STAR__SOLO_MAP_COUNT {
   label 'compute_resources__solo_map_count'
 
   input:
-      tuple val(sample), path(fastqs)
+      tuple val(sampleId), path(fastqs)
       path(soloCBwhitelist)
 
 
   output:
-    tuple val(sample), path("${sample}_Solo.out"), emit: solo_outputs
-    tuple val(sample), path("${sample}_Aligned.sortedByCoord.out.bam"), emit: bam
+    tuple val(sampleId), path("${sampleId}_Solo.out"), emit: solo_outputs
+    tuple val(sampleId), path("${sampleId}_Aligned.sortedByCoord.out.bam"), emit: bam
 
   script:
+    def sampleParams = params.parseConfig(sampleId, params.global, params.tools.star.map_count)
+    processParams = sampleParams.local
+
+  	sampleId = processParams.containsKey('sampleRename') ? processParams.sampleRename : sampleId
+
 
     """
     STAR \
@@ -37,8 +42,8 @@ process SC__STAR__SOLO_MAP_COUNT {
       ${(params.tools.star.map_count.containsKey('outSAMattributes')) ? '--outSAMattributes ' + params.tools.star.map_count.outSAMattributes: ''} \
       ${(params.tools.star.map_count.containsKey('bamRemoveDuplicatesType')) ? '--bamRemoveDuplicatesType ' + params.tools.star.map_count.bamRemoveDuplicatesType: ''} \
       ${(params.tools.star.map_count.containsKey('soloFeatures')) ? '--soloFeatures ' + params.tools.star.map_count.soloFeatures: ''} \
-      --outFileNamePrefix ${sample}_
+      --outFileNamePrefix ${sampleId}_
 
-    gzip ${sample}_Solo.out/Gene/*/*
+    gzip ${sampleId}_Solo.out/Gene/*/*
     """
 }

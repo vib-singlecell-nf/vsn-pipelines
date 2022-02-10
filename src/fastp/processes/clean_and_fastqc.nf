@@ -19,12 +19,32 @@ process FASTP__CLEAN_AND_FASTQC {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.tools.fastp)
 		processParams = sampleParams.local
+
         """
-        fastp --thread ${processParams.thread} \
-            -i ${reads[0]} \
-            -I ${reads[1]} \
+        case "${reads[0]}" in
+            *.fastq.gz) EXTENSION='fastq.gz' ;;
+            *.fastq)     EXTENSION='fastq' ;;
+            *) ;;
+        esac
+
+        if [ `ls -1 ${sampleId}_L00[0-9]_R1_*.\$EXTENSION 2>/dev/null | wc -l ` -gt 1 ]; then
+            cat ${sampleId}_L00[0-9]_R1_*.\$EXTENSION > ${sampleId}_R1.\$EXTENSION
+        else
+            mv ${reads}[0] ${sampleId}_R1.\$EXTENSION
+        fi
+
+        if [ `ls -1 ${sampleId}_L00[0-9]_R2_*.\$EXTENSION 2>/dev/null | wc -l ` -gt 1 ]; then
+            cat ${sampleId}_L00[0-9]_R2_*.\$EXTENSION > ${sampleId}_R2.\$EXTENSION
+        else
+            mv ${reads}[0] ${sampleId}_R2.\$EXTENSION
+        fi
+
+        fastp \
+            -i ${sampleId}_R1.\$EXTENSION \
+            -I ${sampleId}_R2.\$EXTENSION \
             -o ${sampleId}_R1.clean.fastq.gz \
             -O ${sampleId}_R2.clean.fastq.gz \
+            --thread ${task.cpus} \
             --length_required ${processParams.clean_and_fastqc.length_required} \
             --adapter_fasta ${processParams.clean_and_fastqc.adapter_fasta} \
             -j ${sampleId}_fastp.json \

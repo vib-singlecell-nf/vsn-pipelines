@@ -18,6 +18,14 @@ workflow hydrop_mapping {
     Channel
         .fromFilePairs( params.tools.star.map_count.fastqs, size: 2)
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.tools.star.map_count.fastqs}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard! E.g. \"/path/to/HYD__b69d3e__S1-HyD*_R{1,2}.fastq.gz\" " }
+        // .map { println it[0] }
+        .map { 
+            if ( it[0].matches(/.*_L00[0-9]$/) ) {
+                tuple( it[0].replaceFirst(/_L00[0-9]$/, ""), it[1][0], it[1][1])
+            }
+        }
+        .groupTuple(sort: true)
+        .map { it.size() == 3 ? tuple( it[0], it[1] + it[2]) :  tuple( it[0], it[1]) }
         .set { data }
     data.subscribe { println it }
 
