@@ -1,6 +1,9 @@
 nextflow.enable.dsl=2
 
 include {
+    getChannel as getDemultiplexChannel;
+} from './bcl2fastq' params(params)
+include {
     getOutsChannel as getTenXCellRangerOutsChannel;
     getH5Channel as getTenXCellRangerH5Channel;
     getMEXChannel as getTenXCellRangerMEXChannel;
@@ -39,6 +42,17 @@ workflow getDataChannel {
             if(params.utils.file_converter.containsKey("off")) {
                 outputFileFormat = params.utils.file_converter.off
             }
+        }
+
+        if(params.data.containsKey('bcl2fastq')) {
+            data = data.concat(
+                getDemultiplexChannel(
+                    params.data.bcl2fastq.runFolder,
+                    params.data.bcl2fastq.sampleSheet
+                ).map {
+                    it -> tuple(it[0], it[1], "demultiplex", outputFileFormat, 'NULL')
+                }
+            )
         }
 
         if(params.data.containsKey("tenx") && params.data.tenx.containsKey("cellranger_mex")) {

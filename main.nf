@@ -20,9 +20,11 @@ include {
 
 workflow bcl2fastq_demultiplex {
 
-    include { demultiplex as BCL2FASTQ__DEMULTIPLEX; } from './src/bcl2fastq' params(params)
+    include { 
+        demultiplex as BCL2FASTQ__DEMULTIPLEX; 
+    } from './src/bcl2fastq/main' params(params)
     
-    getDataChannel | demultiplex
+    getDataChannel | BCL2FASTQ__DEMULTIPLEX
 
 }
 
