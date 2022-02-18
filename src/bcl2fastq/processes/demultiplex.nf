@@ -12,9 +12,8 @@ process BCL2FASTQ__DEMULTIPLEX {
 			path(sampleSheet)
             
 	output:
-		tuple \
-			path("**.fastq.gz"), \
-			path("Stats/DemultiplexingStats.xml")
+		path("**.fastq.gz"), emit: fastqs
+		path("Stats/DemultiplexingStats.xml"), emit: stats
 
   	script:
         processParams = params.tools.bcl2fastq.demultiplex

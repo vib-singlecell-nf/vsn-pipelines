@@ -25,6 +25,14 @@ workflow bcl2fastq_demultiplex {
     } from './src/bcl2fastq/main' params(params)
     
     getDataChannel | BCL2FASTQ__DEMULTIPLEX
+    //  This needs testing
+    sample_fastqs = BCL2FASTQ__DEMULTIPLEX.out.fastqs
+    .map { tuple(it.simpleName, it)}
+    .groupTuple(sort: true)
+
+    emit:
+        fastqs = sample_fastqs
+        stats = BCL2FASTQ__DEMULTIPLEX.out.stats
 
 }
 
