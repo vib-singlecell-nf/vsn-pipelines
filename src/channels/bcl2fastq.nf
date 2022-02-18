@@ -7,11 +7,12 @@ workflow getChannel {
         sampleSheet
     
     main:
-        runFolder_channel = channel
+        runFolder_channel = Channel
             .fromPath(runFolder, type: 'dir', checkIfExists: true)
-        sampleSheet_channel = channel
+        sampleSheet_channel = Channel
             .fromPath(sampleSheet, checkIfExists: true)
-        data_channel = runFolder_channel | combine(sampleSheet_channel)
+        data_channel = runFolder_channel
+                       .combine(sampleSheet_channel)
         
     emit:
         data_channel

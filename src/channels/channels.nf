@@ -50,7 +50,7 @@ workflow getDataChannel {
                     params.data.bcl2fastq.runFolder,
                     params.data.bcl2fastq.sampleSheet
                 ).map {
-                    it -> tuple(it[0], it[1], "demultiplex", outputFileFormat, 'NULL')
+                    it -> tuple(it[0], it[1], "bcl", 'fastq', 'NULL')
                 }
             )
         }
