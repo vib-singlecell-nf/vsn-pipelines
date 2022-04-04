@@ -12,4 +12,7 @@ workflow demultiplex {
     main:
         BCL2FASTQ__DEMULTIPLEX(data)
 
+    emit:
+        fastqs = BCL2FASTQ__DEMULTIPLEX.out.fastqs
+        stats = BCL2FASTQ__DEMULTIPLEX.out.stats
 }
