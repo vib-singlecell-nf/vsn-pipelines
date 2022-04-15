@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir --upgrade pip wheel && \
 
 
 # install seq (https://github.com/seq-lang/seq/):
-ENV SEQ_VERSION=0.10.2
+ENV SEQ_VERSION=0.10.3
 RUN mkdir -p /opt/seq && \
     wget https://github.com/seq-lang/seq/releases/download/v${SEQ_VERSION}/seq-linux-x86_64.tar.gz && \
     tar xzf seq-linux-x86_64.tar.gz --strip-components 1 -C /opt/seq && \
