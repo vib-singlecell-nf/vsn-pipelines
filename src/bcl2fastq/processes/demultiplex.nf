@@ -1,3 +1,5 @@
+nextflow.enable.dsl=2
+
 process BCL2FASTQ__DEMULTIPLEX {
 
 	container params.tools.bcl2fastq.container
@@ -14,6 +16,7 @@ process BCL2FASTQ__DEMULTIPLEX {
 	output:
 		path("**.fastq.gz"), emit: fastqs
 		path("Stats/DemultiplexingStats.xml"), emit: stats
+        path(sampleSheet), emit: sampleSheet
 
   	script:
         processParams = params.tools.bcl2fastq.demultiplex
