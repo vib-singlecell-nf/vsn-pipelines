@@ -52,8 +52,10 @@ workflow cellranger_output_to_bam_fragments {
                                     file(it[1]+"/*possorted*bam.bam.bai")[0],
                                     ]) }
         fragments = data.map{ it -> tuple(it[0], [
-                                    *file(it[1]+"/*fragments.tsv.gz"),
-                                    *file(it[1]+"/*fragments.tsv.gz.tbi"),
+//                                    *file(it[1]+"/*fragments.tsv.gz"),
+//                                    *file(it[1]+"/*fragments.tsv.gz.tbi"),
+                                    file(it[1]+"/*fragments.tsv.gz")[0],
+                                    file(it[1]+"/*fragments.tsv.gz.tbi")[0],
                                     ]) }
 
         if(!params.containsKey('quiet')) bam.view()
@@ -94,9 +96,11 @@ workflow ATAC_QC_PREFILTER {
            file name). This is not currently necessary for the bam files since
            they are processed in separate processes.
          */
-        fragments = rename_fragments(
+        /*fragments = rename_fragments(
             data_split.fragments.mix(data_cr.fragments)
             )
+        */
+        fragments = data_split.fragments.mix(data_cr.fragments)
 
 
         biomart = PYCISTOPIC__BIOMART_ANNOT()
