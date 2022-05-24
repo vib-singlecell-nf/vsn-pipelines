@@ -136,16 +136,18 @@ workflow ATAC_QC_PREFILTER {
         | REPORT_TO_HTML
 
         /* saturation */
-        SCTK__SATURATION(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
-        SCTK__SATURATION_BC_WL(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
-            PYCISTOPIC__QC_REPORT.out, 'RUN')
-        /* publish saturation outputs */
-        PUBLISH_SATURATION_TSV(SCTK__SATURATION.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation')
-        PUBLISH_SATURATION_PNG(SCTK__SATURATION.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation')
-        //
-        PUBLISH_SATURATION_BC_WL_TSV(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation_bc_wl')
-        PUBLISH_SATURATION_BC_WL_PNG(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation_bc_wl')
+        if(! params.tools.singlecelltoolkit.saturation.skip) {
+            SCTK__SATURATION(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
+            SCTK__SATURATION_BC_WL(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
+                PYCISTOPIC__QC_REPORT.out, 'RUN')
 
+            /* publish saturation outputs */
+            PUBLISH_SATURATION_TSV(SCTK__SATURATION.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation')
+            PUBLISH_SATURATION_PNG(SCTK__SATURATION.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation')
+
+            PUBLISH_SATURATION_BC_WL_TSV(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation_bc_wl')
+            PUBLISH_SATURATION_BC_WL_PNG(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation_bc_wl')
+        }
 }
 
 
