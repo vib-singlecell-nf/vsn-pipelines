@@ -33,23 +33,23 @@ workflow bcl2fastq_demultiplex {
 
     PROCESS_SAMPLESHEET(BCL2FASTQ__DEMULTIPLEX.out.sampleSheet)
 
-    projects_samples =  PROCESS_SAMPLESHEET.out.processedSampleSheet \
-        | splitCsv(header:true) \
-        | map { row -> tuple(row.Sample_Project, row.Sample_Name) } \
-        | unique()
+    projects_samples =  PROCESS_SAMPLESHEET.out.processedSampleSheet
+        .splitCsv(header:true)
+        .map { row -> tuple(row.Sample_Project, row.Sample_Name) }
+        .unique()
 
     projects_samples | view
 
 
-    fastqs_per_sample = projects_samples \
-        | combine(BCL2FASTQ__DEMULTIPLEX.out.fastqs | flatten) \
-        | filter {project, name, file -> file =~ /${name}_S\d*_L\d\d\d_R[12]_001.fastq.gz/}
+    fastqs_per_sample = projects_samples
+        .combine(BCL2FASTQ__DEMULTIPLEX.out.fastqs | flatten)
+        .filter {project, name, file -> file =~ /${name}_S\d*_L\d\d\d_R[12]_001.fastq.gz/}
 
     fastqs_per_sample | view
 
 
-    project_sample_fastqs = fastqs_per_sample \
-        | groupTuple(by: [0,1])
+    project_sample_fastqs = fastqs_per_sample
+        .groupTuple(by: [0,1])
 
     project_sample_fastqs | view
     
