@@ -26,10 +26,6 @@ workflow bcl2fastq_demultiplex {
     } from './src/bcl2fastq/main' params(params)
     
     getDataChannel | BCL2FASTQ__DEMULTIPLEX
-    //  This needs testing
-    // sample_fastqs = BCL2FASTQ__DEMULTIPLEX.out.fastqs
-    // .map { tuple(it.simpleName, it)}
-    // .groupTuple(sort: true)
 
     PROCESS_SAMPLESHEET(BCL2FASTQ__DEMULTIPLEX.out.sampleSheet)
 
@@ -38,21 +34,12 @@ workflow bcl2fastq_demultiplex {
         .map { row -> tuple(row.Sample_Project, row.Sample_Name) }
         .unique()
 
-    projects_samples | view
-
-
     fastqs_per_sample = projects_samples
         .combine(BCL2FASTQ__DEMULTIPLEX.out.fastqs | flatten)
-        .filter {project, name, file -> file =~ /${name}_S\d*_L\d\d\d_R[12]_001.fastq.gz/}
-
-    fastqs_per_sample | view
-
+        .filter {project, name, file -> file =~ /${name}_S\d*(_L\d\d\d)?_R\d_001.fastq.gz/}
 
     project_sample_fastqs = fastqs_per_sample
         .groupTuple(by: [0,1])
-
-    project_sample_fastqs | view
-    
 
     emit:
         project_sample_fastqs

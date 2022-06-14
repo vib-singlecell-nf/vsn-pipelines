@@ -4,11 +4,10 @@ process BCL2FASTQ__DEMULTIPLEX {
 
 	container params.tools.bcl2fastq.container
     publishDir "${params.global.outdir}/fastqs-bcl2fastq"
+    label 'compute_resources__demultiplex'
+
 
 	input:
-    	// tuple \
-		// 	val(runName), \
-		// 	path(sampleSheet)
     	tuple \
 			path(runFolder), \
 			path(sampleSheet)
@@ -16,6 +15,7 @@ process BCL2FASTQ__DEMULTIPLEX {
 	output:
 		path("**.fastq.gz"), emit: fastqs
 		path("Stats/DemultiplexingStats.xml"), emit: stats
+		path("Stats/Stats.json"), emit: stats_json
         path(sampleSheet), emit: sampleSheet
 
   	script:
@@ -33,6 +33,7 @@ process BCL2FASTQ__DEMULTIPLEX {
             ${processParams.split_lanes? "": "--no-lane-splitting"} \
             ${processParams.create_fastq_for_index_reads? "--create-fastq-for-index-reads": ""} \
             ${processParams.barcode_mismatches? "--barcode-mismatches=" + processParams.barcode_mismatches : ""} \
+            ${processParams.use_bases_mask? "--use-bases-mask=" + processParams.use_bases_mask : ""} \
             --ignore-missing-filter
         """
 }

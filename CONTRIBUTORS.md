@@ -20,5 +20,8 @@
     - [Data Intuitive](http://www.data-intuitive.com/)
         - Toni Verbeiren
 
+3) Provided implementation of bcl2fastq
+    - [VIB Nucleomics Core](https://nucleomicscore.sites.vib.be/en)
+        - Kobe Lavaerts
 
 For a full breakdown of code contributions for each repository, see GitHub.
