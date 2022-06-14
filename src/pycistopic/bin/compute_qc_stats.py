@@ -132,11 +132,12 @@ except FileExistsError as e:
 #    bapqc = pd.read_csv(f_bap_qc, index_col=0)
 #    metadata_bc_dict[args.sampleId]['Dupl_rate'] = bapqc['duplicateProportion']
 
-### outputs:
+# Write output for each sample to separate pickle files.
 
-with open(args.output_metadata_pkl, 'wb') as f:
-    pickle.dump(metadata_bc_dict, f)
+for sample, metadata_bc in metadata_bc_dict.items():
+    with open(f"{sample}.metadata.pkl", "wb") as fh:
+        pickle.dump(metadata_bc, fh)
 
-with open(args.output_profile_data_pkl, 'wb') as f:
-    pickle.dump(profile_data_dict, f)
-
+for sample, profile_data in profile_data_dict.items():
+    with open(f"{sample}.profile_data.pkl", "wb") as fh:
+        pickle.dump(profile_data, fh)
