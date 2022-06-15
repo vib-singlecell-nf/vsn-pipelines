@@ -16,6 +16,37 @@ include {
     getDataChannel;
 } from './src/channels/channels' params(params)
 
+// TODO: Actually make this work
+
+workflow bcl2fastq_demultiplex {
+
+    include { 
+        demultiplex as BCL2FASTQ__DEMULTIPLEX;
+        process_samplesheet as PROCESS_SAMPLESHEET;
+    } from './src/bcl2fastq/main' params(params)
+    
+    getDataChannel | BCL2FASTQ__DEMULTIPLEX
+
+    PROCESS_SAMPLESHEET(BCL2FASTQ__DEMULTIPLEX.out.sampleSheet)
+
+    projects_samples =  PROCESS_SAMPLESHEET.out.processedSampleSheet
+        .splitCsv(header:true)
+        .map { row -> tuple(row.Sample_Project, row.Sample_Name) }
+        .unique()
+
+    fastqs_per_sample = projects_samples
+        .combine(BCL2FASTQ__DEMULTIPLEX.out.fastqs | flatten)
+        .filter {project, name, file -> file =~ /${name}_S\d*(_L\d\d\d)?_R\d_001.fastq.gz/}
+
+    project_sample_fastqs = fastqs_per_sample
+        .groupTuple(by: [0,1])
+
+    emit:
+        project_sample_fastqs
+        stats = BCL2FASTQ__DEMULTIPLEX.out.stats
+
+}
+
 // run multi-sample with bbknn, output a scope loom file
 workflow bbknn {
 
