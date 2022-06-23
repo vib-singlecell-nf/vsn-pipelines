@@ -7,7 +7,7 @@ toolParams = params.tools.gatk
 process PICARD__MARK_DUPLICATES_AND_SORT {
 
     container toolParams.container
-    label 'compute_resources__default','compute_resources__24hqueue'
+    label 'compute_resources__picard__mark_duplicates_and_sort'
 
     input:
         tuple val(sampleId),

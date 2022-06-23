@@ -7,7 +7,7 @@ toolParams = params.tools.trimgalore
 process TRIMGALORE__TRIM {
 
     container toolParams.container
-    label 'compute_resources__cpu','compute_resources__24hqueue'
+    label 'compute_resources__trimgalore__trim'
 
     input:
         tuple val(sampleId),

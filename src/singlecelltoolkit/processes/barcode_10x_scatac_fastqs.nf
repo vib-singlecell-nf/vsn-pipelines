@@ -7,7 +7,7 @@ toolParams = params.tools.singlecelltoolkit
 process SCTK__BARCODE_10X_SCATAC_FASTQ {
 
     container toolParams.container
-    label 'compute_resources__cpu'
+    label 'compute_resources__sctk__barcode_10x_scatac_fastq_5cpus'
 
     input:
         tuple val(sampleId),
@@ -24,7 +24,7 @@ process SCTK__BARCODE_10X_SCATAC_FASTQ {
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_10x_scatac_fastqs)
         processParams = sampleParams.local
-        def max_threads = (task.cpus > 6) ? 6 : task.cpus
+        def max_threads = (task.cpus > 5) ? 5 : task.cpus
         """
         export compress_fastq_threads="${max_threads}"
         barcode_10x_scatac_fastqs.sh \
