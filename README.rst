@@ -57,6 +57,9 @@ The **Single Sample Workflows** perform a "best practices" scRNA-seq analysis. M
     * - single_sample
       - Independent samples
       - |single_sample|
+    * - single_sample_seurat
+      - Ind. samples  with Seurat
+      - |single_sample_seurat|
     * - single_sample_scenic
       - Ind. samples + SCENIC
       - |single_sample_scenic|
@@ -155,6 +158,10 @@ See `here <https://vsn-pipelines.readthedocs.io/en/latest/scatac-seq.html>`_ for
 .. |single_sample| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-single-sample
     :alt: Single-sample Pipeline
+
+.. |single_sample_seurat| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_seurat/badge.svg
+    :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-seurat-single-sample-seurat
+    :alt: Single-sample Seurat Pipeline
 
 .. |single_sample_scenic| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_scenic/badge.svg
     :target: https://vsn-pipelines.readthedocs.io/en/latest/pipelines.html#single-sample-scenic-single-sample-scenic

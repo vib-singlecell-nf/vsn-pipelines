@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 in_formats = c("seurat_rds", "10x_cellranger_mex")
-out_formats = c("h5ad", "sce_rds")
+out_formats = c("h5ad", "sce_rds", "seurat_rds")
 
 library("argparse")
 
@@ -302,6 +302,25 @@ if(INPUT_FORMAT == 'seurat_rds' & OUTPUT_FORMAT == 'h5ad') {
 		object = sce,
 		file = paste0(FILE_PATH_OUT_BASENAME, ".SCE.Rds"),
 		compress = TRUE
+    )
+} else if(INPUT_FORMAT == '10x_cellranger_mex' & OUTPUT_FORMAT == 'seurat_rds') {
+    if (grepl("\\.h5", FILE_PATH_IN)) {
+        counts_matrix <- Seurat::Read10X_h5(FILE_PATH_IN)
+    } else {
+        counts_matrix <- Seurat::Read10X(FILE_PATH_IN)
+    }
+    # Create seurat object without any filtering
+    # TODO: handle multi modal data. Make sure we only get the RNA
+    seurat <- Seurat::CreateSeuratObject(
+        counts_matrix,
+        min.cells = 0,
+        min.features = 0,
+        project = args$`sample_id`
+    )
+    saveRDS(
+        object = seurat,
+        file = paste0(FILE_PATH_OUT_BASENAME, ".seurat.Rds"),
+        compress = TRUE
     )
 } else {
     stop(paste0("VSN ERROR: File format conversion ", INPUT_FORMAT," --> ", OUTPUT_FORMAT," hasn't been implemented yet.)"))

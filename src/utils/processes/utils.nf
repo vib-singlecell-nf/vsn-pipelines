@@ -166,7 +166,8 @@ def getConverter = { iff, off ->
         return "cistopic"
     if((iff == "seurat_rds" && off == "h5ad")
         || (iff == "10x_cellranger_mex" && off == "sce_rds")
-        || (iff == "sce_rds" && off == "h5ad"))
+        || (iff == "sce_rds" && off == "h5ad")
+        || (iff == "10x_cellranger_mex" && off == "seurat_rds"))
         return "r"
     return "python"
 }
@@ -177,6 +178,8 @@ def getOutputExtension = { off ->
             return "cisTopic.Rds"
         case "sce_rds":
             return "SCE.Rds"
+        case "seurat_rds":
+            return "seurat.Rds"
         case "h5ad":
             return "h5ad"
         default:

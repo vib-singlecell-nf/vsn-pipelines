@@ -1,0 +1,137 @@
+---
+title: "Single-Cell Report: Filtering"
+output: html_document
+params:
+    unfiltered: "FILE1"
+    filtered: "FILE2"
+    mito_prefix: "MT-"
+---
+
+```{r}
+suppressMessages(library("Seurat", quietly = TRUE))
+suppressMessages(library("ggplot2", quietly = TRUE))
+```
+
+#### Read Data
+
+```{r}
+seuratObj <- readRDS(file = params$unfiltered)
+seuratObj.filtered <- readRDS(file = params$filtered)
+```
+
+#### Get filtering thresholds
+```{r}
+min_n_features <- min(seuratObj.filtered@meta.data$nFeature_RNA)
+max_n_features <- max(seuratObj.filtered@meta.data$nFeature_RNA)
+
+min_n_counts <- min(seuratObj.filtered@meta.data$nCount_RNA)
+max_n_counts <- max(seuratObj.filtered@meta.data$nCount_RNA)
+
+max_percent_mito <- max(seuratObj.filtered@meta.data$pct.mito)
+```
+
+```{r, include = FALSE}
+
+if (!"pct.mito" %in% colnames(seuratObj@meta.data)) {
+    mito.pattern <- paste0("^", params$mito_prefix)
+
+    mito.genes <- grep(mito.pattern, rownames(seuratObj))
+    if (length(mito.genes) == 0 && max_percent_mito != Inf && max_percent_mito != 0) {
+        stop(paste0("VSN ERROR: Could not find any mitochondrial genes with the prefix: '" , mito_prefix, "'"))
+    }
+
+    seuratObj[["pct.mito"]] <- Seurat::PercentageFeatureSet(seuratObj, pattern = mito.pattern)
+}
+```
+
+```{r}
+plotFeatureFiltering <- function(object, threshold = T, min_n_features, max_n_features) {
+    metric <- "nFeature_RNA"
+    if (!metric %in% colnames(object@meta.data)) {
+        message(paste0("Metric ", metric, " is not available in this object"))
+        return()
+    }
+
+    plot.data <- object@meta.data
+    plot.data$metric <- object@meta.data[,metric]
+
+    plot <- ggplot(data = plot.data, aes(x = metric, colour = metric)) +
+        geom_histogram(binwidth = 30) +
+        ggtitle(metric) +
+        theme(
+            legend.title = element_blank()
+        )
+
+    if (threshold) {
+        plot <- plot + geom_vline(xintercept = c(min_n_features, max_n_features), colour = "red")
+    }
+
+    print(plot)
+}
+
+plotCountFiltering <- function(object, threshold = T, min_n_counts, max_n_counts) {
+    metric <- "nCount_RNA"
+    if (!metric %in% colnames(object@meta.data)) {
+        message(paste0("Metric ", metric, " is not available in this object"))
+        return()
+    }
+
+    plot.data <- object@meta.data
+    plot.data$metric <- object@meta.data[,metric]
+
+    plot <- ggplot(data = plot.data, aes(x = metric, colour = metric)) +
+        geom_histogram(binwidth = 50) +
+        ggtitle(metric) +
+        theme(
+            legend.title = element_blank()
+        )
+
+    if (threshold) {
+        plot <- plot + geom_vline(xintercept = c(min_n_counts, max_n_counts), colour = "red")
+    }
+
+    print(plot)
+}
+
+plotMitoFiltering <- function(object, threshold = T, max_percent_mito) {
+    metric <- "pct.mito"
+
+    if (!metric %in% colnames(object@meta.data)) {
+        message(paste0("Metric ", metric, " is not available in this object"))
+        return()
+    }
+
+    plot.data <- object@meta.data
+    plot.data$metric <- object@meta.data[,metric]
+
+    plot <- ggplot(data = plot.data, aes(x = metric, colour = metric)) +
+        geom_histogram(binwidth = 1) +
+        ggtitle(metric) +
+        theme(
+            legend.title = element_blank()
+        )
+
+    if (threshold && max_percent_mito != 0) {
+        plot <- plot + geom_vline(xintercept = c(max_percent_mito), colour = "red")
+    }
+
+    print(plot)
+}
+
+plotsForFiltering <- function(object, threshold = T, min_n_features, max_n_features, min_n_counts, max_n_counts, max_percent_mito) {
+    plotFeatureFiltering(object, threshold, min_n_features, max_n_features)
+    plotCountFiltering(object, threshold, min_n_counts, max_n_counts)
+    plotMitoFiltering(object, threshold, max_percent_mito)
+}
+```
+
+### Pre-filtering diagnostics
+```{r, fig.show="hold", out.width="33%"}
+plotsForFiltering(seuratObj, T, min_n_features, max_n_features, min_n_counts, max_n_counts, max_percent_mito)
+```
+
+### Post-filtering diagnostics
+```{r, fig.show="hold", out.width="33%"}
+plotsForFiltering(seuratObj.filtered, F, min_n_features, max_n_features, min_n_counts, max_n_counts, max_percent_mito)
+```
+

@@ -1,0 +1,62 @@
+---
+title: "Single-Cell Report: Clustering"
+output: html_document
+params:
+    input: "FILE"
+---
+
+```{r}
+suppressMessages(library("Seurat", quietly = TRUE))
+suppressMessages(library("ggplot2", quietly = TRUE))
+```
+
+#### Read Data
+
+```{r}
+seuratObj <- readRDS(file = params$input)
+```
+
+```{r}
+printClusteringParams <- function(object) {
+    clustering.algorithm.number <- object@commands$FindClusters$algorithm
+    
+    if (clustering.algorithm.number > 4 || clustering.algorithm.number < 0) {
+        clustering.algorithm <- 'Unknown'
+    } else {
+        clustering.algorithm <- switch(
+            clustering.algorithm.number,
+            "1" = "Louvain",
+            "2" = "Lovain with multilevel refinement",
+            "3" = "SLM",
+            "4" = "Leiden"
+        )
+    }
+    
+    clustering.resolution <- object@commands$FindClusters$resolution
+    
+    message(paste0("Clustering algorithm: ", clustering.algorithm, "; Resolution: ", clustering.resolution))
+}
+
+plotReductions <- function(object) {
+    
+    if ('pca' %in% names(object@reductions)) {
+        print(DimPlot(object, reduction = 'pca', group.by = 'orig.ident') + ggtitle("sample_id"))
+        print(DimPlot(object, reduction = 'pca'))
+    }
+    if ('tsne' %in% names(object@reductions)) {
+        print(DimPlot(object, reduction = 'tsne', group.by = 'orig.ident') + ggtitle("sample_id"))
+        print(DimPlot(object, reduction = 'tsne'))
+    }
+    if ('umap' %in% names(object@reductions)) {
+        print(DimPlot(object, reduction = 'umap', group.by = 'orig.ident') + ggtitle("sample_id"))
+        print(DimPlot(object, reduction = 'umap'))
+    }
+}
+```
+
+### Clustering
+
+```{r, fig.show="hold", out.width="50%"}
+printClusteringParams(seuratObj)
+plotReductions(seuratObj)
+```

@@ -18,6 +18,21 @@ The output is a loom file with the results embedded.
 
 .. |Single-sample Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample.svg?sanitize=true
 
+----
+
+**single_sample_seurat** |single_sample_seurat|
+----------------------------------
+
+.. |single_sample_seurat| image:: https://github.com/vib-singlecell-nf/vsn-pipelines/workflows/single_sample_seurat/badge.svg
+
+This workflow is very similar to the ``single_sample`` workflow, but uses Seurat (R-package) instead of the python based Scanpy.
+Starting from 10X data, processed by the cellranger pipeline, it will generate a fully processed Seurat object (Rds format) and a SCope ready loom file.
+
+Following steps will be run in the standard workflow: filtering (cells & features), normalization, HVG detection, scaling, dimensionality reduction, and clustering.
+
+|Single-sample Seurat Workflow|
+
+.. |Single-sample Seurat Workflow| image:: https://raw.githubusercontent.com/vib-singlecell-nf/vsn-pipelines/master/assets/images/single_sample_seurat.svg?sanitize=true
 
 ----
 
