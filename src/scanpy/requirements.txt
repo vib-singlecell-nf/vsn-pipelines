@@ -46,7 +46,7 @@ leidenalg==0.8.3
 llvmlite==0.35.0
 loompy==3.0.6
 louvain==0.7.0
-lxml==4.6.3
+lxml==4.9.1
 MarkupSafe==1.1.1
 matplotlib==3.3.4
 mistune==0.8.4
