@@ -39,7 +39,9 @@ workflow FILTER_BY_CELL_METADATA {
             .from(workflowParams.filters)
             .set{ filters }
         SC__PREPARE_OBS_FILTER(
-            data.combine(filters),
+            data.map {
+                it -> tuple(it[0], it[1])
+            }.combine(filters),
             isParamNull(tool) ? 'NULL' : tool
         )
         out = SC__APPLY_OBS_FILTER(

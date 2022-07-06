@@ -500,6 +500,45 @@ process SIMPLE_PUBLISH {
         """
 }
 
+process MAKE_UNIQUE_FILENAME {
+
+    label 'compute_resources__minimal'
+    
+    input:
+        tuple \
+            val(tag), \
+            path(f), \
+            val(stashedParams)
+        val(fileOutputSuffix)
+        val(toolName)
+        val(isParameterExplorationModeOn)
+
+    output:
+        tuple \
+            val(tag), \
+            path(outputFileName), \
+            val(stashedParams)
+
+    script:
+        outputFileName = getOutputFileName(
+            params,
+            tag,
+            f,
+            fileOutputSuffix,
+            isParameterExplorationModeOn,
+            stashedParams
+        )
+        /* avoid cases where the input and output files have identical names:
+           Move the input file to a unique name, then create a link to
+           the input file */
+        """
+        mv $f tmp
+        if [ ! -f ${outputFileName} ]; then
+            ln -L tmp "${outputFileName}"
+        fi
+        """
+}
+
 
 process COMPRESS_HDF5() {
 

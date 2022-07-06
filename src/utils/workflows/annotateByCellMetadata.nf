@@ -19,7 +19,7 @@ include {
 workflow ANNOTATE_BY_CELL_METADATA {
 
     take:
-        // Expects (sampleId, h5ad) : Channel
+        // Expects (sampleId, h5ad, stashedParams?) : Channel
         data
         // Expects (sampleId, tsv) : (Channel || null)
         metadata
@@ -41,7 +41,8 @@ workflow ANNOTATE_BY_CELL_METADATA {
         if(method == 'aio') {
             out = SC__ANNOTATE_BY_CELL_METADATA( 
                 data.map {
-                    it -> tuple(it[0], it[1], file(workflowParams.cellMetaDataFilePath))
+                    // Add NULL as stashedParams if needed
+                    it -> it.size() == 2 ? tuple(it[0], it[1], 'NULL', file(workflowParams.cellMetaDataFilePath)) : tuple(it[0], it[1], it[2], file(workflowParams.cellMetaDataFilePath))
                 },
                 isParamNull(tool) ? 'NULL' : tool
             )
@@ -54,7 +55,10 @@ workflow ANNOTATE_BY_CELL_METADATA {
                 )
             }
             out = SC__ANNOTATE_BY_CELL_METADATA(
-                data.join(metadata),
+                data.map {
+                    // Add NULL as stashedParams if needed
+                    it -> it.size() == 2 ? tuple(it[0], it[1], 'NULL') : it
+                }.combine(metadata, by: 0),
                 isParamNull(tool) ? 'NULL' : tool
             )
         } else {

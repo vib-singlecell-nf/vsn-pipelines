@@ -32,6 +32,7 @@ process SC__ANNOTATE_BY_CELL_METADATA {
         tuple \
             val(sampleId), \
             path(f), \
+            val(stashedParams), \
             path(metadata)
         // Expects tool name [string || null]
         val(tool)
@@ -39,7 +40,8 @@ process SC__ANNOTATE_BY_CELL_METADATA {
     output:
         tuple \
             val(sampleId), \
-            path("${sampleId}.${toolTag}SC__ANNOTATE_BY_CELL_METADATA.h5ad")
+            path("${sampleId}.${toolTag}SC__ANNOTATE_BY_CELL_METADATA.h5ad"), \
+            val(stashedParams)
 
     script:
         def sampleParams = params.parseConfig(
