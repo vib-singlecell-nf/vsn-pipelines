@@ -68,7 +68,7 @@ workflow BWA_MAPPING_PE {
         // while sampleId represents each split fastq file for a unique sample.
 
     main:
-        /* 
+        /*
            1) create a channel linking bwa index files from genome.fa in params, and
            2) combine this channel with the items in the data channel
         */
@@ -76,9 +76,15 @@ workflow BWA_MAPPING_PE {
 
         aligned_bam = BWA_MEM_PE(bwa_inputs)
 
+
+        // publish output:
+        PUBLISH_BAM(aligned_bam.map{it -> tuple(it[0], it[1])}, '.bwa.out.possorted.bam', 'bam')
+        PUBLISH_BAM_INDEX(aligned_bam.map{it -> tuple(it[0], it[2])}, '.bwa.out.possorted.bam.bai', 'bam')
+        MAPPING_SUMMARY(aligned_bam)
+        PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, '.mapping_stats.tsv', 'reports/mapping_stats')
+
     emit:
         aligned_bam
-
 }
 
 

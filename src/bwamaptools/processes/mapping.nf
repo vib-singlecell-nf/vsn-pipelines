@@ -19,7 +19,8 @@ process BWAMAPTOOLS__BWA_MEM_PE {
 
     output:
         tuple val(sampleId),
-              path("${sampleId}.bwa.out.fixmate.bam")
+              path("${sampleId}.bwa.out.fixmate.possorted.bam"),
+              path("${sampleId}.bwa.out.fixmate.possorted.bam.bai")
 
     script:
         def sampleParams = params.parseConfig(unique_sampleId, params.global, toolParams)
@@ -33,7 +34,7 @@ process BWAMAPTOOLS__BWA_MEM_PE {
             ${bwa_fasta} \
             ${fastq_PE1} \
             ${fastq_PE2} \
-        | samtools fixmate -m -O bam - ${sampleId}.bwa.out.fixmate.bam
+        | samtools fixmate -u -m -O bam - - \
+        | samtools sort -@ 2 -m 2G -O bam --write-index -T '${sampleId}.bwa.out.fixmate.possorted.TMP' -o '${sampleId}.bwa.out.fixmate.possorted.bam##idx##${sampleId}.bwa.out.fixmate.possorted.bam.bai' -
         """
 }
-
