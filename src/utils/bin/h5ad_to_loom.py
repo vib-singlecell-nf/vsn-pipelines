@@ -206,6 +206,11 @@ for column_attr_key in adata.obs.keys():
     if column_attr_key.lower().startswith('cell_id') or column_attr_key.lower().startswith('cellid'):
         continue
 
+    if adata.obs[column_attr_key].isnull().values.any():
+        if '' not in adata.obs[column_attr_key].cat.categories:
+            adata.obs[column_attr_key].cat.add_categories([''], inplace=True)
+        adata.obs[column_attr_key].fillna('',inplace=True)
+        
     vals = adata.obs[column_attr_key].values
     uniq_vals = np.unique(vals)
 
