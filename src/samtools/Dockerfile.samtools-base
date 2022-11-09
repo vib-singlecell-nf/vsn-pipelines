@@ -9,6 +9,7 @@ RUN apt-get update && \
         make \
         mawk \
         gcc \
+        g++ \
         libbz2-dev \
         liblzma-dev \
         libdeflate-dev \

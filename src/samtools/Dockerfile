@@ -16,7 +16,7 @@ RUN BUILDPKGS="git \
     apt-get install -y --no-install-recommends $BUILDPKGS
 
 # install htslib
-ENV HTSLIB_VERSION 1.15.1
+ENV HTSLIB_VERSION 1.16
 RUN curl -L -o /tmp/htslib-${HTSLIB_VERSION}.tar.bz2 \
         https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 && \
     mkdir -p /tmp/htslib-${HTSLIB_VERSION} && \
@@ -29,7 +29,7 @@ RUN curl -L -o /tmp/htslib-${HTSLIB_VERSION}.tar.bz2 \
     cd .. && rm -rf htslib-${HTSLIB_VERSION}*
 
 # install samtools
-ENV SAMTOOLS_VERSION 1.15.1
+ENV SAMTOOLS_VERSION 1.16.1
 RUN curl -L -o /tmp/samtools-${SAMTOOLS_VERSION}.tar.bz2 \
         https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSION}/samtools-${SAMTOOLS_VERSION}.tar.bz2 && \
     mkdir -p /tmp/samtools-${SAMTOOLS_VERSION} && \
