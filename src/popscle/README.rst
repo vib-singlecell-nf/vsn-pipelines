@@ -21,6 +21,7 @@ Image tag format: ``<date of latest git commit>-<short hash of latest git commit
 .. code:: bash
 
     docker build -t vibsinglecellnf/popscle:2021-05-05-da70fc7 .
+    podman build -t vibsinglecellnf/popscle:2021-05-05-da70fc7 .
 
 This image uses the ``vibsinglecellnf/samtools`` image as a base.
 
