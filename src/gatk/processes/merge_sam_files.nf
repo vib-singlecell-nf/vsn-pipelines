@@ -22,11 +22,11 @@ process PICARD__MERGE_SAM_FILES_AND_SORT {
         //processParams = sampleParams.local
         """
         gatk MergeSamFiles \
-            --TMP_DIR=${VSC_SCRATCH}/tmp \
+            --TMP_DIR \${VSC_SCRATCH}/tmp \
             ${"-I "+bams.join(" -I ")} \
             -O /dev/stdout \
         | gatk SortSam \
-            --TMP_DIR=${VSC_SCRATCH}/tmp \
+            --TMP_DIR \${VSC_SCRATCH}/tmp \
             -I /dev/stdin \
             -O ${sampleId}.bwa.out.fixmate.merged.bam \
             --SORT_ORDER queryname
