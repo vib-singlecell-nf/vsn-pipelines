@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
 
-include { 
+include {
     SINTO__FRAGMENTS;
     SINTO__SORT_FRAGMENTS;
 } from './processes/fragments.nf' params(params)

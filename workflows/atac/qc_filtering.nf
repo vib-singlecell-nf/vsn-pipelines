@@ -31,7 +31,7 @@ include {
 
 
 //////////////////////////////////////////////////////
-//  Define the workflow 
+//  Define the workflow
 
 
 workflow cellranger_output_to_bam_fragments {
@@ -157,7 +157,7 @@ workflow ATAC_QC_FILTERING {
         data
 
     main:
-        
+
         data.branch {
             fragments: it[3] == 'fragments'
             bam: it[3] == 'bam'

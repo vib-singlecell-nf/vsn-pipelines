@@ -9,7 +9,7 @@ process PICARD__CREATE_SEQUENCE_DICTIONARY {
     input:
         file(genome)
         file(tmpDir)
-    
+
     output:
         file "${genome.baseName}.dict"
 

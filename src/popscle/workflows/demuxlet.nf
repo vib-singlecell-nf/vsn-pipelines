@@ -102,7 +102,7 @@ workflow FREEMUXLET {
     main:
         DSC_PILEUP_FILTERED(data) |
         SC__POPSCLE__FREEMUXLET
-    
+
     emit:
         SC__POPSCLE__FREEMUXLET.out
 }
@@ -116,7 +116,7 @@ workflow DEMUXLET {
         vcf = file(params.tools.popscle.vcf)
         DSC_PILEUP_FILTERED(data)
         SC__POPSCLE__DEMUXLET(DSC_PILEUP_FILTERED.out, vcf)
-    
+
     emit:
         SC__POPSCLE__DEMUXLET.out
 }

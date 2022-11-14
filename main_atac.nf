@@ -2,7 +2,7 @@ import static groovy.json.JsonOutput.*
 
 nextflow.enable.dsl=2
 
-include { 
+include {
     INIT;
 } from './src/utils/workflows/utils' params(params)
 
@@ -16,7 +16,7 @@ include {
     getDataChannel;
 } from './src/channels/channels' params(params)
 
-/* 
+/*
     ATAC-seq pipelines
 */
 
@@ -27,7 +27,7 @@ workflow cellranger_atac {
     include {
         CELLRANGER_ATAC
     } from './src/cellranger-atac/main.nf' params(params)
-    
+
     CELLRANGER_ATAC(
         file(params.tools.cellranger_atac.mkfastq.csv),
         file(params.tools.cellranger_atac.mkfastq.runFolder),

@@ -42,7 +42,7 @@ include {
 
 
 //////////////////////////////////////////////////////
-//  Define the workflow 
+//  Define the workflow
 
 workflow ATAC_PREPROCESS {
 

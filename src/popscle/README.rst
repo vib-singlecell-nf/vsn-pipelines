@@ -7,7 +7,7 @@ This is a repository for the popslce module of the VIB-SingleCell-NF (VSN) pipel
 Current Status
 ---------------
 
-This module currently has two workflows ``freemuxlet`` and ``demuxlet``. 
+This module currently has two workflows ``freemuxlet`` and ``demuxlet``.
 Both of these workflows expect an input channel consisting of a tuple where
 element 1 is the sampleID and element 2 is the output folder of a 10X run.
 

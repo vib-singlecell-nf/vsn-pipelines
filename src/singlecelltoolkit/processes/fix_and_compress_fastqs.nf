@@ -14,10 +14,10 @@ process FIX_AND_COMPRESS_SRA_FASTQS {
 
     input:
         tuple val(sraId), file("${sraId}_*.fastq")
-    
+
     output:
         tuple val(sraId), file("${sraId}_*.fastq.gz")
-    
+
     script:
         """
         # Fixing the FASTQ files is required for future pre-processing (e.g.: scATAC-seq pipelines) because fasterq-dump does not have the -F option as fastq-dump do to keep original sequence names.
