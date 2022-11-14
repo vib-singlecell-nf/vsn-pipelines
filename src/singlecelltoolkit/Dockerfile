@@ -1,4 +1,4 @@
-FROM vibsinglecellnf/samtools:0.3-1.15.1
+FROM vibsinglecellnf/samtools:0.3-1.16.1
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
@@ -34,8 +34,8 @@ RUN pip install --no-cache-dir --upgrade pip wheel && \
         typing \
         pathlib \
         matplotlib \
-        numpy && \
-        polars>=0.14.1
+        numpy \
+        polars>=0.14.28
 
 RUN cd /opt/venv/bin && \
     wget https://temp.aertslab.org/.barcard/create_fragments_file && \
