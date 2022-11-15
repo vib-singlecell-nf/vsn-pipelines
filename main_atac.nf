@@ -65,9 +65,18 @@ workflow atac_preprocess_bap {
 
 }
 
+workflow atac_preprocess_rapid {
+
+    include {
+        ATAC_PREPROCESS_RAPID;
+    } from './workflows/atac/preprocess_rapid.nf' params(params)
+
+    ATAC_PREPROCESS_RAPID(file(params.data.atac_preprocess.metadata))
+
+}
+
 
 workflow bap {
-
     include {
         BAP__BARCODE_MULTIPLET_WF;
     } from './src/bap/main.nf' params(params)
