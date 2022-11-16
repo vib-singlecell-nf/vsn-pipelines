@@ -8,7 +8,7 @@ if(!params.containsKey("test")) {
 
 process FIX_AND_COMPRESS_SRA_FASTQS {
 
-    container "vibsinglecellnf/singlecelltoolkit:2022-04-15-16314db"
+    container "vibsinglecellnf/singlecelltoolkit:2022-11-16-064b064"
     publishDir "${params.global.outdir}/data/raw/fastqs_fixed_and_compressed", mode: 'symlink', overwrite: true
     label 'compute_resources__cpu'
 
