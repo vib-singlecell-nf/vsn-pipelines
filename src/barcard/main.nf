@@ -12,10 +12,6 @@ include {
 } from './processes/detect_barcode_multiplets.nf' params(params)
 
 include {
-    MERGE_BARCODE_MULTIPLETS as BARCARD__MERGE_BARCODE_MULTIPLETS;
-} from './processes/merge_barcode_multiplets.nf' params(params)
-
-include {
     GENERATE_REPORT;
     REPORT_TO_HTML;
 } from './processes/report.nf' params(params)
