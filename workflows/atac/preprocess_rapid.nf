@@ -25,11 +25,8 @@ include {
     BWA_MAPPING_PE;
 } from './../../src/bwamaptools/main.nf'
 include {
-    PICARD__MERGE_SAM_FILES_AND_SORT;
-} from './../../src/gatk/processes/merge_sam_files.nf'
-include {
-    SAMTOOLS__SORT_BAM;
-} from './../../src/samtools/processes/sort_bam.nf'
+    SAMTOOLS__MERGE_BAM;
+} from './../../src/samtools/processes/merge_bam.nf'
 include {
     BAM_TO_FRAGMENTS;
     DETECT_BARCODE_MULTIPLETS;
@@ -162,7 +159,7 @@ workflow mapping {
                    .set { aligned_bam_size_split }
 
         // merge samples with multiple files:
-        bam_merged = PICARD__MERGE_SAM_FILES_AND_SORT(aligned_bam_size_split.to_merge)
+        bam_merged = SAMTOOLS__MERGE_BAM(aligned_bam_size_split.to_merge)
 
         // re-combine with single files:
         bam_merged.mix(aligned_bam_size_split.no_merge.map { it -> tuple(it[0], *it[1]) })
