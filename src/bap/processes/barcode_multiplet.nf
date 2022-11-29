@@ -27,6 +27,7 @@ process BAP__BARCODE_MULTIPLET_PIPELINE {
         def sampleParams = params.parseConfig(sampleId, params.global, toolParams.barcode_multiplet)
         processParams = sampleParams.local
         """
+        export OMP_THREAD_LIMIT=8
         bap2 bam \
             --input input.bam \
             --output ${sampleId} \

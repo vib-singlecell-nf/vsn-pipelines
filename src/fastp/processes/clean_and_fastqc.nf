@@ -11,11 +11,11 @@ process FASTP__CLEAN_AND_FASTQC {
 
     input:
         set val(sample), path(reads)
-    
+
     output:
         tuple file('*_R{1,2}.clean.fastq.gz'), emit: fastq
         tuple file('*_fastp.{json,html}'), emit: report
-    
+
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.tools.fastp)
 		processParams = sampleParams.local

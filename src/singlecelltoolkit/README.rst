@@ -12,7 +12,8 @@ Image tag format: ``<date of latest git commit>-<short hash of latest git commit
 
 .. code:: bash
 
-    docker build -t vibsinglecellnf/singlecelltoolkit:2021-07-29-09cac13 .
+    docker build -t vibsinglecellnf/singlecelltoolkit:2022-11-16-064b064 .
+    podman build -t vibsinglecellnf/singlecelltoolkit:2022-11-16-064b064 .
 
 This image uses the ``vibsinglecellnf/samtools`` image as a base.
 

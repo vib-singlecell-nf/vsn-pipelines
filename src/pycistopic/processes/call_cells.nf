@@ -51,20 +51,19 @@ process PYCISTOPIC__QC_REPORT {
     container toolParams.container
     publishDir "${params.global.outdir}/notebooks/", mode: params.utils.publish.mode, pattern: '*ipynb'
     publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode, pattern: 'selected_barcodes'
-    publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode, pattern: 'selected_barcodes_nFrag'
+    publishDir "${params.global.outdir}/data/pycistopic/qc/", mode: params.utils.publish.mode, pattern: 'plots_qc'
     label 'compute_resources__report'
 
     input:
         path(ipynb)
         val(sampleId)
-        tuple path(metadata_pickle),
-              path(profile_data_pickle)
+        path(metadata_pickles)
         val(reportTitle)
 
     output:
         tuple path("${reportTitle}.ipynb"),
               path("selected_barcodes/"),
-              path("selected_barcodes_nFrag/")
+              path("plots_qc/")
 
     script:
         pycistopic_params = toJson(toolParams)
@@ -73,9 +72,7 @@ process PYCISTOPIC__QC_REPORT {
             --report-mode \
             ${reportTitle}.ipynb \
             -p SAMPLES "${sampleId.join(",")}" \
-            -p METADATAPKL "${metadata_pickle}" \
-            -p PROFDATAPKL "${profile_data_pickle}" \
-            -p WORKFLOW_PARAMETERS '${pycistopic_params}' \
+            -p WORKFLOW_PARAMETERS '${pycistopic_params}'
         """
 }
 

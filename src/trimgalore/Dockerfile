@@ -1,35 +1,23 @@
-FROM python:3.7-slim
+FROM vibsinglecellnf/samtools:base-0.3
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN BUILDPKGS="build-essential zlib1g-dev git curl" && \
+RUN BUILDPKGS="perl python3 python3-pip" && \
     apt-get update && \
-    apt-get install -y --no-install-recommends apt-utils debconf locales && dpkg-reconfigure locales && \
-    apt-get install -y --no-install-recommends $BUILDPKGS
-
-RUN pip install -U pip
-
-##################################################
-# cutadapt
-RUN pip install cutadapt
-
-##################################################
-# fastQC
-# RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
-
-##################################################
-# trim galore
-RUN curl -fsSL https://github.com/FelixKrueger/TrimGalore/archive/0.6.6.tar.gz -o trim_galore.tar.gz && \
-    tar xvzf trim_galore.tar.gz && \
-    mv TrimGalore-0.6.6/trim_galore /usr/bin/ && \
-    rm -r TrimGalore-0.6.6
-
-
-RUN apt-get -y update && \
-    apt-get -y --no-install-recommends install \
-        # Need to run ps
-        procps \
-        pigz \
-        less && \
+    apt-get upgrade -y --no-install-recommends && \
+    apt-get install -y --no-install-recommends $BUILDPKGS && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.9 100 && \
     rm -rf /var/cache/apt/* && \
     rm -rf /var/lib/apt/lists/*
+
+# Update pip.
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install cutadapt.
+RUN pip install --no-cache-dir cutadapt==4.1
+
+# Install TrimGalore.
+RUN curl -fsSL https://github.com/FelixKrueger/TrimGalore/archive/0.6.7.tar.gz -o trim_galore.tar.gz && \
+    tar xvzf trim_galore.tar.gz && \
+    mv TrimGalore-0.6.7/trim_galore /usr/bin/ && \
+    rm -r TrimGalore-0.6.7
 

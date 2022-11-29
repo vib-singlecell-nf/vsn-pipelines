@@ -4,9 +4,10 @@
 
 1) Contributed to the development of the pipelines and modules
     - [Stein Aerts Lab (VIB-KULeuven)](https://www.aertslab.org/)
-        - Chris Flerin - Lead Developer
-        - Maxime De Waegeneer - Lead Developer
-        - Gert Hulselmans
+        - Gert Hulselmans - Lead Developer (scATAC pipeline)
+        - Florian De Rop - Developer/Testing (scATAC pipeline)
+        - Maxime De Waegeneer - Former Lead Developer (scRNA pipeline)
+        - Chris Flerin - Former Lead Developer (scATAC pipeline)
     - [Single Cell Bioinformatics Expertise Unit (CBD VIB)](https://cbd.vib.be/research/expertise-units/bioinformatics/)
         - Kris Davie - Lead Developer
 

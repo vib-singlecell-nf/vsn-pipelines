@@ -29,7 +29,7 @@ process BAP__BIORAD_DEBARCODE {
             -b ${fastq_PE2} \
             --ncores ${task.cpus} \
             --nmismatches ${processParams.nmismatches} \
-            --output ${sampleId} 
+            --output ${sampleId}
         """
 }
 

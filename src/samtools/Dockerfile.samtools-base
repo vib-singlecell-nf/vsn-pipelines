@@ -1,17 +1,16 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        apt-utils debconf locales locales-all && \
-    dpkg-reconfigure locales && \
+    apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --reinstall ca-certificates && \
     apt-get install -y --no-install-recommends \
         cmake \
         make \
+        mawk \
         gcc \
+        g++ \
         libbz2-dev \
-        zlib1g-dev \
         liblzma-dev \
         libdeflate-dev \
         bzip2 \
@@ -21,7 +20,7 @@ RUN apt-get update && \
         less
 
 # zlib-ng
-ENV ZLIBNG 2.0.4
+ENV ZLIBNG 2.0.6
 RUN curl -L -o /tmp/zlib-ng-${ZLIBNG}.tar.gz https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ZLIBNG}.tar.gz && \
     cd /tmp && tar xvf zlib-ng-${ZLIBNG}.tar.gz && \
     cd zlib-ng-${ZLIBNG} && \

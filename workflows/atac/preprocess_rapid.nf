@@ -16,6 +16,8 @@ include {
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
+    SIMPLE_PUBLISH as PUBLISH_BAM;
+    SIMPLE_PUBLISH as PUBLISH_BAM_INDEX;
     SIMPLE_PUBLISH as PUBLISH_FRAGMENTS;
     SIMPLE_PUBLISH as PUBLISH_FRAGMENTS_INDEX;
 } from '../../src/utils/processes/utils.nf'
@@ -23,14 +25,15 @@ include {
 // workflow imports:
 include {
     BWA_MAPPING_PE;
-    MARK_DUPLICATES;
 } from './../../src/bwamaptools/main.nf'
 include {
-    PICARD__MERGE_SAM_FILES_AND_SORT;
-} from './../../src/gatk/processes/merge_sam_files.nf'
+    SAMTOOLS__MERGE_BAM;
+} from './../../src/samtools/processes/merge_bam.nf'
 include {
     BAM_TO_FRAGMENTS;
-} from './../../src/sinto/main.nf'
+    DETECT_BARCODE_MULTIPLETS;
+} from './../../src/barcard/main.nf'
+//} from './../../src/sinto/main.nf'
 
 
 include {
@@ -44,7 +47,7 @@ include {
 //////////////////////////////////////////////////////
 //  Define the workflow
 
-workflow ATAC_PREPROCESS {
+workflow ATAC_PREPROCESS_RAPID {
 
     take:
         metadata
@@ -158,24 +161,27 @@ workflow mapping {
                    .set { aligned_bam_size_split }
 
         // merge samples with multiple files:
-        merged_bam = PICARD__MERGE_SAM_FILES_AND_SORT(aligned_bam_size_split.to_merge)
+        bam_merged = SAMTOOLS__MERGE_BAM(aligned_bam_size_split.to_merge)
 
         // re-combine with single files:
-        merged_bam.mix(aligned_bam_size_split.no_merge.map { it -> tuple(it[0], *it[1]) })
-                  .set { aligned_bam_sample_merged }
+        bam_merged.mix(aligned_bam_size_split.no_merge.map { it -> tuple(it[0], *it[1]) })
+           .set { bam }
 
-        bam = MARK_DUPLICATES(aligned_bam_sample_merged,
-                params.atac_preprocess_tools.mark_duplicates_method)
+        // publish merged BAM files or only BAM file per sample:
+        PUBLISH_BAM(bam.map{ it -> tuple(it[0..1]) }, '.bwa.out.possorted.bam', 'bam')
+        PUBLISH_BAM_INDEX(bam.map{ it -> tuple(it[0],it[2]) }, '.bwa.out.possorted.bam.bai', 'bam')
 
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)
+
+        DETECT_BARCODE_MULTIPLETS(fragments)
+
         // publish fragments output:
-        PUBLISH_FRAGMENTS(fragments.map{ it -> tuple(it[0..1]) }, '.sinto.fragments.tsv.gz', 'fragments')
-        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0],it[2]) }, '.sinto.fragments.tsv.gz.tbi', 'fragments')
+        PUBLISH_FRAGMENTS(fragments.map{ it -> tuple(it[0..1]) }, '.fragments.tsv.gz', 'fragments')
+        PUBLISH_FRAGMENTS_INDEX(fragments.map{ it -> tuple(it[0],it[2]) }, '.fragments.tsv.gz.tbi', 'fragments')
 
     emit:
         bam
         fragments
 
 }
-

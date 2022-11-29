@@ -7,7 +7,7 @@ toolParams = params.tools.singlecelltoolkit
 process SCTK__EXTRACT_AND_CORRECT_BIORAD_BARCODE {
 
     container toolParams.container
-    label 'compute_resources__default'
+    label 'compute_resources__sctk_barcode'
 
     input:
         tuple val(sampleId),
