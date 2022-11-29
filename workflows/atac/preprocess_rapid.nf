@@ -16,6 +16,8 @@ include {
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE1;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_PE2;
     SIMPLE_PUBLISH as PUBLISH_FASTQS_TRIMLOG_FASTP;
+    SIMPLE_PUBLISH as PUBLISH_BAM;
+    SIMPLE_PUBLISH as PUBLISH_BAM_INDEX;
     SIMPLE_PUBLISH as PUBLISH_FRAGMENTS;
     SIMPLE_PUBLISH as PUBLISH_FRAGMENTS_INDEX;
 } from '../../src/utils/processes/utils.nf'
@@ -164,10 +166,10 @@ workflow mapping {
         // re-combine with single files:
         bam_merged.mix(aligned_bam_size_split.no_merge.map { it -> tuple(it[0], *it[1]) })
            .set { bam }
-//           .set { aligned_bam_sample_merged }
 
-        // sort the bam (not duplicate marked!)
-        //sorted_bam = SAMTOOLS__SORT_BAM(merged_bam)
+        // publish merged BAM files or only BAM file per sample:
+        PUBLISH_BAM(bam.map{ it -> tuple(it[0..1]) }, '.bwa.out.possorted.bam', 'bam')
+        PUBLISH_BAM_INDEX(bam.map{ it -> tuple(it[0],it[2]) }, '.bwa.out.possorted.bam.bai', 'bam')
 
         // generate a fragments file:
         fragments = BAM_TO_FRAGMENTS(bam)

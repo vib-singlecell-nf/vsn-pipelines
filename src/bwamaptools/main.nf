@@ -78,8 +78,6 @@ workflow BWA_MAPPING_PE {
 
 
         // publish output:
-        PUBLISH_BAM(aligned_bam.map{it -> tuple(it[0], it[1])}, '.bwa.out.possorted.bam', 'bam')
-        PUBLISH_BAM_INDEX(aligned_bam.map{it -> tuple(it[0], it[2])}, '.bwa.out.possorted.bam.bai', 'bam')
         MAPPING_SUMMARY(aligned_bam)
         PUBLISH_MAPPING_SUMMARY(MAPPING_SUMMARY.out, '.mapping_stats.tsv', 'reports/mapping_stats')
 
