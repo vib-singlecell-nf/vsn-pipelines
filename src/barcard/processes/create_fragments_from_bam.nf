@@ -10,8 +10,8 @@ process CREATE_FRAGMENTS_FROM_BAM {
 
     input:
         tuple val(sampleId),
-              path(bam) //,
-//              path(bai)
+              path(bam),
+              path(bai)
 
     output:
         tuple val(sampleId),
