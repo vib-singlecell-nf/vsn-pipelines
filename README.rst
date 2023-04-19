@@ -1,6 +1,11 @@
 VSN-Pipelines
 ==============
 
+VSN-Pipelines has now been archived
+-----------------------------
+
+**2023-04-19 - Unfortunately due to lack of developers, VSN-pipelines is no longer being worked on and has been archived. The repo will remain in read-only mode from this point on.**
+
 A repository of pipelines for single-cell data analysis in Nextflow DSL2.
 
 |VSN-Pipelines| |ReadTheDocs| |Zenodo| |Gitter| |Nextflow|
