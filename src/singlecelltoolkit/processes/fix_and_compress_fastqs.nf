@@ -8,16 +8,16 @@ if(!params.containsKey("test")) {
 
 process FIX_AND_COMPRESS_SRA_FASTQS {
 
-    container "vibsinglecellnf/singlecelltoolkit:2021-07-29-09cac13"
+    container "vibsinglecellnf/singlecelltoolkit:2022-11-16-064b064"
     publishDir "${params.global.outdir}/data/raw/fastqs_fixed_and_compressed", mode: 'symlink', overwrite: true
     label 'compute_resources__cpu'
 
     input:
         tuple val(sraId), file("${sraId}_*.fastq")
-    
+
     output:
         tuple val(sraId), file("${sraId}_*.fastq.gz")
-    
+
     script:
         """
         # Fixing the FASTQ files is required for future pre-processing (e.g.: scATAC-seq pipelines) because fasterq-dump does not have the -F option as fastq-dump do to keep original sequence names.

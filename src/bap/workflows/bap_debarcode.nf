@@ -2,7 +2,7 @@ nextflow.enable.dsl=2
 
 //////////////////////////////////////////////////////
 //  Import sub-workflows from the modules:
-include { 
+include {
     BAP__BIORAD_DEBARCODE as BIORAD_DEBARCODE;
     BAP__MERGE_FASTQS as MERGE_FASTQS;
 } from './../processes/biorad_debarcode.nf' params(params)

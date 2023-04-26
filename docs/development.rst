@@ -298,7 +298,7 @@ It is highly recommended to start from the ``develop`` branch:
 
     .. code:: groovy
 
-        nextflow.preview.dsl=2
+        nextflow.enable.dsl=2
 
         binDir = !params.containsKey("test") ? "${workflow.projectDir}/src/harmony/bin/" : ""
 
@@ -340,7 +340,7 @@ It is highly recommended to start from the ``develop`` branch:
 
     .. code:: groovy
 
-        nextflow.preview.dsl=2
+        nextflow.enable.dsl=2
 
         //////////////////////////////////////////////////////
         //  process imports:

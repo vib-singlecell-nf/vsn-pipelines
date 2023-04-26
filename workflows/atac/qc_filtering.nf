@@ -31,7 +31,7 @@ include {
 
 
 //////////////////////////////////////////////////////
-//  Define the workflow 
+//  Define the workflow
 
 
 workflow cellranger_output_to_bam_fragments {
@@ -52,8 +52,10 @@ workflow cellranger_output_to_bam_fragments {
                                     file(it[1]+"/*possorted*bam.bam.bai")[0],
                                     ]) }
         fragments = data.map{ it -> tuple(it[0], [
-                                    *file(it[1]+"/*fragments.tsv.gz"),
-                                    *file(it[1]+"/*fragments.tsv.gz.tbi"),
+//                                    *file(it[1]+"/*fragments.tsv.gz"),
+//                                    *file(it[1]+"/*fragments.tsv.gz.tbi"),
+                                    file(it[1]+"/*fragments.tsv.gz")[0],
+                                    file(it[1]+"/*fragments.tsv.gz.tbi")[0],
                                     ]) }
 
         if(!params.containsKey('quiet')) bam.view()
@@ -94,9 +96,11 @@ workflow ATAC_QC_PREFILTER {
            file name). This is not currently necessary for the bam files since
            they are processed in separate processes.
          */
-        fragments = rename_fragments(
+        /*fragments = rename_fragments(
             data_split.fragments.mix(data_cr.fragments)
             )
+        */
+        fragments = data_split.fragments.mix(data_cr.fragments)
 
 
         biomart = PYCISTOPIC__BIOMART_ANNOT()
@@ -132,16 +136,18 @@ workflow ATAC_QC_PREFILTER {
         | REPORT_TO_HTML
 
         /* saturation */
-        SCTK__SATURATION(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
-        SCTK__SATURATION_BC_WL(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
-            PYCISTOPIC__QC_REPORT.out, 'RUN')
-        /* publish saturation outputs */
-        PUBLISH_SATURATION_TSV(SCTK__SATURATION.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation')
-        PUBLISH_SATURATION_PNG(SCTK__SATURATION.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation')
-        //
-        PUBLISH_SATURATION_BC_WL_TSV(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation_bc_wl')
-        PUBLISH_SATURATION_BC_WL_PNG(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation_bc_wl')
+        if(! params.tools.singlecelltoolkit.saturation.skip) {
+            SCTK__SATURATION(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) }, '', '')
+            SCTK__SATURATION_BC_WL(fragments.map { it -> tuple(it[0], it[1][0], it[1][1] ) },
+                PYCISTOPIC__QC_REPORT.out, 'RUN')
 
+            /* publish saturation outputs */
+            PUBLISH_SATURATION_TSV(SCTK__SATURATION.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation')
+            PUBLISH_SATURATION_PNG(SCTK__SATURATION.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation')
+
+            PUBLISH_SATURATION_BC_WL_TSV(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[1]) }, '.sampling_stats.tsv', 'singlecelltoolkit/saturation_bc_wl')
+            PUBLISH_SATURATION_BC_WL_PNG(SCTK__SATURATION_BC_WL.out.map { it -> tuple(it[0], it[2]) }, '.saturation.png', 'singlecelltoolkit/saturation_bc_wl')
+        }
 }
 
 
@@ -151,7 +157,7 @@ workflow ATAC_QC_FILTERING {
         data
 
     main:
-        
+
         data.branch {
             fragments: it[3] == 'fragments'
             bam: it[3] == 'bam'

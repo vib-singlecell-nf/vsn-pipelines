@@ -12,7 +12,8 @@ Image tag format: ``<bwa-mem2>-<bwa-mem2 release version>``.
 
 .. code:: bash
 
-    docker build -t vibsinglecellnf/bwamaptools:bwa-mem2-2.2.1 .
+    docker build -t vibsinglecellnf/bwamaptools:bwa-mem2-2.2.1-zlibng-2.0.6 .
+    podman build -t vibsinglecellnf/bwamaptools:bwa-mem2-2.2.1-zlibng-2.0.6 .
 
 This image uses the ``vibsinglecellnf/samtools`` image as a base.
 

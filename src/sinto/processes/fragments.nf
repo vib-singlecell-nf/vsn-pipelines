@@ -7,7 +7,7 @@ toolParams = params.tools.sinto
 process SINTO__FRAGMENTS {
 
     container toolParams.container
-    label 'compute_resources__cpu','compute_resources__24hqueue'
+    label 'compute_resources__sinto__fragments'
 
     input:
         tuple val(sampleId),
@@ -40,7 +40,7 @@ process SINTO__FRAGMENTS {
 process SINTO__SORT_FRAGMENTS {
 
     container toolParams.container
-    label 'compute_resources__mem'
+    label 'compute_resources__sinto__sort_fragments'
 
     input:
         tuple val(sampleId),

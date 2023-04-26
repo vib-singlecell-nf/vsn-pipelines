@@ -12,7 +12,7 @@ process PICARD__SORT_SAM {
 
     output:
         tuple val(sample), path("*.STAR_aligned_sorted.bam")
-    
+
     script:
         def sampleParams = params.parseConfig(sampleId, params.global, params.tools.picard.sort_sam)
 		processParams = sampleParams.local
